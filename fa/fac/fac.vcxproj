@@ -18,11 +18,30 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fa.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ASTs\ClassExprAST.hpp" />
+    <ClInclude Include="ASTs\ClassItemExprAST.hpp" />
+    <ClInclude Include="ASTs\FuncArgsAST.hpp" />
+    <ClInclude Include="ASTs\FuncExprAST.hpp" />
+    <ClInclude Include="ASTs\IdAST.hpp" />
+    <ClInclude Include="ASTs\IdsAST.hpp" />
+    <ClInclude Include="ASTs\ProgramAST.hpp" />
+    <ClInclude Include="ASTs\PublicOptAST.hpp" />
+    <ClInclude Include="ASTs\SAST.hpp" />
+    <ClInclude Include="ASTs\TypeAST.hpp" />
+    <ClInclude Include="ASTs\UseExprAST.hpp" />
+    <ClInclude Include="FaGenAST.hpp" />
+    <ClInclude Include="FaLink.hpp" />
+    <ClInclude Include="FaUseAST.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{6ea01b50-14e9-4e5d-a9a0-9d63fd505fbf}</ProjectGuid>
-    <RootNamespace>fa</RootNamespace>
+    <ProjectGuid>{ce4a7c06-b918-42a6-aaa8-c63bb8bfad9c}</ProjectGuid>
+    <RootNamespace>fac</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -138,13 +157,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="fa.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="tools\Fa.g4" />
-    <None Include="tools\generate.bat" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

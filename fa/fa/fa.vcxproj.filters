@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\ASTs">
-      <UniqueIdentifier>{c639cc76-92bd-414f-83a0-16238b986bb9}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fa.cpp">
@@ -23,41 +20,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FaGenAST.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="FaUseAST.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="FaLink.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\IdsAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\PublicOptAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\SAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\TypeAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\UseExprAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\ClassExprAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\ClassFuncExprAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\ClassVarExprAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
-    <ClInclude Include="ASTs\IdAST.hpp">
-      <Filter>头文件\ASTs</Filter>
-    </ClInclude>
+    <None Include="tools\generate.bat">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="tools\Fa.g4" />
   </ItemGroup>
 </Project>
