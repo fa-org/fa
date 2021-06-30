@@ -13,10 +13,28 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\antlr">
+      <UniqueIdentifier>{b48337cb-03b5-4e6f-8bd1-3b7bb6b48d7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\antlr">
+      <UniqueIdentifier>{22f86aba-eb75-4097-b3f1-7f7f82ecda38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fa.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\libs\FaBaseVisitor.cpp">
+      <Filter>源文件\antlr</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\libs\FaLexer.cpp">
+      <Filter>源文件\antlr</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\libs\FaParser.cpp">
+      <Filter>源文件\antlr</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\libs\FaVisitor.cpp">
+      <Filter>源文件\antlr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -24,5 +42,20 @@
       <Filter>源文件</Filter>
     </None>
     <None Include="tools\Fa.g4" />
+    <None Include="tools\libs\FaLexer.interp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tools\libs\FaVisitor.h">
+      <Filter>头文件\antlr</Filter>
+    </ClInclude>
+    <ClInclude Include="tools\libs\FaBaseVisitor.h">
+      <Filter>头文件\antlr</Filter>
+    </ClInclude>
+    <ClInclude Include="tools\libs\FaLexer.h">
+      <Filter>头文件\antlr</Filter>
+    </ClInclude>
+    <ClInclude Include="tools\libs\FaParser.h">
+      <Filter>头文件\antlr</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

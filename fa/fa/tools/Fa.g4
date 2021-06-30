@@ -1,5 +1,5 @@
 grammar Fa;
 
-s					: 'hello' ID;
+s					: 'hello' ID*;
 ID					: [a-z]+;
 WS					: [ \t\r\n]+ -> skip;
