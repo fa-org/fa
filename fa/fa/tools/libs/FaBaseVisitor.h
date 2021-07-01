@@ -15,7 +15,11 @@
 class  FaBaseVisitor : public FaVisitor {
 public:
 
-  virtual antlrcpp::Any visitS(FaParser::SContext *ctx) override {
+  virtual antlrcpp::Any visitUseExpr(FaParser::UseExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitProgram(FaParser::ProgramContext *ctx) override {
     return visitChildren(ctx);
   }
 

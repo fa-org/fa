@@ -12,7 +12,7 @@
 class  FaLexer : public antlr4::Lexer {
 public:
   enum {
-    T__0 = 1, ID = 2, WS = 3
+    T__0 = 1, T__1 = 2, Comment1 = 3, Comment2 = 4, WS = 5, ID = 6, IDs = 7
   };
 
   explicit FaLexer(antlr4::CharStream *input);

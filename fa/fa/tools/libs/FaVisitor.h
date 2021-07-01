@@ -19,7 +19,9 @@ public:
   /**
    * Visit parse trees produced by FaParser.
    */
-    virtual antlrcpp::Any visitS(FaParser::SContext *context) = 0;
+    virtual antlrcpp::Any visitUseExpr(FaParser::UseExprContext *context) = 0;
+
+    virtual antlrcpp::Any visitProgram(FaParser::ProgramContext *context) = 0;
 
 
 };

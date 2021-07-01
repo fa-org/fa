@@ -42,7 +42,6 @@
       <Filter>源文件</Filter>
     </None>
     <None Include="tools\Fa.g4" />
-    <None Include="tools\libs\FaLexer.interp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tools\libs\FaVisitor.h">
@@ -56,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="tools\libs\FaParser.h">
       <Filter>头文件\antlr</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeVisitor.hpp">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

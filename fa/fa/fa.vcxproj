@@ -176,9 +176,14 @@
   <ItemGroup>
     <None Include="tools\Fa.g4" />
     <None Include="tools\generate.bat" />
-    <None Include="tools\libs\FaLexer.interp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CodeVisitor.hpp">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </ClInclude>
     <ClInclude Include="tools\libs\FaBaseVisitor.h" />
     <ClInclude Include="tools\libs\FaLexer.h" />
     <ClInclude Include="tools\libs\FaParser.h" />

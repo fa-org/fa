@@ -1,4 +1,9 @@
 T__0=1
-ID=2
-WS=3
-'hello'=1
+T__1=2
+Comment1=3
+Comment2=4
+WS=5
+ID=6
+IDs=7
+'use'=1
+';'=2

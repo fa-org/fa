@@ -12,11 +12,11 @@
 class  FaParser : public antlr4::Parser {
 public:
   enum {
-    T__0 = 1, ID = 2, WS = 3
+    T__0 = 1, T__1 = 2, Comment1 = 3, Comment2 = 4, WS = 5, ID = 6, IDs = 7
   };
 
   enum {
-    RuleS = 0
+    RuleUseExpr = 0, RuleProgram = 1
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -29,21 +29,36 @@ public:
   virtual antlr4::dfa::Vocabulary& getVocabulary() const override;
 
 
-  class SContext; 
+  class UseExprContext;
+  class ProgramContext; 
 
-  class  SContext : public antlr4::ParserRuleContext {
+  class  UseExprContext : public antlr4::ParserRuleContext {
   public:
-    SContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    UseExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> ID();
-    antlr4::tree::TerminalNode* ID(size_t i);
+    antlr4::tree::TerminalNode *ID();
+    antlr4::tree::TerminalNode *IDs();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  SContext* s();
+  UseExprContext* useExpr();
+
+  class  ProgramContext : public antlr4::ParserRuleContext {
+  public:
+    ProgramContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<UseExprContext *> useExpr();
+    UseExprContext* useExpr(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ProgramContext* program();
 
 
 private:
