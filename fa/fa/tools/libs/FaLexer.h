@@ -12,7 +12,11 @@
 class  FaLexer : public antlr4::Lexer {
 public:
   enum {
-    T__0 = 1, T__1 = 2, Comment1 = 3, Comment2 = 4, WS = 5, ID = 6, IDs = 7
+    T__0 = 1, Class = 2, PublicLevel = 3, Return = 4, Static = 5, Use = 6, 
+    Id = 7, QuotFangL = 8, QuotFangR = 9, QuotJianL = 10, QuotJianR = 11, 
+    QuotHuaL = 12, QuotHuaR = 13, QuotYuanL = 14, QuotYuanR = 15, BitAnd = 16, 
+    BitOr = 17, BitXor = 18, Comma = 19, Colon = 20, Semi = 21, Num = 22, 
+    Comment1 = 23, Comment2 = 24, WS = 25
   };
 
   explicit FaLexer(antlr4::CharStream *input);

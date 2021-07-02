@@ -3,20 +3,28 @@
 
 
 
+#include <tuple>
+
 #include "FaBaseVisitor.h"
 
 
 
-class CodeVisitor: public FaVisitor {
+class CodeVisitor: public FaBaseVisitor {
 public:
-    virtual antlrcpp::Any visitUseExpr (FaParser::UseExprContext *ctx) override {
-        return (ctx->ID () ? ctx->ID () : ctx->IDs ())->getText ();
-    }
+	antlrcpp::Any visitIds (FaParser::IdsContext *ctx) override {
+		return ctx->getText ();
+	}
 
-    virtual antlrcpp::Any visitProgram (FaParser::ProgramContext *ctx) override {
-        auto _v = ctx->useExpr ();
-        return visitUseExpr (_v [2]);
-    }
+	antlrcpp::Any visitUseStmt (FaParser::UseStmtContext *ctx) override {
+		return visitIds (ctx->ids ());
+	}
+
+	antlrcpp::Any visitProgram (FaParser::ProgramContext *ctx) override {
+		std::vector<std::string> _uses;
+		for (auto _use_expr : ctx->useStmt ())
+			_uses.push_back (visitUseStmt (_use_expr));
+		return _uses;
+	}
 };
 
 

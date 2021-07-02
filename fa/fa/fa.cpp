@@ -1,8 +1,8 @@
-﻿#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#pragma warning (disable: 4251)
-#define ANTLR4CPP_STATIC
+﻿//#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+//#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+//#define _CRT_SECURE_NO_WARNINGS
+//#define ANTLR4CPP_STATIC
+//#pragma warning (disable: 4251)
 
 
 
@@ -15,7 +15,7 @@
 #include "FaLexer.h"
 #include "CodeVisitor.hpp"
 
-#pragma comment (lib, "antlr4-runtime.lib")
+//#pragma comment (lib, "antlr4-runtime.lib")
 
 
 
@@ -24,7 +24,14 @@ int main (int argc, char *argv[]) {
 use tesrds13_;
 use sadas;
 use sa.das;
+
+class Program {
+	static void Main (string args) {}
+}
 )";
+	std::cout << "----------source begin----------" << std::endl;
+	std::cout << _code << std::endl;
+	std::cout << "----------source end----------" << std::endl << std::endl;
 	antlr4::ANTLRInputStream _s (_code);
 	FaLexer _lexer { &_s };
 	antlr4::CommonTokenStream _cts { &_lexer };
@@ -32,8 +39,10 @@ use sa.das;
 	FaParser _parser { &_cts };
 	FaParser::ProgramContext *_ctx = _parser.program ();
 	CodeVisitor _visitor;
-	auto _v = _visitor.visitProgram (_ctx).as<std::string> ();
-	std::cout << _v << std::endl;
+	auto _v = _visitor.visitProgram (_ctx).as<std::vector<std::string>> ();
+	std::cout << "----------visit begin----------" << std::endl;
+	for (auto _use_item : _v)
+		std::cout << "    " << _use_item << std::endl;
 	//std::vector<antlr4::tree::ParseTree*> _children = _ctx->children;
 	//for (antlr4::tree::ParseTree *_child : _children) {
 	//	std::cout << _child->children [1]->getText () << std::endl;

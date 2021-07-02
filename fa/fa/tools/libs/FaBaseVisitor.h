@@ -15,7 +15,51 @@
 class  FaBaseVisitor : public FaVisitor {
 public:
 
-  virtual antlrcpp::Any visitUseExpr(FaParser::UseExprContext *ctx) override {
+  virtual antlrcpp::Any visitIds(FaParser::IdsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeAfter(FaParser::TypeAfterContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeExpr(FaParser::TypeExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitReturnStmt(FaParser::ReturnStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeVar(FaParser::TypeVarContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeVarList(FaParser::TypeVarListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassItemExpr(FaParser::ClassItemExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassItemFieldStmt(FaParser::ClassItemFieldStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassItemFuncStmt(FaParser::ClassItemFuncStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 
