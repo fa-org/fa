@@ -13,11 +13,21 @@ grammar Fa;
 //
 // keyword
 //
+CC__Cdecl:				'__cdecl';
+CC__FastCall:			'__fastcall';
+CC__StdCall:			'__stdcall';
 Class:					'class';
-PublicLevel:			'public' | 'internal' | 'protected' | 'private';
+Const:					'const';
+Extern:					'extern';
+FaEntryMain:			'FaEntryMain';
+Internal:				'internal';
+Public:					'public';
+Protected:				'protected';
+Private:				'private';
 Return:					'return';
 Static:					'static';
 Use:					'use';
+Volatile:				'volatile';
 
 
 
@@ -43,6 +53,8 @@ BitXor:					'^';
 Comma:					',';
 Colon:					':';
 Semi:					';';
+Star:					'*';
+publicLevel:			Public | Internal | Protected | Private;
 
 
 
@@ -56,17 +68,25 @@ Num:					[0-9]+;
 //
 // type
 //
+typeBefore:				Const | Volatile;
 typeAfter:				(QuotFangL QuotFangR) | BitAnd;
-typeExpr				: (Id
-						| (Id QuotJianL typeExpr (Comma typeExpr)* QuotJianR)	// Lazy<int>
-						| (QuotYuanL typeExpr (Comma typeExpr)+ QuotYuanR)		// (int, string)
-						) typeAfter*;											// int[]&
+type:					typeBefore? ( Id
+						| (Id QuotJianL type (Comma type)* QuotJianR)	// Lazy<int>
+						| (QuotYuanL type (Comma type)+ QuotYuanR)		// (int, string)
+						) typeAfter*;									// int[]&
+eTypeBefore:			Const;
+eTypeAfter:				(QuotFangL QuotFangR) | BitAnd | Star;
+eType:					eTypeBefore? Id eTypeAfter*;						// int[]&
 
 
 
 //
 // expr
 //
+typeVar:				type Id?;
+typeVarList:			typeVar (Comma typeVar)*;
+eTypeVar:				eType Id?;
+eTypeVarList:			eTypeVar (Comma eTypeVar)*;
 
 
 
@@ -77,18 +97,32 @@ useStmt:				Use ids Semi;
 returnStmt:				Return Semi;
 
 
+
 //
 // class
 //
 classParent:			Colon ids (Comma ids)*;
-typeVar:				typeExpr Id;
-typeVarList:			typeVar (Comma typeVar)*;
 //
-classItemExpr:			PublicLevel? Static? Id Id;
+classItemExpr:			publicLevel? Static? Id Id;
 classItemFieldStmt:		classItemExpr Semi;
 classItemFuncStmt:		classItemExpr QuotYuanL typeVarList QuotYuanR QuotHuaL QuotHuaR;
-classStmt:				PublicLevel? Class Id classParent? QuotHuaL (classItemFieldStmt | classItemFuncStmt)* QuotHuaR;
-program:				useStmt* classStmt*;
+classStmt:				publicLevel? Class Id classParent? QuotHuaL (classItemFieldStmt | classItemFuncStmt)* QuotHuaR;
+
+
+
+//
+// extern
+//
+callConvention:			CC__Cdecl | CC__FastCall | CC__StdCall;
+externStmt:				Extern eType callConvention Id QuotYuanL eTypeVarList QuotYuanR Semi;
+
+
+
+//
+// fa_entry_main
+//
+faEntryMainFuncStmt:	Static type FaEntryMain QuotYuanL QuotYuanR QuotHuaL QuotHuaR;
+program:				useStmt* externStmt* classStmt* faEntryMainFuncStmt?;
 
 
 

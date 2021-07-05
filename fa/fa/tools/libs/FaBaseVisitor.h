@@ -19,11 +19,47 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitPublicLevel(FaParser::PublicLevelContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeBefore(FaParser::TypeBeforeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitTypeAfter(FaParser::TypeAfterContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitTypeExpr(FaParser::TypeExprContext *ctx) override {
+  virtual antlrcpp::Any visitType(FaParser::TypeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitETypeBefore(FaParser::ETypeBeforeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitETypeAfter(FaParser::ETypeAfterContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitEType(FaParser::ETypeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeVar(FaParser::TypeVarContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeVarList(FaParser::TypeVarListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitETypeVar(FaParser::ETypeVarContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitETypeVarList(FaParser::ETypeVarListContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -36,14 +72,6 @@ public:
   }
 
   virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitTypeVar(FaParser::TypeVarContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitTypeVarList(FaParser::TypeVarListContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -60,6 +88,18 @@ public:
   }
 
   virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitCallConvention(FaParser::CallConventionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExternStmt(FaParser::ExternStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitFaEntryMainFuncStmt(FaParser::FaEntryMainFuncStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 

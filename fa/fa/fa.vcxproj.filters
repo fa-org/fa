@@ -59,5 +59,8 @@
     <ClInclude Include="CodeVisitor.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="FaLLVMGen.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
