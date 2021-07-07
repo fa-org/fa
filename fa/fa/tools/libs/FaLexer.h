@@ -12,13 +12,20 @@
 class  FaLexer : public antlr4::Lexer {
 public:
   enum {
-    T__0 = 1, CC__Cdecl = 2, CC__FastCall = 3, CC__StdCall = 4, Class = 5, 
-    Const = 6, Extern = 7, FaEntryMain = 8, Internal = 9, Public = 10, Protected = 11, 
-    Private = 12, Return = 13, Static = 14, Use = 15, Volatile = 16, Id = 17, 
-    QuotFangL = 18, QuotFangR = 19, QuotJianL = 20, QuotJianR = 21, QuotHuaL = 22, 
-    QuotHuaR = 23, QuotYuanL = 24, QuotYuanR = 25, BitAnd = 26, BitOr = 27, 
-    BitXor = 28, Comma = 29, Colon = 30, Semi = 31, Star = 32, Num = 33, 
-    Comment1 = 34, Comment2 = 35, WS = 36
+    AImport = 1, ALib = 2, CC__Cdecl = 3, CC__FastCall = 4, CC__StdCall = 5, 
+    Class = 6, Const = 7, FaEntryMain = 8, Internal = 9, Public = 10, Protected = 11, 
+    Private = 12, Return = 13, Static = 14, Use = 15, Id = 16, Assign = 17, 
+    QusQusAssign = 18, AddAssign = 19, SubAssign = 20, StarAssign = 21, 
+    StarStarAssign = 22, DivAssign = 23, ModAssign = 24, AndAssign = 25, 
+    OrAssign = 26, XorAssign = 27, AndAndAssign = 28, OrOrAssign = 29, ShiftLAssign = 30, 
+    ShiftRAssign = 31, ReverseOp = 32, AddAddOp = 33, SubSubOp = 34, PointOp = 35, 
+    QusQusOp = 36, AddOp = 37, SubOp = 38, StarOp = 39, DivOp = 40, StarStarOp = 41, 
+    ModOp = 42, AndOp = 43, OrOp = 44, XorOp = 45, AndAndOp = 46, OrOrOp = 47, 
+    ShiftLOp = 48, ShiftROp = 49, Qus = 50, Comma = 51, ColonColon = 52, 
+    Colon = 53, Semi = 54, QuotFangL = 55, QuotFangR = 56, QuotJianL = 57, 
+    QuotJianR = 58, QuotHuaL = 59, QuotHuaR = 60, QuotYuanL = 61, QuotYuanR = 62, 
+    BoolLiteral = 63, IntLiteral = 64, FloatLiteral = 65, String1Literal = 66, 
+    Comment1 = 67, Comment2 = 68, WS = 69
   };
 
   explicit FaLexer(antlr4::CharStream *input);

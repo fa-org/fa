@@ -167,11 +167,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="fa.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="tools\libs\FaBaseVisitor.cpp" />
     <ClCompile Include="tools\libs\FaLexer.cpp" />
     <ClCompile Include="tools\libs\FaParser.cpp" />
     <ClCompile Include="tools\libs\FaVisitor.cpp" />
+    <ClCompile Include="win32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="tools\Fa.g4" />

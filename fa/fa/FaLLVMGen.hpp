@@ -6,6 +6,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/Optional.h>
@@ -30,19 +31,31 @@
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 
+#include <fmt/core.h>
+
 #include "CodeVisitor.hpp"
 
 
 
 class FaLLVMGen {
 public:
-	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor) {
+	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor), m_module_name (_module_name) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (_module_name, *m_ctx);
 	}
 
-	std::optional<std::string> Build (FaParser::ProgramContext *_program_ctx, std::string _file) {
-		auto _entry = m_visitor->visitProgram (_program_ctx).as<FaParser::FaEntryMainFuncStmtContext*> ();
+	std::optional<std::string> Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
+		auto [_uses, _imports, _classes, _entry] = m_visitor->visitProgram (_program_ctx).as<std::tuple<std::vector<std::string>, FaParser::ImportBlockContext *, std::vector<FaParser::ClassBlockContext *>, FaParser::FaEntryMainFuncBlockContext *>> ();
+		m_uses = _uses;
+
+		// 引用外部模块
+		std::tie (m_imports, m_libs) = m_visitor->visitImportBlock (_imports).as<std::tuple<std::vector<std::string>, std::vector<std::string>>> ();
+		//m_imports.push_back ("puts");
+		//m_libs.push_back ("libcmt.lib");
+		ProcessImports ();
+
+		// TODO: 编译类
+
 		if (!_entry)
 			return "未定义入口点";
 		BuildFaEntryMain (_entry);
@@ -80,11 +93,26 @@ public:
 		return std::nullopt;
 	}
 
-private:
-	//bool BuildClassMethod () {
-	//}
+	std::string Link (std::string _link_exe_path) {
+		wchar_t *get_env (std::string _key, std::string _val);
+		wchar_t *_env = get_env ("LIB", R"(LIBPATH=E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86\store\references;D:\Windows Kits\10\UnionMetadata\10.0.19041.0;D:\Windows Kits\10\References\10.0.19041.0;C:\Windows\Microsoft.NET\Framework\v4.0.30319\0\0)");
 
-	void BuildFaEntryMain (FaParser::FaEntryMainFuncStmtContext *_mctx) {
+		std::string _cmd = fmt::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:fa_entry_main /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
+		for (auto _lib : m_libs) {
+			_cmd += " ";
+			_cmd += _lib;
+		}
+		std::string get_process_output (std::string _cmd, wchar_t *_env);
+		return get_process_output (_cmd, _env);
+	}
+
+private:
+	void ProcessImports () {
+		// TODO 链接接口
+		// https://blog.csdn.net/adream307/article/details/83820543
+	}
+
+	void BuildFaEntryMain (FaParser::FaEntryMainFuncBlockContext *_mctx) {
 		llvm::FunctionType *_ft = llvm::FunctionType::get (
 			llvm::Type::getInt32Ty (*m_ctx),
 			//{ llvm::Type::getInt32Ty (*m_ctx), llvm::Type::getInt32Ty (*m_ctx) },
@@ -98,8 +126,12 @@ private:
 	}
 
 	CodeVisitor *m_visitor = nullptr;
+	std::string m_module_name;
 	std::shared_ptr<llvm::LLVMContext> m_ctx;
 	std::shared_ptr<llvm::Module> m_module;
+
+	std::vector<std::string> m_uses;
+	std::vector<std::string> m_imports, m_libs;
 };
 
 

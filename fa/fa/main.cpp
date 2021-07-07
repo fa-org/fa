@@ -24,15 +24,14 @@
 int main (int argc, char *argv[]) {
 	std::filesystem::current_path ("E:\\fa_tmp");
 	std::string _code = R"(
-extern int __cdecl puts (const char*);
+@import int __cdecl puts (const char*);
+@lib "libcmt.lib";
 
-//class io {
-//	public static void Write (string s, string line_end = "\n") {
-//		//extern int __cdecl puts (char*);
-//	}
-//}
+
 
 static int32 FaEntryMain () {
+	::puts ("hello world!\n");
+	return 0;
 }
 )";
 	std::cout << "----------source begin----------" << std::endl;
@@ -54,13 +53,16 @@ static int32 FaEntryMain () {
 	////	std::cout << _child->children [1]->getText () << std::endl;
 	////}
 	FaLLVMGen _gen { &_visitor, "hello" };
-	auto _err = _gen.Build (_parser.program (), "hello.obj");
+	auto _err = _gen.Compile (_parser.program (), "hello.obj");
 	if (!_err.has_value ()) {
 		std::cout << "compile success." << std::endl;
+		std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
+		std::cout << _out << std::endl;
 	} else {
 		std::cout << _err.value () << std::endl;
 		std::cout << "compile failed." << std::endl;
 	}
+	// link /out:hello.exe /subsystem:console /entry:fa_entry_main hello.obj
 
 	std::cout << "press any key to exit." << std::endl;
 	::_getch ();

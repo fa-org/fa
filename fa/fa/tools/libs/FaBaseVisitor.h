@@ -19,11 +19,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitPublicLevel(FaParser::PublicLevelContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitTypeBefore(FaParser::TypeBeforeContext *ctx) override {
+  virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -32,10 +28,6 @@ public:
   }
 
   virtual antlrcpp::Any visitType(FaParser::TypeContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitETypeBefore(FaParser::ETypeBeforeContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -63,6 +55,18 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAllOp(FaParser::AllOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExpr(FaParser::ExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -71,23 +75,31 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitStmt(FaParser::StmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitPublicLevel(FaParser::PublicLevelContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassItemExpr(FaParser::ClassItemExprContext *ctx) override {
+  virtual antlrcpp::Any visitClassItemPart(FaParser::ClassItemPartContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassItemFieldStmt(FaParser::ClassItemFieldStmtContext *ctx) override {
+  virtual antlrcpp::Any visitClassItemFieldBlock(FaParser::ClassItemFieldBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassItemFuncStmt(FaParser::ClassItemFuncStmtContext *ctx) override {
+  virtual antlrcpp::Any visitClassItemFuncBlock(FaParser::ClassItemFuncBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *ctx) override {
+  virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -95,11 +107,19 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitExternStmt(FaParser::ExternStmtContext *ctx) override {
+  virtual antlrcpp::Any visitImportStmt(FaParser::ImportStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitFaEntryMainFuncStmt(FaParser::FaEntryMainFuncStmtContext *ctx) override {
+  virtual antlrcpp::Any visitLibStmt(FaParser::LibStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitImportBlock(FaParser::ImportBlockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitFaEntryMainFuncBlock(FaParser::FaEntryMainFuncBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -21,7 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="fa.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="tools\libs\FaBaseVisitor.cpp">
@@ -35,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="tools\libs\FaVisitor.cpp">
       <Filter>源文件\antlr</Filter>
+    </ClCompile>
+    <ClCompile Include="win32.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

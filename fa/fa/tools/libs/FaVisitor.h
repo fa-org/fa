@@ -21,15 +21,11 @@ public:
    */
     virtual antlrcpp::Any visitIds(FaParser::IdsContext *context) = 0;
 
-    virtual antlrcpp::Any visitPublicLevel(FaParser::PublicLevelContext *context) = 0;
-
-    virtual antlrcpp::Any visitTypeBefore(FaParser::TypeBeforeContext *context) = 0;
+    virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *context) = 0;
 
     virtual antlrcpp::Any visitTypeAfter(FaParser::TypeAfterContext *context) = 0;
 
     virtual antlrcpp::Any visitType(FaParser::TypeContext *context) = 0;
-
-    virtual antlrcpp::Any visitETypeBefore(FaParser::ETypeBeforeContext *context) = 0;
 
     virtual antlrcpp::Any visitETypeAfter(FaParser::ETypeAfterContext *context) = 0;
 
@@ -43,25 +39,39 @@ public:
 
     virtual antlrcpp::Any visitETypeVarList(FaParser::ETypeVarListContext *context) = 0;
 
+    virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitAllOp(FaParser::AllOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
+
     virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitReturnStmt(FaParser::ReturnStmtContext *context) = 0;
 
+    virtual antlrcpp::Any visitStmt(FaParser::StmtContext *context) = 0;
+
+    virtual antlrcpp::Any visitPublicLevel(FaParser::PublicLevelContext *context) = 0;
+
     virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemExpr(FaParser::ClassItemExprContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemPart(FaParser::ClassItemPartContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemFieldStmt(FaParser::ClassItemFieldStmtContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemFieldBlock(FaParser::ClassItemFieldBlockContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemFuncStmt(FaParser::ClassItemFuncStmtContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemFuncBlock(FaParser::ClassItemFuncBlockContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *context) = 0;
+    virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *context) = 0;
 
     virtual antlrcpp::Any visitCallConvention(FaParser::CallConventionContext *context) = 0;
 
-    virtual antlrcpp::Any visitExternStmt(FaParser::ExternStmtContext *context) = 0;
+    virtual antlrcpp::Any visitImportStmt(FaParser::ImportStmtContext *context) = 0;
 
-    virtual antlrcpp::Any visitFaEntryMainFuncStmt(FaParser::FaEntryMainFuncStmtContext *context) = 0;
+    virtual antlrcpp::Any visitLibStmt(FaParser::LibStmtContext *context) = 0;
+
+    virtual antlrcpp::Any visitImportBlock(FaParser::ImportBlockContext *context) = 0;
+
+    virtual antlrcpp::Any visitFaEntryMainFuncBlock(FaParser::FaEntryMainFuncBlockContext *context) = 0;
 
     virtual antlrcpp::Any visitProgram(FaParser::ProgramContext *context) = 0;
 
