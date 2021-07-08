@@ -195,6 +195,13 @@
     <ClInclude Include="tools\libs\FaLexer.h" />
     <ClInclude Include="tools\libs\FaParser.h" />
     <ClInclude Include="tools\libs\FaVisitor.h" />
+    <ClInclude Include="TypeMap.hpp" />
+    <ClInclude Include="ValueBuilder.hpp">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

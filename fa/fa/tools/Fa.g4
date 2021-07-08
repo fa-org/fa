@@ -26,7 +26,9 @@ Public:						'public';
 Protected:					'protected';
 Private:					'private';
 Return:						'return';
+Signed:						'signed';
 Static:						'static';
+Unsigned:					'unsigned';
 Use:						'use';
 
 
@@ -77,8 +79,8 @@ OrOp:						'|';
 XorOp:						'^';
 AndAndOp:					'&&';
 OrOrOp:						'||';
-ShiftLOp:					'<<';
-ShiftROp:					'>>';
+shiftLOp:					QuotJianL QuotJianL;
+shiftROp:					QuotJianR QuotJianR;
 
 // 三元或其他
 Qus:						'?';
@@ -126,7 +128,8 @@ type:						Const? ( Id
 								| (QuotYuanL type (Comma type)+ QuotYuanR)		// (int, string)
 							) typeAfter*;										// int[]&
 eTypeAfter:					(QuotFangL QuotFangR) | AndOp | StarOp;
-eType:						Const? Id eTypeAfter*;								// int[]&
+eSign:						Signed | Unsigned;
+eType:						Const? eSign? Id eTypeAfter*;					// int[]&
 
 
 
@@ -144,7 +147,7 @@ eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 // expr
 //
 allAssign:					Assign | QusQusAssign | AddAssign | SubAssign | StarAssign | StarStarAssign | DivAssign | ModAssign | AndAssign | OrAssign | XorAssign | AndAndAssign | OrOrAssign | ShiftLAssign | ShiftRAssign;
-allOp:						QusQusOp | PointOp | AddOp | SubOp | StarOp | DivOp | StarStarOp | ModOp | AndOp | OrOp | XorOp | AndAndOp | OrOrOp | ShiftLOp | ShiftROp;
+allOp:						QusQusOp | PointOp | AddOp | SubOp | StarOp | DivOp | StarStarOp | ModOp | AndOp | OrOp | XorOp | AndAndOp | OrOrOp | shiftLOp | shiftROp;
 //exprAtom:					ids
 //							| value
 //							| (QuotYuanL expr QuotYuanR);
@@ -159,17 +162,14 @@ allOp:						QusQusOp | PointOp | AddOp | SubOp | StarOp | DivOp | StarStarOp | M
 //							| (expr (AddAddOp | SubSubOp))													// val++
 //							| (expr allAssign<assoc=right> expr)											// val = 12
 //							);
-expr						: (QuotYuanL expr QuotYuanR)
-							| (
-								(AddOp | SubOp | AddAddOp | SubSubOp | ReverseOp)*							// expr 前缀
-								(ids | (ColonColon Id) | literal)											// expr 本体
-								(																			// expr 后缀
-									(AddAddOp | SubSubOp)														// ++ --
-									| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)								// Write ("")
-									| (QuotFangL expr QuotFangL)												// list [12]
-									| ((allAssign | allOp) expr)+												// 12 += 24
-								)*
-							);
+quotExpr:					(QuotYuanL expr QuotYuanR);
+exprPrefix:					(AddOp | SubOp | AddAddOp | SubSubOp | ReverseOp);								// 前缀 + - ++ -- ~
+exprBody:					(ids | (ColonColon Id) | literal);												// 本体
+exprSuffix:					(AddAddOp | SubSubOp)+															// 后缀 ++ --
+							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)+									//      Write ("")
+							| (QuotFangL expr QuotFangL)+													//      list [12]
+							| ((allAssign | allOp) expr)+;													//      12 += 24
+expr:						quotExpr | (exprPrefix* exprBody exprSuffix*);
 
 
 
@@ -177,8 +177,7 @@ expr						: (QuotYuanL expr QuotYuanR)
 // stmt
 //
 useStmt:					Use ids Semi;
-returnStmt:					Return expr? Semi;
-stmt:						returnStmt | (expr Semi);
+stmt:						Return? expr Semi;
 
 
 

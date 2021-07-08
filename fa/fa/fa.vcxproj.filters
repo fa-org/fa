@@ -65,5 +65,11 @@
     <ClInclude Include="FaLLVMGen.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TypeMap.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ValueBuilder.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

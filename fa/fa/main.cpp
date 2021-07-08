@@ -30,7 +30,7 @@ int main (int argc, char *argv[]) {
 
 
 static int32 FaEntryMain () {
-	::puts ("hello world!\n");
+	//::puts ("hello world!\n");
 	return 0;
 }
 )";

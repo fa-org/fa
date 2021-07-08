@@ -14,14 +14,14 @@ public:
   enum {
     AImport = 1, ALib = 2, CC__Cdecl = 3, CC__FastCall = 4, CC__StdCall = 5, 
     Class = 6, Const = 7, FaEntryMain = 8, Internal = 9, Public = 10, Protected = 11, 
-    Private = 12, Return = 13, Static = 14, Use = 15, Id = 16, Assign = 17, 
-    QusQusAssign = 18, AddAssign = 19, SubAssign = 20, StarAssign = 21, 
-    StarStarAssign = 22, DivAssign = 23, ModAssign = 24, AndAssign = 25, 
-    OrAssign = 26, XorAssign = 27, AndAndAssign = 28, OrOrAssign = 29, ShiftLAssign = 30, 
-    ShiftRAssign = 31, ReverseOp = 32, AddAddOp = 33, SubSubOp = 34, PointOp = 35, 
-    QusQusOp = 36, AddOp = 37, SubOp = 38, StarOp = 39, DivOp = 40, StarStarOp = 41, 
-    ModOp = 42, AndOp = 43, OrOp = 44, XorOp = 45, AndAndOp = 46, OrOrOp = 47, 
-    ShiftLOp = 48, ShiftROp = 49, Qus = 50, Comma = 51, ColonColon = 52, 
+    Private = 12, Return = 13, Signed = 14, Static = 15, Unsigned = 16, 
+    Use = 17, Id = 18, Assign = 19, QusQusAssign = 20, AddAssign = 21, SubAssign = 22, 
+    StarAssign = 23, StarStarAssign = 24, DivAssign = 25, ModAssign = 26, 
+    AndAssign = 27, OrAssign = 28, XorAssign = 29, AndAndAssign = 30, OrOrAssign = 31, 
+    ShiftLAssign = 32, ShiftRAssign = 33, ReverseOp = 34, AddAddOp = 35, 
+    SubSubOp = 36, PointOp = 37, QusQusOp = 38, AddOp = 39, SubOp = 40, 
+    StarOp = 41, DivOp = 42, StarStarOp = 43, ModOp = 44, AndOp = 45, OrOp = 46, 
+    XorOp = 47, AndAndOp = 48, OrOrOp = 49, Qus = 50, Comma = 51, ColonColon = 52, 
     Colon = 53, Semi = 54, QuotFangL = 55, QuotFangR = 56, QuotJianL = 57, 
     QuotJianR = 58, QuotHuaL = 59, QuotHuaR = 60, QuotYuanL = 61, QuotYuanR = 62, 
     BoolLiteral = 63, IntLiteral = 64, FloatLiteral = 65, String1Literal = 66, 
@@ -29,14 +29,15 @@ public:
   };
 
   enum {
-    RuleIds = 0, RuleLiteral = 1, RuleTypeAfter = 2, RuleType = 3, RuleETypeAfter = 4, 
-    RuleEType = 5, RuleTypeVar = 6, RuleTypeVarList = 7, RuleETypeVar = 8, 
-    RuleETypeVarList = 9, RuleAllAssign = 10, RuleAllOp = 11, RuleExpr = 12, 
-    RuleUseStmt = 13, RuleReturnStmt = 14, RuleStmt = 15, RulePublicLevel = 16, 
-    RuleClassParent = 17, RuleClassItemPart = 18, RuleClassItemFieldBlock = 19, 
-    RuleClassItemFuncBlock = 20, RuleClassBlock = 21, RuleCallConvention = 22, 
-    RuleImportStmt = 23, RuleLibStmt = 24, RuleImportBlock = 25, RuleFaEntryMainFuncBlock = 26, 
-    RuleProgram = 27
+    RuleIds = 0, RuleShiftLOp = 1, RuleShiftROp = 2, RuleLiteral = 3, RuleTypeAfter = 4, 
+    RuleType = 5, RuleETypeAfter = 6, RuleESign = 7, RuleEType = 8, RuleTypeVar = 9, 
+    RuleTypeVarList = 10, RuleETypeVar = 11, RuleETypeVarList = 12, RuleAllAssign = 13, 
+    RuleAllOp = 14, RuleQuotExpr = 15, RuleExprPrefix = 16, RuleExprBody = 17, 
+    RuleExprSuffix = 18, RuleExpr = 19, RuleUseStmt = 20, RuleStmt = 21, 
+    RulePublicLevel = 22, RuleClassParent = 23, RuleClassItemPart = 24, 
+    RuleClassItemFieldBlock = 25, RuleClassItemFuncBlock = 26, RuleClassBlock = 27, 
+    RuleCallConvention = 28, RuleImportStmt = 29, RuleLibStmt = 30, RuleImportBlock = 31, 
+    RuleFaEntryMainFuncBlock = 32, RuleProgram = 33
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -50,10 +51,13 @@ public:
 
 
   class IdsContext;
+  class ShiftLOpContext;
+  class ShiftROpContext;
   class LiteralContext;
   class TypeAfterContext;
   class TypeContext;
   class ETypeAfterContext;
+  class ESignContext;
   class ETypeContext;
   class TypeVarContext;
   class TypeVarListContext;
@@ -61,9 +65,12 @@ public:
   class ETypeVarListContext;
   class AllAssignContext;
   class AllOpContext;
+  class QuotExprContext;
+  class ExprPrefixContext;
+  class ExprBodyContext;
+  class ExprSuffixContext;
   class ExprContext;
   class UseStmtContext;
-  class ReturnStmtContext;
   class StmtContext;
   class PublicLevelContext;
   class ClassParentContext;
@@ -93,6 +100,34 @@ public:
   };
 
   IdsContext* ids();
+
+  class  ShiftLOpContext : public antlr4::ParserRuleContext {
+  public:
+    ShiftLOpContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<antlr4::tree::TerminalNode *> QuotJianL();
+    antlr4::tree::TerminalNode* QuotJianL(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ShiftLOpContext* shiftLOp();
+
+  class  ShiftROpContext : public antlr4::ParserRuleContext {
+  public:
+    ShiftROpContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<antlr4::tree::TerminalNode *> QuotJianR();
+    antlr4::tree::TerminalNode* QuotJianR(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ShiftROpContext* shiftROp();
 
   class  LiteralContext : public antlr4::ParserRuleContext {
   public:
@@ -165,12 +200,27 @@ public:
 
   ETypeAfterContext* eTypeAfter();
 
+  class  ESignContext : public antlr4::ParserRuleContext {
+  public:
+    ESignContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Signed();
+    antlr4::tree::TerminalNode *Unsigned();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ESignContext* eSign();
+
   class  ETypeContext : public antlr4::ParserRuleContext {
   public:
     ETypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Id();
     antlr4::tree::TerminalNode *Const();
+    ESignContext *eSign();
     std::vector<ETypeAfterContext *> eTypeAfter();
     ETypeAfterContext* eTypeAfter(size_t i);
 
@@ -285,8 +335,8 @@ public:
     antlr4::tree::TerminalNode *XorOp();
     antlr4::tree::TerminalNode *AndAndOp();
     antlr4::tree::TerminalNode *OrOrOp();
-    antlr4::tree::TerminalNode *ShiftLOp();
-    antlr4::tree::TerminalNode *ShiftROp();
+    ShiftLOpContext *shiftLOp();
+    ShiftROpContext *shiftROp();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -295,38 +345,94 @@ public:
 
   AllOpContext* allOp();
 
-  class  ExprContext : public antlr4::ParserRuleContext {
+  class  QuotExprContext : public antlr4::ParserRuleContext {
   public:
-    ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    QuotExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> QuotYuanL();
-    antlr4::tree::TerminalNode* QuotYuanL(size_t i);
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> QuotYuanR();
-    antlr4::tree::TerminalNode* QuotYuanR(size_t i);
+    antlr4::tree::TerminalNode *QuotYuanL();
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *QuotYuanR();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  QuotExprContext* quotExpr();
+
+  class  ExprPrefixContext : public antlr4::ParserRuleContext {
+  public:
+    ExprPrefixContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *AddOp();
+    antlr4::tree::TerminalNode *SubOp();
+    antlr4::tree::TerminalNode *AddAddOp();
+    antlr4::tree::TerminalNode *SubSubOp();
+    antlr4::tree::TerminalNode *ReverseOp();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ExprPrefixContext* exprPrefix();
+
+  class  ExprBodyContext : public antlr4::ParserRuleContext {
+  public:
+    ExprBodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
     IdsContext *ids();
     LiteralContext *literal();
-    std::vector<antlr4::tree::TerminalNode *> AddOp();
-    antlr4::tree::TerminalNode* AddOp(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> SubOp();
-    antlr4::tree::TerminalNode* SubOp(size_t i);
+    antlr4::tree::TerminalNode *ColonColon();
+    antlr4::tree::TerminalNode *Id();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ExprBodyContext* exprBody();
+
+  class  ExprSuffixContext : public antlr4::ParserRuleContext {
+  public:
+    ExprSuffixContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> AddAddOp();
     antlr4::tree::TerminalNode* AddAddOp(size_t i);
     std::vector<antlr4::tree::TerminalNode *> SubSubOp();
     antlr4::tree::TerminalNode* SubSubOp(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> ReverseOp();
-    antlr4::tree::TerminalNode* ReverseOp(size_t i);
-    antlr4::tree::TerminalNode *ColonColon();
-    antlr4::tree::TerminalNode *Id();
+    std::vector<antlr4::tree::TerminalNode *> QuotYuanL();
+    antlr4::tree::TerminalNode* QuotYuanL(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> QuotYuanR();
+    antlr4::tree::TerminalNode* QuotYuanR(size_t i);
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> Comma();
+    antlr4::tree::TerminalNode* Comma(size_t i);
     std::vector<antlr4::tree::TerminalNode *> QuotFangL();
     antlr4::tree::TerminalNode* QuotFangL(size_t i);
     std::vector<AllAssignContext *> allAssign();
     AllAssignContext* allAssign(size_t i);
     std::vector<AllOpContext *> allOp();
     AllOpContext* allOp(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> Comma();
-    antlr4::tree::TerminalNode* Comma(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ExprSuffixContext* exprSuffix();
+
+  class  ExprContext : public antlr4::ParserRuleContext {
+  public:
+    ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    QuotExprContext *quotExpr();
+    ExprBodyContext *exprBody();
+    std::vector<ExprPrefixContext *> exprPrefix();
+    ExprPrefixContext* exprPrefix(size_t i);
+    std::vector<ExprSuffixContext *> exprSuffix();
+    ExprSuffixContext* exprSuffix(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -350,28 +456,13 @@ public:
 
   UseStmtContext* useStmt();
 
-  class  ReturnStmtContext : public antlr4::ParserRuleContext {
-  public:
-    ReturnStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *Return();
-    antlr4::tree::TerminalNode *Semi();
-    ExprContext *expr();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ReturnStmtContext* returnStmt();
-
   class  StmtContext : public antlr4::ParserRuleContext {
   public:
     StmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    ReturnStmtContext *returnStmt();
     ExprContext *expr();
     antlr4::tree::TerminalNode *Semi();
+    antlr4::tree::TerminalNode *Return();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

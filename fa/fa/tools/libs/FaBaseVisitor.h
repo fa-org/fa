@@ -19,6 +19,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitShiftLOp(FaParser::ShiftLOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitShiftROp(FaParser::ShiftROpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -32,6 +40,10 @@ public:
   }
 
   virtual antlrcpp::Any visitETypeAfter(FaParser::ETypeAfterContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitESign(FaParser::ESignContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -63,15 +75,27 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExprPrefix(FaParser::ExprPrefixContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExprBody(FaParser::ExprBodyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExprSuffix(FaParser::ExprSuffixContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitExpr(FaParser::ExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitReturnStmt(FaParser::ReturnStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 

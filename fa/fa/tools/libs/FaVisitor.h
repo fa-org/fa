@@ -21,6 +21,10 @@ public:
    */
     virtual antlrcpp::Any visitIds(FaParser::IdsContext *context) = 0;
 
+    virtual antlrcpp::Any visitShiftLOp(FaParser::ShiftLOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitShiftROp(FaParser::ShiftROpContext *context) = 0;
+
     virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *context) = 0;
 
     virtual antlrcpp::Any visitTypeAfter(FaParser::TypeAfterContext *context) = 0;
@@ -28,6 +32,8 @@ public:
     virtual antlrcpp::Any visitType(FaParser::TypeContext *context) = 0;
 
     virtual antlrcpp::Any visitETypeAfter(FaParser::ETypeAfterContext *context) = 0;
+
+    virtual antlrcpp::Any visitESign(FaParser::ESignContext *context) = 0;
 
     virtual antlrcpp::Any visitEType(FaParser::ETypeContext *context) = 0;
 
@@ -43,11 +49,17 @@ public:
 
     virtual antlrcpp::Any visitAllOp(FaParser::AllOpContext *context) = 0;
 
+    virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *context) = 0;
+
+    virtual antlrcpp::Any visitExprPrefix(FaParser::ExprPrefixContext *context) = 0;
+
+    virtual antlrcpp::Any visitExprBody(FaParser::ExprBodyContext *context) = 0;
+
+    virtual antlrcpp::Any visitExprSuffix(FaParser::ExprSuffixContext *context) = 0;
+
     virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
 
     virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *context) = 0;
-
-    virtual antlrcpp::Any visitReturnStmt(FaParser::ReturnStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitStmt(FaParser::StmtContext *context) = 0;
 
