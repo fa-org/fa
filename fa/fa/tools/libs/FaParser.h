@@ -136,6 +136,7 @@ public:
     antlr4::tree::TerminalNode *BoolLiteral();
     antlr4::tree::TerminalNode *IntLiteral();
     antlr4::tree::TerminalNode *FloatLiteral();
+    antlr4::tree::TerminalNode *String1Literal();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

@@ -13,7 +13,7 @@
 //template<int bitsize>
 class TypeMap {
 public:
-	TypeMap (FaVisitor *_visitor, llvm::LLVMContext *_ctx): m_visitor (_visitor), m_ctx (_ctx) {}
+	TypeMap (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx): m_visitor (_visitor), m_ctx (_ctx) {}
 
 	llvm::Type *GetType (FaParser::TypeContext *_type_ctx) {
 		auto _name = _type_ctx->getText ();
@@ -39,6 +39,7 @@ public:
 			return llvm::Type::getDoubleTy (*m_ctx);
 		}
 		std::cout << "unknown type " << _name << std::endl;
+		return nullptr;
 	}
 
 	std::vector<llvm::Type *> GetTypes (std::vector<FaParser::TypeContext *> _types_raw) {
@@ -107,7 +108,7 @@ public:
 
 private:
 	FaVisitor *m_visitor = nullptr;
-	llvm::LLVMContext *m_ctx = nullptr;
+	std::shared_ptr<llvm::LLVMContext> m_ctx = nullptr;
 };
 
 

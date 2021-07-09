@@ -115,7 +115,7 @@ FloatLiteral:				NUM+ PointOp NUM+;
 //CharLiteral:				"'" ([\x09\x20-\x26\x28-\x5B\x5D-\x7F\u0100-\uffff] | conv_mean16) "'";
 String1Literal:				'"' Schar* '"';
 //String2Literal:				'`' ([\x09\x20-\x5B\x5D-\x5F\x61-\x7F\u0100-\uffff] | conv_mean16)* '`';
-literal:					BoolLiteral | IntLiteral | FloatLiteral;
+literal:					BoolLiteral | IntLiteral | FloatLiteral | String1Literal;
 
 
 

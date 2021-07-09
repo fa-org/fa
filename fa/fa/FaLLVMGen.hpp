@@ -45,8 +45,8 @@ public:
 	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor), m_module_name (_module_name) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (_module_name, *m_ctx);
-		m_etype_map = std::make_shared<TypeMap> (_visitor, *m_ctx);
-		m_value_builder = std::make_shared<ValueBuilder> (_visitor, *m_ctx);
+		m_etype_map = std::make_shared<TypeMap> (_visitor, m_ctx);
+		m_value_builder = std::make_shared<ValueBuilder> (_visitor, m_ctx);
 	}
 
 	std::optional<std::string> Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
@@ -165,7 +165,7 @@ private:
 	void FuncCodeBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::StmtContext *> _stmts_raw, llvm::Type *_ret_type) {
 		for (FaParser::StmtContext *_stmt_raw : _stmts_raw) {
 			FaParser::ExprContext *_expr = _stmt_raw->expr ();
-			llvm::Value *_value = ExprCodeBuilder (_expr);
+			llvm::Value *_value = ExprCodeBuilder (_builder, _expr);
 			//
 			if (_stmt_raw->Return () != nullptr)
 				_builder.CreateRet (_value);
@@ -173,26 +173,50 @@ private:
 		//llvm::ConstantInt::get (_ret_type, llvm::APInt (32, 0, true))
 	}
 
-	llvm::Value *ExprCodeBuilder (FaParser::ExprContext *_expr) {
+	llvm::Value *ExprCodeBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr) {
 		if (_expr == nullptr)
 			return nullptr;
 		if (_expr->quotExpr () != nullptr)
-			return ExprCodeBuilder (_expr->quotExpr ()->expr ());
+			return ExprCodeBuilder (_builder, _expr->quotExpr ()->expr ());
 		std::vector<FaParser::ExprPrefixContext *> _prefix = _expr->exprPrefix (); // TODO
 		FaParser::ExprBodyContext *_body = _expr->exprBody ();
 		std::vector<FaParser::ExprSuffixContext *> _suffix = _expr->exprSuffix (); // TODO
-		if (_body->ids () != nullptr) {
-			// TODO ids操作
-			std::string _cur_name = _body->ids ()->getText ();
-		} else if (_body->ColonColon () != nullptr) {
-			// TODO 外部 C API 调用
-		} else {
-			// TODO 元素
-			auto _literal = _body->literal ();
-			if (_literal->BoolLiteral ()) {
-				return llvm::ConstantInt::get ();
+		llvm::Value *_current = nullptr;
+		while (_prefix.size () > 0 || _suffix.size () > 0 || _current == nullptr) {
+			if (_current == nullptr) {
+				// 第一次处理，_body 不为空，_current 为空
+				if (_body->ids () != nullptr) {
+					// TODO ids操作
+					std::string _cur_name = _body->ids ()->getText ();
+				} else if (_body->ColonColon () != nullptr) {
+					// TODO 外部 C API 调用
+					std::string _func_name = _body->Id ()->getText ();
+					llvm::Function *_func = m_imports [_func_name];
+					std::vector<llvm::Value *> _args;
+					for (auto _arg_expr : _suffix [0]->expr ())
+						_args.push_back (ExprCodeBuilder (_builder, _arg_expr));
+					_current = _builder.CreateCall (_func, _args);
+					_suffix.erase (_suffix.begin ());
+				} else {
+					// literal
+					auto _literal = _body->literal ();
+					if (_literal->BoolLiteral ()) {
+						_current = m_value_builder->Build ("bool", _literal->getText ());
+					} else if (_literal->IntLiteral ()) {
+						_current = m_value_builder->Build ("int64", _literal->getText ());
+					} else if (_literal->FloatLiteral ()) {
+						_current = m_value_builder->Build ("float64", _literal->getText ());
+					} else if (_literal->String1Literal ()) {
+						_current = m_value_builder->Build ("string", _literal->getText ());
+					} else {
+						// TODO: 待添加
+					}
+				}
+			} else {
+				// 第二次及后续处理，_body 为空，_current 不为空
 			}
 		}
+		return _current;
 	}
 
 	CodeVisitor *m_visitor = nullptr;

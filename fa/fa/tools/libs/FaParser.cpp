@@ -235,6 +235,10 @@ tree::TerminalNode* FaParser::LiteralContext::FloatLiteral() {
   return getToken(FaParser::FloatLiteral, 0);
 }
 
+tree::TerminalNode* FaParser::LiteralContext::String1Literal() {
+  return getToken(FaParser::String1Literal, 0);
+}
+
 
 size_t FaParser::LiteralContext::getRuleIndex() const {
   return FaParser::RuleLiteral;
@@ -267,7 +271,8 @@ FaParser::LiteralContext* FaParser::literal() {
     if (!(((((_la - 63) & ~ 0x3fULL) == 0) &&
       ((1ULL << (_la - 63)) & ((1ULL << (FaParser::BoolLiteral - 63))
       | (1ULL << (FaParser::IntLiteral - 63))
-      | (1ULL << (FaParser::FloatLiteral - 63)))) != 0))) {
+      | (1ULL << (FaParser::FloatLiteral - 63))
+      | (1ULL << (FaParser::String1Literal - 63)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -1609,7 +1614,8 @@ FaParser::ExprBodyContext* FaParser::exprBody() {
 
       case FaParser::BoolLiteral:
       case FaParser::IntLiteral:
-      case FaParser::FloatLiteral: {
+      case FaParser::FloatLiteral:
+      case FaParser::String1Literal: {
         setState(197);
         literal();
         break;
@@ -1795,7 +1801,8 @@ FaParser::ExprSuffixContext* FaParser::exprSuffix() {
                     | (1ULL << (FaParser::QuotYuanL - 18))
                     | (1ULL << (FaParser::BoolLiteral - 18))
                     | (1ULL << (FaParser::IntLiteral - 18))
-                    | (1ULL << (FaParser::FloatLiteral - 18)))) != 0)) {
+                    | (1ULL << (FaParser::FloatLiteral - 18))
+                    | (1ULL << (FaParser::String1Literal - 18)))) != 0)) {
                     setState(206);
                     expr();
                     setState(211);
@@ -2041,7 +2048,8 @@ FaParser::ExprContext* FaParser::expr() {
       case FaParser::ColonColon:
       case FaParser::BoolLiteral:
       case FaParser::IntLiteral:
-      case FaParser::FloatLiteral: {
+      case FaParser::FloatLiteral:
+      case FaParser::String1Literal: {
         enterOuterAlt(_localctx, 2);
         setState(245);
         _errHandler->sync(this);
@@ -2600,7 +2608,8 @@ FaParser::ClassItemFuncBlockContext* FaParser::classItemFuncBlock() {
       | (1ULL << (FaParser::QuotYuanL - 13))
       | (1ULL << (FaParser::BoolLiteral - 13))
       | (1ULL << (FaParser::IntLiteral - 13))
-      | (1ULL << (FaParser::FloatLiteral - 13)))) != 0)) {
+      | (1ULL << (FaParser::FloatLiteral - 13))
+      | (1ULL << (FaParser::String1Literal - 13)))) != 0)) {
       setState(295);
       stmt();
       setState(300);
@@ -3168,7 +3177,8 @@ FaParser::FaEntryMainFuncBlockContext* FaParser::faEntryMainFuncBlock() {
       | (1ULL << (FaParser::QuotYuanL - 13))
       | (1ULL << (FaParser::BoolLiteral - 13))
       | (1ULL << (FaParser::IntLiteral - 13))
-      | (1ULL << (FaParser::FloatLiteral - 13)))) != 0)) {
+      | (1ULL << (FaParser::FloatLiteral - 13))
+      | (1ULL << (FaParser::String1Literal - 13)))) != 0)) {
       setState(348);
       stmt();
       setState(353);
@@ -3430,7 +3440,7 @@ FaParser::Initializer::Initializer() {
        0x23, 0x2, 0x2, 0x24, 0x2, 0x4, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 
        0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x20, 0x22, 0x24, 0x26, 0x28, 
        0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 
-       0x40, 0x42, 0x44, 0x2, 0x9, 0x3, 0x2, 0x41, 0x43, 0x4, 0x2, 0x10, 
+       0x40, 0x42, 0x44, 0x2, 0x9, 0x3, 0x2, 0x41, 0x44, 0x4, 0x2, 0x10, 
        0x10, 0x12, 0x12, 0x3, 0x2, 0x15, 0x23, 0x4, 0x2, 0x24, 0x26, 0x29, 
        0x2a, 0x3, 0x2, 0x25, 0x26, 0x3, 0x2, 0xb, 0xe, 0x3, 0x2, 0x5, 0x7, 
        0x2, 0x195, 0x2, 0x46, 0x3, 0x2, 0x2, 0x2, 0x4, 0x4e, 0x3, 0x2, 0x2, 
