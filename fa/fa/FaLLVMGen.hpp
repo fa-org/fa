@@ -46,7 +46,7 @@ public:
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (_module_name, *m_ctx);
 		m_etype_map = std::make_shared<TypeMap> (_visitor, m_ctx);
-		m_value_builder = std::make_shared<ValueBuilder> (_visitor, m_ctx);
+		m_value_builder = std::make_shared<ValueBuilder> (_visitor, m_ctx, m_module);
 	}
 
 	std::optional<std::string> Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
@@ -109,9 +109,11 @@ public:
 
 	std::string Link (std::string _link_exe_path) {
 		wchar_t *get_env (std::string _key, std::string _val);
-		wchar_t *_env = get_env ("LIB", R"(LIBPATH=E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86\store\references;D:\Windows Kits\10\UnionMetadata\10.0.19041.0;D:\Windows Kits\10\References\10.0.19041.0;C:\Windows\Microsoft.NET\Framework\v4.0.30319\0\0)");
+		//wchar_t *_env = get_env ("LIB", R"(LIBPATH=E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86\store\references;D:\Windows Kits\10\UnionMetadata\10.0.19041.0;D:\Windows Kits\10\References\10.0.19041.0;C:\Windows\Microsoft.NET\Framework\v4.0.30319\0\0)");
+		wchar_t *_env = get_env ("LIB", R"(D:\Software\Program\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;D:\Software\Program\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.19041.0\um\x86)");
 
 		std::string _cmd = fmt::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:fa_entry_main /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
+		//std::string _cmd = R"(/OUT:"hello.exe" /MANIFEST /LTCG:incremental /NXCOMPAT /PDB:"hello.pdb" /DYNAMICBASE "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib" /DEBUG /MACHINE:X86 /OPT:REF /SAFESEH /INCREMENTAL:NO /PGD:"hello.pgd" /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ManifestFile:"hello.exe.intermediate.manifest" /LTCGOUT:"hello.iobj" /OPT:ICF /ERRORREPORT:PROMPT /ILK:"hello.ilk" /NOLOGO /TLBID:1)";
 		for (auto _lib : m_libs) {
 			_cmd += " ";
 			_cmd += _lib;
@@ -135,6 +137,11 @@ private:
 				llvm::Type *_ret_type = m_etype_map->GetExternType (_ret_type_raw);
 				std::vector<llvm::Type *> _arg_types = m_etype_map->GetExternTypes (_arg_types_raw);
 				llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type, _arg_types, false);
+				//static std::map<std::string, std::string> s_name_map { { "puts", "_cputs" }};
+				//std::string _link_name = _name;
+				//if (s_name_map.contains (_name)) {
+				//	_link_name = s_name_map [_name];
+				//}
 				_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, _name, *m_module);
 				if (_cc == "__cdecl") {
 					_f->setCallingConv (llvm::CallingConv::C);
@@ -203,7 +210,7 @@ private:
 					if (_literal->BoolLiteral ()) {
 						_current = m_value_builder->Build ("bool", _literal->getText ());
 					} else if (_literal->IntLiteral ()) {
-						_current = m_value_builder->Build ("int64", _literal->getText ());
+						_current = m_value_builder->Build ("int32", _literal->getText ());
 					} else if (_literal->FloatLiteral ()) {
 						_current = m_value_builder->Build ("float64", _literal->getText ());
 					} else if (_literal->String1Literal ()) {

@@ -19,7 +19,8 @@
 
 class ValueBuilder {
 public:
-	ValueBuilder (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx): m_visitor (_visitor), m_ctx (_ctx) {
+	ValueBuilder (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module)
+		: m_visitor (_visitor), m_ctx (_ctx), m_module (_module) {
 		m_etype_map = std::make_shared<TypeMap> (_visitor, m_ctx);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (*m_ctx);
 	}
@@ -34,7 +35,7 @@ public:
 		}
 
 		if (_type == "string") {
-			return m_builder->CreateGlobalStringPtr (_value);
+			return m_builder->CreateGlobalStringPtr (_value, "", 0, m_module.get ());
 		}
 
 		llvm::Type *_t = m_etype_map->GetType (_type);
@@ -56,13 +57,13 @@ public:
 				}
 			} else {
 				int64_t _i = std::stoll (_value);
-				if (_type == "uint8") {
+				if (_type == "int8") {
 					_int = llvm::APInt (8, (uint64_t) _i, true);
-				} else if (_type == "uint16") {
+				} else if (_type == "int16") {
 					_int = llvm::APInt (16, (uint64_t) _i, true);
-				} else if (_type == "uint32") {
+				} else if (_type == "int32") {
 					_int = llvm::APInt (32, (uint64_t) _i, true);
-				} else if (_type == "uint64") {
+				} else if (_type == "int64") {
 					_int = llvm::APInt (64, (uint64_t) _i, true);
 				} else {
 					_valid = false;
@@ -81,6 +82,7 @@ private:
 	std::shared_ptr<llvm::LLVMContext> m_ctx = nullptr;
 	std::shared_ptr<TypeMap> m_etype_map;
 	std::shared_ptr<llvm::IRBuilder<>> m_builder;
+	std::shared_ptr<llvm::Module> m_module;
 };
 
 

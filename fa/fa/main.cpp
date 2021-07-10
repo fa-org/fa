@@ -22,10 +22,20 @@
 
 
 int main (int argc, char *argv[]) {
-	std::filesystem::current_path ("E:\\fa_tmp");
+	std::filesystem::current_path ("D:\\fa_tmp");
 	std::string _code = R"(
 @import int __cdecl puts (const char*);
-@lib "libcmt.lib";
+//// MT
+//@lib "libucrt.lib";
+//@lib "libcmt.lib";
+////@lib "libvcruntime.lib";
+
+// MD
+@lib "ucrt.lib";
+@lib "msvcrt.lib";
+//@lib "vcruntime.lib";
+
+//@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib"
 
 
 
@@ -56,7 +66,8 @@ static int32 FaEntryMain () {
 	auto _err = _gen.Compile (_parser.program (), "hello.obj");
 	if (!_err.has_value ()) {
 		std::cout << "compile success." << std::endl;
-		std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
+		//std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
+		std::string _out = _gen.Link (R"(D:\Software\Program\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)");
 		std::cout << _out << std::endl;
 	} else {
 		std::cout << _err.value () << std::endl;

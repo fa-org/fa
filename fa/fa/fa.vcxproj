@@ -72,19 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;D:\gitee\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;D:\gitee\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;D:\gitee\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)tools\libs;D:\GitHub\vcpkg\installed\x86-windows-static\include\antlr4-runtime;D:\gitee\vcpkg\installed\x86-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
