@@ -214,6 +214,10 @@ private:
 					} else if (_literal->FloatLiteral ()) {
 						_current = m_value_builder->Build ("float64", _literal->getText ());
 					} else if (_literal->String1Literal ()) {
+						std::string _data1 = _literal->getText ();
+						_data1 = _data1.substr (1, _data1.size () - 2);
+						std::string _data2;
+						_data2.reserve (_data1.size ());
 						_current = m_value_builder->Build ("string", _literal->getText ());
 					} else {
 						// TODO: ´ıÌí¼Ó

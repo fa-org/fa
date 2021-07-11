@@ -40,7 +40,7 @@ int main (int argc, char *argv[]) {
 
 
 static int32 FaEntryMain () {
-	::puts ("hello world!\n");
+	::_putws ("hello world!\n");
 	return 0;
 }
 )";

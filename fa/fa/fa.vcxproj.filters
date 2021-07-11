@@ -71,5 +71,8 @@
     <ClInclude Include="ValueBuilder.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StringProcessor.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
