@@ -15,9 +15,11 @@ grammar Fa;
 //
 AImport:					'@import';
 ALib:						'@lib';
+Break:						'break';
 CC__Cdecl:					'__cdecl';
 CC__FastCall:				'__fastcall';
 CC__StdCall:				'__stdcall';
+Continue:					'continue';
 Class:						'class';
 Const:						'const';
 Else:						'else';
@@ -32,6 +34,7 @@ Signed:						'signed';
 Static:						'static';
 Unsigned:					'unsigned';
 Use:						'use';
+While:						'while';
 
 
 
@@ -114,9 +117,7 @@ fragment Schar:				SimpleEscape | HexEscape | UniEscape | ~["\\\r\n];
 BoolLiteral:				'true' | 'false';
 IntLiteral:					NUM+;
 FloatLiteral:				NUM+ PointOp NUM+;
-//CharLiteral:				"'" ([\x09\x20-\x26\x28-\x5B\x5D-\x7F\u0100-\uffff] | conv_mean16) "'";
 String1Literal:				'"' Schar* '"';
-//String2Literal:				'`' ([\x09\x20-\x5B\x5D-\x5F\x61-\x7F\u0100-\uffff] | conv_mean16)* '`';
 literal:					BoolLiteral | IntLiteral | FloatLiteral | String1Literal;
 
 
@@ -149,10 +150,19 @@ eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 // if
 //
 ifPart:						If QuotYuanL expr QuotYuanR;
-quotStmtPart:				QuotHuaL stmt* QuotHuaR;
-quotStmtExpr:				QuotHuaL stmt* expr QuotHuaR;
+stmtOrExpr:					stmt | expr;
+quotStmtPart:				(QuotHuaL stmt* QuotHuaR) | stmt;
+quotStmtExpr:				(QuotHuaL stmtOrExpr* expr QuotHuaR) | expr;
 ifStmt:						ifPart quotStmtPart (Else ifPart quotStmtPart)* (Else quotStmtPart)?;
 ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)* (Else quotStmtExpr)?;
+
+
+
+//
+// while
+//
+whileStmtPart:				(QuotHuaL stmt* QuotHuaR) | stmt;
+whileStmt:					While QuotYuanL expr QuotYuanR whileStmtPart;
 
 
 
@@ -191,8 +201,8 @@ expr:						normalExpr | ifExpr;
 // stmt
 //
 useStmt:					Use ids Semi;
-normalStmt:					expr Semi;
-stmt:						Return? normalStmt | ifStmt;
+normalStmt:					(expr | Break | Continue) Semi;
+stmt:						Return? (normalStmt | ifStmt | whileStmt);
 
 
 
