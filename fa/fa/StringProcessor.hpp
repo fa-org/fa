@@ -22,9 +22,7 @@ class StringProcessor {
 	}
 
 public:
-	static std::string TransformMean (std::string _s, bool _remove_quot) {
-		if (_remove_quot)
-			_s.substr (1, _s.size () - 2);
+	static std::string TransformMean (std::string _s) {
 		for (size_t i = 0; i < _s.size (); ++i) {
 			if (_s [i] == '\\') {
 				switch (_s [i + 1]) {
@@ -64,6 +62,7 @@ public:
 				}
 			}
 		}
+		return _s;
 	}
 };
 

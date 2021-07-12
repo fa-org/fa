@@ -67,6 +67,26 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitIfPart(FaParser::IfPartContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotStmtExpr(FaParser::QuotStmtExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitIfStmt(FaParser::IfStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitIfExpr(FaParser::IfExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -91,11 +111,19 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitNormalExpr(FaParser::NormalExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitExpr(FaParser::ExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitNormalStmt(FaParser::NormalStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 

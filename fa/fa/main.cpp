@@ -35,12 +35,15 @@ int main (int argc, char *argv[]) {
 @lib "msvcrt.lib";
 //@lib "vcruntime.lib";
 
-//@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib"
-
-
+@lib "ole32.lib";
+//@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib"
 
 static int32 FaEntryMain () {
-	::_putws ("hello world!\n");
+	if (true) {
+		::puts ("true\n");
+	} else {
+		::puts ("false\n");
+	}
 	return 0;
 }
 )";
@@ -67,7 +70,7 @@ static int32 FaEntryMain () {
 	if (!_err.has_value ()) {
 		std::cout << "compile success." << std::endl;
 		//std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
-		std::string _out = _gen.Link (R"(D:\Software\Program\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)");
+		std::string _out = _gen.Link ();
 		std::cout << _out << std::endl;
 	} else {
 		std::cout << _err.value () << std::endl;

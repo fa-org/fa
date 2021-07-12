@@ -107,12 +107,18 @@ public:
 		return std::nullopt;
 	}
 
-	std::string Link (std::string _link_exe_path) {
+	std::string Link () {
 		wchar_t *get_env (std::string _key, std::string _val);
-		//wchar_t *_env = get_env ("LIB", R"(LIBPATH=E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\lib\x86\store\references;D:\Windows Kits\10\UnionMetadata\10.0.19041.0;D:\Windows Kits\10\References\10.0.19041.0;C:\Windows\Microsoft.NET\Framework\v4.0.30319\0\0)");
+#if 0
+		// home
+		std::string _link_exe_path = R"(D:\Software\Program\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)";
 		wchar_t *_env = get_env ("LIB", R"(D:\Software\Program\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;D:\Software\Program\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.19041.0\um\x86)");
-
-		std::string _cmd = fmt::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:fa_entry_main /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
+#else
+		// company
+		std::string _link_exe_path = R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)";
+		wchar_t *_env = get_env ("LIB", R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
+#endif
+		std::string _cmd = fmt::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:FaEntryMain /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
 		//std::string _cmd = R"(/OUT:"hello.exe" /MANIFEST /LTCG:incremental /NXCOMPAT /PDB:"hello.pdb" /DYNAMICBASE "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib" /DEBUG /MACHINE:X86 /OPT:REF /SAFESEH /INCREMENTAL:NO /PGD:"hello.pgd" /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ManifestFile:"hello.exe.intermediate.manifest" /LTCGOUT:"hello.iobj" /OPT:ICF /ERRORREPORT:PROMPT /ILK:"hello.ilk" /NOLOGO /TLBID:1)";
 		for (auto _lib : m_libs) {
 			_cmd += " ";
@@ -162,17 +168,27 @@ private:
 		>> ();
 		llvm::Type *_ret_type = m_etype_map->GetType (_ret_type_raw);
 		llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type, false);
-		llvm::Function *_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, "fa_entry_main", *m_module);
-		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "fa_entry_main_block", _f);
+		llvm::Function *_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, "FaEntryMain", *m_module);
+		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "FaEntryMain_block", _f);
+		_f->setCallingConv (llvm::CallingConv::C);
 		llvm::IRBuilder<> _builder (_bb);
 		_builder.SetInsertPoint (_bb);
 		FuncCodeBuilder (_builder, _stmts_raw, _ret_type);
 	}
 
 	void FuncCodeBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::StmtContext *> _stmts_raw, llvm::Type *_ret_type) {
+		llvm::Value *_value = nullptr;
 		for (FaParser::StmtContext *_stmt_raw : _stmts_raw) {
-			FaParser::ExprContext *_expr = _stmt_raw->expr ();
-			llvm::Value *_value = ExprCodeBuilder (_builder, _expr);
+			if (_stmt_raw->normalStmt ()) {
+				FaParser::ExprContext *_expr = _stmt_raw->normalStmt ()->expr ();
+				if (_expr->normalExpr ()) {
+					_value = NormalExprBuilder (_builder, _expr->normalExpr ());
+				} else if (_expr->ifExpr ()) {
+
+				}
+			} else if (_stmt_raw->ifStmt ()) {
+				// TODO
+			}
 			//
 			if (_stmt_raw->Return () != nullptr)
 				_builder.CreateRet (_value);
@@ -180,11 +196,11 @@ private:
 		//llvm::ConstantInt::get (_ret_type, llvm::APInt (32, 0, true))
 	}
 
-	llvm::Value *ExprCodeBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr) {
+	llvm::Value *NormalExprBuilder (llvm::IRBuilder<> &_builder, FaParser::NormalExprContext *_expr) {
 		if (_expr == nullptr)
 			return nullptr;
 		if (_expr->quotExpr () != nullptr)
-			return ExprCodeBuilder (_builder, _expr->quotExpr ()->expr ());
+			return NormalExprBuilder (_builder, _expr->quotExpr ()->expr ());
 		std::vector<FaParser::ExprPrefixContext *> _prefix = _expr->exprPrefix (); // TODO
 		FaParser::ExprBodyContext *_body = _expr->exprBody ();
 		std::vector<FaParser::ExprSuffixContext *> _suffix = _expr->exprSuffix (); // TODO
@@ -201,7 +217,7 @@ private:
 					llvm::Function *_func = m_imports [_func_name];
 					std::vector<llvm::Value *> _args;
 					for (auto _arg_expr : _suffix [0]->expr ())
-						_args.push_back (ExprCodeBuilder (_builder, _arg_expr));
+						_args.push_back (NormalExprBuilder (_builder, _arg_expr));
 					_current = _builder.CreateCall (_func, _args);
 					_suffix.erase (_suffix.begin ());
 				} else {

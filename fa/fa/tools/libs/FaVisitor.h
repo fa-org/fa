@@ -45,6 +45,16 @@ public:
 
     virtual antlrcpp::Any visitETypeVarList(FaParser::ETypeVarListContext *context) = 0;
 
+    virtual antlrcpp::Any visitIfPart(FaParser::IfPartContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotStmtExpr(FaParser::QuotStmtExprContext *context) = 0;
+
+    virtual antlrcpp::Any visitIfStmt(FaParser::IfStmtContext *context) = 0;
+
+    virtual antlrcpp::Any visitIfExpr(FaParser::IfExprContext *context) = 0;
+
     virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *context) = 0;
 
     virtual antlrcpp::Any visitAllOp(FaParser::AllOpContext *context) = 0;
@@ -57,9 +67,13 @@ public:
 
     virtual antlrcpp::Any visitExprSuffix(FaParser::ExprSuffixContext *context) = 0;
 
+    virtual antlrcpp::Any visitNormalExpr(FaParser::NormalExprContext *context) = 0;
+
     virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
 
     virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *context) = 0;
+
+    virtual antlrcpp::Any visitNormalStmt(FaParser::NormalStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitStmt(FaParser::StmtContext *context) = 0;
 

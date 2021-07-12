@@ -20,7 +20,9 @@ CC__FastCall:				'__fastcall';
 CC__StdCall:				'__stdcall';
 Class:						'class';
 Const:						'const';
+Else:						'else';
 FaEntryMain:				'FaEntryMain';
+If:							'if';
 Internal:					'internal';
 Public:						'public';
 Protected:					'protected';
@@ -144,6 +146,17 @@ eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 
 
 //
+// if
+//
+ifPart:						If QuotYuanL expr QuotYuanR;
+quotStmtPart:				QuotHuaL stmt* QuotHuaR;
+quotStmtExpr:				QuotHuaL stmt* expr QuotHuaR;
+ifStmt:						ifPart quotStmtPart (Else ifPart quotStmtPart)* (Else quotStmtPart)?;
+ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)* (Else quotStmtExpr)?;
+
+
+
+//
 // expr
 //
 allAssign:					Assign | QusQusAssign | AddAssign | SubAssign | StarAssign | StarStarAssign | DivAssign | ModAssign | AndAssign | OrAssign | XorAssign | AndAndAssign | OrOrAssign | ShiftLAssign | ShiftRAssign;
@@ -169,7 +182,8 @@ exprSuffix:					(AddAddOp | SubSubOp)+															// บ๓ืบ ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)+									//      Write ("")
 							| (QuotFangL expr QuotFangL)+													//      list [12]
 							| ((allAssign | allOp) expr)+;													//      12 += 24
-expr:						quotExpr | (exprPrefix* exprBody exprSuffix*);
+normalExpr:					quotExpr | (exprPrefix* exprBody exprSuffix*);
+expr:						normalExpr | ifExpr;
 
 
 
@@ -177,7 +191,8 @@ expr:						quotExpr | (exprPrefix* exprBody exprSuffix*);
 // stmt
 //
 useStmt:					Use ids Semi;
-stmt:						Return? expr Semi;
+normalStmt:					expr Semi;
+stmt:						Return? normalStmt | ifStmt;
 
 
 

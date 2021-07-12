@@ -14,6 +14,7 @@
 #include "FaVisitor.h"
 #include "FaParser.h"
 #include "TypeMap.hpp"
+#include "StringProcessor.hpp"
 
 
 
@@ -35,6 +36,8 @@ public:
 		}
 
 		if (_type == "string") {
+			_value = _value.substr (1, _value.size () - 2);
+			_value = StringProcessor::TransformMean (_value);
 			return m_builder->CreateGlobalStringPtr (_value, "", 0, m_module.get ());
 		}
 
