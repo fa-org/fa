@@ -198,11 +198,18 @@ expr:						normalExpr | ifExpr;
 
 
 //
+// define variable
+//
+// TODO
+
+
+
+//
 // stmt
 //
 useStmt:					Use ids Semi;
-normalStmt:					(expr | Break | Continue) Semi;
-stmt:						Return? (normalStmt | ifStmt | whileStmt);
+normalStmt:					((Return? expr) | Break | Continue) Semi;
+stmt:						normalStmt | ifStmt | whileStmt;
 
 
 

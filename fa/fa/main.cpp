@@ -16,6 +16,7 @@
 #include "FaLexer.h"
 #include "CodeVisitor.hpp"
 #include "FaLLVMGen.hpp"
+#include "InfoOut.hpp"
 
 //#pragma comment (lib, "antlr4-runtime.lib")
 
@@ -47,6 +48,7 @@ static int32 FaEntryMain () {
 	return 0;
 }
 )";
+	InfoOut::SetCurrentFile ("Program.fa");
 	std::cout << "----------source begin----------" << std::endl;
 	std::cout << _code << std::endl;
 	std::cout << "----------source end----------" << std::endl << std::endl;

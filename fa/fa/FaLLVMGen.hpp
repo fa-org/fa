@@ -31,7 +31,6 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
-
 #include <fmt/core.h>
 
 #include "CodeVisitor.hpp"
@@ -49,7 +48,7 @@ public:
 		m_value_builder = std::make_shared<ValueBuilder> (_visitor, m_ctx, m_module);
 	}
 
-	std::optional<std::string> Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
+	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
 		auto [_uses, _imports, _classes, _entry] = m_visitor->visitProgram (_program_ctx).as<std::tuple<
 			std::vector<std::string>,
 			FaParser::ImportBlockContext *,
@@ -66,12 +65,15 @@ public:
 		>> ();
 		//m_imports.push_back ("puts");
 		//m_libs.push_back ("libcmt.lib");
-		ProcessImports (_imports_raw);
+		if (!ProcessImports (_imports_raw))
+			return false;
 
 		// TODO: 编译类
 
-		if (!_entry)
-			return "未定义入口点";
+		if (!_entry) {
+			LOG_ERROR (nullptr, "未定义入口函数：FaEntryMain");
+			return false;
+		}
 		BuildFaEntryMain (_entry);
 
 		llvm::InitializeAllTargetInfos ();
@@ -82,8 +84,10 @@ public:
 		std::string _target_triple = llvm::sys::getDefaultTargetTriple (), _err = "";
 		m_module->setTargetTriple (_target_triple);
 		const llvm::Target *_target = llvm::TargetRegistry::lookupTarget (_target_triple, _err);
-		if (!_target)
-			return _err;
+		if (!_target) {
+			LOG_ERROR (nullptr, _err);
+			return false;
+		}
 		std::string _cpu = "";
 		std::string _features = "";
 
@@ -95,16 +99,20 @@ public:
 		std::error_code _ec;
 		llvm::raw_fd_ostream _dest (_file, _ec, llvm::sys::fs::F_None);
 
-		if (_ec)
-			return "无法打开输出文件";
+		if (_ec) {
+			LOG_ERROR (nullptr, "无法打开输出文件");
+			return false;
+		}
 
 		llvm::legacy::PassManager _pass;
-		if (_target_machine->addPassesToEmitFile (_pass, _dest, nullptr, llvm::CGFT_ObjectFile))
-			return "无法输出编译文件";
+		if (_target_machine->addPassesToEmitFile (_pass, _dest, nullptr, llvm::CGFT_ObjectFile)) {
+			LOG_ERROR (nullptr, "无法输出编译文件");
+			return false;
+		}
 
 		_pass.run (*m_module);
 		_dest.flush ();
-		return std::nullopt;
+		return true;
 	}
 
 	std::string Link () {
@@ -129,7 +137,7 @@ public:
 	}
 
 private:
-	void ProcessImports (std::vector<FaParser::ImportStmtContext *> _imports_raw) {
+	bool ProcessImports (std::vector<FaParser::ImportStmtContext *> _imports_raw) {
 		// https://blog.csdn.net/adream307/article/details/83820543
 		for (FaParser::ImportStmtContext *_import_func_raw : _imports_raw) {
 			auto [_name, _ret_type_raw, _arg_types_raw, _cc] = m_visitor->visitImportStmt (_import_func_raw).as<std::tuple<
@@ -140,14 +148,13 @@ private:
 			>> ();
 			llvm::Function *_f = m_module->getFunction (_name);
 			if (_f == nullptr) {
-				llvm::Type *_ret_type = m_etype_map->GetExternType (_ret_type_raw);
-				std::vector<llvm::Type *> _arg_types = m_etype_map->GetExternTypes (_arg_types_raw);
-				llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type, _arg_types, false);
-				//static std::map<std::string, std::string> s_name_map { { "puts", "_cputs" }};
-				//std::string _link_name = _name;
-				//if (s_name_map.contains (_name)) {
-				//	_link_name = s_name_map [_name];
-				//}
+				std::optional<llvm::Type *> _ret_type = m_etype_map->GetExternType (_ret_type_raw);
+				if (!_ret_type.has_value ())
+					return false;
+				std::optional<std::vector<llvm::Type *>> _arg_types = m_etype_map->GetExternTypes (_arg_types_raw);
+				if (!_arg_types.has_value ())
+					return false;
+				llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type.value (), _arg_types.value (), false);
 				_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, _name, *m_module);
 				if (_cc == "__cdecl") {
 					_f->setCallingConv (llvm::CallingConv::C);
@@ -181,11 +188,7 @@ private:
 		for (FaParser::StmtContext *_stmt_raw : _stmts_raw) {
 			if (_stmt_raw->normalStmt ()) {
 				FaParser::ExprContext *_expr = _stmt_raw->normalStmt ()->expr ();
-				if (_expr->normalExpr ()) {
-					_value = NormalExprBuilder (_builder, _expr->normalExpr ());
-				} else if (_expr->ifExpr ()) {
-
-				}
+				_value = ExprBuilder (_builder, _expr);
 			} else if (_stmt_raw->ifStmt ()) {
 				// TODO
 			}
@@ -194,6 +197,16 @@ private:
 				_builder.CreateRet (_value);
 		}
 		//llvm::ConstantInt::get (_ret_type, llvm::APInt (32, 0, true))
+	}
+
+	llvm::Value *ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr) {
+		if (_expr->normalExpr ()) {
+			return NormalExprBuilder (_builder, _expr->normalExpr ());
+		} else if (_expr->ifExpr ()) {
+			return IfExprBuilder (_builder, _expr->ifExpr ());
+		} else {
+
+		}
 	}
 
 	llvm::Value *NormalExprBuilder (llvm::IRBuilder<> &_builder, FaParser::NormalExprContext *_expr) {
@@ -244,6 +257,10 @@ private:
 			}
 		}
 		return _current;
+	}
+
+	llvm::Value *IfExprBuilder (llvm::IRBuilder<> &_builder, FaParser::IfExprContext *_expr) {
+
 	}
 
 	CodeVisitor *m_visitor = nullptr;

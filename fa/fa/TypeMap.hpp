@@ -3,10 +3,16 @@
 
 
 
+#include <optional>
+#include <string>
+
 #include <llvm/IR/Type.h>
+
+#include <fmt/core.h>
 
 #include "FaVisitor.h"
 #include "FaParser.h"
+#include "InfoOut.hpp"
 
 
 
@@ -15,12 +21,12 @@ class TypeMap {
 public:
 	TypeMap (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx): m_visitor (_visitor), m_ctx (_ctx) {}
 
-	llvm::Type *GetType (FaParser::TypeContext *_type_ctx) {
+	std::optional<llvm::Type *> GetType (FaParser::TypeContext *_type_ctx) {
 		auto _name = _type_ctx->getText ();
 		return GetType (_name);
 	}
 
-	llvm::Type *GetType (std::string _name) {
+	std::optional<llvm::Type *> GetType (std::string _name) {
 		if (_name == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_name == "int8" || _name == "bool") {
@@ -38,18 +44,22 @@ public:
 		} else if (_name == "float64") {
 			return llvm::Type::getDoubleTy (*m_ctx);
 		}
-		std::cout << "unknown type " << _name << std::endl;
-		return nullptr;
+		LOG_ERROR (fmt::format ("无法识别的类型 [{}]", _name));
+		return std::nullopt;
 	}
 
-	std::vector<llvm::Type *> GetTypes (std::vector<FaParser::TypeContext *> _types_raw) {
+	std::optional<std::vector<llvm::Type *>> GetTypes (std::vector<FaParser::TypeContext *> _types_raw) {
 		std::vector<llvm::Type *> _types;
-		for (FaParser::TypeContext *_type_raw : _types_raw)
-			_types.push_back (GetType (_type_raw));
+		for (FaParser::TypeContext *_type_raw : _types_raw) {
+			std::optional<llvm::Type *> _type = GetType (_type_raw);
+			if (!_type.has_value ())
+				return std::nullopt;
+			_types.push_back (_type.value ());
+		}
 		return _types;
 	}
 
-	llvm::Type *GetExternType (FaParser::ETypeContext *_etype_ctx) {
+	std::optional<llvm::Type *> GetExternType (FaParser::ETypeContext *_etype_ctx) {
 		auto [_sign, _name, _ptr_level] = m_visitor->visitEType (_etype_ctx).as<std::tuple<bool, std::string, size_t>> ();
 		// _sign 好像暂时用不到
 		if (_name == "void") {
@@ -95,14 +105,18 @@ public:
 				return (llvm::Type *) llvm::Type::getDoublePtrTy (*m_ctx);
 			}
 		}
-		std::cout << "unknown extern type " << _name << std::endl;
-		return nullptr;
+		LOG_ERROR (fmt::format ("无法识别的外部接口函数类型 [{}]", _name));
+		return std::nullopt;
 	}
 
-	std::vector<llvm::Type *> GetExternTypes (std::vector<FaParser::ETypeContext *> _types_raw) {
+	std::optional<std::vector<llvm::Type *>> GetExternTypes (std::vector<FaParser::ETypeContext *> _types_raw) {
 		std::vector<llvm::Type *> _types;
-		for (FaParser::ETypeContext *_type_raw : _types_raw)
-			_types.push_back (GetExternType (_type_raw));
+		for (FaParser::ETypeContext *_type_raw : _types_raw) {
+			std::optional<llvm::Type *> _type = GetExternType (_type_raw);
+			if (!_type.has_value ())
+				return std::nullopt;
+			_types.push_back (_type.value ());
+		}
 		return _types;
 	}
 

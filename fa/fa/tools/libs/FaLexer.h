@@ -12,20 +12,20 @@
 class  FaLexer : public antlr4::Lexer {
 public:
   enum {
-    AImport = 1, ALib = 2, CC__Cdecl = 3, CC__FastCall = 4, CC__StdCall = 5, 
-    Class = 6, Const = 7, Else = 8, FaEntryMain = 9, If = 10, Internal = 11, 
-    Public = 12, Protected = 13, Private = 14, Return = 15, Signed = 16, 
-    Static = 17, Unsigned = 18, Use = 19, Id = 20, Assign = 21, QusQusAssign = 22, 
-    AddAssign = 23, SubAssign = 24, StarAssign = 25, StarStarAssign = 26, 
-    DivAssign = 27, ModAssign = 28, AndAssign = 29, OrAssign = 30, XorAssign = 31, 
-    AndAndAssign = 32, OrOrAssign = 33, ShiftLAssign = 34, ShiftRAssign = 35, 
-    ReverseOp = 36, AddAddOp = 37, SubSubOp = 38, PointOp = 39, QusQusOp = 40, 
-    AddOp = 41, SubOp = 42, StarOp = 43, DivOp = 44, StarStarOp = 45, ModOp = 46, 
-    AndOp = 47, OrOp = 48, XorOp = 49, AndAndOp = 50, OrOrOp = 51, Qus = 52, 
-    Comma = 53, ColonColon = 54, Colon = 55, Semi = 56, QuotFangL = 57, 
-    QuotFangR = 58, QuotJianL = 59, QuotJianR = 60, QuotHuaL = 61, QuotHuaR = 62, 
-    QuotYuanL = 63, QuotYuanR = 64, BoolLiteral = 65, IntLiteral = 66, FloatLiteral = 67, 
-    String1Literal = 68, Comment1 = 69, Comment2 = 70, WS = 71
+    AImport = 1, ALib = 2, Break = 3, CC__Cdecl = 4, CC__FastCall = 5, CC__StdCall = 6, 
+    Continue = 7, Class = 8, Const = 9, Else = 10, FaEntryMain = 11, If = 12, 
+    Internal = 13, Public = 14, Protected = 15, Private = 16, Return = 17, 
+    Signed = 18, Static = 19, Unsigned = 20, Use = 21, While = 22, Id = 23, 
+    Assign = 24, QusQusAssign = 25, AddAssign = 26, SubAssign = 27, StarAssign = 28, 
+    StarStarAssign = 29, DivAssign = 30, ModAssign = 31, AndAssign = 32, 
+    OrAssign = 33, XorAssign = 34, AndAndAssign = 35, OrOrAssign = 36, ShiftLAssign = 37, 
+    ShiftRAssign = 38, ReverseOp = 39, AddAddOp = 40, SubSubOp = 41, PointOp = 42, 
+    QusQusOp = 43, AddOp = 44, SubOp = 45, StarOp = 46, DivOp = 47, StarStarOp = 48, 
+    ModOp = 49, AndOp = 50, OrOp = 51, XorOp = 52, AndAndOp = 53, OrOrOp = 54, 
+    Qus = 55, Comma = 56, ColonColon = 57, Colon = 58, Semi = 59, QuotFangL = 60, 
+    QuotFangR = 61, QuotJianL = 62, QuotJianR = 63, QuotHuaL = 64, QuotHuaR = 65, 
+    QuotYuanL = 66, QuotYuanR = 67, BoolLiteral = 68, IntLiteral = 69, FloatLiteral = 70, 
+    String1Literal = 71, Comment1 = 72, Comment2 = 73, WS = 74
   };
 
   explicit FaLexer(antlr4::CharStream *input);

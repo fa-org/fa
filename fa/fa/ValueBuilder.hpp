@@ -3,6 +3,9 @@
 
 
 
+#include <optional>
+#include <string>
+
 #include <llvm/ADT/APFloat.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
@@ -15,6 +18,7 @@
 #include "FaParser.h"
 #include "TypeMap.hpp"
 #include "StringProcessor.hpp"
+#include "InfoOut.hpp"
 
 
 
@@ -26,19 +30,23 @@ public:
 		m_builder = std::make_shared<llvm::IRBuilder<>> (*m_ctx);
 	}
 
-	llvm::Value *Build (std::string _type, std::string _value) {
+	std::optional<llvm::Value *> Build (std::string _type, std::string _value) {
 		if (_type == "bool") {
 			if (_value == "true") {
 				return llvm::ConstantInt::getTrue (*m_ctx);
-			} else {
+			} else if (_value == "false") {
 				return llvm::ConstantInt::getFalse (*m_ctx);
 			}
 		}
 
 		if (_type == "string") {
 			_value = _value.substr (1, _value.size () - 2);
-			_value = StringProcessor::TransformMean (_value);
-			return m_builder->CreateGlobalStringPtr (_value, "", 0, m_module.get ());
+			std::optional<std::string> _tmp_value = StringProcessor::TransformMean (_value);
+			if (!_tmp_value.has_value ()) {
+				LOG_ERROR (fmt::format ("    值 \"{}\" 无法转为 \"{}\" 类型", _value, _type));
+				return std::nullopt;
+			}
+			return m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ());
 		}
 
 		llvm::Type *_t = m_etype_map->GetType (_type);
@@ -76,8 +84,8 @@ public:
 				return llvm::ConstantInt::get (_t, _int);
 		}
 
-		// TODO: 其他类型
-		return nullptr;
+		LOG_ERROR (fmt::format ("值 \"{}\" 无法转为 \"{}\" 类型。", _value, _type));
+		return std::nullopt;
 	}
 
 private:

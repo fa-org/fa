@@ -74,5 +74,8 @@
     <ClInclude Include="StringProcessor.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="InfoOut.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

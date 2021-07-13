@@ -4,12 +4,18 @@
 
 
 #include <iostream>
+#include <optional>
 #include <string>
+
+#include <antlr4-runtime/Token.h>
+#include <fmt/core.h>
+
+#include "InfoOut.hpp"
 
 
 
 class StringProcessor {
-	static int _char_to_hex (char _ch) {
+	static std::optional<char> _char_to_hex (char _ch, antlr4::Token *_t) {
 		if (_ch >= '0' && _ch <= '9') {
 			return _ch - '0';
 		} else if (_ch >= 'A' && _ch <= 'F') {
@@ -17,12 +23,14 @@ class StringProcessor {
 		} else if (_ch >= 'a' && _ch <= 'f') {
 			return _ch - 'a' + 10;
 		}
-		std::cout << "error in" << "char" << std::endl;
-		return -1;
+		LOG_ERROR (_t, fmt::format ("字符 '{}' 无法转为十六进制数字", _ch));
+		return std::nullopt;
 	}
 
 public:
-	static std::string TransformMean (std::string _s) {
+	static std::optional<std::string> TransformMean (std::string _s) {
+		std::string _tmp = _s;
+		std::optional<char> _c1, _c2;
 		for (size_t i = 0; i < _s.size (); ++i) {
 			if (_s [i] == '\\') {
 				switch (_s [i + 1]) {
@@ -51,13 +59,32 @@ public:
 						_s.erase (i + 1);
 						break;
 					case 'x':
-						_s [i] = (char) ((_char_to_hex (_s [i + 2]) << 4) + _char_to_hex (_s [i + 3]));
+						_c1 = _char_to_hex (_s [i + 2]), _c2 = _char_to_hex (_s [i + 3]);
+						if ((!_c1.has_value ()) || (!_c2.has_value ())) {
+							LOG_ERROR (fmt::format ("    转义字符串 \"{}\" 失败", _tmp));
+							return std::nullopt;
+						}
+						_s [i] = (_c1.value () << 4) + _c2.value ();
 						_s.erase (i + 1, 3);
 						break;
 					case 'u':
-						_s [i] = (char) ((_char_to_hex (_s [i + 2]) << 4) + _char_to_hex (_s [i + 3]));
-						_s [i + 1] = (char) ((_char_to_hex (_s [i + 4]) << 4) + _char_to_hex (_s [i + 5]));
+						_c1 = _char_to_hex (_s [i + 2]), _c2 = _char_to_hex (_s [i + 3]);
+						if ((!_c1.has_value ()) || (!_c2.has_value ())) {
+							LOG_ERROR (fmt::format ("    转义字符串 \"{}\" 失败", _tmp));
+							return std::nullopt;
+						}
+						_s [i] = (_c1.value () << 4) + _c2.value ();
+						//
+						_c1 = _char_to_hex (_s [i + 4]), _c2 = _char_to_hex (_s [i + 5]);
+						if ((!_c1.has_value ()) || (!_c2.has_value ())) {
+							LOG_ERROR (fmt::format ("    转义字符串 \"{}\" 失败", _tmp));
+							return std::nullopt;
+						}
+						_s [i + 1] = (_c1.value () << 4) + _c2.value ();
 						_s.erase (i + 2, 4);
+						break;
+					default:
+						LOG_ERROR (fmt::format ("字符 '{}' 无法转义", _s [i + 1]));
 						break;
 				}
 			}
