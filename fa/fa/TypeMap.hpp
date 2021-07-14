@@ -23,10 +23,10 @@ public:
 
 	std::optional<llvm::Type *> GetType (FaParser::TypeContext *_type_ctx) {
 		auto _name = _type_ctx->getText ();
-		return GetType (_name);
+		return GetType (_name, _type_ctx->start);
 	}
 
-	std::optional<llvm::Type *> GetType (std::string _name) {
+	std::optional<llvm::Type *> GetType (std::string _name, antlr4::Token *_t) {
 		if (_name == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_name == "int8" || _name == "bool") {
@@ -44,7 +44,7 @@ public:
 		} else if (_name == "float64") {
 			return llvm::Type::getDoubleTy (*m_ctx);
 		}
-		LOG_ERROR (fmt::format ("无法识别的类型 [{}]", _name));
+		LOG_ERROR (_t, fmt::format ("无法识别的类型 [{}]", _name));
 		return std::nullopt;
 	}
 
@@ -105,7 +105,7 @@ public:
 				return (llvm::Type *) llvm::Type::getDoublePtrTy (*m_ctx);
 			}
 		}
-		LOG_ERROR (fmt::format ("无法识别的外部接口函数类型 [{}]", _name));
+		LOG_ERROR (_etype_ctx->start, fmt::format ("无法识别的外部接口函数类型 [{}]", _name));
 		return std::nullopt;
 	}
 

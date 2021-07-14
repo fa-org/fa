@@ -41,12 +41,6 @@ While:						'while';
 //
 // element
 //
-fragment NUM:				[0-9];
-fragment HEX:				NUM | [a-fA-F];
-fragment ID_BEGIN:			[a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-Id:							ID_BEGIN ID_AFTER*;
-ids:						Id (PointOp Id)*;
 
 // ∏≥÷µ‘ÀÀ„
 Assign:						'=';
@@ -119,6 +113,13 @@ IntLiteral:					NUM+;
 FloatLiteral:				NUM+ PointOp NUM+;
 String1Literal:				'"' Schar* '"';
 literal:					BoolLiteral | IntLiteral | FloatLiteral | String1Literal;
+
+fragment NUM:				[0-9];
+fragment HEX:				NUM | [a-fA-F];
+fragment ID_BEGIN:			[a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
+fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
+Id:							ID_BEGIN ID_AFTER*;
+ids:						Id (PointOp Id)*;
 
 
 

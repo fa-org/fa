@@ -30,7 +30,7 @@ public:
 		m_builder = std::make_shared<llvm::IRBuilder<>> (*m_ctx);
 	}
 
-	std::optional<llvm::Value *> Build (std::string _type, std::string _value) {
+	std::optional<llvm::Value *> Build (std::string _type, std::string _value, antlr4::Token *_t) {
 		if (_type == "bool") {
 			if (_value == "true") {
 				return llvm::ConstantInt::getTrue (*m_ctx);
@@ -41,18 +41,19 @@ public:
 
 		if (_type == "string") {
 			_value = _value.substr (1, _value.size () - 2);
-			std::optional<std::string> _tmp_value = StringProcessor::TransformMean (_value);
+			std::optional<std::string> _tmp_value = StringProcessor::TransformMean (_value, _t);
 			if (!_tmp_value.has_value ()) {
-				LOG_ERROR (fmt::format ("    值 \"{}\" 无法转为 \"{}\" 类型", _value, _type));
+				LOG_ERROR (_t, fmt::format ("    值 \"{}\" 无法转为 \"{}\" 类型", _value, _type));
 				return std::nullopt;
 			}
 			return m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ());
 		}
 
-		llvm::Type *_t = m_etype_map->GetType (_type);
 		if (_type.find ("int") != std::string::npos) {
-			llvm::APInt _int;
-			bool _valid = true;
+			std::optional<llvm::Type *> _tp = m_etype_map->GetType (_type, _t);
+			if (!_tp.has_value ())
+				return std::nullopt;
+			std::optional<llvm::APInt> _int;
 			if (_type [0] == 'u') {
 				uint64_t _i = std::stoull (_value);
 				if (_type == "uint8") {
@@ -63,8 +64,6 @@ public:
 					_int = llvm::APInt (32, _i, false);
 				} else if (_type == "uint64") {
 					_int = llvm::APInt (64, _i, false);
-				} else {
-					_valid = false;
 				}
 			} else {
 				int64_t _i = std::stoll (_value);
@@ -76,15 +75,13 @@ public:
 					_int = llvm::APInt (32, (uint64_t) _i, true);
 				} else if (_type == "int64") {
 					_int = llvm::APInt (64, (uint64_t) _i, true);
-				} else {
-					_valid = false;
 				}
 			}
-			if (_valid)
-				return llvm::ConstantInt::get (_t, _int);
+			if (_int.has_value ())
+				return llvm::ConstantInt::get (_tp.value (), _int.value ());
 		}
 
-		LOG_ERROR (fmt::format ("值 \"{}\" 无法转为 \"{}\" 类型。", _value, _type));
+		LOG_ERROR (_t, fmt::format ("值 \"{}\" 无法转为 \"{}\" 类型。", _value, _type));
 		return std::nullopt;
 	}
 

@@ -15,10 +15,6 @@
 class  FaBaseVisitor : public FaVisitor {
 public:
 
-  virtual antlrcpp::Any visitIds(FaParser::IdsContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitShiftLOp(FaParser::ShiftLOpContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -28,6 +24,10 @@ public:
   }
 
   virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitIds(FaParser::IdsContext *ctx) override {
     return visitChildren(ctx);
   }
 

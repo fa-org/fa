@@ -15,21 +15,21 @@ public:
     AImport = 1, ALib = 2, Break = 3, CC__Cdecl = 4, CC__FastCall = 5, CC__StdCall = 6, 
     Continue = 7, Class = 8, Const = 9, Else = 10, FaEntryMain = 11, If = 12, 
     Internal = 13, Public = 14, Protected = 15, Private = 16, Return = 17, 
-    Signed = 18, Static = 19, Unsigned = 20, Use = 21, While = 22, Id = 23, 
-    Assign = 24, QusQusAssign = 25, AddAssign = 26, SubAssign = 27, StarAssign = 28, 
-    StarStarAssign = 29, DivAssign = 30, ModAssign = 31, AndAssign = 32, 
-    OrAssign = 33, XorAssign = 34, AndAndAssign = 35, OrOrAssign = 36, ShiftLAssign = 37, 
-    ShiftRAssign = 38, ReverseOp = 39, AddAddOp = 40, SubSubOp = 41, PointOp = 42, 
-    QusQusOp = 43, AddOp = 44, SubOp = 45, StarOp = 46, DivOp = 47, StarStarOp = 48, 
-    ModOp = 49, AndOp = 50, OrOp = 51, XorOp = 52, AndAndOp = 53, OrOrOp = 54, 
-    Qus = 55, Comma = 56, ColonColon = 57, Colon = 58, Semi = 59, QuotFangL = 60, 
-    QuotFangR = 61, QuotJianL = 62, QuotJianR = 63, QuotHuaL = 64, QuotHuaR = 65, 
-    QuotYuanL = 66, QuotYuanR = 67, BoolLiteral = 68, IntLiteral = 69, FloatLiteral = 70, 
-    String1Literal = 71, Comment1 = 72, Comment2 = 73, WS = 74
+    Signed = 18, Static = 19, Unsigned = 20, Use = 21, While = 22, Assign = 23, 
+    QusQusAssign = 24, AddAssign = 25, SubAssign = 26, StarAssign = 27, 
+    StarStarAssign = 28, DivAssign = 29, ModAssign = 30, AndAssign = 31, 
+    OrAssign = 32, XorAssign = 33, AndAndAssign = 34, OrOrAssign = 35, ShiftLAssign = 36, 
+    ShiftRAssign = 37, ReverseOp = 38, AddAddOp = 39, SubSubOp = 40, PointOp = 41, 
+    QusQusOp = 42, AddOp = 43, SubOp = 44, StarOp = 45, DivOp = 46, StarStarOp = 47, 
+    ModOp = 48, AndOp = 49, OrOp = 50, XorOp = 51, AndAndOp = 52, OrOrOp = 53, 
+    Qus = 54, Comma = 55, ColonColon = 56, Colon = 57, Semi = 58, QuotFangL = 59, 
+    QuotFangR = 60, QuotJianL = 61, QuotJianR = 62, QuotHuaL = 63, QuotHuaR = 64, 
+    QuotYuanL = 65, QuotYuanR = 66, BoolLiteral = 67, IntLiteral = 68, FloatLiteral = 69, 
+    String1Literal = 70, Id = 71, Comment1 = 72, Comment2 = 73, WS = 74
   };
 
   enum {
-    RuleIds = 0, RuleShiftLOp = 1, RuleShiftROp = 2, RuleLiteral = 3, RuleTypeAfter = 4, 
+    RuleShiftLOp = 0, RuleShiftROp = 1, RuleLiteral = 2, RuleIds = 3, RuleTypeAfter = 4, 
     RuleType = 5, RuleETypeAfter = 6, RuleESign = 7, RuleEType = 8, RuleTypeVar = 9, 
     RuleTypeVarList = 10, RuleETypeVar = 11, RuleETypeVarList = 12, RuleIfPart = 13, 
     RuleStmtOrExpr = 14, RuleQuotStmtPart = 15, RuleQuotStmtExpr = 16, RuleIfStmt = 17, 
@@ -52,10 +52,10 @@ public:
   virtual antlr4::dfa::Vocabulary& getVocabulary() const override;
 
 
-  class IdsContext;
   class ShiftLOpContext;
   class ShiftROpContext;
   class LiteralContext;
+  class IdsContext;
   class TypeAfterContext;
   class TypeContext;
   class ETypeAfterContext;
@@ -96,22 +96,6 @@ public:
   class ImportBlockContext;
   class FaEntryMainFuncBlockContext;
   class ProgramContext; 
-
-  class  IdsContext : public antlr4::ParserRuleContext {
-  public:
-    IdsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> Id();
-    antlr4::tree::TerminalNode* Id(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> PointOp();
-    antlr4::tree::TerminalNode* PointOp(size_t i);
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  IdsContext* ids();
 
   class  ShiftLOpContext : public antlr4::ParserRuleContext {
   public:
@@ -156,6 +140,22 @@ public:
   };
 
   LiteralContext* literal();
+
+  class  IdsContext : public antlr4::ParserRuleContext {
+  public:
+    IdsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<antlr4::tree::TerminalNode *> Id();
+    antlr4::tree::TerminalNode* Id(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> PointOp();
+    antlr4::tree::TerminalNode* PointOp(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  IdsContext* ids();
 
   class  TypeAfterContext : public antlr4::ParserRuleContext {
   public:

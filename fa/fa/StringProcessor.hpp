@@ -28,7 +28,7 @@ class StringProcessor {
 	}
 
 public:
-	static std::optional<std::string> TransformMean (std::string _s) {
+	static std::optional<std::string> TransformMean (std::string _s, antlr4::Token *_t) {
 		std::string _tmp = _s;
 		std::optional<char> _c1, _c2;
 		for (size_t i = 0; i < _s.size (); ++i) {
@@ -59,32 +59,32 @@ public:
 						_s.erase (i + 1);
 						break;
 					case 'x':
-						_c1 = _char_to_hex (_s [i + 2]), _c2 = _char_to_hex (_s [i + 3]);
+						_c1 = _char_to_hex (_s [i + 2], _t), _c2 = _char_to_hex (_s [i + 3], _t);
 						if ((!_c1.has_value ()) || (!_c2.has_value ())) {
-							LOG_ERROR (fmt::format ("    ×ªÒå×Ö·û´® \"{}\" Ê§°Ü", _tmp));
+							LOG_ERROR (_t, fmt::format ("    ×ªÒå×Ö·û´® \"{}\" Ê§°Ü", _tmp));
 							return std::nullopt;
 						}
 						_s [i] = (_c1.value () << 4) + _c2.value ();
 						_s.erase (i + 1, 3);
 						break;
 					case 'u':
-						_c1 = _char_to_hex (_s [i + 2]), _c2 = _char_to_hex (_s [i + 3]);
+						_c1 = _char_to_hex (_s [i + 2], _t), _c2 = _char_to_hex (_s [i + 3], _t);
 						if ((!_c1.has_value ()) || (!_c2.has_value ())) {
-							LOG_ERROR (fmt::format ("    ×ªÒå×Ö·û´® \"{}\" Ê§°Ü", _tmp));
+							LOG_ERROR (_t, fmt::format ("    ×ªÒå×Ö·û´® \"{}\" Ê§°Ü", _tmp));
 							return std::nullopt;
 						}
 						_s [i] = (_c1.value () << 4) + _c2.value ();
 						//
-						_c1 = _char_to_hex (_s [i + 4]), _c2 = _char_to_hex (_s [i + 5]);
+						_c1 = _char_to_hex (_s [i + 4], _t), _c2 = _char_to_hex (_s [i + 5], _t);
 						if ((!_c1.has_value ()) || (!_c2.has_value ())) {
-							LOG_ERROR (fmt::format ("    ×ªÒå×Ö·û´® \"{}\" Ê§°Ü", _tmp));
+							LOG_ERROR (_t, fmt::format ("    ×ªÒå×Ö·û´® \"{}\" Ê§°Ü", _tmp));
 							return std::nullopt;
 						}
 						_s [i + 1] = (_c1.value () << 4) + _c2.value ();
 						_s.erase (i + 2, 4);
 						break;
 					default:
-						LOG_ERROR (fmt::format ("×Ö·û '{}' ÎÞ·¨×ªÒå", _s [i + 1]));
+						LOG_ERROR (_t, fmt::format ("×Ö·û '{}' ÎÞ·¨×ªÒå", _s [i + 1]));
 						break;
 				}
 			}

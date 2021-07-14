@@ -59,6 +59,7 @@ __declspec (selectany) std::string InfoOut::s_file = "";
 #define LOG_INFO(t,data)		InfoOut::Info(__FILE__,__LINE__,t,data)
 #define LOG_WARNING(t,data)		InfoOut::Warning(__FILE__,__LINE__,t,data)
 #define LOG_ERROR(t,data)		InfoOut::Error(__FILE__,__LINE__,t,data)
+#define LOG_TODO(t)				InfoOut::Error(__FILE__,__LINE__,t,"此功能暂未完成")
 
 
 

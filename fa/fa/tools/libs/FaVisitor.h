@@ -19,13 +19,13 @@ public:
   /**
    * Visit parse trees produced by FaParser.
    */
-    virtual antlrcpp::Any visitIds(FaParser::IdsContext *context) = 0;
-
     virtual antlrcpp::Any visitShiftLOp(FaParser::ShiftLOpContext *context) = 0;
 
     virtual antlrcpp::Any visitShiftROp(FaParser::ShiftROpContext *context) = 0;
 
     virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *context) = 0;
+
+    virtual antlrcpp::Any visitIds(FaParser::IdsContext *context) = 0;
 
     virtual antlrcpp::Any visitTypeAfter(FaParser::TypeAfterContext *context) = 0;
 

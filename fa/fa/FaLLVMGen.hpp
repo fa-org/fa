@@ -166,101 +166,171 @@ private:
 			}
 			m_imports [_name] = _f;
 		}
+		return true;
 	}
 
-	void BuildFaEntryMain (FaParser::FaEntryMainFuncBlockContext *_mctx) {
+	bool BuildFaEntryMain (FaParser::FaEntryMainFuncBlockContext *_mctx) {
 		auto [_ret_type_raw, _stmts_raw] = m_visitor->visitFaEntryMainFuncBlock (_mctx).as<std::tuple<
 			FaParser::TypeContext *,
 			std::vector<FaParser::StmtContext *>
 		>> ();
-		llvm::Type *_ret_type = m_etype_map->GetType (_ret_type_raw);
-		llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type, false);
+		std::optional<llvm::Type *> _ret_type = m_etype_map->GetType (_ret_type_raw);
+		if (!_ret_type.has_value ())
+			return false;
+		llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type.value (), false);
 		llvm::Function *_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, "FaEntryMain", *m_module);
-		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "FaEntryMain_block", _f);
 		_f->setCallingConv (llvm::CallingConv::C);
+		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
 		llvm::IRBuilder<> _builder (_bb);
 		_builder.SetInsertPoint (_bb);
-		FuncCodeBuilder (_builder, _stmts_raw, _ret_type);
+		return StmtBuilder (_builder, _stmts_raw, _f);
 	}
 
-	void FuncCodeBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::StmtContext *> _stmts_raw, llvm::Type *_ret_type) {
-		llvm::Value *_value = nullptr;
+	bool StmtBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::StmtContext *> &_stmts_raw, llvm::Function *_f) {
 		for (FaParser::StmtContext *_stmt_raw : _stmts_raw) {
 			if (_stmt_raw->normalStmt ()) {
-				FaParser::ExprContext *_expr = _stmt_raw->normalStmt ()->expr ();
-				_value = ExprBuilder (_builder, _expr);
-			} else if (_stmt_raw->ifStmt ()) {
-				// TODO
-			}
-			//
-			if (_stmt_raw->Return () != nullptr)
-				_builder.CreateRet (_value);
-		}
-		//llvm::ConstantInt::get (_ret_type, llvm::APInt (32, 0, true))
-	}
-
-	llvm::Value *ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr) {
-		if (_expr->normalExpr ()) {
-			return NormalExprBuilder (_builder, _expr->normalExpr ());
-		} else if (_expr->ifExpr ()) {
-			return IfExprBuilder (_builder, _expr->ifExpr ());
-		} else {
-
-		}
-	}
-
-	llvm::Value *NormalExprBuilder (llvm::IRBuilder<> &_builder, FaParser::NormalExprContext *_expr) {
-		if (_expr == nullptr)
-			return nullptr;
-		if (_expr->quotExpr () != nullptr)
-			return NormalExprBuilder (_builder, _expr->quotExpr ()->expr ());
-		std::vector<FaParser::ExprPrefixContext *> _prefix = _expr->exprPrefix (); // TODO
-		FaParser::ExprBodyContext *_body = _expr->exprBody ();
-		std::vector<FaParser::ExprSuffixContext *> _suffix = _expr->exprSuffix (); // TODO
-		llvm::Value *_current = nullptr;
-		while (_prefix.size () > 0 || _suffix.size () > 0 || _current == nullptr) {
-			if (_current == nullptr) {
-				// 第一次处理，_body 不为空，_current 为空
-				if (_body->ids () != nullptr) {
-					// TODO ids操作
-					std::string _cur_name = _body->ids ()->getText ();
-				} else if (_body->ColonColon () != nullptr) {
-					// TODO 外部 C API 调用
-					std::string _func_name = _body->Id ()->getText ();
-					llvm::Function *_func = m_imports [_func_name];
-					std::vector<llvm::Value *> _args;
-					for (auto _arg_expr : _suffix [0]->expr ())
-						_args.push_back (NormalExprBuilder (_builder, _arg_expr));
-					_current = _builder.CreateCall (_func, _args);
-					_suffix.erase (_suffix.begin ());
+				FaParser::NormalStmtContext *_normal_stmt_raw = _stmt_raw->normalStmt ();
+				if (_normal_stmt_raw->expr ()) {
+					std::optional<llvm::Value *> _value = ExprBuilder (_builder, _normal_stmt_raw->expr ());
+					if (!_value.has_value ())
+						return false;
+					if (_normal_stmt_raw->Return ())
+						_builder.CreateRet (_value.value ());
+				} else if (_normal_stmt_raw->Break ()) {
+					// TODO break
+					LOG_TODO (_normal_stmt_raw->start);
+				} else if (_normal_stmt_raw->Continue ()) {
+					// TODO continue
+					LOG_TODO (_normal_stmt_raw->start);
 				} else {
-					// literal
-					auto _literal = _body->literal ();
-					if (_literal->BoolLiteral ()) {
-						_current = m_value_builder->Build ("bool", _literal->getText ());
-					} else if (_literal->IntLiteral ()) {
-						_current = m_value_builder->Build ("int32", _literal->getText ());
-					} else if (_literal->FloatLiteral ()) {
-						_current = m_value_builder->Build ("float64", _literal->getText ());
-					} else if (_literal->String1Literal ()) {
-						std::string _data1 = _literal->getText ();
-						_data1 = _data1.substr (1, _data1.size () - 2);
-						std::string _data2;
-						_data2.reserve (_data1.size ());
-						_current = m_value_builder->Build ("string", _literal->getText ());
+					LOG_ERROR (_stmt_raw->start, "未知的表达式");
+					return false;
+				}
+			} else if (_stmt_raw->ifStmt ()) {
+				FaParser::IfStmtContext *_if_stmt_raw = _stmt_raw->ifStmt ();
+				std::vector<FaParser::ExprContext *> _conds;
+				for (auto _if_part_raw : _if_stmt_raw->ifPart ())
+					_conds.push_back (_if_part_raw->expr ());
+				std::vector<std::vector<FaParser::StmtContext *>> _bodys;
+				for (auto _body_part_raw : _if_stmt_raw->quotStmtPart ())
+					_bodys.push_back (_body_part_raw->stmt ());
+				if (!IfStmtBuilder (_builder, _conds, _bodys, _f))
+					return false;
+			} else if (_stmt_raw->whileStmt ()) {
+				// TODO
+				LOG_TODO (_stmt_raw->start);
+				return false;
+			} else {
+				LOG_ERROR (_stmt_raw->start, "未知的表达式");
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool IfStmtBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw, llvm::Function *_f) {
+		if (_conds_raw.size () == 0) {
+			if (_bodys_raw.size () >= 2) {
+				LOG_ERROR (_bodys_raw [0][0]->start, "条件异常");
+				return false;
+			} else if (_bodys_raw.size () == 1) {
+				StmtBuilder (_builder, _bodys_raw [0], _f);
+				_bodys_raw.erase (_bodys_raw.begin ());
+			}
+			return true;
+		}
+		std::optional<llvm::Value *> _cond = ExprBuilder (_builder, _conds_raw [0]);
+		if (!_cond.has_value ())
+			return false;
+		_conds_raw.erase (_conds_raw.begin ());
+		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
+		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
+		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
+		_builder.CreateCondBr (_cond.value (), _true_bb, _false_bb);
+		//
+		_builder.SetInsertPoint (_true_bb);
+		if (!StmtBuilder (_builder, _bodys_raw [0], _f))
+			return false;
+		_bodys_raw.erase (_bodys_raw.begin ());
+		_builder.CreateBr (_endif_bb);
+		//
+		_builder.SetInsertPoint (_false_bb);
+		if (!IfStmtBuilder (_builder, _conds_raw, _bodys_raw, _f))
+			return false;
+		_builder.CreateBr (_endif_bb);
+		//
+		_builder.SetInsertPoint (_endif_bb);
+		return true;
+	}
+
+	std::optional<llvm::Value *> ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr_raw) {
+		if (_expr_raw->normalExpr ()) {
+			FaParser::NormalExprContext *_normal_expr_raw = _expr_raw->normalExpr ();
+			if (_normal_expr_raw->quotExpr () != nullptr)
+				return ExprBuilder (_builder, _normal_expr_raw->quotExpr ()->expr ());
+			std::vector<FaParser::ExprPrefixContext *> _prefix = _normal_expr_raw->exprPrefix (); // TODO
+			FaParser::ExprBodyContext *_body = _normal_expr_raw->exprBody ();
+			std::vector<FaParser::ExprSuffixContext *> _suffix = _normal_expr_raw->exprSuffix (); // TODO
+			llvm::Value *_current = nullptr;
+			while (_prefix.size () > 0 || _suffix.size () > 0 || _current == nullptr) {
+				if (_current == nullptr) {
+					// 第一次处理，_body 不为空，_current 为空
+					if (_body->ids () != nullptr) {
+						// TODO ids操作
+						std::string _cur_name = _body->ids ()->getText ();
+					} else if (_body->ColonColon () != nullptr) {
+						// TODO 外部 C API 调用
+						std::string _func_name = _body->Id ()->getText ();
+						llvm::Function *_func = m_imports [_func_name];
+						std::vector<llvm::Value *> _args;
+						for (auto _arg_expr : _suffix [0]->expr ()) {
+							std::optional<llvm::Value *> _oarg = ExprBuilder (_builder, _arg_expr);
+							if (!_oarg.has_value ())
+								return std::nullopt;
+							_args.push_back (_oarg.value ());
+						}
+						_current = _builder.CreateCall (_func, _args);
+						_suffix.erase (_suffix.begin ());
 					} else {
-						// TODO: 待添加
+						// literal
+						auto _literal = _body->literal ();
+						std::optional<llvm::Value *> _ocurrent;
+						if (_literal->BoolLiteral ()) {
+							_ocurrent = m_value_builder->Build ("bool", _literal->getText (), _literal->start);
+						} else if (_literal->IntLiteral ()) {
+							_ocurrent = m_value_builder->Build ("int32", _literal->getText (), _literal->start);
+						} else if (_literal->FloatLiteral ()) {
+							_ocurrent = m_value_builder->Build ("float64", _literal->getText (), _literal->start);
+						} else if (_literal->String1Literal ()) {
+							std::string _data1 = _literal->getText ();
+							_data1 = _data1.substr (1, _data1.size () - 2);
+							std::string _data2;
+							_data2.reserve (_data1.size ());
+							_ocurrent = m_value_builder->Build ("string", _literal->getText (), _literal->start);
+						} else {
+							LOG_ERROR (_literal->start, "未知的表达式");
+						}
+						if (!_ocurrent.has_value ())
+							return std::nullopt;
+						_current = _ocurrent.value ();
+					}
+				} else {
+					// TODO 第二次及后续处理，_body 为空，_current 不为空
+					if (_prefix.size () > 0) {
+						LOG_TODO (_prefix [0]->start);
+					} else if (_suffix.size () > 0) {
+						LOG_TODO (_suffix [0]->start);
 					}
 				}
-			} else {
-				// 第二次及后续处理，_body 为空，_current 不为空
 			}
+			return _current;
+		} else if (_expr_raw->ifExpr ()) {
+			// TODO
+			LOG_TODO (_expr_raw->start);
+		} else {
+			LOG_ERROR (_expr_raw->start, "未知的表达式");
 		}
-		return _current;
-	}
-
-	llvm::Value *IfExprBuilder (llvm::IRBuilder<> &_builder, FaParser::IfExprContext *_expr) {
-
+		return std::nullopt;
 	}
 
 	CodeVisitor *m_visitor = nullptr;
