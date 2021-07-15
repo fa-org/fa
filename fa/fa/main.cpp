@@ -40,8 +40,10 @@ int main (int argc, char *argv[]) {
 //@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib"
 
 static int32 FaEntryMain () {
-	if (true) {
-		if (true) {
+	bool _b = true;
+	if (_b) {
+		_b = false;
+		if (_b) {
 			::puts ("true2\n");
 		} else {
 			::puts ("true false\n");

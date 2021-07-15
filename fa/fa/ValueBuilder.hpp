@@ -37,19 +37,13 @@ public:
 			} else if (_value == "false") {
 				return llvm::ConstantInt::getFalse (*m_ctx);
 			}
-		}
-
-		if (_type == "string") {
+		} else if (_type == "string") {
 			_value = _value.substr (1, _value.size () - 2);
 			std::optional<std::string> _tmp_value = StringProcessor::TransformMean (_value, _t);
-			if (!_tmp_value.has_value ()) {
-				LOG_ERROR (_t, fmt::format ("    值 \"{}\" 无法转为 \"{}\" 类型", _value, _type));
-				return std::nullopt;
+			if (_tmp_value.has_value ()) {
+				return m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ());
 			}
-			return m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ());
-		}
-
-		if (_type.find ("int") != std::string::npos) {
+		} else if (_type.find ("int") != std::string::npos) {
 			std::optional<llvm::Type *> _tp = m_etype_map->GetType (_type, _t);
 			if (!_tp.has_value ())
 				return std::nullopt;

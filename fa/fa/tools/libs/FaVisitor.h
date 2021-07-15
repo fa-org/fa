@@ -77,6 +77,8 @@ public:
 
     virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
 
+    virtual antlrcpp::Any visitDefVarStmt(FaParser::DefVarStmtContext *context) = 0;
+
     virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitNormalStmt(FaParser::NormalStmtContext *context) = 0;

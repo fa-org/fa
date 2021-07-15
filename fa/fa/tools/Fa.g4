@@ -187,12 +187,12 @@ allOp:						QusQusOp | PointOp | AddOp | SubOp | StarOp | DivOp | StarStarOp | M
 //							| (expr allAssign<assoc=right> expr)											// val = 12
 //							);
 quotExpr:					(QuotYuanL expr QuotYuanR);
-exprPrefix:					(AddOp | SubOp | AddAddOp | SubSubOp | ReverseOp);								// 前缀 + - ++ -- ~
-exprBody:					(ids | (ColonColon Id) | literal);												// 本体
-exprSuffix:					(AddAddOp | SubSubOp)+															// 后缀 ++ --
-							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)+									//      Write ("")
-							| (QuotFangL expr QuotFangL)+													//      list [12]
-							| ((allAssign | allOp) expr)+;													//      12 += 24
+exprPrefix:					AddOp | SubOp | AddAddOp | SubSubOp | ReverseOp;								// 前缀 + - ++ -- ~
+exprBody:					ids | (ColonColon Id) | literal;												// 本体
+exprSuffix:					(AddAddOp | SubSubOp)															// 后缀 ++ --
+							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//      Write ("")
+							| (QuotFangL expr QuotFangR)													//      list [12]
+							| ((allAssign | allOp) expr);													//      12 += 24
 normalExpr:					quotExpr | (exprPrefix* exprBody exprSuffix*);
 expr:						normalExpr | ifExpr;
 
@@ -201,7 +201,7 @@ expr:						normalExpr | ifExpr;
 //
 // define variable
 //
-// TODO
+defVarStmt:					type Id Assign expr Semi;
 
 
 
@@ -210,7 +210,7 @@ expr:						normalExpr | ifExpr;
 //
 useStmt:					Use ids Semi;
 normalStmt:					((Return? expr) | Break | Continue) Semi;
-stmt:						normalStmt | ifStmt | whileStmt;
+stmt:						normalStmt | ifStmt | whileStmt | defVarStmt;
 
 
 

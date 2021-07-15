@@ -131,6 +131,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitDefVarStmt(FaParser::DefVarStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *ctx) override {
     return visitChildren(ctx);
   }

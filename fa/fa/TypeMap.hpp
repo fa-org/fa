@@ -29,7 +29,9 @@ public:
 	std::optional<llvm::Type *> GetType (std::string _name, antlr4::Token *_t) {
 		if (_name == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
-		} else if (_name == "int8" || _name == "bool") {
+		} else if (_name == "bool") {
+			return (llvm::Type *) llvm::Type::getInt1Ty (*m_ctx);
+		} else if (_name == "int8") {
 			return (llvm::Type *) llvm::Type::getInt8Ty (*m_ctx);
 		} else if (_name == "int16") {
 			return (llvm::Type *) llvm::Type::getInt16Ty (*m_ctx);
