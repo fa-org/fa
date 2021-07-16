@@ -167,7 +167,7 @@ private:
 					_f->setCallingConv (llvm::CallingConv::X86_FastCall);
 				}
 			}
-			m_imports [_name] = _f;
+			m_imports [fmt::format ("::{}", _name)] = _f;
 		}
 		return true;
 	}
@@ -196,11 +196,24 @@ private:
 			if (_stmt_raw->normalStmt ()) {
 				FaParser::NormalStmtContext *_normal_stmt_raw = _stmt_raw->normalStmt ();
 				if (_normal_stmt_raw->expr ()) {
-					std::optional<llvm::Value *> _value = ExprBuilder (_builder, _normal_stmt_raw->expr (), _new_local_vars);
-					if (!_value.has_value ())
+					std::variant<std::nullopt_t, llvm::Value *, std::string> _value = ExprBuilder (_builder, _normal_stmt_raw->expr (), _new_local_vars);
+					if (_value.index () == 0)
 						return false;
-					if (_normal_stmt_raw->Return ())
-						_builder.CreateRet (_value.value ());
+
+					if (_normal_stmt_raw->Return ()) {
+						if (_value.index () == 1) {
+							_builder.CreateRet (std::get<1> (_value));
+						} else if (_value.index () == 2) {
+							std::string _var_name = std::get<2> (_value);
+							if (!_local_vars.contains (_var_name)) {
+								LOG_ERROR (_stmt_raw->start, fmt::format ("{} 无法识别为变量", _var_name));
+								return false;
+							}
+							_builder.CreateRet (_builder.CreateLoad (_local_vars [_var_name]));
+						} else {
+							LOG_TODO (_stmt_raw->start);
+						}
+					}
 				} else if (_normal_stmt_raw->Break ()) {
 					// TODO break
 					LOG_TODO (_normal_stmt_raw->start);
@@ -236,10 +249,21 @@ private:
 					return false;
 				}
 				_new_local_vars [_var_name] = _builder.CreateAlloca (_ret_type.value ());
-				auto _value = ExprBuilder (_builder, _def_var_stmt_raw->expr (), _new_local_vars);
-				if (!_value.has_value ())
+				std::variant<std::nullopt_t, llvm::Value *, std::string> _value = ExprBuilder (_builder, _def_var_stmt_raw->expr (), _new_local_vars);
+				if (_value.index () == 0) {
 					return false;
-				_builder.CreateStore (_value.value (), _new_local_vars [_var_name]);
+				} else if (_value.index () == 1) {
+					_builder.CreateStore (std::get<1> (_value), _new_local_vars [_var_name]);
+				} else if (_value.index () == 2) {
+					std::string _var_name2 = std::get<2> (_value);
+					if (!_local_vars.contains (_var_name2)) {
+						LOG_ERROR (_stmt_raw->start, fmt::format ("{} 无法识别为变量", _var_name2));
+						return false;
+					}
+					_builder.CreateStore (_new_local_vars [_var_name2], _new_local_vars [_var_name]);
+				} else {
+					LOG_TODO (_def_var_stmt_raw->Assign ()->getSymbol ());
+				}
 			} else {
 				LOG_ERROR (_stmt_raw->start, "未知的表达式");
 				return false;
@@ -260,14 +284,22 @@ private:
 			}
 			return true;
 		}
-		std::optional<llvm::Value *> _cond = ExprBuilder (_builder, _conds_raw [0], _local_vars);
-		if (!_cond.has_value ())
+		std::variant<std::nullopt_t, llvm::Value *, std::string> _cond = ExprBuilder (_builder, _conds_raw [0], _local_vars);
+		if (_cond.index () == 0) {
 			return false;
+		} else if (_cond.index () == 2) {
+			std::string _var_name = std::get<2> (_cond);
+			if (!_local_vars.contains (_var_name)) {
+				LOG_ERROR (_conds_raw [0]->start, fmt::format ("{} 无法识别为变量", _var_name));
+				return false;
+			}
+			_cond = _builder.CreateLoad (_local_vars [_var_name]);
+		}
 		_conds_raw.erase (_conds_raw.begin ());
 		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
 		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
 		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		_builder.CreateCondBr (_cond.value (), _true_bb, _false_bb);
+		_builder.CreateCondBr (std::get<1> (_cond), _true_bb, _false_bb);
 		//
 		_builder.SetInsertPoint (_true_bb);
 		if (!StmtBuilder (_builder, _bodys_raw [0], _f, _local_vars))
@@ -358,8 +390,6 @@ private:
 						// TODO
 						LOG_TODO (_cur_suffix->start);
 					} else if (_cur_suffix->QuotYuanL ()) {
-						//// TODO
-						//LOG_TODO (_cur_suffix->start);
 						if (_current.index () != 2) {
 							LOG_ERROR (_cur_suffix->start, "函数调用表达式错误");
 							return std::nullopt;
@@ -367,44 +397,68 @@ private:
 						std::string _func_name = std::get<2> (_current);
 						llvm::Function *_func = m_imports [_func_name];
 						std::vector<llvm::Value *> _args;
-						for (auto _arg_expr : _suffix [0]->expr ()) {
+						for (auto _arg_expr : _cur_suffix->expr ()) {
 							std::variant<std::nullopt_t, llvm::Value *, std::string> _oarg = ExprBuilder (_builder, _arg_expr, _local_vars);
 							if (_oarg.index () == 0) {
 								return std::nullopt;
 							} else if (_oarg.index () == 1) {
 								_args.push_back (std::get<1> (_oarg));
 							} else if (_oarg.index () == 2) {
-								std::string _arg_name = std::get<2> (_oarg);
-								// TODO
-								LOG_TODO (_cur_suffix->start);
+								std::string _var_name = std::get<2> (_oarg);
+								if (!_local_vars.contains (_var_name)) {
+									LOG_ERROR (_arg_expr->start, fmt::format ("{} 无法识别为变量", _var_name));
+									return std::nullopt;
+								}
+								_args.push_back (_builder.CreateLoad (_local_vars [_var_name]));
 							} else {
-								// TODO
 								LOG_TODO (_cur_suffix->start);
 							}
 						}
 						_current = _builder.CreateCall (_func, _args);
-						_suffix.erase (_suffix.begin ());
 					} else if (_cur_suffix->QuotFangL ()) {
-						// TODO
 						LOG_TODO (_cur_suffix->start);
+						return std::nullopt;
 					} else if (_cur_suffix->allAssign ()) {
-						//auto _val2 = ExprBuilder (_builder, _cur_suffix->expr (0), _local_vars);
-						//if (!_val2.has_value ())
-						//	return nullptr;
-						//if (_current.value ().index () != 1) {
-						//	LOG_ERROR (_cur_suffix->start, "非变量类型无法赋值");
-						//	return std::nullopt;
-						//}
-						//_builder.CreateStore (_val2.value (), std::get<1> (_current.value ()));
+						if (_current.index () != 2) {
+							LOG_ERROR (_cur_suffix->start, "非变量类型无法赋值");
+							return std::nullopt;
+						}
+						std::string _var_name = std::get<2> (_current);
+						if (!_local_vars.contains (_var_name)) {
+							LOG_ERROR (_cur_suffix->start, fmt::format ("未识别的变量 {}", _var_name));
+							return std::nullopt;
+						}
+						_current = _local_vars[_var_name];
+						//
+						std::variant<std::nullopt_t, llvm::Value *, std::string> _val2 = ExprBuilder (_builder, _cur_suffix->expr (0), _local_vars);
+						if (_val2.index () == 0) {
+							return std::nullopt;
+						} else if (_val2.index () == 1 || _val2.index () == 2) {
+							if (_val2.index () == 2) {
+								_var_name = std::get<2> (_current);
+								if (!_local_vars.contains (_var_name)) {
+									LOG_ERROR (_cur_suffix->expr (0)->start, fmt::format ("未识别的变量 {}", _var_name));
+									return std::nullopt;
+								}
+								_val2 = _builder.CreateLoad (_local_vars [_var_name]);
+							}
+							// TODO: 计算除=外其他赋值，比如+=等
+							_builder.CreateStore (std::get<1> (_val2), std::get<1> (_current));
+						} else {
+							LOG_TODO (_cur_suffix->start);
+							return std::nullopt;
+						}
 					} else if (_cur_suffix->allOp ()) {
-						// TODO
 						LOG_TODO (_cur_suffix->start);
+						return std::nullopt;
+					} else {
+						LOG_TODO (_cur_suffix->start);
+						return std::nullopt;
 					}
 				}
 			}
 			return _current;
-		} else if (_expr_raw->ifExpr ()) {
-			// TODO
+		} else if (_expr_raw->ifElseExpr ()) {
 			LOG_TODO (_expr_raw->start);
 		} else {
 			LOG_ERROR (_expr_raw->start, "未知的表达式");

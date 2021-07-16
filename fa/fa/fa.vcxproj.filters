@@ -74,7 +74,10 @@
     <ClInclude Include="StringProcessor.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="InfoOut.hpp">
+    <ClInclude Include="Log.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AstValue.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

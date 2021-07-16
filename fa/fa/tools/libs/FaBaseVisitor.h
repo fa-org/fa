@@ -71,7 +71,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitStmtOrExpr(FaParser::StmtOrExprContext *ctx) override {
+  virtual antlrcpp::Any visitStmtOrIfExpr(FaParser::StmtOrIfExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -91,7 +91,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitWhileStmtPart(FaParser::WhileStmtPartContext *ctx) override {
+  virtual antlrcpp::Any visitIfElseExpr(FaParser::IfElseExprContext *ctx) override {
     return visitChildren(ctx);
   }
 

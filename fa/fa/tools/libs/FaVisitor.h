@@ -47,7 +47,7 @@ public:
 
     virtual antlrcpp::Any visitIfPart(FaParser::IfPartContext *context) = 0;
 
-    virtual antlrcpp::Any visitStmtOrExpr(FaParser::StmtOrExprContext *context) = 0;
+    virtual antlrcpp::Any visitStmtOrIfExpr(FaParser::StmtOrIfExprContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *context) = 0;
 
@@ -57,7 +57,7 @@ public:
 
     virtual antlrcpp::Any visitIfExpr(FaParser::IfExprContext *context) = 0;
 
-    virtual antlrcpp::Any visitWhileStmtPart(FaParser::WhileStmtPartContext *context) = 0;
+    virtual antlrcpp::Any visitIfElseExpr(FaParser::IfElseExprContext *context) = 0;
 
     virtual antlrcpp::Any visitWhileStmt(FaParser::WhileStmtContext *context) = 0;
 

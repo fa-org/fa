@@ -1,16 +1,17 @@
-#ifndef __INFO_OUT_HPP__
-#define __INFO_OUT_HPP__
+#ifndef __LOG_HPP__
+#define __LOG_HPP__
 
 
 
 #include <iostream>
 #include <string>
 
+#include <fmt/core.h>
 #include <antlr4-runtime/Token.h>
 
 
 
-class InfoOut {
+class Log {
 	static std::string _process_file (std::string _file) {
 		size_t _p = _file.rfind ('/');
 		size_t _q = _file.rfind ('\\');
@@ -54,13 +55,13 @@ public:
 	static std::string s_file;
 };
 
-__declspec (selectany) std::string InfoOut::s_file = "";
+__declspec (selectany) std::string Log::s_file = "";
 
-#define LOG_INFO(t,data)		InfoOut::Info(__FILE__,__LINE__,t,data)
-#define LOG_WARNING(t,data)		InfoOut::Warning(__FILE__,__LINE__,t,data)
-#define LOG_ERROR(t,data)		InfoOut::Error(__FILE__,__LINE__,t,data)
-#define LOG_TODO(t)				InfoOut::Error(__FILE__,__LINE__,t,"此功能暂未完成")
+#define LOG_INFO(t,data)		Log::Info(__FILE__,__LINE__,t,data)
+#define LOG_WARNING(t,data)		Log::Warning(__FILE__,__LINE__,t,data)
+#define LOG_ERROR(t,data)		Log::Error(__FILE__,__LINE__,t,data)
+#define LOG_TODO(t)				Log::Error(__FILE__,__LINE__,t,"此功能暂未完成")
 
 
 
-#endif //__INFO_OUT_HPP__
+#endif //__LOG_HPP__

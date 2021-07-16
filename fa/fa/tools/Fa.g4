@@ -151,19 +151,19 @@ eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 // if
 //
 ifPart:						If QuotYuanL expr QuotYuanR;
-stmtOrExpr:					stmt | expr;
-quotStmtPart:				(QuotHuaL stmt* QuotHuaR) | stmt;
-quotStmtExpr:				(QuotHuaL stmtOrExpr* expr QuotHuaR) | expr;
+stmtOrIfExpr:				stmt | ifExpr;
+quotStmtPart:				QuotHuaL stmt* QuotHuaR;
+quotStmtExpr:				QuotHuaL stmtOrIfExpr* expr QuotHuaR;
 ifStmt:						ifPart quotStmtPart (Else ifPart quotStmtPart)* (Else quotStmtPart)?;
-ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)* (Else quotStmtExpr)?;
+ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)*;
+ifElseExpr:					ifPart quotStmtExpr (Else ifPart quotStmtExpr)* Else quotStmtExpr;
 
 
 
 //
 // while
 //
-whileStmtPart:				(QuotHuaL stmt* QuotHuaR) | stmt;
-whileStmt:					While QuotYuanL expr QuotYuanR whileStmtPart;
+whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
 
 
 
@@ -194,7 +194,7 @@ exprSuffix:					(AddAddOp | SubSubOp)															// บ๓ืบ ++ --
 							| (QuotFangL expr QuotFangR)													//      list [12]
 							| ((allAssign | allOp) expr);													//      12 += 24
 normalExpr:					quotExpr | (exprPrefix* exprBody exprSuffix*);
-expr:						normalExpr | ifExpr;
+expr:						ifElseExpr | normalExpr;
 
 
 

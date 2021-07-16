@@ -16,7 +16,7 @@
 #include "FaLexer.h"
 #include "CodeVisitor.hpp"
 #include "FaLLVMGen.hpp"
-#include "InfoOut.hpp"
+#include "Log.hpp"
 
 //#pragma comment (lib, "antlr4-runtime.lib")
 
@@ -36,8 +36,8 @@ int main (int argc, char *argv[]) {
 @lib "msvcrt.lib";
 //@lib "vcruntime.lib";
 
-@lib "ole32.lib";
-//@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib"
+//@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "ole32.lib";
+//@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
 
 static int32 FaEntryMain () {
 	bool _b = true;
@@ -54,7 +54,7 @@ static int32 FaEntryMain () {
 	return 0;
 }
 )";
-	InfoOut::SetCurrentFile ("Program.fa");
+	Log::SetCurrentFile ("Program.fa");
 	std::cout << "----------source begin----------" << std::endl;
 	std::cout << _code << std::endl;
 	std::cout << "----------source end----------" << std::endl << std::endl;
