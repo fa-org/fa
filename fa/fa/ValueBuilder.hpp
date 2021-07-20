@@ -18,7 +18,7 @@
 #include "FaParser.h"
 #include "TypeMap.hpp"
 #include "StringProcessor.hpp"
-#include "InfoOut.hpp"
+#include "Log.hpp"
 
 
 

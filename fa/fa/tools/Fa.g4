@@ -44,16 +44,17 @@ While:						'while';
 
 // ∏≥÷µ‘ÀÀ„
 Assign:						'=';
-QusQusAssign:				'??=';
 AddAssign:					'+=';
 SubAssign:					'-=';
 StarAssign:					'*=';
-StarStarAssign:				'**=';
 DivAssign:					'/=';
 ModAssign:					'%=';
-AndAssign:					'&=';
 OrAssign:					'|=';
+AndAssign:					'&=';
+ReverseAssign:				'~=';
 XorAssign:					'^=';
+QusQusAssign:				'??=';
+StarStarAssign:				'**=';
 AndAndAssign:				'&&=';
 OrOrAssign:					'||=';
 ShiftLAssign:				'<<=';

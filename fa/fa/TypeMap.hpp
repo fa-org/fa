@@ -12,7 +12,7 @@
 
 #include "FaVisitor.h"
 #include "FaParser.h"
-#include "InfoOut.hpp"
+#include "Log.hpp"
 
 
 
@@ -39,12 +39,16 @@ public:
 			return (llvm::Type *) llvm::Type::getInt32Ty (*m_ctx);
 		} else if (_name == "int64") {
 			return (llvm::Type *) llvm::Type::getInt64Ty (*m_ctx);
+		} else if (_name == "int128") {
+			return (llvm::Type *) llvm::Type::getInt128Ty (*m_ctx);
 		} else if (_name == "float16") {
 			return llvm::Type::getBFloatTy (*m_ctx);
 		} else if (_name == "float32") {
 			return llvm::Type::getFloatTy (*m_ctx);
 		} else if (_name == "float64") {
 			return llvm::Type::getDoubleTy (*m_ctx);
+		} else if (_name == "float128") {
+			return llvm::Type::getFP128Ty (*m_ctx);
 		}
 		LOG_ERROR (_t, fmt::format ("无法识别的类型 [{}]", _name));
 		return std::nullopt;
@@ -60,6 +64,44 @@ public:
 		}
 		return _types;
 	}
+
+	static std::string GetTypeName (llvm::Type *_type) {
+		switch (_type->getTypeID ()) {
+		case llvm::Type::HalfTyID:
+		case llvm::Type::BFloatTyID:
+			return "float16";
+		case llvm::Type::FloatTyID:
+			return "float32";
+		case llvm::Type::DoubleTyID:
+			return "float64";
+		case llvm::Type::FP128TyID:
+			return "float128";
+		case llvm::Type::VoidTyID:
+			return "void";
+		case llvm::Type::IntegerTyID:
+			{
+				llvm::IntegerType *_itype = static_cast<llvm::IntegerType *> (_type);
+				auto _bit_width = _itype->getBitWidth ();
+				if (_bit_width == 1) {
+					return "bool";
+				} else if (_bit_width == 8) {
+					return "int8";
+				} else if (_bit_width == 16) {
+					return "int16";
+				} else if (_bit_width == 32) {
+					return "int32";
+				} else if (_bit_width == 64) {
+					return "int64";
+				} else if (_bit_width == 128) {
+					return "int128";
+				}
+			}
+			break;
+		}
+		return "";
+	}
+
+
 
 	std::optional<llvm::Type *> GetExternType (FaParser::ETypeContext *_etype_ctx) {
 		auto [_sign, _name, _ptr_level] = m_visitor->visitEType (_etype_ctx).as<std::tuple<bool, std::string, size_t>> ();
