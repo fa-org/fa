@@ -40,6 +40,31 @@ public:
 		return std::make_tuple (_sign, _name, _ptr_level);
 	}
 
+	antlrcpp::Any visitIfStmt (FaParser::IfStmtContext *ctx) override {
+		std::vector<FaParser::ExprContext *> _conds;
+		for (auto _if_part_raw : ctx->ifPart ())
+			_conds.push_back (_if_part_raw->expr ());
+		std::vector<std::vector<FaParser::StmtContext *>> _bodys;
+		for (auto _body_part_raw : ctx->quotStmtPart ())
+			_bodys.push_back (_body_part_raw->stmt ());
+		return std::make_tuple (_conds, _bodys);
+	}
+
+	antlrcpp::Any visitIfExpr (FaParser::IfExprContext *ctx) override {
+		std::vector<FaParser::ExprContext *> _conds;
+		for (auto _if_part_raw : ctx->ifPart ())
+			_conds.push_back (_if_part_raw->expr ());
+		return std::make_tuple (_conds, ctx->quotStmtExpr ());
+	}
+
+	antlrcpp::Any visitIfElseExpr (FaParser::IfElseExprContext *ctx) override {
+		std::vector<FaParser::ExprContext *> _conds;
+		std::vector<FaParser::QuotStmtExprContext *> _bodys;
+		std::tie (_conds, _bodys) = visitIfExpr (ctx->ifExpr ());
+		_bodys.push_back (ctx->quotStmtExpr ());
+		return std::make_tuple (_conds, _bodys);
+	}
+
 	antlrcpp::Any visitImportBlock (FaParser::ImportBlockContext *ctx) override {
 		std::vector<FaParser::ImportStmtContext *> _imports;
 		std::vector<std::string> _libs;

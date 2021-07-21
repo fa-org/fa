@@ -15,11 +15,123 @@
 class  FaBaseVisitor : public FaVisitor {
 public:
 
+  virtual antlrcpp::Any visitAddAssign(FaParser::AddAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitSubAssign(FaParser::SubAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitStarAssign(FaParser::StarAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitDivAssign(FaParser::DivAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitModAssign(FaParser::ModAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitOrAssign(FaParser::OrAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAndAssign(FaParser::AndAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitXorAssign(FaParser::XorAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQusQusAssign(FaParser::QusQusAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitStarStarAssign(FaParser::StarStarAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAndAndAssign(FaParser::AndAndAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitOrOrAssign(FaParser::OrOrAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitShiftLAssign(FaParser::ShiftLAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitShiftRAssign(FaParser::ShiftRAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQusQusOp(FaParser::QusQusOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitStarStarOp(FaParser::StarStarOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAndAndOp(FaParser::AndAndOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitOrOrOp(FaParser::OrOrOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitShiftLOp(FaParser::ShiftLOpContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitShiftROp(FaParser::ShiftROpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitLtOp(FaParser::LtOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitLtEqualOp(FaParser::LtEqualOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitGtOp(FaParser::GtOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitGtEqualOp(FaParser::GtEqualOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitEqualOp(FaParser::EqualOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitNotEqualOp(FaParser::NotEqualOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitLtOps(FaParser::LtOpsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitGtOps(FaParser::GtOpsContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -96,14 +208,6 @@ public:
   }
 
   virtual antlrcpp::Any visitWhileStmt(FaParser::WhileStmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitAllOp(FaParser::AllOpContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -19,9 +19,65 @@ public:
   /**
    * Visit parse trees produced by FaParser.
    */
+    virtual antlrcpp::Any visitAddAssign(FaParser::AddAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitSubAssign(FaParser::SubAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitStarAssign(FaParser::StarAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitDivAssign(FaParser::DivAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitModAssign(FaParser::ModAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitOrAssign(FaParser::OrAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitAndAssign(FaParser::AndAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitXorAssign(FaParser::XorAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitQusQusAssign(FaParser::QusQusAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitStarStarAssign(FaParser::StarStarAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitAndAndAssign(FaParser::AndAndAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitOrOrAssign(FaParser::OrOrAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitShiftLAssign(FaParser::ShiftLAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitShiftRAssign(FaParser::ShiftRAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *context) = 0;
+
+    virtual antlrcpp::Any visitQusQusOp(FaParser::QusQusOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitStarStarOp(FaParser::StarStarOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitAndAndOp(FaParser::AndAndOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitOrOrOp(FaParser::OrOrOpContext *context) = 0;
+
     virtual antlrcpp::Any visitShiftLOp(FaParser::ShiftLOpContext *context) = 0;
 
     virtual antlrcpp::Any visitShiftROp(FaParser::ShiftROpContext *context) = 0;
+
+    virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *context) = 0;
+
+    virtual antlrcpp::Any visitLtOp(FaParser::LtOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitLtEqualOp(FaParser::LtEqualOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitGtOp(FaParser::GtOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitGtEqualOp(FaParser::GtEqualOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitEqualOp(FaParser::EqualOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitNotEqualOp(FaParser::NotEqualOpContext *context) = 0;
+
+    virtual antlrcpp::Any visitLtOps(FaParser::LtOpsContext *context) = 0;
+
+    virtual antlrcpp::Any visitGtOps(FaParser::GtOpsContext *context) = 0;
 
     virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *context) = 0;
 
@@ -60,10 +116,6 @@ public:
     virtual antlrcpp::Any visitIfElseExpr(FaParser::IfElseExprContext *context) = 0;
 
     virtual antlrcpp::Any visitWhileStmt(FaParser::WhileStmtContext *context) = 0;
-
-    virtual antlrcpp::Any visitAllAssign(FaParser::AllAssignContext *context) = 0;
-
-    virtual antlrcpp::Any visitAllOp(FaParser::AllOpContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *context) = 0;
 

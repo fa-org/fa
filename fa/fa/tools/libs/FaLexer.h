@@ -16,16 +16,13 @@ public:
     Continue = 7, Class = 8, Const = 9, Else = 10, FaEntryMain = 11, If = 12, 
     Internal = 13, Public = 14, Protected = 15, Private = 16, Return = 17, 
     Signed = 18, Static = 19, Unsigned = 20, Use = 21, While = 22, Assign = 23, 
-    QusQusAssign = 24, AddAssign = 25, SubAssign = 26, StarAssign = 27, 
-    StarStarAssign = 28, DivAssign = 29, ModAssign = 30, AndAssign = 31, 
-    OrAssign = 32, XorAssign = 33, AndAndAssign = 34, OrOrAssign = 35, ShiftLAssign = 36, 
-    ShiftRAssign = 37, ReverseOp = 38, AddAddOp = 39, SubSubOp = 40, PointOp = 41, 
-    QusQusOp = 42, AddOp = 43, SubOp = 44, StarOp = 45, DivOp = 46, StarStarOp = 47, 
-    ModOp = 48, AndOp = 49, OrOp = 50, XorOp = 51, AndAndOp = 52, OrOrOp = 53, 
-    Qus = 54, Comma = 55, ColonColon = 56, Colon = 57, Semi = 58, QuotFangL = 59, 
-    QuotFangR = 60, QuotJianL = 61, QuotJianR = 62, QuotHuaL = 63, QuotHuaR = 64, 
-    QuotYuanL = 65, QuotYuanR = 66, BoolLiteral = 67, IntLiteral = 68, FloatLiteral = 69, 
-    String1Literal = 70, Id = 71, Comment1 = 72, Comment2 = 73, WS = 74
+    ReverseOp = 24, AddAddOp = 25, SubSubOp = 26, PointOp = 27, AddOp = 28, 
+    SubOp = 29, StarOp = 30, DivOp = 31, ModOp = 32, OrOp = 33, AndOp = 34, 
+    XorOp = 35, Qus = 36, Comma = 37, ColonColon = 38, Colon = 39, Semi = 40, 
+    Exclam = 41, QuotFangL = 42, QuotFangR = 43, QuotJianL = 44, QuotJianR = 45, 
+    QuotHuaL = 46, QuotHuaR = 47, QuotYuanL = 48, QuotYuanR = 49, BoolLiteral = 50, 
+    IntLiteral = 51, FloatLiteral = 52, String1Literal = 53, Id = 54, Comment1 = 55, 
+    Comment2 = 56, WS = 57
   };
 
   explicit FaLexer(antlr4::CharStream *input);

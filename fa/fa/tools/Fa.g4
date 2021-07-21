@@ -44,21 +44,21 @@ While:						'while';
 
 // 赋值运算
 Assign:						'=';
-AddAssign:					'+=';
-SubAssign:					'-=';
-StarAssign:					'*=';
-DivAssign:					'/=';
-ModAssign:					'%=';
-OrAssign:					'|=';
-AndAssign:					'&=';
-ReverseAssign:				'~=';
-XorAssign:					'^=';
-QusQusAssign:				'??=';
-StarStarAssign:				'**=';
-AndAndAssign:				'&&=';
-OrOrAssign:					'||=';
-ShiftLAssign:				'<<=';
-ShiftRAssign:				'>>=';
+addAssign:					AddOp Assign;
+subAssign:					SubOp Assign;
+starAssign:					StarOp Assign;
+divAssign:					DivOp Assign;
+modAssign:					ModOp Assign;
+orAssign:					OrOp Assign;
+andAssign:					AndOp Assign;
+xorAssign:					XorOp Assign;
+qusQusAssign:				qusQusOp Assign;
+starStarAssign:				starStarOp Assign;
+andAndAssign:				andAndOp Assign;
+orOrAssign:					orOrOp Assign;
+shiftLAssign:				shiftLOp Assign;
+shiftRAssign:				shiftROp Assign;
+allAssign:					Assign | qusQusAssign | addAssign | subAssign | starAssign | starStarAssign | divAssign | modAssign | andAssign | orAssign | xorAssign | andAndAssign | orOrAssign | shiftLAssign | shiftRAssign;
 
 // 一元计算
 ReverseOp:					'~';
@@ -67,20 +67,21 @@ SubSubOp:					'--';
 
 // 二元计算
 PointOp:					'.';
-QusQusOp:					'??';
 AddOp:						'+';
 SubOp:						'-';
 StarOp:						'*';
 DivOp:						'/';
-StarStarOp:					'**';
 ModOp:						'%';
-AndOp:						'&';
 OrOp:						'|';
+AndOp:						'&';
 XorOp:						'^';
-AndAndOp:					'&&';
-OrOrOp:						'||';
+qusQusOp:					Qus Qus;
+starStarOp:					StarOp StarOp;
+andAndOp:					AndOp AndOp;
+orOrOp:						OrOp OrOp;
 shiftLOp:					QuotJianL QuotJianL;
 shiftROp:					QuotJianR QuotJianR;
+allOp2:						qusQusOp | PointOp | AddOp | SubOp | StarOp | DivOp | starStarOp | ModOp | AndOp | OrOp | XorOp | andAndOp | orOrOp | shiftLOp | shiftROp;
 
 // 三元或其他
 Qus:						'?';
@@ -88,6 +89,7 @@ Comma:						',';
 ColonColon:					'::';
 Colon:						':';
 Semi:						';';
+Exclam:						'!';
 
 // 括号
 QuotFangL:					'[';
@@ -98,6 +100,16 @@ QuotHuaL:					'{';
 QuotHuaR:					'}';
 QuotYuanL:					'(';
 QuotYuanR:					')';
+
+// 比较   TODO
+ltOp:						QuotJianL;
+ltEqualOp:					QuotJianL Assign;
+gtOp:						QuotJianR;
+gtEqualOp:					QuotJianR Assign;
+equalOp:					Assign Assign;
+notEqualOp:					Exclam Assign;
+ltOps:						ltOp | ltEqualOp;
+gtOps:						gtOp | gtEqualOp;
 
 
 
@@ -157,7 +169,7 @@ quotStmtPart:				QuotHuaL stmt* QuotHuaR;
 quotStmtExpr:				QuotHuaL stmtOrIfExpr* expr QuotHuaR;
 ifStmt:						ifPart quotStmtPart (Else ifPart quotStmtPart)* (Else quotStmtPart)?;
 ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)*;
-ifElseExpr:					ifPart quotStmtExpr (Else ifPart quotStmtExpr)* Else quotStmtExpr;
+ifElseExpr:					ifExpr Else quotStmtExpr;
 
 
 
@@ -171,31 +183,16 @@ whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
 //
 // expr
 //
-allAssign:					Assign | QusQusAssign | AddAssign | SubAssign | StarAssign | StarStarAssign | DivAssign | ModAssign | AndAssign | OrAssign | XorAssign | AndAndAssign | OrOrAssign | ShiftLAssign | ShiftRAssign;
-allOp:						QusQusOp | PointOp | AddOp | SubOp | StarOp | DivOp | StarStarOp | ModOp | AndOp | OrOp | XorOp | AndAndOp | OrOrOp | shiftLOp | shiftROp;
-//exprAtom:					ids
-//							| value
-//							| (QuotYuanL expr QuotYuanR);
-//expr						: (AddOp | SubOp | AddAddOp | SubSubOp)?
-//							( ids																			// io.Write
-//							| literal																		// 12
-//							| (QuotYuanL expr QuotYuanR)													// (12+24)
-//							| (expr PointOp expr)															// 10.min
-//							| (expr QuotFangL expr QuotFangR)												// list [12]
-//							| (expr QuotYuanL (expr (Comma expr)*)? QuotYuanR)								// Write ("")
-//							| ((AddAddOp | SubSubOp | ReverseOp) expr)										// ~val
-//							| (expr (AddAddOp | SubSubOp))													// val++
-//							| (expr allAssign<assoc=right> expr)											// val = 12
-//							);
 quotExpr:					(QuotYuanL expr QuotYuanR);
 exprPrefix:					AddOp | SubOp | AddAddOp | SubSubOp | ReverseOp;								// 前缀 + - ++ -- ~
-exprBody:					ids | (ColonColon Id) | literal;												// 本体
+exprBody:					ids | (ColonColon Id) | literal | ifElseExpr | quotExpr;						// 本体
 exprSuffix:					(AddAddOp | SubSubOp)															// 后缀 ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//      Write ("")
 							| (QuotFangL expr QuotFangR)													//      list [12]
-							| ((allAssign | allOp) expr);													//      12 += 24
-normalExpr:					quotExpr | (exprPrefix* exprBody exprSuffix*);
-expr:						ifElseExpr | normalExpr;
+							| ((allAssign | allOp2) expr)													//      12 += 24
+							| (ltOps expr)+ | (gtOps expr)+ | ((equalOp | notEqualOp) expr);				//      a < b <= c < d
+normalExpr:					exprPrefix* exprBody exprSuffix*;
+expr:						ifElseExpr | quotExpr | normalExpr;
 
 
 

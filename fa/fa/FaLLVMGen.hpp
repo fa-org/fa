@@ -222,13 +222,9 @@ private:
 					return false;
 				}
 			} else if (_stmt_raw->ifStmt ()) {
-				FaParser::IfStmtContext *_if_stmt_raw = _stmt_raw->ifStmt ();
 				std::vector<FaParser::ExprContext *> _conds;
-				for (auto _if_part_raw : _if_stmt_raw->ifPart ())
-					_conds.push_back (_if_part_raw->expr ());
 				std::vector<std::vector<FaParser::StmtContext *>> _bodys;
-				for (auto _body_part_raw : _if_stmt_raw->quotStmtPart ())
-					_bodys.push_back (_body_part_raw->stmt ());
+				std::tie (_conds, _bodys) = m_visitor->visitIfStmt (_stmt_raw->ifStmt ());
 				if (!IfStmtBuilder (_builder, _conds, _bodys, _f, _new_local_vars))
 					return false;
 			} else if (_stmt_raw->whileStmt ()) {
@@ -306,7 +302,7 @@ private:
 
 	AstValue _ExprBuilder_GetCurrent (llvm::IRBuilder<> &_builder, FaParser::ExprBodyContext *_current_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars) {
 		// 第一次处理
-		if (_current_raw->ids () != nullptr) {
+		if (_current_raw->ids ()) {
 			// TODO ids操作
 			std::string _cur_name = _current_raw->getText ();
 			if (_local_vars.contains (_cur_name)) {
@@ -315,7 +311,7 @@ private:
 				LOG_ERROR (_current_raw->start, fmt::format ("变量 {} 不存在", _cur_name));
 				return std::nullopt;
 			}
-		} else if (_current_raw->ColonColon () != nullptr) {
+		} else if (_current_raw->ColonColon ()) {
 			// 外部 C API 调用
 			std::string _cur_name = _current_raw->getText ();
 			if (m_imports.contains (_cur_name)) {
@@ -324,18 +320,28 @@ private:
 				LOG_ERROR (_current_raw->start, fmt::format ("未定义的外部符号：{}", _cur_name));
 				return std::nullopt;
 			}
-		} else {
-			// literal
+		} else if (_current_raw->literal ()) {
 			auto _literal = _current_raw->literal ();
 			return AstValue { m_value_builder, _literal };
+		} else if (_current_raw->ifElseExpr ()) {
+			LOG_TODO (_current_raw->ifElseExpr ()->start);
+			//return IfElseExprBuilder (_builder, _current_raw->ifElseExpr (), _local_vars);
+		} else if (_current_raw->quotExpr ()) {
+			return ExprBuilder (_builder, _current_raw->quotExpr ()->expr (), _local_vars);
+		} else {
+			LOG_TODO (_current_raw->start);
+			return std::nullopt;
 		}
 	}
 
-	AstValue ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars) {
-		if (_expr_raw->normalExpr ()) {
+	AstValue ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars, AstValue &_assign_left_val/*TODO: 此处允许变量、类型字符串及空*/) {
+		if (_expr_raw->ifElseExpr ()) {
+			LOG_TODO (_expr_raw->ifElseExpr ()->start);
+			//return IfElseExprBuilder (_builder, _expr_raw->ifElseExpr (), _local_vars);
+		} else if (_expr_raw->quotExpr ()) {
+			return ExprBuilder (_builder, _expr_raw->quotExpr ()->expr (), _local_vars);
+		} else if (_expr_raw->normalExpr ()) {
 			FaParser::NormalExprContext *_normal_expr_raw = _expr_raw->normalExpr ();
-			if (_normal_expr_raw->quotExpr () != nullptr)
-				return ExprBuilder (_builder, _normal_expr_raw->quotExpr ()->expr (), _local_vars);
 			FaParser::ExprBodyContext *_current_raw = _normal_expr_raw->exprBody ();
 			AstValue _current = _ExprBuilder_GetCurrent (_builder, _current_raw, _local_vars);
 			if (!_current.IsValid ())
@@ -345,7 +351,6 @@ private:
 			std::vector<FaParser::ExprSuffixContext *> _suffix = _normal_expr_raw->exprSuffix ();
 			while (_prefix.size () > 0 || _suffix.size () > 0) {
 				if (_prefix.size () > 0) {
-					//LOG_TODO (_prefix [0]->start);
 					auto _cur_prefix = _prefix [_prefix.size () - 1];
 					_prefix.erase (_prefix.begin () + (_prefix.size () - 1));
 					if (_cur_prefix->AddOp ()) {
@@ -354,7 +359,7 @@ private:
 						// TODO 取反
 					} else {
 					}
-					// TODO
+					// TODO 提前处理
 					LOG_TODO (_cur_prefix->start);
 					return std::nullopt;
 				} else if (_suffix.size () > 0) {
@@ -384,8 +389,8 @@ private:
 					} else if (_cur_suffix->QuotFangL ()) {
 						LOG_TODO (_cur_suffix->start);
 						return std::nullopt;
-					} else if (_cur_suffix->allAssign ()) {
-						if (!_current.IsVariable ()) {
+					} else if (_cur_suffix->allAssign () || _cur_suffix->allOp2 ()) {
+						if (_cur_suffix->allAssign () && (!_current.IsVariable ())) {
 							LOG_ERROR (_cur_suffix->start, "非变量类型无法赋值");
 							return std::nullopt;
 						}
@@ -397,8 +402,8 @@ private:
 							LOG_TODO (_cur_suffix->start);
 							return std::nullopt;
 						}
-						_current.DoOper2 (_builder, _cur_suffix->allAssign ()->getText (), _val2, _cur_suffix->allAssign ()->start);
-					} else if (_cur_suffix->allOp ()) {
+						_current.DoOper2 (_builder, m_value_builder, _cur_suffix->allAssign ()->getText (), _val2, _cur_suffix->allAssign ()->start);
+					} else if (_cur_suffix->ltOps ().size () > 0 || _cur_suffix->gtOps ().size () > 0 || _cur_suffix->equalOp () || _cur_suffix->notEqualOp ()) {
 						LOG_TODO (_cur_suffix->start);
 						return std::nullopt;
 					} else {
@@ -408,13 +413,27 @@ private:
 				}
 			}
 			return _current;
-		} else if (_expr_raw->ifElseExpr ()) {
-			LOG_TODO (_expr_raw->start);
 		} else {
 			LOG_ERROR (_expr_raw->start, "未知的表达式");
 		}
 		return std::nullopt;
 	}
+
+	//bool IfExprBuilder (llvm::IRBuilder<> &_builder, AstValue &_dest, FaParser::IfExprContext *_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars) {
+	//	std::vector<FaParser::ExprContext *> _conds;
+	//	std::vector<FaParser::QuotStmtExprContext *> _bodys;
+	//	std::tie (_conds, _bodys) = m_visitor->visitIfExpr (_expr_raw);
+	//	LOG_TODO (_expr_raw->start);
+	//	return false;
+	//}
+
+	//bool IfElseExprBuilder (llvm::IRBuilder<> &_builder, AstValue &_dest, FaParser::IfElseExprContext *_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars) {
+	//	std::vector<FaParser::ExprContext *> _conds;
+	//	std::vector<FaParser::QuotStmtExprContext *> _bodys;
+	//	std::tie (_conds, _bodys) = m_visitor->visitIfElseExpr (_expr_raw);
+	//	LOG_TODO (_expr_raw->start);
+	//	return false;
+	//}
 
 	CodeVisitor *m_visitor = nullptr;
 	std::string m_module_name;
