@@ -103,8 +103,6 @@ public:
 
     virtual antlrcpp::Any visitIfPart(FaParser::IfPartContext *context) = 0;
 
-    virtual antlrcpp::Any visitStmtOrIfExpr(FaParser::StmtOrIfExprContext *context) = 0;
-
     virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotStmtExpr(FaParser::QuotStmtExprContext *context) = 0;
@@ -113,19 +111,19 @@ public:
 
     virtual antlrcpp::Any visitIfExpr(FaParser::IfExprContext *context) = 0;
 
-    virtual antlrcpp::Any visitIfElseExpr(FaParser::IfElseExprContext *context) = 0;
-
     virtual antlrcpp::Any visitWhileStmt(FaParser::WhileStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *context) = 0;
 
-    virtual antlrcpp::Any visitExprPrefix(FaParser::ExprPrefixContext *context) = 0;
+    virtual antlrcpp::Any visitStrongExprBase(FaParser::StrongExprBaseContext *context) = 0;
 
-    virtual antlrcpp::Any visitExprBody(FaParser::ExprBodyContext *context) = 0;
+    virtual antlrcpp::Any visitStrongExprPrefix(FaParser::StrongExprPrefixContext *context) = 0;
 
-    virtual antlrcpp::Any visitExprSuffix(FaParser::ExprSuffixContext *context) = 0;
+    virtual antlrcpp::Any visitStrongExprSuffix(FaParser::StrongExprSuffixContext *context) = 0;
 
-    virtual antlrcpp::Any visitNormalExpr(FaParser::NormalExprContext *context) = 0;
+    virtual antlrcpp::Any visitStrongExpr(FaParser::StrongExprContext *context) = 0;
+
+    virtual antlrcpp::Any visitWeakExprSuffix(FaParser::WeakExprSuffixContext *context) = 0;
 
     virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
 

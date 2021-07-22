@@ -36,15 +36,15 @@ public:
     RuleNotEqualOp = 27, RuleLtOps = 28, RuleGtOps = 29, RuleLiteral = 30, 
     RuleIds = 31, RuleTypeAfter = 32, RuleType = 33, RuleETypeAfter = 34, 
     RuleESign = 35, RuleEType = 36, RuleTypeVar = 37, RuleTypeVarList = 38, 
-    RuleETypeVar = 39, RuleETypeVarList = 40, RuleIfPart = 41, RuleStmtOrIfExpr = 42, 
-    RuleQuotStmtPart = 43, RuleQuotStmtExpr = 44, RuleIfStmt = 45, RuleIfExpr = 46, 
-    RuleIfElseExpr = 47, RuleWhileStmt = 48, RuleQuotExpr = 49, RuleExprPrefix = 50, 
-    RuleExprBody = 51, RuleExprSuffix = 52, RuleNormalExpr = 53, RuleExpr = 54, 
-    RuleDefVarStmt = 55, RuleUseStmt = 56, RuleNormalStmt = 57, RuleStmt = 58, 
-    RulePublicLevel = 59, RuleClassParent = 60, RuleClassItemPart = 61, 
-    RuleClassItemFieldBlock = 62, RuleClassItemFuncBlock = 63, RuleClassBlock = 64, 
-    RuleCallConvention = 65, RuleImportStmt = 66, RuleLibStmt = 67, RuleImportBlock = 68, 
-    RuleFaEntryMainFuncBlock = 69, RuleProgram = 70
+    RuleETypeVar = 39, RuleETypeVarList = 40, RuleIfPart = 41, RuleQuotStmtPart = 42, 
+    RuleQuotStmtExpr = 43, RuleIfStmt = 44, RuleIfExpr = 45, RuleWhileStmt = 46, 
+    RuleQuotExpr = 47, RuleStrongExprBase = 48, RuleStrongExprPrefix = 49, 
+    RuleStrongExprSuffix = 50, RuleStrongExpr = 51, RuleWeakExprSuffix = 52, 
+    RuleExpr = 53, RuleDefVarStmt = 54, RuleUseStmt = 55, RuleNormalStmt = 56, 
+    RuleStmt = 57, RulePublicLevel = 58, RuleClassParent = 59, RuleClassItemPart = 60, 
+    RuleClassItemFieldBlock = 61, RuleClassItemFuncBlock = 62, RuleClassBlock = 63, 
+    RuleCallConvention = 64, RuleImportStmt = 65, RuleLibStmt = 66, RuleImportBlock = 67, 
+    RuleFaEntryMainFuncBlock = 68, RuleProgram = 69
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -99,18 +99,17 @@ public:
   class ETypeVarContext;
   class ETypeVarListContext;
   class IfPartContext;
-  class StmtOrIfExprContext;
   class QuotStmtPartContext;
   class QuotStmtExprContext;
   class IfStmtContext;
   class IfExprContext;
-  class IfElseExprContext;
   class WhileStmtContext;
   class QuotExprContext;
-  class ExprPrefixContext;
-  class ExprBodyContext;
-  class ExprSuffixContext;
-  class NormalExprContext;
+  class StrongExprBaseContext;
+  class StrongExprPrefixContext;
+  class StrongExprSuffixContext;
+  class StrongExprContext;
+  class WeakExprSuffixContext;
   class ExprContext;
   class DefVarStmtContext;
   class UseStmtContext;
@@ -768,20 +767,6 @@ public:
 
   IfPartContext* ifPart();
 
-  class  StmtOrIfExprContext : public antlr4::ParserRuleContext {
-  public:
-    StmtOrIfExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    StmtContext *stmt();
-    IfExprContext *ifExpr();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  StmtOrIfExprContext* stmtOrIfExpr();
-
   class  QuotStmtPartContext : public antlr4::ParserRuleContext {
   public:
     QuotStmtPartContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -805,8 +790,8 @@ public:
     antlr4::tree::TerminalNode *QuotHuaL();
     ExprContext *expr();
     antlr4::tree::TerminalNode *QuotHuaR();
-    std::vector<StmtOrIfExprContext *> stmtOrIfExpr();
-    StmtOrIfExprContext* stmtOrIfExpr(size_t i);
+    std::vector<StmtContext *> stmt();
+    StmtContext* stmt(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -851,21 +836,6 @@ public:
 
   IfExprContext* ifExpr();
 
-  class  IfElseExprContext : public antlr4::ParserRuleContext {
-  public:
-    IfElseExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    IfExprContext *ifExpr();
-    antlr4::tree::TerminalNode *Else();
-    QuotStmtExprContext *quotStmtExpr();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  IfElseExprContext* ifElseExpr();
-
   class  WhileStmtContext : public antlr4::ParserRuleContext {
   public:
     WhileStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -901,11 +871,28 @@ public:
 
   QuotExprContext* quotExpr();
 
-  class  ExprPrefixContext : public antlr4::ParserRuleContext {
+  class  StrongExprBaseContext : public antlr4::ParserRuleContext {
   public:
-    ExprPrefixContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    StrongExprBaseContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *AddOp();
+    IdsContext *ids();
+    antlr4::tree::TerminalNode *ColonColon();
+    antlr4::tree::TerminalNode *Id();
+    LiteralContext *literal();
+    IfExprContext *ifExpr();
+    QuotExprContext *quotExpr();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  StrongExprBaseContext* strongExprBase();
+
+  class  StrongExprPrefixContext : public antlr4::ParserRuleContext {
+  public:
+    StrongExprPrefixContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *SubOp();
     antlr4::tree::TerminalNode *AddAddOp();
     antlr4::tree::TerminalNode *SubSubOp();
@@ -916,29 +903,11 @@ public:
    
   };
 
-  ExprPrefixContext* exprPrefix();
+  StrongExprPrefixContext* strongExprPrefix();
 
-  class  ExprBodyContext : public antlr4::ParserRuleContext {
+  class  StrongExprSuffixContext : public antlr4::ParserRuleContext {
   public:
-    ExprBodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    IdsContext *ids();
-    antlr4::tree::TerminalNode *ColonColon();
-    antlr4::tree::TerminalNode *Id();
-    LiteralContext *literal();
-    IfElseExprContext *ifElseExpr();
-    QuotExprContext *quotExpr();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ExprBodyContext* exprBody();
-
-  class  ExprSuffixContext : public antlr4::ParserRuleContext {
-  public:
-    ExprSuffixContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    StrongExprSuffixContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *AddAddOp();
     antlr4::tree::TerminalNode *SubSubOp();
@@ -950,46 +919,60 @@ public:
     antlr4::tree::TerminalNode* Comma(size_t i);
     antlr4::tree::TerminalNode *QuotFangL();
     antlr4::tree::TerminalNode *QuotFangR();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  StrongExprSuffixContext* strongExprSuffix();
+
+  class  StrongExprContext : public antlr4::ParserRuleContext {
+  public:
+    StrongExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    StrongExprBaseContext *strongExprBase();
+    std::vector<StrongExprPrefixContext *> strongExprPrefix();
+    StrongExprPrefixContext* strongExprPrefix(size_t i);
+    std::vector<StrongExprSuffixContext *> strongExprSuffix();
+    StrongExprSuffixContext* strongExprSuffix(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  StrongExprContext* strongExpr();
+
+  class  WeakExprSuffixContext : public antlr4::ParserRuleContext {
+  public:
+    WeakExprSuffixContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<StrongExprContext *> strongExpr();
+    StrongExprContext* strongExpr(size_t i);
     AllAssignContext *allAssign();
     AllOp2Context *allOp2();
+    EqualOpContext *equalOp();
+    NotEqualOpContext *notEqualOp();
     std::vector<LtOpsContext *> ltOps();
     LtOpsContext* ltOps(size_t i);
     std::vector<GtOpsContext *> gtOps();
     GtOpsContext* gtOps(size_t i);
-    EqualOpContext *equalOp();
-    NotEqualOpContext *notEqualOp();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  ExprSuffixContext* exprSuffix();
-
-  class  NormalExprContext : public antlr4::ParserRuleContext {
-  public:
-    NormalExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    ExprBodyContext *exprBody();
-    std::vector<ExprPrefixContext *> exprPrefix();
-    ExprPrefixContext* exprPrefix(size_t i);
-    std::vector<ExprSuffixContext *> exprSuffix();
-    ExprSuffixContext* exprSuffix(size_t i);
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  NormalExprContext* normalExpr();
+  WeakExprSuffixContext* weakExprSuffix();
 
   class  ExprContext : public antlr4::ParserRuleContext {
   public:
     ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    IfElseExprContext *ifElseExpr();
-    QuotExprContext *quotExpr();
-    NormalExprContext *normalExpr();
+    StrongExprContext *strongExpr();
+    std::vector<WeakExprSuffixContext *> weakExprSuffix();
+    WeakExprSuffixContext* weakExprSuffix(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

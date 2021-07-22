@@ -164,12 +164,10 @@ eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 // if
 //
 ifPart:						If QuotYuanL expr QuotYuanR;
-stmtOrIfExpr:				stmt | ifExpr;
 quotStmtPart:				QuotHuaL stmt* QuotHuaR;
-quotStmtExpr:				QuotHuaL stmtOrIfExpr* expr QuotHuaR;
+quotStmtExpr:				QuotHuaL stmt* expr QuotHuaR;
 ifStmt:						ifPart quotStmtPart (Else ifPart quotStmtPart)* (Else quotStmtPart)?;
-ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)*;
-ifElseExpr:					ifExpr Else quotStmtExpr;
+ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)* Else quotStmtExpr;
 
 
 
@@ -183,16 +181,18 @@ whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
 //
 // expr
 //
-quotExpr:					(QuotYuanL expr QuotYuanR);
-exprPrefix:					AddOp | SubOp | AddAddOp | SubSubOp | ReverseOp;								// 前缀 + - ++ -- ~
-exprBody:					ids | (ColonColon Id) | literal | ifElseExpr | quotExpr;						// 本体
-exprSuffix:					(AddAddOp | SubSubOp)															// 后缀 ++ --
-							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//      Write ("")
-							| (QuotFangL expr QuotFangR)													//      list [12]
-							| ((allAssign | allOp2) expr)													//      12 += 24
-							| (ltOps expr)+ | (gtOps expr)+ | ((equalOp | notEqualOp) expr);				//      a < b <= c < d
-normalExpr:					exprPrefix* exprBody exprSuffix*;
-expr:						ifElseExpr | quotExpr | normalExpr;
+quotExpr:					QuotYuanL expr QuotYuanR;
+strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr;
+strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// 前缀 - ++ -- ~
+strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
+							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
+							| (QuotFangL expr QuotFangR)													//     list [12];
+							;
+strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
+weakExprSuffix				: ((allAssign | allOp2 | equalOp | notEqualOp) strongExpr)						//      a += 24
+							| (ltOps strongExpr)+ | (gtOps strongExpr)+										//      a < b <= c < d
+							;
+expr:						strongExpr weakExprSuffix*;
 
 
 

@@ -57,14 +57,6 @@ public:
 		return std::make_tuple (_conds, ctx->quotStmtExpr ());
 	}
 
-	antlrcpp::Any visitIfElseExpr (FaParser::IfElseExprContext *ctx) override {
-		std::vector<FaParser::ExprContext *> _conds;
-		std::vector<FaParser::QuotStmtExprContext *> _bodys;
-		std::tie (_conds, _bodys) = visitIfExpr (ctx->ifExpr ());
-		_bodys.push_back (ctx->quotStmtExpr ());
-		return std::make_tuple (_conds, _bodys);
-	}
-
 	antlrcpp::Any visitImportBlock (FaParser::ImportBlockContext *ctx) override {
 		std::vector<FaParser::ImportStmtContext *> _imports;
 		std::vector<std::string> _libs;

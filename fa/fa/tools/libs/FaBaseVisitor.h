@@ -183,10 +183,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitStmtOrIfExpr(FaParser::StmtOrIfExprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -203,10 +199,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitIfElseExpr(FaParser::IfElseExprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitWhileStmt(FaParser::WhileStmtContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -215,19 +207,23 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitExprPrefix(FaParser::ExprPrefixContext *ctx) override {
+  virtual antlrcpp::Any visitStrongExprBase(FaParser::StrongExprBaseContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitExprBody(FaParser::ExprBodyContext *ctx) override {
+  virtual antlrcpp::Any visitStrongExprPrefix(FaParser::StrongExprPrefixContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitExprSuffix(FaParser::ExprSuffixContext *ctx) override {
+  virtual antlrcpp::Any visitStrongExprSuffix(FaParser::StrongExprSuffixContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitNormalExpr(FaParser::NormalExprContext *ctx) override {
+  virtual antlrcpp::Any visitStrongExpr(FaParser::StrongExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitWeakExprSuffix(FaParser::WeakExprSuffixContext *ctx) override {
     return visitChildren(ctx);
   }
 

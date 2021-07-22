@@ -77,7 +77,7 @@
     <ClInclude Include="Log.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="AstValue.hpp">
+    <ClInclude Include="AstObject.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
