@@ -48,16 +48,18 @@ public:
 			m_value = _val.value ();
 		}
 	}
-	explicit AstObject (llvm::AllocaInst *_var, std::string _typestr): m_type (AstObjectType::Var), m_value (_var), m_typestr (_typestr) {}
-	explicit AstObject (llvm::Value *_value, std::string _typestr): m_type (AstObjectType::Value), m_value (_value), m_typestr (_typestr) {}
-	explicit AstObject (llvm::Function *_func): m_type (AstObjectType::Func), m_func (_func) {}
-	explicit AstObject (std::string _typestr): m_type (AstObjectType::TypeStr), m_typestr (_typestr) {}
+	AstObject (llvm::AllocaInst *_var): m_type (AstObjectType::Var), m_value (_var) {}
+	AstObject (llvm::Value *_value): m_type (AstObjectType::Value), m_value (_value) {}
+	AstObject (llvm::Function *_func): m_type (AstObjectType::Func), m_func (_func) {}
+	AstObject &operator= (const llvm::Value *_val) {
+		AstObject _o { _val };
+		return operator= (_o);
+	}
 	AstObject &operator= (const AstObject &_o) {
 		if (m_allow_assign) {
 			m_type = _o.m_type;
 			m_value = _o.m_value;
 			m_func = _o.m_func;
-			m_typestr = _o.m_typestr;
 		} else {
 			LOG_ERROR (nullptr, "当前 AstObject 对象不允许赋值");
 		}
@@ -105,16 +107,16 @@ public:
 				std::optional<llvm::Value *> _tmp2 = _value_builder->Build (_typestr, "0", _t);
 				if (!_tmp2.has_value ())
 					return std::nullopt;
-				return { _builder.CreateSub (_tmp2.value (), _tmp), _typestr };
+				return _builder.CreateSub (_tmp2.value (), _tmp);
 			} else if (_op == "++" || _op == "--") {
 				std::optional<llvm::Value *> _tmp2 = _value_builder->Build (_typestr, "1", _t);
 				if (!_tmp2.has_value ())
 					return std::nullopt;
 				AstObject _v;
 				if (_op == "++") {
-					_v = { _builder.CreateAdd (Value (_builder), _tmp2.value ()), _typestr };
+					_v = _builder.CreateAdd (Value (_builder), _tmp2.value ());
 				} else {
-					_v = { _builder.CreateSub (Value (_builder), _tmp2.value ()), _typestr };
+					_v = _builder.CreateSub (Value (_builder), _tmp2.value ());
 				}
 				if (!Assign (_builder, _v, _t))
 					return std::nullopt;
@@ -127,7 +129,7 @@ public:
 				std::optional<llvm::Value *> _tmp2 = _value_builder->Build (_typestr, "true", _t);
 				if (!_tmp2.has_value ())
 					return std::nullopt;
-				return { _builder.CreateSub (_tmp2.value (), _tmp), _typestr };
+				return _builder.CreateSub (_tmp2.value (), _tmp);
 			}
 		}
 
@@ -152,28 +154,27 @@ public:
 		llvm::Value *_v = _val.Value (_builder);
 		if (_op.size () == 1) {
 			switch (_op [0]) {
-			case '+': return { _builder.CreateAdd (_tmp, _v), m_typestr };
-			case '-': return { _builder.CreateSub (_tmp, _v), m_typestr };
-			case '*': return { _builder.CreateMul (_tmp, _v), m_typestr };
-			case '/': return { _builder.CreateSDiv (_tmp, _v), m_typestr };
-			case '%': return { _builder.CreateSRem (_tmp, _v), m_typestr };
-			case '|': return { _builder.CreateOr (_tmp, _v), m_typestr };
-			case '&': return { _builder.CreateAnd (_tmp, _v), m_typestr };
-			case '^': return { _builder.CreateXor (_tmp, _v), m_typestr };
+			case '+': return _builder.CreateAdd (_tmp, _v);
+			case '-': return _builder.CreateSub (_tmp, _v);
+			case '*': return _builder.CreateMul (_tmp, _v);
+			case '/': return _builder.CreateSDiv (_tmp, _v);
+			case '%': return _builder.CreateSRem (_tmp, _v);
+			case '|': return _builder.CreateOr (_tmp, _v);
+			case '&': return _builder.CreateAnd (_tmp, _v);
+			case '^': return _builder.CreateXor (_tmp, _v);
 			}
 		} else if (_op.size () == 2 && _op [0] == _op [1]) {
 			switch (_op [0]) {
-			case '?': return { _builder.CreateAdd (_tmp, _v), m_typestr };
-			case '*': return { _builder.CreateAdd (_tmp, _v), m_typestr };
-			case '&': return { _builder.CreateAnd (_tmp, _v), m_typestr };
-			case '|': return { _builder.CreateOr (_tmp, _v), m_typestr };
-			case '<': return { _builder.CreateShl (_tmp, _v), m_typestr };
-			case '>': return { _builder.CreateShl (_tmp, DoOper1 (_builder, _value_builder, "-", _t).Value (_builder)), m_typestr };
+			case '?': return _builder.CreateAdd (_tmp, _v);
+			case '*': return _builder.CreateAdd (_tmp, _v);
+			case '&': return _builder.CreateAnd (_tmp, _v);
+			case '|': return _builder.CreateOr (_tmp, _v);
+			case '<': return _builder.CreateShl (_tmp, _v);
+			case '>': return _builder.CreateShl (_tmp, DoOper1 (_builder, _value_builder, "-", _t).Value (_builder));
 			}
 		}
 		return std::nullopt;
 	}
-	std::string GetTypeStr () { return m_typestr; }
 	static AstObject nullopt;
 
 private:
@@ -181,7 +182,6 @@ private:
 	AstObjectType m_type = AstObjectType::None;
 	llvm::Value *m_value = nullptr;
 	llvm::Function *m_func = nullptr;
-	std::string m_typestr = "";
 };
 
 inline AstObject AstObject::nullopt { false };

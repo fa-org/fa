@@ -45,6 +45,7 @@
       <Filter>源文件</Filter>
     </None>
     <None Include="tools\Fa.g4" />
+    <None Include="..\..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tools\libs\FaVisitor.h">
@@ -78,6 +79,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="AstObject.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AstCheck.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

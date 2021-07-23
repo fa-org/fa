@@ -951,9 +951,10 @@ public:
     std::vector<StrongExprContext *> strongExpr();
     StrongExprContext* strongExpr(size_t i);
     AllAssignContext *allAssign();
-    AllOp2Context *allOp2();
     EqualOpContext *equalOp();
     NotEqualOpContext *notEqualOp();
+    std::vector<AllOp2Context *> allOp2();
+    AllOp2Context* allOp2(size_t i);
     std::vector<LtOpsContext *> ltOps();
     LtOpsContext* ltOps(size_t i);
     std::vector<GtOpsContext *> gtOps();
@@ -971,8 +972,7 @@ public:
     ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     StrongExprContext *strongExpr();
-    std::vector<WeakExprSuffixContext *> weakExprSuffix();
-    WeakExprSuffixContext* weakExprSuffix(size_t i);
+    WeakExprSuffixContext *weakExprSuffix();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

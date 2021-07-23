@@ -189,10 +189,11 @@ strongExprSuffix			: AddAddOp | SubSubOp															// บ๓ืบ ++ --
 							| (QuotFangL expr QuotFangR)													//     list [12];
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
-weakExprSuffix				: ((allAssign | allOp2 | equalOp | notEqualOp) strongExpr)						//      a += 24
+weakExprSuffix				: ((allAssign | equalOp | notEqualOp) strongExpr)								//      a += 24
+							| (allOp2 strongExpr)+															//      a + b - c
 							| (ltOps strongExpr)+ | (gtOps strongExpr)+										//      a < b <= c < d
 							;
-expr:						strongExpr weakExprSuffix*;
+expr:						strongExpr weakExprSuffix?;
 
 
 

@@ -38,6 +38,7 @@
 #include "TypeMap.hpp"
 #include "ValueBuilder.hpp"
 #include "AstObject.hpp"
+#include "AstCheck.hpp"
 
 
 
@@ -228,7 +229,7 @@ private:
 					std::vector<FaParser::ExprContext *>,
 					std::vector<std::vector<FaParser::StmtContext *>>
 				>> ();
-				if (!IfStmtBuilder (_builder, _conds, _bodys, _f, _new_local_vars, AstObject::nullopt))
+				if (!IfStmtBuilder (_builder, _conds, _bodys, _f, _new_local_vars))
 					return false;
 			} else if (_stmt_raw->whileStmt ()) {
 				// TODO
@@ -257,50 +258,33 @@ private:
 		return true;
 	}
 
-	bool IfStmtBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw, llvm::Function *_f, std::map<std::string, llvm::AllocaInst *> &_local_vars, AstObject &_vt) {
-		if (_conds_raw.size () > 0) {
-			AstObject _cond { "bool" };
-			if (!ExprBuilder (_builder, _conds_raw [0], _local_vars, _cond))
-				return false;
-			// TODO
-		}
-	//	if (_conds_raw.size () == 0) {
-	//		if (_bodys_raw.size () >= 2) {
-	//			LOG_ERROR (_bodys_raw [0][0]->start, "条件异常");
-	//			return false;
-	//		} else if (_bodys_raw.size () == 1) {
-	//			if (!StmtBuilder (_builder, _bodys_raw [0], _f, _local_vars))
-	//				return false;
-	//			_bodys_raw.erase (_bodys_raw.begin ());
-	//		}
-	//		return true;
-	//	}
-	//	AstValue _cond = ExprBuilder (_builder, _conds_raw [0], _local_vars);
-	//	if (!_cond.IsValid ()) {
-	//		return false;
-	//	} else if (!_cond.IsValue ()) {
-	//		LOG_ERROR (_conds_raw [0]->start, "条件需指定为值类型");
-	//		return false;
-	//	}
-	//	_conds_raw.erase (_conds_raw.begin ());
-	//	llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-	//	llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-	//	llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-	//	_builder.CreateCondBr (_cond.Value (_builder), _true_bb, _false_bb);
-	//	//
-	//	_builder.SetInsertPoint (_true_bb);
-	//	if (!StmtBuilder (_builder, _bodys_raw [0], _f, _local_vars))
-	//		return false;
-	//	_bodys_raw.erase (_bodys_raw.begin ());
-	//	_builder.CreateBr (_endif_bb);
-	//	//
-	//	_builder.SetInsertPoint (_false_bb);
-	//	if (!IfStmtBuilder (_builder, _conds_raw, _bodys_raw, _f, _local_vars))
-	//		return false;
-	//	_builder.CreateBr (_endif_bb);
-	//	//
-	//	_builder.SetInsertPoint (_endif_bb);
-	//	return true;
+	bool IfStmtBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw, llvm::Function *_f, std::map<std::string, llvm::AllocaInst *> &_local_vars) {
+		if (_conds_raw.size () == 0)
+			return StmtBuilder (_builder, _bodys_raw [0], _f, _local_vars);
+		//
+		AstObject _cond { "bool" };
+		// TODO: 不允许计算表达式有副作用
+		if (!ExprBuilder (_builder, _conds_raw [0], _local_vars, _cond))
+			return false;
+		_conds_raw.erase (_conds_raw.begin ());
+		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
+		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
+		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
+		_builder.CreateCondBr (_cond.Value (_builder), _true_bb, _false_bb);
+		//
+		_builder.SetInsertPoint (_true_bb);
+		if (!StmtBuilder (_builder, _bodys_raw [0], _f, _local_vars))
+			return false;
+		_bodys_raw.erase (_bodys_raw.begin ());
+		_builder.CreateBr (_endif_bb);
+		//
+		_builder.SetInsertPoint (_false_bb);
+		if (!IfStmtBuilder (_builder, _conds_raw, _bodys_raw, _f, _local_vars))
+			return false;
+		_builder.CreateBr (_endif_bb);
+		//
+		_builder.SetInsertPoint (_endif_bb);
+		return true;
 	}
 
 	//bool ExprBodyBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprBodyContext *_current_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars, VarOrType &_vt) {
@@ -337,7 +321,18 @@ private:
 	//	}
 	//}
 
-	bool ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars, AstObject &_vt) {
+	bool ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars, std::string _expect_type, AstObject &_vt) {
+		// 判断表达式是否需要缓存（带ifExpr并且是原对象则需要缓存）
+		if (AstCheck::NeedExternCache (_expr_raw)) {
+			if (!_vt.AllowAssign ()) {
+				LOG_ERROR (_expr_raw->start, "表达式需缓存结果");
+				return false;
+			}
+		}
+
+		if (!StrongExprBuilder (_builder, _expr_raw->strongExpr (), _local_vars, _vt))
+			return false;
+
 	//	if (_expr_raw->ifExpr ()) {
 	//		return IfExprBuilder (_builder, _expr_raw->ifExpr (), _local_vars, _vt);
 	//	} else if (_expr_raw->quotExpr ()) {
@@ -360,7 +355,6 @@ private:
 	//				if (_suffix_item->AddAddOp)
 	//			}
 	//		}
-
 	//		AstValue _current = ExprBodyBuilder (_builder, _normal_expr_raw->exprBody (), _local_vars);
 	//		if (!_current.IsValid ())
 	//			return false;
@@ -433,6 +427,10 @@ private:
 	//		LOG_ERROR (_expr_raw->start, "未知的表达式");
 	//	}
 	//	return std::nullopt;
+	}
+
+	bool StrongExprBuilder (llvm::IRBuilder<> &_builder, FaParser::StrongExprContext *_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars, AstObject &_vt) {
+
 	}
 
 	//bool IfExprBuilder (llvm::IRBuilder<> &_builder, FaParser::IfExprContext *_if_expr_raw, std::map<std::string, llvm::AllocaInst *> &_local_vars, VarOrType &_vt) {
