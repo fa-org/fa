@@ -115,6 +115,8 @@ public:
 
     virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *context) = 0;
 
+    virtual antlrcpp::Any visitExprOpt(FaParser::ExprOptContext *context) = 0;
+
     virtual antlrcpp::Any visitStrongExprBase(FaParser::StrongExprBaseContext *context) = 0;
 
     virtual antlrcpp::Any visitStrongExprPrefix(FaParser::StrongExprPrefixContext *context) = 0;

@@ -180,7 +180,7 @@
     <None Include="tools\generate.bat" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AstObject.hpp">
+    <ClInclude Include="AstValue.hpp">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>

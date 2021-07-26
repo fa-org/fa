@@ -207,6 +207,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitExprOpt(FaParser::ExprOptContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitStrongExprBase(FaParser::StrongExprBaseContext *ctx) override {
     return visitChildren(ctx);
   }

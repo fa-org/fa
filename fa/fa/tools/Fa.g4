@@ -182,11 +182,12 @@ whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
 // expr
 //
 quotExpr:					QuotYuanL expr QuotYuanR;
+exprOpt:					expr?;
 strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// Ç°×º - ++ -- ~
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
-							| (QuotFangL expr QuotFangR)													//     list [12];
+							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12];
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
 weakExprSuffix				: ((allAssign | equalOp | notEqualOp) strongExpr)								//      a += 24

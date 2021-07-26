@@ -40,12 +40,12 @@ int main (int argc, char *argv[]) {
 //@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
 
 static int32 FaEntryMain () {
-	int32 n = 10;
+	//int32 n = 10;
 	::puts ("false\n");
 	return 0;
 }
 )";
-	Log::SetCurrentFile ("Program.fa");
+	Log::SetCurrentFile ("Program.fa", _code);
 	std::cout << "----------source begin----------" << std::endl;
 	std::cout << _code << std::endl;
 	std::cout << "----------source end----------" << std::endl << std::endl;

@@ -38,13 +38,13 @@ public:
     RuleESign = 35, RuleEType = 36, RuleTypeVar = 37, RuleTypeVarList = 38, 
     RuleETypeVar = 39, RuleETypeVarList = 40, RuleIfPart = 41, RuleQuotStmtPart = 42, 
     RuleQuotStmtExpr = 43, RuleIfStmt = 44, RuleIfExpr = 45, RuleWhileStmt = 46, 
-    RuleQuotExpr = 47, RuleStrongExprBase = 48, RuleStrongExprPrefix = 49, 
-    RuleStrongExprSuffix = 50, RuleStrongExpr = 51, RuleWeakExprSuffix = 52, 
-    RuleExpr = 53, RuleDefVarStmt = 54, RuleUseStmt = 55, RuleNormalStmt = 56, 
-    RuleStmt = 57, RulePublicLevel = 58, RuleClassParent = 59, RuleClassItemPart = 60, 
-    RuleClassItemFieldBlock = 61, RuleClassItemFuncBlock = 62, RuleClassBlock = 63, 
-    RuleCallConvention = 64, RuleImportStmt = 65, RuleLibStmt = 66, RuleImportBlock = 67, 
-    RuleFaEntryMainFuncBlock = 68, RuleProgram = 69
+    RuleQuotExpr = 47, RuleExprOpt = 48, RuleStrongExprBase = 49, RuleStrongExprPrefix = 50, 
+    RuleStrongExprSuffix = 51, RuleStrongExpr = 52, RuleWeakExprSuffix = 53, 
+    RuleExpr = 54, RuleDefVarStmt = 55, RuleUseStmt = 56, RuleNormalStmt = 57, 
+    RuleStmt = 58, RulePublicLevel = 59, RuleClassParent = 60, RuleClassItemPart = 61, 
+    RuleClassItemFieldBlock = 62, RuleClassItemFuncBlock = 63, RuleClassBlock = 64, 
+    RuleCallConvention = 65, RuleImportStmt = 66, RuleLibStmt = 67, RuleImportBlock = 68, 
+    RuleFaEntryMainFuncBlock = 69, RuleProgram = 70
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -105,6 +105,7 @@ public:
   class IfExprContext;
   class WhileStmtContext;
   class QuotExprContext;
+  class ExprOptContext;
   class StrongExprBaseContext;
   class StrongExprPrefixContext;
   class StrongExprSuffixContext;
@@ -871,6 +872,19 @@ public:
 
   QuotExprContext* quotExpr();
 
+  class  ExprOptContext : public antlr4::ParserRuleContext {
+  public:
+    ExprOptContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExprContext *expr();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ExprOptContext* exprOpt();
+
   class  StrongExprBaseContext : public antlr4::ParserRuleContext {
   public:
     StrongExprBaseContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -919,6 +933,10 @@ public:
     antlr4::tree::TerminalNode* Comma(size_t i);
     antlr4::tree::TerminalNode *QuotFangL();
     antlr4::tree::TerminalNode *QuotFangR();
+    std::vector<ExprOptContext *> exprOpt();
+    ExprOptContext* exprOpt(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> Colon();
+    antlr4::tree::TerminalNode* Colon(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

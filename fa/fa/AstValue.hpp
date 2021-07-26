@@ -18,14 +18,14 @@
 
 
 
-class AstObject {
+class AstValue {
 	enum class AstObjectType { None, Value, Var, Func, TypeStr };
 
 public:
-	AstObject () {}
-	AstObject (std::nullopt_t) {}
-	explicit AstObject (bool _allow_assign): m_allow_assign (_allow_assign) {}
-	explicit AstObject (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
+	AstValue () {}
+	AstValue (std::nullopt_t) {}
+	explicit AstValue (bool _allow_assign): m_allow_assign (_allow_assign) {}
+	explicit AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
 		std::optional<llvm::Value *> _val;
 		if (_literal->BoolLiteral ()) {
 			_val = _value_builder->Build ("bool", _literal->getText (), _literal->start);
@@ -48,20 +48,18 @@ public:
 			m_value = _val.value ();
 		}
 	}
-	AstObject (llvm::AllocaInst *_var): m_type (AstObjectType::Var), m_value (_var) {}
-	AstObject (llvm::Value *_value): m_type (AstObjectType::Value), m_value (_value) {}
-	AstObject (llvm::Function *_func): m_type (AstObjectType::Func), m_func (_func) {}
-	AstObject &operator= (const llvm::Value *_val) {
-		AstObject _o { _val };
-		return operator= (_o);
-	}
-	AstObject &operator= (const AstObject &_o) {
+	AstValue (llvm::AllocaInst *_var): m_type (AstObjectType::Var), m_value (_var) {}
+	AstValue (llvm::Value *_value): m_type (AstObjectType::Value), m_value (_value) {}
+	AstValue (llvm::Function *_func): m_type (AstObjectType::Func), m_func (_func) {}
+	AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
+	AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
+	AstValue &operator= (const AstValue &_o) {
 		if (m_allow_assign) {
 			m_type = _o.m_type;
 			m_value = _o.m_value;
 			m_func = _o.m_func;
 		} else {
-			LOG_ERROR (nullptr, "当前 AstObject 对象不允许赋值");
+			LOG_ERROR (nullptr, "当前 AstValue 对象不允许赋值");
 		}
 		return *this;
 	}
@@ -87,7 +85,7 @@ public:
 			return nullptr;
 		return _builder.CreateCall (m_func, _args);
 	}
-	bool Assign (llvm::IRBuilder<> &_builder, AstObject &_val, antlr4::Token *_t) {
+	bool Assign (llvm::IRBuilder<> &_builder, AstValue &_val, antlr4::Token *_t) {
 		if (m_type != AstObjectType::Var) {
 			LOG_ERROR (_t, "非变量类型无法赋值");
 			return false;
@@ -95,7 +93,7 @@ public:
 		_builder.CreateStore (_val.Value (_builder), m_value);
 		return true;
 	}
-	AstObject DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token *_t) {
+	AstValue DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token *_t) {
 		if (!IsValue ())
 			return std::nullopt;
 		llvm::Value *_tmp = _builder.CreateLoad (m_value);
@@ -112,7 +110,7 @@ public:
 				std::optional<llvm::Value *> _tmp2 = _value_builder->Build (_typestr, "1", _t);
 				if (!_tmp2.has_value ())
 					return std::nullopt;
-				AstObject _v;
+				AstValue _v;
 				if (_op == "++") {
 					_v = _builder.CreateAdd (Value (_builder), _tmp2.value ());
 				} else {
@@ -136,10 +134,10 @@ public:
 		LOG_ERROR (_t, fmt::format ("暂不支持的运算符 {}", _op));
 		return std::nullopt;
 	}
-	AstObject DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstObject &_val, antlr4::Token *_t) {
+	AstValue DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue &_val, antlr4::Token *_t) {
 		if (_op [_op.size () - 1] == '=') {
 			if (_op.size () > 1) {
-				AstObject _tmp = DoOper2 (_builder, _value_builder, _op.substr (0, _op.size () - 1), _val, _t);
+				AstValue _tmp = DoOper2 (_builder, _value_builder, _op.substr (0, _op.size () - 1), _val, _t);
 				if (!_tmp.IsValid ())
 					return std::nullopt;
 				if (!Assign (_builder, _tmp, _t))
@@ -175,7 +173,7 @@ public:
 		}
 		return std::nullopt;
 	}
-	static AstObject nullopt;
+	static AstValue nullopt;
 
 private:
 	bool m_allow_assign = true;
@@ -184,7 +182,7 @@ private:
 	llvm::Function *m_func = nullptr;
 };
 
-inline AstObject AstObject::nullopt { false };
+inline AstValue AstValue::nullopt { false };
 
 
 
