@@ -179,10 +179,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitIfPart(FaParser::IfPartContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *ctx) override {
     return visitChildren(ctx);
   }

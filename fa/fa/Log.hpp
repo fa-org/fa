@@ -42,10 +42,10 @@ class Log {
 				_end1 = std::min (_end1, _end2);
 			}
 		}
-		std::string _line = "", _arrow = "";
-		for (size_t i = _start; i < _end1 || i >= s_code.size (); ++i) {
-			_line += s_code [i];
-			_arrow += s_code [i] == '\t' ? '\t' : ' ';
+		std::string_view _line = s_code.substr (_start, _end1 - _start);
+		std::string _arrow = "";
+		for (size_t i = 0, _end2 = _t->getCharPositionInLine (); i < _end2; ++i) {
+			_arrow += s_code [_start + i] == '\t' ? '\t' : ' ';
 		}
 		_arrow += '^';
 		std::cout << _line << std::endl << _arrow << std::endl;

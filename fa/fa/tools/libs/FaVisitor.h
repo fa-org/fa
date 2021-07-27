@@ -101,8 +101,6 @@ public:
 
     virtual antlrcpp::Any visitETypeVarList(FaParser::ETypeVarListContext *context) = 0;
 
-    virtual antlrcpp::Any visitIfPart(FaParser::IfPartContext *context) = 0;
-
     virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotStmtExpr(FaParser::QuotStmtExprContext *context) = 0;

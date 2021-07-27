@@ -163,11 +163,10 @@ eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 //
 // if
 //
-ifPart:						If QuotYuanL expr QuotYuanR;
 quotStmtPart:				QuotHuaL stmt* QuotHuaR;
 quotStmtExpr:				QuotHuaL stmt* expr QuotHuaR;
-ifStmt:						ifPart quotStmtPart (Else ifPart quotStmtPart)* (Else quotStmtPart)?;
-ifExpr:						ifPart quotStmtExpr (Else ifPart quotStmtExpr)* Else quotStmtExpr;
+ifStmt:						If expr quotStmtPart (Else If expr quotStmtPart)* (Else quotStmtPart)?;
+ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr;
 
 
 

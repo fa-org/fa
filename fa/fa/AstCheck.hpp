@@ -3,54 +3,53 @@
 
 
 
+#include <optional>
+#include <string>
+
 #include <FaParser.h>
 
 
 
 class AstCheck {
 public:
-	static bool NeedExternCache (FaParser::ExprContext *_expr_raw) {
-		return _check_is_ifexpr (_expr_raw) && _check_expr_is_self (_expr_raw);
+	static std::optional<std::string> TryGetStrongExpectType (FaParser::ExprContext *_expr_raw, std::string _expect_type) {
+		auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
+		if (!_weak_suffix_raw)
+			return _expect_type;
+		if (_weak_suffix_raw->allAssign ()) {
+			return _expect_type;
+		} else if (_weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
+			return "[equable]";
+		} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
+			return _expect_type;
+		} else if (_weak_suffix_raw->ltOps ().size () > 0 || _weak_suffix_raw->gtOps ().size () > 0) {
+			return "[comparable]";
+		} else {
+			LOG_TODO (_expr_raw->start);
+			return std::nullopt;
+		}
 	}
 
 private:
-	static bool _check_is_ifexpr (FaParser::ExprContext *_expr_raw) {
-		auto _expr_base_raw = _expr_raw->strongExpr ()->strongExprBase ();
-		if (_expr_base_raw->quotExpr ()) {
-			return _check_is_ifexpr (_expr_base_raw->quotExpr ()->expr ());
+	static std::string _get_short_type (std::string _type1, std::string _type2) {
+		if (_type1 == "") {
+			return _type2;
+		} else if (_type2 == "") {
+			return _type1;
 		} else {
-			return !!_expr_base_raw->ifExpr ();
-		}
-	}
-
-	static bool _check_expr_is_self (FaParser::ExprContext *_expr_raw) {
-		// 检查weak后缀
-		if (_expr_raw->weakExprSuffix ()) {
-			auto _suffix_raw = _expr_raw->weakExprSuffix ();
-			if (_suffix_raw->equalOp () || _suffix_raw->notEqualOp ()) {
-				return false;
-			} else if (_suffix_raw->allOp2 ().size () > 0 || _suffix_raw->ltOps ().size () > 0 || _suffix_raw->gtOps ().size () > 0) {
-				return false;
+			bool _type1_range = _type1 [0] == '[';
+			bool _type2_range = _type2 [0] == '[';
+			// TODO: 检查类型和范围是否匹配
+			if (_type1_range && (!_type2_range)) {
+				return _type2;
+			} else if ((!_type1_range) && _type2_range) {
+				return _type1;
+			} else if (_type1_range && _type2_range) {
+				// 俩范围
+			} else {
+				// 俩类型
 			}
 		}
-
-		// 检查strong前缀
-		if (_expr_raw->strongExpr ()->strongExprPrefix ().size () > 0) {
-			for (auto _prefix_raws : _expr_raw->strongExpr ()->strongExprPrefix ()) {
-				if (_prefix_raws->SubOp () || _prefix_raws->ReverseOp ())
-					return false;
-			}
-		}
-
-		// 检查strong后缀
-		if (_expr_raw->strongExpr ()->strongExprSuffix ().size () > 0) {
-			for (auto _suffix_raws : _expr_raw->strongExpr ()->strongExprSuffix ()) {
-				if (_suffix_raws->QuotYuanL () || _suffix_raws->QuotFangL ())
-					return false;
-			}
-		}
-
-		return false;
 	}
 };
 

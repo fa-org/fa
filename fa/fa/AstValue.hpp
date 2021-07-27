@@ -24,7 +24,6 @@ class AstValue {
 public:
 	AstValue () {}
 	AstValue (std::nullopt_t) {}
-	explicit AstValue (bool _allow_assign): m_allow_assign (_allow_assign) {}
 	explicit AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
 		std::optional<llvm::Value *> _val;
 		if (_literal->BoolLiteral ()) {
@@ -54,17 +53,12 @@ public:
 	AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const AstValue &_o) {
-		if (m_allow_assign) {
-			m_type = _o.m_type;
-			m_value = _o.m_value;
-			m_func = _o.m_func;
-		} else {
-			LOG_ERROR (nullptr, "当前 AstValue 对象不允许赋值");
-		}
+		m_type = _o.m_type;
+		m_value = _o.m_value;
+		m_func = _o.m_func;
 		return *this;
 	}
 
-	bool AllowAssign () const { return m_allow_assign; }
 	bool IsValid () const { return m_type != AstObjectType::None; }
 	bool IsValue () const { return m_type == AstObjectType::Value || m_type == AstObjectType::Var; }
 	bool IsVariable () const { return m_type == AstObjectType::Var; }
@@ -173,16 +167,12 @@ public:
 		}
 		return std::nullopt;
 	}
-	static AstValue nullopt;
 
 private:
-	bool m_allow_assign = true;
 	AstObjectType m_type = AstObjectType::None;
 	llvm::Value *m_value = nullptr;
 	llvm::Function *m_func = nullptr;
 };
-
-inline AstValue AstValue::nullopt { false };
 
 
 

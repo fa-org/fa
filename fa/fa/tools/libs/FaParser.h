@@ -36,15 +36,15 @@ public:
     RuleNotEqualOp = 27, RuleLtOps = 28, RuleGtOps = 29, RuleLiteral = 30, 
     RuleIds = 31, RuleTypeAfter = 32, RuleType = 33, RuleETypeAfter = 34, 
     RuleESign = 35, RuleEType = 36, RuleTypeVar = 37, RuleTypeVarList = 38, 
-    RuleETypeVar = 39, RuleETypeVarList = 40, RuleIfPart = 41, RuleQuotStmtPart = 42, 
-    RuleQuotStmtExpr = 43, RuleIfStmt = 44, RuleIfExpr = 45, RuleWhileStmt = 46, 
-    RuleQuotExpr = 47, RuleExprOpt = 48, RuleStrongExprBase = 49, RuleStrongExprPrefix = 50, 
-    RuleStrongExprSuffix = 51, RuleStrongExpr = 52, RuleWeakExprSuffix = 53, 
-    RuleExpr = 54, RuleDefVarStmt = 55, RuleUseStmt = 56, RuleNormalStmt = 57, 
-    RuleStmt = 58, RulePublicLevel = 59, RuleClassParent = 60, RuleClassItemPart = 61, 
-    RuleClassItemFieldBlock = 62, RuleClassItemFuncBlock = 63, RuleClassBlock = 64, 
-    RuleCallConvention = 65, RuleImportStmt = 66, RuleLibStmt = 67, RuleImportBlock = 68, 
-    RuleFaEntryMainFuncBlock = 69, RuleProgram = 70
+    RuleETypeVar = 39, RuleETypeVarList = 40, RuleQuotStmtPart = 41, RuleQuotStmtExpr = 42, 
+    RuleIfStmt = 43, RuleIfExpr = 44, RuleWhileStmt = 45, RuleQuotExpr = 46, 
+    RuleExprOpt = 47, RuleStrongExprBase = 48, RuleStrongExprPrefix = 49, 
+    RuleStrongExprSuffix = 50, RuleStrongExpr = 51, RuleWeakExprSuffix = 52, 
+    RuleExpr = 53, RuleDefVarStmt = 54, RuleUseStmt = 55, RuleNormalStmt = 56, 
+    RuleStmt = 57, RulePublicLevel = 58, RuleClassParent = 59, RuleClassItemPart = 60, 
+    RuleClassItemFieldBlock = 61, RuleClassItemFuncBlock = 62, RuleClassBlock = 63, 
+    RuleCallConvention = 64, RuleImportStmt = 65, RuleLibStmt = 66, RuleImportBlock = 67, 
+    RuleFaEntryMainFuncBlock = 68, RuleProgram = 69
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -98,7 +98,6 @@ public:
   class TypeVarListContext;
   class ETypeVarContext;
   class ETypeVarListContext;
-  class IfPartContext;
   class QuotStmtPartContext;
   class QuotStmtExprContext;
   class IfStmtContext;
@@ -752,22 +751,6 @@ public:
 
   ETypeVarListContext* eTypeVarList();
 
-  class  IfPartContext : public antlr4::ParserRuleContext {
-  public:
-    IfPartContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *If();
-    antlr4::tree::TerminalNode *QuotYuanL();
-    ExprContext *expr();
-    antlr4::tree::TerminalNode *QuotYuanR();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  IfPartContext* ifPart();
-
   class  QuotStmtPartContext : public antlr4::ParserRuleContext {
   public:
     QuotStmtPartContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -805,8 +788,10 @@ public:
   public:
     IfStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<IfPartContext *> ifPart();
-    IfPartContext* ifPart(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> If();
+    antlr4::tree::TerminalNode* If(size_t i);
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
     std::vector<QuotStmtPartContext *> quotStmtPart();
     QuotStmtPartContext* quotStmtPart(size_t i);
     std::vector<antlr4::tree::TerminalNode *> Else();
@@ -823,8 +808,10 @@ public:
   public:
     IfExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<IfPartContext *> ifPart();
-    IfPartContext* ifPart(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> If();
+    antlr4::tree::TerminalNode* If(size_t i);
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
     std::vector<QuotStmtExprContext *> quotStmtExpr();
     QuotStmtExprContext* quotStmtExpr(size_t i);
     std::vector<antlr4::tree::TerminalNode *> Else();

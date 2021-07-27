@@ -41,20 +41,20 @@ public:
 	}
 
 	antlrcpp::Any visitIfStmt (FaParser::IfStmtContext *ctx) override {
-		std::vector<FaParser::ExprContext *> _conds;
-		for (auto _if_part_raw : ctx->ifPart ())
-			_conds.push_back (_if_part_raw->expr ());
 		std::vector<std::vector<FaParser::StmtContext *>> _bodys;
 		for (auto _body_part_raw : ctx->quotStmtPart ())
 			_bodys.push_back (_body_part_raw->stmt ());
-		return std::make_tuple (_conds, _bodys);
+		return std::make_tuple (ctx->expr (), _bodys);
 	}
 
 	antlrcpp::Any visitIfExpr (FaParser::IfExprContext *ctx) override {
-		std::vector<FaParser::ExprContext *> _conds;
-		for (auto _if_part_raw : ctx->ifPart ())
-			_conds.push_back (_if_part_raw->expr ());
-		return std::make_tuple (_conds, ctx->quotStmtExpr ());
+		std::vector<std::vector<FaParser::StmtContext *>> _bodys1;
+		std::vector<FaParser::ExprContext *> _bodys2;
+		for (auto _body_part_raw : ctx->quotStmtExpr ()) {
+			_bodys1.push_back (_body_part_raw->stmt ());
+			_bodys2.push_back (_body_part_raw->expr ());
+		}
+		return std::make_tuple (ctx->expr (), _bodys1, _bodys2);
 	}
 
 	antlrcpp::Any visitImportBlock (FaParser::ImportBlockContext *ctx) override {
