@@ -3,8 +3,13 @@
 
 
 
+#include <functional>
+#include <map>
 #include <optional>
 #include <string>
+#include <vector>
+
+#include <antlr4-runtime/Token.h>
 
 #include <FaParser.h>
 
@@ -31,26 +36,60 @@ public:
 	}
 
 private:
-	static std::string _get_short_type (std::string _type1, std::string _type2) {
-		if (_type1 == "") {
+	static std::optional<std::string> _get_min_type (std::string _type1, std::string _type2, antlr4::Token *_t) {
+		if (_type1 == _type2) {
+			return _type1;
+		} else if (_type1 == "") {
 			return _type2;
 		} else if (_type2 == "") {
 			return _type1;
 		} else {
-			bool _type1_range = _type1 [0] == '[';
-			bool _type2_range = _type2 [0] == '[';
-			// TODO: 检查类型和范围是否匹配
-			if (_type1_range && (!_type2_range)) {
-				return _type2;
-			} else if ((!_type1_range) && _type2_range) {
+			// 检查父子关系
+			std::function<bool (std::string, std::string)> _is_type_contain;
+			_is_type_contain = [&_is_type_contain] (std::string _parent, std::string _child) {
+				if (!s_types.contains (_parent))
+					return false;
+				for (std::string _parent0 : s_types [_parent]) {
+					if (_parent0 == _child)
+						return true;
+				}
+				for (std::string _parent0 : s_types [_parent]) {
+					if (_is_type_contain (_parent0, _child))
+						return true;
+				}
+				return false;
+			};
+			if (_is_type_contain (_type1, _type2))
 				return _type1;
-			} else if (_type1_range && _type2_range) {
-				// 俩范围
-			} else {
-				// 俩类型
+			if (_is_type_contain (_type2, _type1))
+				return _type2;
+
+			// 检查兄弟关系
+			std::string _current = "";
+			for (auto &[_par, _children] : s_types) {
+				if ((!_is_type_contain (_par, _type1)) || (!_is_type_contain (_par, _type1)))
+					continue;
+				if (_current == "") {
+					_current = _par;
+				} else if (_is_type_contain (_par, _current)) {
+					_current = _par;
+				}
 			}
+
+			// 假如没有任何一个类型能同时满足这俩特性
+			if (_current == "") {
+				LOG_ERROR (_t, "左右操作数不支持做此种运算");
+				return std::nullopt;
+			}
+			return _current;
 		}
 	}
+
+	inline static std::map<std::string, std::vector<std::string>> s_types {
+		{ "bool", { "[equable]" } },
+		{ "int", { "[equable]", "[comparable]" } },
+		{ "float", { "int", "[equable]", "[comparable]" } },
+	};
 };
 
 

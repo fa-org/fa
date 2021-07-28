@@ -40,11 +40,16 @@ int main (int argc, char *argv[]) {
 //@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
 
 static int32 FaEntryMain () {
-	if true {
-		::puts ("hello1\n");
-		::puts ("hello2\n");
+	int32 n = if true {
+		10
 	} else {
-		::puts ("world\n");
+		20
+	};
+
+	if n == 10 {
+		::puts ("n == 10\n");
+	} else {
+		::puts ("n != 10\n");
 	}
 	return 0;
 }

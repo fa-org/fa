@@ -79,18 +79,18 @@ public:
 			return nullptr;
 		return _builder.CreateCall (m_func, _args);
 	}
-	bool Assign (llvm::IRBuilder<> &_builder, AstValue &_val, antlr4::Token *_t) {
-		if (m_type != AstObjectType::Var) {
-			LOG_ERROR (_t, "非变量类型无法赋值");
-			return false;
-		}
-		_builder.CreateStore (_val.Value (_builder), m_value);
-		return true;
-	}
+	//bool Assign (llvm::IRBuilder<> &_builder, AstValue &_val, antlr4::Token *_t) {
+	//	if (m_type != AstObjectType::Var) {
+	//		LOG_ERROR (_t, "非变量类型无法赋值");
+	//		return false;
+	//	}
+	//	_builder.CreateStore (_val.Value (_builder), m_value);
+	//	return true;
+	//}
 	AstValue DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token *_t) {
 		if (!IsValue ())
 			return std::nullopt;
-		llvm::Value *_tmp = _builder.CreateLoad (m_value);
+		llvm::Value *_tmp = Value (_builder);
 		if (_op == "+") {
 			return *this;
 		} else {
@@ -128,41 +128,60 @@ public:
 		LOG_ERROR (_t, fmt::format ("暂不支持的运算符 {}", _op));
 		return std::nullopt;
 	}
-	AstValue DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue &_val, antlr4::Token *_t) {
-		if (_op [_op.size () - 1] == '=') {
-			if (_op.size () > 1) {
-				AstValue _tmp = DoOper2 (_builder, _value_builder, _op.substr (0, _op.size () - 1), _val, _t);
-				if (!_tmp.IsValid ())
-					return std::nullopt;
-				if (!Assign (_builder, _tmp, _t))
-					return std::nullopt;
-			} else {
-				if (!Assign (_builder, _val, _t))
-					return std::nullopt;
-			}
-			return *this;
-		}
-		llvm::Value *_tmp = _builder.CreateLoad (m_value);
-		llvm::Value *_v = _val.Value (_builder);
+	AstValue DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue &_other, antlr4::Token *_t) {
+		if (!_other.IsValid ())
+			return std::nullopt;
+		AstValue _tmp;
 		if (_op.size () == 1) {
 			switch (_op [0]) {
-			case '+': return _builder.CreateAdd (_tmp, _v);
-			case '-': return _builder.CreateSub (_tmp, _v);
-			case '*': return _builder.CreateMul (_tmp, _v);
-			case '/': return _builder.CreateSDiv (_tmp, _v);
-			case '%': return _builder.CreateSRem (_tmp, _v);
-			case '|': return _builder.CreateOr (_tmp, _v);
-			case '&': return _builder.CreateAnd (_tmp, _v);
-			case '^': return _builder.CreateXor (_tmp, _v);
+			case '+': return _builder.CreateAdd (Value (_builder), _other.Value (_builder));
+			case '-': return _builder.CreateSub (Value (_builder), _other.Value (_builder));
+			case '*': return _builder.CreateMul (Value (_builder), _other.Value (_builder));
+			case '/': return _builder.CreateSDiv (Value (_builder), _other.Value (_builder));
+			case '%': return _builder.CreateSRem (Value (_builder), _other.Value (_builder));
+			case '|': return _builder.CreateOr (Value (_builder), _other.Value (_builder));
+			case '&': return _builder.CreateAnd (Value (_builder), _other.Value (_builder));
+			case '^': return _builder.CreateXor (Value (_builder), _other.Value (_builder));
+			case '<': return _builder.CreateICmpSLT (Value (_builder), _other.Value (_builder));
+			case '>': return _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder));
+			case '=':
+				_builder.CreateStore (_other.Value (_builder), m_value);
+				return *this;
 			}
-		} else if (_op.size () == 2 && _op [0] == _op [1]) {
-			switch (_op [0]) {
-			case '?': return _builder.CreateAdd (_tmp, _v);
-			case '*': return _builder.CreateAdd (_tmp, _v);
-			case '&': return _builder.CreateAnd (_tmp, _v);
-			case '|': return _builder.CreateOr (_tmp, _v);
-			case '<': return _builder.CreateShl (_tmp, _v);
-			case '>': return _builder.CreateShl (_tmp, DoOper1 (_builder, _value_builder, "-", _t).Value (_builder));
+		} else if (_op.size () == 2) {
+			if (_op [0] == _op [1]) {
+				switch (_op [0]) {
+				case '?': return _builder.CreateAdd (Value (_builder), _other.Value (_builder));
+				case '*': return _builder.CreateAdd (Value (_builder), _other.Value (_builder));
+				case '&': return _builder.CreateAnd (Value (_builder), _other.Value (_builder));
+				case '|': return _builder.CreateOr (Value (_builder), _other.Value (_builder));
+				case '<': return _builder.CreateShl (Value (_builder), _other.Value (_builder));
+				case '>':
+					_tmp = _other.DoOper1 (_builder, _value_builder, "-", _t);
+					return _builder.CreateShl (Value (_builder), _tmp.Value (_builder));
+				}
+			} else if (_op [1] == '=') {
+				switch (_op [0]) {
+				case '<': return _builder.CreateICmpSLE (Value (_builder), _other.Value (_builder));
+				case '>': return _builder.CreateICmpSGE (Value (_builder), _other.Value (_builder));
+				case '+':
+				case '-':
+				case '*':
+				case '/':
+				case '%':
+				case '|':
+				case '&':
+				case '^':
+					std::string _tmp_op = "";
+					_tmp_op += _op [0];
+					_tmp = DoOper2 (_builder, _value_builder, _tmp_op, _other, _t);
+					return DoOper2 (_builder, _value_builder, "=", _tmp, _t);
+				}
+			}
+		} else if (_op.size () == 3) {
+			if (_op == "<<=" || _op == ">>=") {
+				_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 2), _other, _t);
+				return DoOper2 (_builder, _value_builder, "=", _tmp, _t);
 			}
 		}
 		return std::nullopt;

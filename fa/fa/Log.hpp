@@ -77,12 +77,9 @@ public:
 		_print_line_code (_t);
 	}
 
-	static std::string s_file;
-	static std::string_view s_code;
+	inline static std::string s_file = "";
+	inline static std::string_view s_code = "";
 };
-
-__declspec (selectany) std::string Log::s_file = "";
-__declspec (selectany) std::string_view Log::s_code = "";
 
 #define LOG_INFO(t,data)		Log::Info(__FILE__,__LINE__,t,data)
 #define LOG_WARNING(t,data)		Log::Warning(__FILE__,__LINE__,t,data)

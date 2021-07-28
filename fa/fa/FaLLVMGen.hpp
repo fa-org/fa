@@ -297,7 +297,35 @@ private:
 		AstValue _tmp_vt = _vt;
 		if (!StrongExprBuilder (_builder, _expr_raw->strongExpr (), _f, _local_vars, _strong_expect_type.value (), _tmp_vt))
 			return false;
-		_vt = _tmp_vt;
+
+		auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
+		if (_weak_suffix_raw) {
+			if (_weak_suffix_raw->allAssign () || _weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
+				AstValue _other_tmp_vt {};
+				if (!StrongExprBuilder (_builder, _weak_suffix_raw->strongExpr (0), _f, _local_vars, _strong_expect_type.value (), _other_tmp_vt))
+					return false;
+				std::string _op_str = "";
+				if (_weak_suffix_raw->allAssign ()) {
+					_op_str = _weak_suffix_raw->allAssign ()->getText ();
+				} else if (_weak_suffix_raw->equalOp ()) {
+					_op_str = _weak_suffix_raw->equalOp ()->getText ();
+				} else if (_weak_suffix_raw->notEqualOp ()) {
+					_op_str = _weak_suffix_raw->notEqualOp ()->getText ();
+				} else {
+					LOG_TODO (_weak_suffix_raw->start);
+					return false;
+				}
+				_tmp_vt = _tmp_vt.DoOper2 (_builder, m_value_builder, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
+			} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
+				LOG_TODO (_weak_suffix_raw->start);
+				return false;
+			} else if (_weak_suffix_raw->ltOps ().size () > 0 || _weak_suffix_raw->gtOps ().size () > 0) {
+				LOG_TODO (_weak_suffix_raw->start);
+				return false;
+			}
+		} else {
+			_vt = _tmp_vt;
+		}
 
 		// TODO: 计算所有后缀++--
 
@@ -309,7 +337,8 @@ private:
 		AstValue _val {};
 		auto _base_raw = _expr_raw->strongExprBase ();
 		if (_base_raw->ids ()) {
-			// TODO 计算_val
+			// 计算_val
+			_val = _local_vars[_base_raw->ids ()->getText ()];
 			// TODO 计算是否符合期望
 		} else if (_base_raw->ColonColon ()) {
 			// 外部 C API 调用
