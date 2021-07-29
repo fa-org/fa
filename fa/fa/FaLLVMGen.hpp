@@ -39,6 +39,7 @@
 #include "ValueBuilder.hpp"
 #include "AstValue.hpp"
 #include "AstCheck.hpp"
+#include "FuncContext.hpp"
 
 
 
@@ -47,7 +48,7 @@ public:
 	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor), m_module_name (_module_name) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (_module_name, *m_ctx);
-		m_etype_map = std::make_shared<TypeMap> (_visitor, m_ctx);
+		m_type_map = std::make_shared<TypeMap> (_visitor, m_ctx);
 		m_value_builder = std::make_shared<ValueBuilder> (_visitor, m_ctx, m_module);
 	}
 
@@ -153,10 +154,10 @@ private:
 				>> ();
 			llvm::Function *_f = m_module->getFunction (_name);
 			if (_f == nullptr) {
-				std::optional<llvm::Type *> _ret_type = m_etype_map->GetExternType (_ret_type_raw);
+				std::optional<llvm::Type *> _ret_type = m_type_map->GetExternType (_ret_type_raw);
 				if (!_ret_type.has_value ())
 					return false;
-				std::optional<std::vector<llvm::Type *>> _arg_types = m_etype_map->GetExternTypes (_arg_types_raw);
+				std::optional<std::vector<llvm::Type *>> _arg_types = m_type_map->GetExternTypes (_arg_types_raw);
 				if (!_arg_types.has_value ())
 					return false;
 				llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type.value (), _arg_types.value (), false);
@@ -178,33 +179,25 @@ private:
 		auto [_ret_type_raw, _stmts_raw] = m_visitor->visit (_mctx).as<std::tuple<
 			FaParser::TypeContext *,
 			std::vector<FaParser::StmtContext *>
-			>> ();
-		std::optional<llvm::Type *> _ret_type = m_etype_map->GetType (_ret_type_raw);
-		if (!_ret_type.has_value ())
+		>> ();
+		FuncContext _func_ctx { m_ctx, m_module, m_type_map };
+		if (!_func_ctx.InitFunc ("FaEntryMain", _ret_type_raw))
 			return false;
-		llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type.value (), false);
-		llvm::Function *_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, "FaEntryMain", *m_module);
-		_f->setCallingConv (llvm::CallingConv::C);
-		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		llvm::IRBuilder<> _builder (_bb);
-		_builder.SetInsertPoint (_bb);
-		std::map<std::string, llvm::AllocaInst *> _local_vars;
-		return StmtBuilder (_builder, _stmts_raw, _f, _local_vars);
+		return StmtBuilder (_func_ctx, _stmts_raw);
 	}
 
-	bool StmtBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::StmtContext *> &_stmts_raw, llvm::Function *_f, std::map<std::string, llvm::AllocaInst *> &_local_vars) {
-		std::map<std::string, llvm::AllocaInst *> _new_local_vars = _local_vars;
+	bool StmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::StmtContext *> &_stmts_raw) {
 		for (FaParser::StmtContext *_stmt_raw : _stmts_raw) {
 			if (_stmt_raw->normalStmt ()) {
 				FaParser::NormalStmtContext *_normal_stmt_raw = _stmt_raw->normalStmt ();
 				if (_normal_stmt_raw->expr ()) {
 					AstValue _value;
-					if (!ExprBuilder (_builder, _normal_stmt_raw->expr (), _f, _new_local_vars, "", _value))
+					if (!ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), "", _value))
 						return false;
 
 					if (_normal_stmt_raw->Return ()) {
 						if (_value.IsValue ()) {
-							_builder.CreateRet (_value.Value (_builder));
+							_func_ctx.m_builder->CreateRet (_value.Value (*_func_ctx.m_builder));
 						} else {
 							LOG_TODO (_stmt_raw->start);
 							return false;
@@ -229,7 +222,7 @@ private:
 					std::vector<FaParser::ExprContext *>,
 					std::vector<std::vector<FaParser::StmtContext *>>
 				>> ();
-				if (!IfStmtBuilder (_builder, _conds, _bodys, _f, _new_local_vars))
+				if (!IfStmtBuilder (_func_ctx, _conds, _bodys))
 					return false;
 			} else if (_stmt_raw->whileStmt ()) {
 				// TODO
@@ -238,17 +231,10 @@ private:
 			} else if (_stmt_raw->defVarStmt ()) {
 				auto _def_var_stmt_raw = _stmt_raw->defVarStmt ();
 				std::string _type_str = _def_var_stmt_raw->type ()->getText ();
-				std::optional<llvm::Type *> _ret_type = m_etype_map->GetType (_type_str, _def_var_stmt_raw->type ()->start);
-				if (!_ret_type.has_value ())
+				AstValue _var = _func_ctx.DefineVariable (_def_var_stmt_raw->type (), _type_str);
+				if (!_var.IsValid ())
 					return false;
-				std::string _var_name = _def_var_stmt_raw->Id ()->getText ();
-				if (_new_local_vars.contains (_var_name)) {
-					LOG_ERROR (_def_var_stmt_raw->Id ()->getSymbol (), fmt::format ("[{}] 变量重复定义", _var_name));
-					return false;
-				}
-				_new_local_vars [_var_name] = _builder.CreateAlloca (_ret_type.value ());
-				AstValue _var { _new_local_vars [_var_name] };
-				if (!ExprBuilder (_builder, _def_var_stmt_raw->expr (), _f, _new_local_vars, _type_str, _var))
+				if (!ExprBuilder (_func_ctx, _def_var_stmt_raw->expr (), _type_str, _var))
 					return false;
 			} else {
 				LOG_ERROR (_stmt_raw->start, "未知的表达式");
@@ -258,35 +244,26 @@ private:
 		return true;
 	}
 
-	bool IfStmtBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw, llvm::Function *_f, std::map<std::string, llvm::AllocaInst *> &_local_vars) {
+	bool IfStmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw) {
 		if (_conds_raw.size () == 0)
-			return StmtBuilder (_builder, _bodys_raw [0], _f, _local_vars);
+			return StmtBuilder (_func_ctx, _bodys_raw [0]);
 		//
 		AstValue _cond {};
-		if (!ExprBuilder (_builder, _conds_raw [0], _f, _local_vars, "bool", _cond))
+		if (!ExprBuilder (_func_ctx, _conds_raw [0], "bool", _cond))
 			return false;
 		_conds_raw.erase (_conds_raw.begin ());
-		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		_builder.CreateCondBr (_cond.Value (_builder), _true_bb, _false_bb);
-		//
-		_builder.SetInsertPoint (_true_bb);
-		if (!StmtBuilder (_builder, _bodys_raw [0], _f, _local_vars))
-			return false;
-		_bodys_raw.erase (_bodys_raw.begin ());
-		_builder.CreateBr (_endif_bb);
-		//
-		_builder.SetInsertPoint (_false_bb);
-		if (!IfStmtBuilder (_builder, _conds_raw, _bodys_raw, _f, _local_vars))
-			return false;
-		_builder.CreateBr (_endif_bb);
-		//
-		_builder.SetInsertPoint (_endif_bb);
+		_func_ctx.IfElse (_cond, [&] () {
+			if (!StmtBuilder (_func_ctx, _bodys_raw [0]))
+				return false;
+			_bodys_raw.erase (_bodys_raw.begin ());
+			return true;
+		}, [&] () {
+			return IfStmtBuilder (_func_ctx, _conds_raw, _bodys_raw);
+		});
 		return true;
 	}
 
-	bool ExprBuilder (llvm::IRBuilder<> &_builder, FaParser::ExprContext *_expr_raw, llvm::Function *_f, std::map<std::string, llvm::AllocaInst *> &_local_vars, std::string _expect_type, AstValue &_vt) {
+	bool ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext *_expr_raw, std::string _expect_type, AstValue &_vt) {
 		// TODO: 计算所有前缀++--
 
 		// 计算强表达式类型
@@ -295,14 +272,14 @@ private:
 			return false;
 
 		AstValue _tmp_vt = _vt;
-		if (!StrongExprBuilder (_builder, _expr_raw->strongExpr (), _f, _local_vars, _strong_expect_type.value (), _tmp_vt))
+		if (!StrongExprBuilder (_func_ctx, _expr_raw->strongExpr (), _strong_expect_type.value (), _tmp_vt))
 			return false;
 
 		auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
 		if (_weak_suffix_raw) {
 			if (_weak_suffix_raw->allAssign () || _weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
 				AstValue _other_tmp_vt {};
-				if (!StrongExprBuilder (_builder, _weak_suffix_raw->strongExpr (0), _f, _local_vars, _strong_expect_type.value (), _other_tmp_vt))
+				if (!StrongExprBuilder (_func_ctx, _weak_suffix_raw->strongExpr (0), _strong_expect_type.value (), _other_tmp_vt))
 					return false;
 				std::string _op_str = "";
 				if (_weak_suffix_raw->allAssign ()) {
@@ -315,7 +292,10 @@ private:
 					LOG_TODO (_weak_suffix_raw->start);
 					return false;
 				}
-				_tmp_vt = _tmp_vt.DoOper2 (_builder, m_value_builder, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
+				_tmp_vt = _tmp_vt.DoOper2 (*_func_ctx.m_builder, m_value_builder, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
+				if (!_tmp_vt.IsValid ())
+					return false;
+				_vt = _tmp_vt;
 			} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
 				LOG_TODO (_weak_suffix_raw->start);
 				return false;
@@ -332,13 +312,15 @@ private:
 		return true;
 	}
 
-	bool StrongExprBuilder (llvm::IRBuilder<> &_builder, FaParser::StrongExprContext *_expr_raw, llvm::Function *_f, std::map<std::string, llvm::AllocaInst *> &_local_vars, std::string _expect_type, AstValue &_vt) {
+	bool StrongExprBuilder (FuncContext &_func_ctx, FaParser::StrongExprContext *_expr_raw, std::string _expect_type, AstValue &_vt) {
 		bool _assigned = false;
 		AstValue _val {};
 		auto _base_raw = _expr_raw->strongExprBase ();
 		if (_base_raw->ids ()) {
 			// 计算_val
-			_val = _local_vars[_base_raw->ids ()->getText ()];
+			_val = _func_ctx .GetVariable (_base_raw->ids ()->getText ());
+			if (!_val.IsValid ())
+				return false;
 			// TODO 计算是否符合期望
 		} else if (_base_raw->ColonColon ()) {
 			// 外部 C API 调用
@@ -362,12 +344,12 @@ private:
 				std::vector<FaParser::ExprContext *>
 			>> ();
 			// TODO: 计算期望的类型
-			if (!IfExprBuilder (_builder, _conds, _bodys1, _bodys2, _f, _local_vars, "", _vt))
+			if (!IfExprBuilder (_func_ctx, _conds, _bodys1, _bodys2, "", _vt))
 				return false;
 			_assigned = true;
 		} else if (_base_raw->quotExpr ()) {
 			// TODO: 计算期望的类型
-			if (!ExprBuilder (_builder, _base_raw->quotExpr ()->expr (), _f, _local_vars, "", _val))
+			if (!ExprBuilder (_func_ctx, _base_raw->quotExpr ()->expr (), "", _val))
 				return false;
 		} else {
 			LOG_TODO (_base_raw->start);
@@ -386,17 +368,22 @@ private:
 				for (auto _arg_expr : _suffix_raw->expr ()) {
 					AstValue _oarg {};
 					// TODO: 计算期望类型
-					if (!ExprBuilder (_builder, _arg_expr, _f, _local_vars, "", _oarg))
+					if (!ExprBuilder (_func_ctx, _arg_expr, "", _oarg))
 						return false;
 					if (!_oarg.IsValue ()) {
 						LOG_ERROR (_arg_expr->start, "参数只接收值类型");
 						return false;
 					}
-					_args.push_back (_oarg.Value (_builder));
+					_args.push_back (_oarg.Value (*_func_ctx.m_builder));
 				}
-				_val = _val.FunctionCall (_builder, _args);
+				_val = _val.FunctionCall (*_func_ctx.m_builder, _args);
 			} else if (_suffix_raw->QuotFangL ()) {
 				// TODO 处理索引
+				LOG_TODO (_suffix_raw->start);
+				return false;
+			} else {
+				LOG_TODO (_suffix_raw->start);
+				return false;
 			}
 		}
 
@@ -409,6 +396,8 @@ private:
 			} else if (_prefix_text == "-") {
 				// TODO 数字类型取负
 			}
+			LOG_TODO (_expr_raw->start);
+			return false;
 		}
 
 		if (!_assigned) {
@@ -418,37 +407,32 @@ private:
 		return true;
 	}
 
-	bool IfExprBuilder (llvm::IRBuilder<> &_builder, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, llvm::Function *_f, std::map<std::string, llvm::AllocaInst *> &_local_vars, std::string _expect_type, AstValue &_vt) {
+	bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
+		AstValue _cond {}, _tmp_vt = _func_ctx.DefineVariable ();// TODO: 如何将_tmp_vt赋值给_vt？
 		if (_conds_raw.size () == 0) {
-			if (!StmtBuilder (_builder, _bodys_raw1 [0], _f, _local_vars))
+			if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
 				return false;
-			return ExprBuilder (_builder, _bodys_raw2 [0], _f, _local_vars, _expect_type, _vt);
+			if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
+				return false;
+			_vt.DoOper2 (*_func_ctx.m_builder, m_value_builder, "=", _tmp_vt, _bodys_raw2 [0]->start);
+			return true;
 		}
 		//
-		AstValue _cond {};
-		if (!ExprBuilder (_builder, _conds_raw [0], _f, _local_vars, "bool", _cond))
+		if (!ExprBuilder (_func_ctx, _conds_raw [0], "bool", _cond))
 			return false;
 		_conds_raw.erase (_conds_raw.begin ());
-		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", _f);
-		_builder.CreateCondBr (_cond.Value (_builder), _true_bb, _false_bb);
-		//
-		_builder.SetInsertPoint (_true_bb);
-		if (!StmtBuilder (_builder, _bodys_raw1 [0], _f, _local_vars))
-			return false;
-		_bodys_raw1.erase (_bodys_raw1.begin ());
-		if (!ExprBuilder (_builder, _bodys_raw2 [0], _f, _local_vars, _expect_type, _vt))
-			return false;
-		_bodys_raw2.erase (_bodys_raw2.begin ());
-		_builder.CreateBr (_endif_bb);
-		//
-		_builder.SetInsertPoint (_false_bb);
-		if (!IfExprBuilder (_builder, _conds_raw, _bodys_raw1, _bodys_raw2, _f, _local_vars, _expect_type, _vt))
-			return false;
-		_builder.CreateBr (_endif_bb);
-		//
-		_builder.SetInsertPoint (_endif_bb);
+		_func_ctx.IfElse (_cond, [&] () {
+			if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
+				return false;
+			_bodys_raw1.erase (_bodys_raw1.begin ());
+			if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
+				return false;
+			_bodys_raw2.erase (_bodys_raw2.begin ());
+			_vt.DoOper2 (*_func_ctx.m_builder, m_value_builder, "=", _tmp_vt, _bodys_raw2 [0]->start);
+			return true;
+		}, [&] () {
+			return IfExprBuilder (_func_ctx, _conds_raw, _bodys_raw1, _bodys_raw2, _expect_type, _vt);
+		});
 		return true;
 	}
 
@@ -456,7 +440,7 @@ private:
 	std::string m_module_name;
 	std::shared_ptr<llvm::LLVMContext> m_ctx;
 	std::shared_ptr<llvm::Module> m_module;
-	std::shared_ptr<TypeMap> m_etype_map;
+	std::shared_ptr<TypeMap> m_type_map;
 	std::shared_ptr<ValueBuilder> m_value_builder;
 
 	std::vector<std::string> m_uses;

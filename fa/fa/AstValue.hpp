@@ -24,7 +24,7 @@ class AstValue {
 public:
 	AstValue () {}
 	AstValue (std::nullopt_t) {}
-	explicit AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
+	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
 		std::optional<llvm::Value *> _val;
 		if (_literal->BoolLiteral ()) {
 			_val = _value_builder->Build ("bool", _literal->getText (), _literal->start);
@@ -47,9 +47,10 @@ public:
 			m_value = _val.value ();
 		}
 	}
-	AstValue (llvm::AllocaInst *_var): m_type (AstObjectType::Var), m_value (_var) {}
-	AstValue (llvm::Value *_value): m_type (AstObjectType::Value), m_value (_value) {}
-	AstValue (llvm::Function *_func): m_type (AstObjectType::Func), m_func (_func) {}
+	AstValue (llvm::AllocaInst *_var): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var) {}
+	AstValue (llvm::Value *_value): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value) {}
+	AstValue (llvm::Function *_func): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func) {}
+	AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const AstValue &_o) {
@@ -110,8 +111,9 @@ public:
 				} else {
 					_v = _builder.CreateSub (Value (_builder), _tmp2.value ());
 				}
-				if (!Assign (_builder, _v, _t))
+				if (!m_value)
 					return std::nullopt;
+				_builder.CreateStore (_v.Value (_builder), m_value);
 				return *this;
 			} else if (_op == "~") {
 				if (_typestr != "bool") {
@@ -159,6 +161,8 @@ public:
 				case '>':
 					_tmp = _other.DoOper1 (_builder, _value_builder, "-", _t);
 					return _builder.CreateShl (Value (_builder), _tmp.Value (_builder));
+				case '=':
+					return _builder.CreateICmpEQ (Value (_builder), _other.Value (_builder));
 				}
 			} else if (_op [1] == '=') {
 				switch (_op [0]) {
@@ -172,10 +176,9 @@ public:
 				case '|':
 				case '&':
 				case '^':
-					std::string _tmp_op = "";
-					_tmp_op += _op [0];
-					_tmp = DoOper2 (_builder, _value_builder, _tmp_op, _other, _t);
+					_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 1), _other, _t);
 					return DoOper2 (_builder, _value_builder, "=", _tmp, _t);
+				case '!': return _builder.CreateICmpNE (Value (_builder), _other.Value (_builder));
 				}
 			}
 		} else if (_op.size () == 3) {

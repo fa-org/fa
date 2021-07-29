@@ -17,7 +17,12 @@
 
 class AstCheck {
 public:
+	static std::optional<std::string> TryGetExpectType (FaParser::ExprContext *_expr_raw, std::string _expect_type) {
+		// TODO:遍历结构，找到原始类型
+	}
+
 	static std::optional<std::string> TryGetStrongExpectType (FaParser::ExprContext *_expr_raw, std::string _expect_type) {
+		// TODO: 判断的很不全，可能有问题
 		auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
 		if (!_weak_suffix_raw)
 			return _expect_type;

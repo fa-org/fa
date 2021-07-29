@@ -40,16 +40,20 @@ int main (int argc, char *argv[]) {
 //@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
 
 static int32 FaEntryMain () {
-	int32 n = if true {
+	int32 n = if false {
 		10
 	} else {
-		20
+		if true {
+			20
+		} else {
+			30
+		}
 	};
 
-	if n == 10 {
-		::puts ("n == 10\n");
+	if n == 20 {
+		::puts ("n == 20\n");
 	} else {
-		::puts ("n != 10\n");
+		::puts ("n != 20\n");
 	}
 	return 0;
 }
