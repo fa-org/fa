@@ -180,7 +180,7 @@ private:
 			FaParser::TypeContext *,
 			std::vector<FaParser::StmtContext *>
 		>> ();
-		FuncContext _func_ctx { m_ctx, m_module, m_type_map };
+		FuncContext _func_ctx { m_ctx, m_module, m_type_map, m_value_builder };
 		if (!_func_ctx.InitFunc ("FaEntryMain", _ret_type_raw))
 			return false;
 		return StmtBuilder (_func_ctx, _stmts_raw);
@@ -190,18 +190,21 @@ private:
 		for (FaParser::StmtContext *_stmt_raw : _stmts_raw) {
 			if (_stmt_raw->normalStmt ()) {
 				FaParser::NormalStmtContext *_normal_stmt_raw = _stmt_raw->normalStmt ();
-				if (_normal_stmt_raw->expr ()) {
-					AstValue _value;
-					if (!ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), "", _value))
-						return false;
-
-					if (_normal_stmt_raw->Return ()) {
-						if (_value.IsValue ()) {
-							_func_ctx.m_builder->CreateRet (_value.Value (*_func_ctx.m_builder));
-						} else {
-							LOG_TODO (_stmt_raw->start);
+				if (_normal_stmt_raw->Return () || _normal_stmt_raw->expr ()) {
+					if (_normal_stmt_raw->expr ()) {
+						AstValue _value;
+						if (!ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), "", _value))
 							return false;
+						if (_normal_stmt_raw->Return ()) {
+							if (!_value.IsValue ()) {
+								LOG_ERROR (_normal_stmt_raw->start, "无法返回表达式结果");
+								return false;
+							}
+							_func_ctx.Return (_value);
 						}
+					} else {
+						if (_normal_stmt_raw->Return ())
+							_func_ctx.Return ();
 					}
 				} else if (_normal_stmt_raw->Break ()) {
 					// TODO break
@@ -267,7 +270,7 @@ private:
 		// TODO: 计算所有前缀++--
 
 		// 计算强表达式类型
-		auto _strong_expect_type = AstCheck::TryGetStrongExpectType (_expr_raw, _expect_type);
+		auto _strong_expect_type = AstCheck::GetStrongExprExpectType (_expr_raw, _expect_type);
 		if (!_strong_expect_type.has_value ())
 			return false;
 
@@ -292,7 +295,7 @@ private:
 					LOG_TODO (_weak_suffix_raw->start);
 					return false;
 				}
-				_tmp_vt = _tmp_vt.DoOper2 (*_func_ctx.m_builder, m_value_builder, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
+				_tmp_vt = _func_ctx.DoOper2 (_tmp_vt, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
 				if (!_tmp_vt.IsValid ())
 					return false;
 				_vt = _tmp_vt;
@@ -344,6 +347,8 @@ private:
 				std::vector<FaParser::ExprContext *>
 			>> ();
 			// TODO: 计算期望的类型
+			// TODO: 此处用新的变量替换_vt
+			AstValue _tmp_vt = _func_ctx.DefineVariable ("");
 			if (!IfExprBuilder (_func_ctx, _conds, _bodys1, _bodys2, "", _vt))
 				return false;
 			_assigned = true;
@@ -364,7 +369,7 @@ private:
 					LOG_ERROR (_suffix_raw->start, "无法将目标作为函数来调用");
 					return false;
 				}
-				std::vector<llvm::Value *> _args;
+				std::vector<AstValue> _args;
 				for (auto _arg_expr : _suffix_raw->expr ()) {
 					AstValue _oarg {};
 					// TODO: 计算期望类型
@@ -374,9 +379,9 @@ private:
 						LOG_ERROR (_arg_expr->start, "参数只接收值类型");
 						return false;
 					}
-					_args.push_back (_oarg.Value (*_func_ctx.m_builder));
+					_args.push_back (_oarg);
 				}
-				_val = _val.FunctionCall (*_func_ctx.m_builder, _args);
+				_val = _func_ctx.FuncInvoke (_val, _args);
 			} else if (_suffix_raw->QuotFangL ()) {
 				// TODO 处理索引
 				LOG_TODO (_suffix_raw->start);
@@ -408,13 +413,13 @@ private:
 	}
 
 	bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
-		AstValue _cond {}, _tmp_vt = _func_ctx.DefineVariable ();// TODO: 如何将_tmp_vt赋值给_vt？
+		AstValue _cond {}, _tmp_vt {};
 		if (_conds_raw.size () == 0) {
 			if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
 				return false;
 			if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
 				return false;
-			_vt.DoOper2 (*_func_ctx.m_builder, m_value_builder, "=", _tmp_vt, _bodys_raw2 [0]->start);
+			_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
 			return true;
 		}
 		//
@@ -428,7 +433,7 @@ private:
 			if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
 				return false;
 			_bodys_raw2.erase (_bodys_raw2.begin ());
-			_vt.DoOper2 (*_func_ctx.m_builder, m_value_builder, "=", _tmp_vt, _bodys_raw2 [0]->start);
+			_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
 			return true;
 		}, [&] () {
 			return IfExprBuilder (_func_ctx, _conds_raw, _bodys_raw1, _bodys_raw2, _expect_type, _vt);

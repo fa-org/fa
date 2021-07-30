@@ -24,8 +24,7 @@
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module, std::shared_ptr<TypeMap> _type_map)
-		: m_ctx (_ctx), m_module (_module), m_type_map (_type_map) {}
+	FuncContext (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<ValueBuilder> _value_builder) : m_ctx (_ctx), m_module (_module), m_type_map (_type_map), m_value_builder (_value_builder) {}
 
 	bool InitFunc (std::string _func_name, FaParser::TypeContext *_ret_type) {
 		static std::vector<FaParser::TypeContext *> _arg_types;
@@ -75,6 +74,21 @@ public:
 	AstValue DefineVariable (FaParser::TypeContext *_type, std::string _name = "") { return DefineVariable (_type->getText (), _type->start, _name); }
 	AstValue GetVariable (std::string _name) { return _get_local_var (_name); }
 
+	void Return () { m_builder->CreateRetVoid (); }
+	void Return (AstValue &_op1) { m_builder->CreateRet (_op1.Value (*m_builder)); }
+	AstValue DoOper1 (AstValue &_op1, std::string _op, antlr4::Token *_t) {
+		return _op1.DoOper1 (*m_builder, m_value_builder, _op, _t);
+	}
+	AstValue DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token *_t) {
+		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t);
+	}
+	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
+		std::vector<llvm::Value *> _sargs;
+		for (auto _arg : _args)
+			_sargs.push_back (_arg.Value (*m_builder));
+		return _func.FunctionCall (*m_builder, _sargs);
+	}
+
 	bool IfElse (AstValue &_cond, std::function<bool ()> _true_ctx, std::function<bool ()> _false_ctx) {
 		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", m_f);
 		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", m_f);
@@ -95,8 +109,6 @@ public:
 		return true;
 	}
 
-	std::shared_ptr<llvm::IRBuilder<>> m_builder;
-
 private:
 	llvm::AllocaInst *_get_local_var (std::string _name) {
 		for (size_t i = 0; i < m_local_vars.size (); ++i) {
@@ -109,7 +121,10 @@ private:
 	std::shared_ptr<llvm::LLVMContext> m_ctx;
 	std::shared_ptr<llvm::Module> m_module;
 	std::shared_ptr<TypeMap> m_type_map;
+	std::shared_ptr<ValueBuilder> m_value_builder;
+	//
 	llvm::Function *m_f = nullptr;
+	std::shared_ptr<llvm::IRBuilder<>> m_builder;
 	std::vector<std::map<std::string, llvm::AllocaInst *>> m_local_vars;
 };
 

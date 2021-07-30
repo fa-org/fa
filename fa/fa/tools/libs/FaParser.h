@@ -1025,8 +1025,8 @@ public:
     antlr4::tree::TerminalNode *Semi();
     antlr4::tree::TerminalNode *Break();
     antlr4::tree::TerminalNode *Continue();
-    ExprContext *expr();
     antlr4::tree::TerminalNode *Return();
+    ExprContext *expr();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

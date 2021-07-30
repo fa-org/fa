@@ -80,14 +80,6 @@ public:
 			return nullptr;
 		return _builder.CreateCall (m_func, _args);
 	}
-	//bool Assign (llvm::IRBuilder<> &_builder, AstValue &_val, antlr4::Token *_t) {
-	//	if (m_type != AstObjectType::Var) {
-	//		LOG_ERROR (_t, "非变量类型无法赋值");
-	//		return false;
-	//	}
-	//	_builder.CreateStore (_val.Value (_builder), m_value);
-	//	return true;
-	//}
 	AstValue DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token *_t) {
 		if (!IsValue ())
 			return std::nullopt;

@@ -189,6 +189,7 @@ strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12];
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
+// TODO: 弱后缀里的 strongExpr 需全部替换为 expr
 weakExprSuffix				: ((allAssign | equalOp | notEqualOp) strongExpr)								//      a += 24
 							| (allOp2 strongExpr)+															//      a + b - c
 							| (ltOps strongExpr)+ | (gtOps strongExpr)+										//      a < b <= c < d
@@ -208,7 +209,7 @@ defVarStmt:					type Id Assign expr Semi;
 // stmt
 //
 useStmt:					Use ids Semi;
-normalStmt:					((Return? expr) | Break | Continue) Semi;
+normalStmt:					((Return? expr?) | Break | Continue) Semi;
 stmt:						normalStmt | ifStmt | whileStmt | defVarStmt;
 
 
