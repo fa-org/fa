@@ -81,7 +81,6 @@ andAndOp:					AndOp AndOp;
 orOrOp:						OrOp OrOp;
 shiftLOp:					QuotJianL QuotJianL;
 shiftROp:					QuotJianR QuotJianR;
-allOp2:						qusQusOp | PointOp | AddOp | SubOp | StarOp | DivOp | starStarOp | ModOp | AndOp | OrOp | XorOp | andAndOp | orOrOp | shiftLOp | shiftROp;
 
 // 三元或其他
 Qus:						'?';
@@ -108,8 +107,12 @@ gtOp:						QuotJianR;
 gtEqualOp:					QuotJianR Assign;
 equalOp:					Assign Assign;
 notEqualOp:					Exclam Assign;
-ltOps:						ltOp | ltEqualOp;
-gtOps:						gtOp | gtEqualOp;
+
+
+selfOp2:					AddOp | SubOp | StarOp | DivOp | starStarOp | ModOp | AndOp | OrOp | XorOp | andAndOp | orOrOp | shiftLOp | shiftROp;
+compareOp2:					ltOp | ltEqualOp | gtOp | gtEqualOp | equalOp | notEqualOp;
+changeOp2:					qusQusOp | compareOp2;
+allOp2:						selfOp2 | changeOp2;
 
 
 
@@ -187,14 +190,11 @@ strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// 前缀 - 
 strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12];
+							| (PointOp Id)																	//     wnd.Name
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
-// TODO: 弱后缀里的 strongExpr 需全部替换为 expr
-weakExprSuffix				: ((allAssign | equalOp | notEqualOp) strongExpr)								//      a += 24
-							| (allOp2 strongExpr)+															//      a + b - c
-							| (ltOps strongExpr)+ | (gtOps strongExpr)+										//      a < b <= c < d
-							;
-expr:						strongExpr weakExprSuffix?;
+middleExpr:					strongExpr (allOp2 strongExpr)*;												//      a == 24    a + b - c
+expr:						middleExpr (allAssign middleExpr)*;
 
 
 

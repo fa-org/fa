@@ -99,10 +99,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitLtOp(FaParser::LtOpContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -127,11 +123,19 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitLtOps(FaParser::LtOpsContext *ctx) override {
+  virtual antlrcpp::Any visitSelfOp2(FaParser::SelfOp2Context *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitGtOps(FaParser::GtOpsContext *ctx) override {
+  virtual antlrcpp::Any visitCompareOp2(FaParser::CompareOp2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitChangeOp2(FaParser::ChangeOp2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -223,7 +227,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitWeakExprSuffix(FaParser::WeakExprSuffixContext *ctx) override {
+  virtual antlrcpp::Any visitMiddleExpr(FaParser::MiddleExprContext *ctx) override {
     return visitChildren(ctx);
   }
 

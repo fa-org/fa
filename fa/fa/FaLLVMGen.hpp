@@ -266,99 +266,99 @@ private:
 		return true;
 	}
 
-	bool ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext *_expr_raw, std::string _expect_type, AstValue &_vt) {
-		// TODO: 计算所有前缀++--
+	AstValue ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext *_expr_raw, std::string _expect_type) {
+		auto _middles = _expr_raw->middleExpr ();
+		AstValue _val {};
+		for (int i = (int) _middles.size () - 1; i >= 0; --i) {
+			AstValue _val2 = MiddleExprBuilder (_func_ctx, _middles [i], _expect_type);
+			if (!_val2.IsValid ())
+				return std::nullopt;
+			if (i == (int) _middles.size () - 1) {
+				_val = _val2;
+			} else {
+				_val = _func_ctx.DoOper2 (_val2, _expr_raw->allAssign ((size_t) i)->getText (), _val, _middles [i]->start);
+				if (!_val.IsValid ())
+					return std::nullopt;
+			}
+		}
+		return _val;
+	}
 
+	AstValue MiddleExprBuilder (FuncContext &_func_ctx, FaParser::MiddleExprContext *_expr_raw, std::string _expect_type) {
 		// 计算强表达式类型
 		auto _strong_expect_type = AstCheck::GetStrongExprExpectType (_expr_raw, _expect_type);
 		if (!_strong_expect_type.has_value ())
 			return false;
 
-		AstValue _tmp_vt = _vt;
-		if (!StrongExprBuilder (_func_ctx, _expr_raw->strongExpr (), _strong_expect_type.value (), _tmp_vt))
-			return false;
-
-		auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
-		if (_weak_suffix_raw) {
-			if (_weak_suffix_raw->allAssign () || _weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
-				AstValue _other_tmp_vt {};
-				if (!StrongExprBuilder (_func_ctx, _weak_suffix_raw->strongExpr (0), _strong_expect_type.value (), _other_tmp_vt))
-					return false;
-				std::string _op_str = "";
-				if (_weak_suffix_raw->allAssign ()) {
-					_op_str = _weak_suffix_raw->allAssign ()->getText ();
-				} else if (_weak_suffix_raw->equalOp ()) {
-					_op_str = _weak_suffix_raw->equalOp ()->getText ();
-				} else if (_weak_suffix_raw->notEqualOp ()) {
-					_op_str = _weak_suffix_raw->notEqualOp ()->getText ();
-				} else {
-					LOG_TODO (_weak_suffix_raw->start);
-					return false;
-				}
-				_tmp_vt = _func_ctx.DoOper2 (_tmp_vt, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
-				if (!_tmp_vt.IsValid ())
-					return false;
-				_vt = _tmp_vt;
-			} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
-				LOG_TODO (_weak_suffix_raw->start);
+		// TODO
+		std::vector<AstValue> _v;
+		auto _expr_raws = _expr_raw->strongExpr ();
+		for (size_t i = 0; i < _expr_raws.size (); ++i) {
+			AstValue _tmp_vt {};
+			if (!StrongExprBuilder (_func_ctx, _expr_raws [i], _strong_expect_type.value (), _tmp_vt))
 				return false;
-			} else if (_weak_suffix_raw->ltOps ().size () > 0 || _weak_suffix_raw->gtOps ().size () > 0) {
-				LOG_TODO (_weak_suffix_raw->start);
-				return false;
-			}
-		} else {
-			_vt = _tmp_vt;
+			_v.push_back (_tmp_vt);
 		}
 
-		// TODO: 计算所有后缀++--
+		//AstValue _tmp_vt = _vt;
+		//if (!StrongExprBuilder (_func_ctx, _expr_raw->strongExpr () [0], _strong_expect_type.value (), _tmp_vt))
+		//	return false;
 
+		//auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
+		//if (_weak_suffix_raw) {
+		//	if (_weak_suffix_raw->allAssign () || _weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
+		//		AstValue _other_tmp_vt {};
+		//		if (!StrongExprBuilder (_func_ctx, _weak_suffix_raw->strongExpr (0), _strong_expect_type.value (), _other_tmp_vt))
+		//			return false;
+		//		std::string _op_str = "";
+		//		if (_weak_suffix_raw->allAssign ()) {
+		//			_op_str = _weak_suffix_raw->allAssign ()->getText ();
+		//		} else if (_weak_suffix_raw->equalOp ()) {
+		//			_op_str = _weak_suffix_raw->equalOp ()->getText ();
+		//		} else if (_weak_suffix_raw->notEqualOp ()) {
+		//			_op_str = _weak_suffix_raw->notEqualOp ()->getText ();
+		//		} else {
+		//			LOG_TODO (_weak_suffix_raw->start);
+		//			return false;
+		//		}
+		//		_tmp_vt = _func_ctx.DoOper2 (_tmp_vt, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
+		//		if (!_tmp_vt.IsValid ())
+		//			return false;
+		//		_vt = _tmp_vt;
+		//	} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
+		//		LOG_TODO (_weak_suffix_raw->start);
+		//		return false;
+		//	} else if (_weak_suffix_raw->ltOps ().size () > 0 || _weak_suffix_raw->gtOps ().size () > 0) {
+		//		LOG_TODO (_weak_suffix_raw->start);
+		//		return false;
+		//	}
+		//} else {
+		//	_vt = _tmp_vt;
+		//}
 		return true;
 	}
 
 	bool StrongExprBuilder (FuncContext &_func_ctx, FaParser::StrongExprContext *_expr_raw, std::string _expect_type, AstValue &_vt) {
-		bool _assigned = false;
+		bool _current = AstCheck::TypeNotChangeOnCurrentWrapper (_expr_raw);
 		AstValue _val {};
+		if (_current)
+			_val = _vt;
+		if (!StrongExprBaseBuilder (_func_ctx, _expr_raw->strongExprBase (), _expect_type, _vt))
+			return false;
+
+
+
+
+
+
+
+		if (!StrongExprBaseBuilder (_func_ctx, _expr_raw->strongExprBase (), ))
 		auto _base_raw = _expr_raw->strongExprBase ();
-		if (_base_raw->ids ()) {
-			// 计算_val
-			_val = _func_ctx .GetVariable (_base_raw->ids ()->getText ());
-			if (!_val.IsValid ())
-				return false;
-			// TODO 计算是否符合期望
-		} else if (_base_raw->ColonColon ()) {
-			// 外部 C API 调用
-			std::string _cur_name = _base_raw->getText ();
-			if (m_imports.contains (_cur_name)) {
-				_val = m_imports [_cur_name];
-			} else {
-				LOG_ERROR (_base_raw->start, fmt::format ("未定义的外部符号：{}", _cur_name));
-				return false;
-			}
-		} else if (_base_raw->literal ()) {
-			_val = AstValue { m_value_builder, _base_raw->literal () };
-			// TODO 计算是否符合期望
-		} else if (_base_raw->ifExpr ()) {
-			std::vector<FaParser::ExprContext *> _conds;
-			std::vector<std::vector<FaParser::StmtContext *>> _bodys1;
-			std::vector<FaParser::ExprContext *> _bodys2;
-			std::tie (_conds, _bodys1, _bodys2) = m_visitor->visit (_base_raw->ifExpr ()).as<std::tuple<
-				std::vector<FaParser::ExprContext *>,
-				std::vector<std::vector<FaParser::StmtContext *>>,
-				std::vector<FaParser::ExprContext *>
-			>> ();
-			// TODO: 计算期望的类型
-			// TODO: 此处用新的变量替换_vt
-			AstValue _tmp_vt = _func_ctx.DefineVariable ("");
-			if (!IfExprBuilder (_func_ctx, _conds, _bodys1, _bodys2, "", _vt))
-				return false;
-			_assigned = true;
-		} else if (_base_raw->quotExpr ()) {
-			// TODO: 计算期望的类型
-			if (!ExprBuilder (_func_ctx, _base_raw->quotExpr ()->expr (), "", _val))
-				return false;
-		} else {
+		 else if (_base_raw->PointOp ()) {
 			LOG_TODO (_base_raw->start);
 			return false;
+		} else {
+			
 		}
 
 		// 处理后缀
@@ -408,6 +408,50 @@ private:
 		if (!_assigned) {
 			_vt = _val;
 			// TODO 返回结果前检查是否符合期望
+		}
+		return true;
+	}
+
+	bool StrongExprBaseBuilder (FuncContext &_func_ctx, FaParser::StrongExprBaseContext *_expr_raw, std::string _expect_type, AstValue &_vt) {
+		if (_expr_raw->ids ()) {
+			// 计算_val
+			_vt = _func_ctx.GetVariable (_expr_raw->ids ()->getText ());
+			if (!_vt.IsValid ())
+				return false;
+			// TODO 计算是否符合期望
+		} else if (_expr_raw->ColonColon ()) {
+			// 外部 C API 调用
+			std::string _cur_name = _expr_raw->getText ();
+			if (m_imports.contains (_cur_name)) {
+				_vt = m_imports [_cur_name];
+			} else {
+				LOG_ERROR (_expr_raw->start, fmt::format ("未定义的外部符号：{}", _cur_name));
+				return false;
+			}
+		} else if (_expr_raw->literal ()) {
+			_vt = AstValue { m_value_builder, _expr_raw->literal () };
+			// TODO 计算是否符合期望
+		} else if (_expr_raw->ifExpr ()) {
+			std::vector<FaParser::ExprContext *> _conds;
+			std::vector<std::vector<FaParser::StmtContext *>> _bodys1;
+			std::vector<FaParser::ExprContext *> _bodys2;
+			std::tie (_conds, _bodys1, _bodys2) = m_visitor->visit (_expr_raw->ifExpr ()).as<std::tuple<
+				std::vector<FaParser::ExprContext *>,
+				std::vector<std::vector<FaParser::StmtContext *>>,
+				std::vector<FaParser::ExprContext *>
+				>> ();
+			// TODO: 计算期望的类型
+			// TODO: 此处用新的变量替换_vt
+			AstValue _tmp_vt = _func_ctx.DefineVariable ("");
+			if (!IfExprBuilder (_func_ctx, _conds, _bodys1, _bodys2, "", _vt))
+				return false;
+		} else if (_expr_raw->quotExpr ()) {
+			// TODO: 计算期望的类型
+			if (!ExprBuilder (_func_ctx, _expr_raw->quotExpr ()->expr (), "", _vt))
+				return false;
+		} else {
+			LOG_TODO (_expr_raw->start);
+			return false;
 		}
 		return true;
 	}

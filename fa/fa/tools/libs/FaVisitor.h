@@ -61,8 +61,6 @@ public:
 
     virtual antlrcpp::Any visitShiftROp(FaParser::ShiftROpContext *context) = 0;
 
-    virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *context) = 0;
-
     virtual antlrcpp::Any visitLtOp(FaParser::LtOpContext *context) = 0;
 
     virtual antlrcpp::Any visitLtEqualOp(FaParser::LtEqualOpContext *context) = 0;
@@ -75,9 +73,13 @@ public:
 
     virtual antlrcpp::Any visitNotEqualOp(FaParser::NotEqualOpContext *context) = 0;
 
-    virtual antlrcpp::Any visitLtOps(FaParser::LtOpsContext *context) = 0;
+    virtual antlrcpp::Any visitSelfOp2(FaParser::SelfOp2Context *context) = 0;
 
-    virtual antlrcpp::Any visitGtOps(FaParser::GtOpsContext *context) = 0;
+    virtual antlrcpp::Any visitCompareOp2(FaParser::CompareOp2Context *context) = 0;
+
+    virtual antlrcpp::Any visitChangeOp2(FaParser::ChangeOp2Context *context) = 0;
+
+    virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *context) = 0;
 
     virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *context) = 0;
 
@@ -123,7 +125,7 @@ public:
 
     virtual antlrcpp::Any visitStrongExpr(FaParser::StrongExprContext *context) = 0;
 
-    virtual antlrcpp::Any visitWeakExprSuffix(FaParser::WeakExprSuffixContext *context) = 0;
+    virtual antlrcpp::Any visitMiddleExpr(FaParser::MiddleExprContext *context) = 0;
 
     virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
 
