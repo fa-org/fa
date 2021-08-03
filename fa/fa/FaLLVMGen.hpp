@@ -38,12 +38,21 @@
 #include "TypeMap.hpp"
 #include "ValueBuilder.hpp"
 #include "AstValue.hpp"
-#include "AstCheck.hpp"
 #include "FuncContext.hpp"
 
 
 
 class FaLLVMGen {
+	struct _StrongValueCtx {
+		FaParser::StrongExprContext *_expr_raw;
+		AstValue _val;
+		std::string _expect_type;
+	};
+	struct _StrongOpCtx {
+		std::string _op;
+		size_t _level;
+	};
+
 public:
 	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor), m_module_name (_module_name) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
@@ -58,7 +67,7 @@ public:
 			FaParser::ImportBlockContext *,
 			std::vector<FaParser::ClassBlockContext *>,
 			FaParser::FaEntryMainFuncBlockContext *
-			>> ();
+		>> ();
 		m_uses = _uses;
 
 		// 引用外部模块
@@ -192,8 +201,8 @@ private:
 				FaParser::NormalStmtContext *_normal_stmt_raw = _stmt_raw->normalStmt ();
 				if (_normal_stmt_raw->Return () || _normal_stmt_raw->expr ()) {
 					if (_normal_stmt_raw->expr ()) {
-						AstValue _value;
-						if (!ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), "", _value))
+						AstValue _value = ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), "");
+						if (!_value.IsValid ())
 							return false;
 						if (_normal_stmt_raw->Return ()) {
 							if (!_value.IsValue ()) {
@@ -233,12 +242,13 @@ private:
 				return false;
 			} else if (_stmt_raw->defVarStmt ()) {
 				auto _def_var_stmt_raw = _stmt_raw->defVarStmt ();
-				std::string _type_str = _def_var_stmt_raw->type ()->getText ();
-				AstValue _var = _func_ctx.DefineVariable (_def_var_stmt_raw->type (), _type_str);
+				AstValue _var = _func_ctx.DefineVariable (_def_var_stmt_raw->type (), _def_var_stmt_raw->Id ()->getText ());
 				if (!_var.IsValid ())
 					return false;
-				if (!ExprBuilder (_func_ctx, _def_var_stmt_raw->expr (), _type_str, _var))
+				AstValue _val = ExprBuilder (_func_ctx, _def_var_stmt_raw->expr (), _def_var_stmt_raw->type ()->getText ());
+				if (!_val.IsValid ())
 					return false;
+				_func_ctx.DoOper2 (_var, "=", _val, _def_var_stmt_raw->Assign ()->getSymbol ());
 			} else {
 				LOG_ERROR (_stmt_raw->start, "未知的表达式");
 				return false;
@@ -251,8 +261,8 @@ private:
 		if (_conds_raw.size () == 0)
 			return StmtBuilder (_func_ctx, _bodys_raw [0]);
 		//
-		AstValue _cond {};
-		if (!ExprBuilder (_func_ctx, _conds_raw [0], "bool", _cond))
+		AstValue _cond = ExprBuilder (_func_ctx, _conds_raw [0], "bool");
+		if (!_cond.IsValid ())
 			return false;
 		_conds_raw.erase (_conds_raw.begin ());
 		_func_ctx.IfElse (_cond, [&] () {
@@ -285,6 +295,75 @@ private:
 	}
 
 	AstValue MiddleExprBuilder (FuncContext &_func_ctx, FaParser::MiddleExprContext *_expr_raw, std::string _expect_type) {
+		// 整理数据
+		std::vector<std::shared_ptr<_StrongValueCtx>> _vals;
+		for (auto _strong_expr : _expr_raw->strongExpr ())
+			_vals.push_back (std::make_shared<_StrongValueCtx> (_strong_expr, std::nullopt, ""));
+		//
+		std::vector<std::shared_ptr<_StrongOpCtx>> _ops;
+		bool _change_type = false;
+		for (auto _op_raw : _expr_raw->allOp2 ()) {
+			std::string _op = _op_raw->getText ();
+			static std::map<std::string, size_t> s_priv_level {
+				{ "**", 1 },
+				{ "*", 2 }, { "/", 2 }, { "%", 2 },
+				{ "+", 3 }, { "-", 3 },
+				{ "<<", 4 }, { ">>", 4 },
+				{ "&", 5 }, { "|", 5 }, { "^", 5 },
+				{ "??", 6 },
+				{ "<", 7 }, { "<=", 7 }, { ">", 7 }, { ">=", 7 }, { "==", 7 }, { "!=", 7 },
+				{ "&&", 8 },
+				{ "||", 9 },
+			};
+			if (!s_priv_level.contains (_op)) {
+				LOG_TODO (_op_raw->start);
+				return std::nullopt;
+			}
+			_ops.push_back (std::make_shared<_StrongOpCtx> (_op, s_priv_level [_op]));
+		}
+
+		// 计算期望类型
+		if (!_MiddleExprBuilder_calc_expect_type (_vals, _ops, _expect_type, 8))
+			return std::nullopt;
+
+		// 按优先级迭代计算
+
+
+
+
+
+
+
+
+
+		auto _strong_exprs = _expr_raw->strongExpr ();
+		std::vector<AstValue> _vals;
+		_vals.resize (_strong_exprs.size ());
+		std::vector<std::string> _ops;
+		std::vector<size_t> _op_levels;
+		for (auto _op_raw : _expr_raw->allOp2 ()) {
+			std::string _op = _op_raw->getText ();
+			_ops.push_back (_op);
+			if (!s_priv_level.contains (_op)) {
+				LOG_TODO (_op_raw->start);
+				return std::nullopt;
+			}
+			_op_levels.push_back (s_priv_level [_op]);
+		}
+		for (size_t i = 0; i < 8; ++i) {
+			for (size_t j = 0; j < _ops.size (); ++j) {
+				if (_op_levels [j] == i) {
+					if (!_vals [j].IsValid ())
+						_vals [j] = StrongExprBuilder (_func_ctx, _strong_exprs [j], "");
+				}
+			}
+		}
+
+
+
+
+
+
 		// 计算强表达式类型
 		auto _strong_expect_type = AstCheck::GetStrongExprExpectType (_expr_raw, _expect_type);
 		if (!_strong_expect_type.has_value ())
@@ -338,7 +417,11 @@ private:
 		return true;
 	}
 
-	bool StrongExprBuilder (FuncContext &_func_ctx, FaParser::StrongExprContext *_expr_raw, std::string _expect_type, AstValue &_vt) {
+	bool _MiddleExprBuilder_calc_expect_type (std::vector<std::shared_ptr<_StrongValueCtx>> &_vals, std::vector<std::shared_ptr<_StrongOpCtx>> _ops, std::string _expect_type, size_t _cur_level) {
+
+	}
+
+	AstValue StrongExprBuilder (FuncContext &_func_ctx, FaParser::StrongExprContext *_expr_raw, std::string _expect_type) {
 		bool _current = AstCheck::TypeNotChangeOnCurrentWrapper (_expr_raw);
 		AstValue _val {};
 		if (_current)
@@ -412,7 +495,7 @@ private:
 		return true;
 	}
 
-	bool StrongExprBaseBuilder (FuncContext &_func_ctx, FaParser::StrongExprBaseContext *_expr_raw, std::string _expect_type, AstValue &_vt) {
+	AstValue StrongExprBaseBuilder (FuncContext &_func_ctx, FaParser::StrongExprBaseContext *_expr_raw, std::string _expect_type) {
 		if (_expr_raw->ids ()) {
 			// 计算_val
 			_vt = _func_ctx.GetVariable (_expr_raw->ids ()->getText ());
