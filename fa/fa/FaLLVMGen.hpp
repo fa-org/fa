@@ -39,6 +39,7 @@
 #include "ValueBuilder.hpp"
 #include "AstValue.hpp"
 #include "FuncContext.hpp"
+#include "ExpectCheck.hpp"
 
 
 
@@ -49,8 +50,13 @@ class FaLLVMGen {
 		std::string _expect_type;
 	};
 	struct _StrongOpCtx {
-		std::string _op;
+		FaParser::AllOp2Context *_op_raw;
 		size_t _level;
+	};
+	struct _StrongExprTreeCtx : std::enable_shared_from_this<FaLLVMGen::_StrongExprTreeCtx> {
+		std::variant<FaLLVMGen::_StrongValueCtx *, std::shared_ptr<_StrongExprTreeCtx>> _left;
+		std::optional<FaLLVMGen::_StrongOpCtx *> _op;
+		std::optional<std::variant<FaLLVMGen::_StrongValueCtx *, std::shared_ptr<_StrongExprTreeCtx>>> _right;
 	};
 
 public:
@@ -296,11 +302,11 @@ private:
 
 	AstValue MiddleExprBuilder (FuncContext &_func_ctx, FaParser::MiddleExprContext *_expr_raw, std::string _expect_type) {
 		// 整理数据
-		std::vector<std::shared_ptr<_StrongValueCtx>> _vals;
+		std::vector<_StrongValueCtx *> _vals;
 		for (auto _strong_expr : _expr_raw->strongExpr ())
-			_vals.push_back (std::make_shared<_StrongValueCtx> (_strong_expr, std::nullopt, ""));
+			_vals.push_back (new _StrongValueCtx { _strong_expr, std::nullopt, "" });
 		//
-		std::vector<std::shared_ptr<_StrongOpCtx>> _ops;
+		std::vector<_StrongOpCtx *> _ops;
 		bool _change_type = false;
 		for (auto _op_raw : _expr_raw->allOp2 ()) {
 			std::string _op = _op_raw->getText ();
@@ -319,14 +325,25 @@ private:
 				LOG_TODO (_op_raw->start);
 				return std::nullopt;
 			}
-			_ops.push_back (std::make_shared<_StrongOpCtx> (_op, s_priv_level [_op]));
+			_ops.push_back (new _StrongOpCtx { _op_raw, s_priv_level [_op] });
 		}
 
-		// 计算期望类型
-		if (!_MiddleExprBuilder_calc_expect_type (_vals, _ops, _expect_type, 8))
+		// 转为树状结构
+		auto _tree_ctx = _MiddleExprBuilder_calc_tree (_vals, _ops);
+		if (!_tree_ctx.has_value ())
 			return std::nullopt;
 
-		// 按优先级迭代计算
+		// TODO 计算期望类型
+
+		// TODO 按优先级迭代计算
+		AstValue _ret = _MiddleExprBuilder_process (_vals, _ops, 9);
+		for (auto _val : _vals)
+			delete _val;
+		_vals.clear ();
+		for (auto _op : _ops)
+			delete _op;
+		_ops.clear ();
+		return _ret;
 
 
 
@@ -335,89 +352,121 @@ private:
 
 
 
-
-		auto _strong_exprs = _expr_raw->strongExpr ();
-		std::vector<AstValue> _vals;
-		_vals.resize (_strong_exprs.size ());
-		std::vector<std::string> _ops;
-		std::vector<size_t> _op_levels;
-		for (auto _op_raw : _expr_raw->allOp2 ()) {
-			std::string _op = _op_raw->getText ();
-			_ops.push_back (_op);
-			if (!s_priv_level.contains (_op)) {
-				LOG_TODO (_op_raw->start);
-				return std::nullopt;
-			}
-			_op_levels.push_back (s_priv_level [_op]);
-		}
-		for (size_t i = 0; i < 8; ++i) {
-			for (size_t j = 0; j < _ops.size (); ++j) {
-				if (_op_levels [j] == i) {
-					if (!_vals [j].IsValid ())
-						_vals [j] = StrongExprBuilder (_func_ctx, _strong_exprs [j], "");
-				}
-			}
-		}
-
+		////auto _strong_exprs = _expr_raw->strongExpr ();
+		////std::vector<AstValue> _vals;
+		////_vals.resize (_strong_exprs.size ());
+		////std::vector<std::string> _ops;
+		////std::vector<size_t> _op_levels;
+		////for (auto _op_raw : _expr_raw->allOp2 ()) {
+		////	std::string _op = _op_raw->getText ();
+		////	_ops.push_back (_op);
+		////	if (!s_priv_level.contains (_op)) {
+		////		LOG_TODO (_op_raw->start);
+		////		return std::nullopt;
+		////	}
+		////	_op_levels.push_back (s_priv_level [_op]);
+		////}
+		////for (size_t i = 0; i < 8; ++i) {
+		////	for (size_t j = 0; j < _ops.size (); ++j) {
+		////		if (_op_levels [j] == i) {
+		////			if (!_vals [j].IsValid ())
+		////				_vals [j] = StrongExprBuilder (_func_ctx, _strong_exprs [j], "");
+		////		}
+		////	}
+		////}
 
 
 
 
 
-		// 计算强表达式类型
-		auto _strong_expect_type = AstCheck::GetStrongExprExpectType (_expr_raw, _expect_type);
-		if (!_strong_expect_type.has_value ())
-			return false;
 
-		// TODO
-		std::vector<AstValue> _v;
-		auto _expr_raws = _expr_raw->strongExpr ();
-		for (size_t i = 0; i < _expr_raws.size (); ++i) {
-			AstValue _tmp_vt {};
-			if (!StrongExprBuilder (_func_ctx, _expr_raws [i], _strong_expect_type.value (), _tmp_vt))
-				return false;
-			_v.push_back (_tmp_vt);
-		}
+		////// 计算强表达式类型
+		////auto _strong_expect_type = AstCheck::GetStrongExprExpectType (_expr_raw, _expect_type);
+		////if (!_strong_expect_type.has_value ())
+		////	return false;
 
-		//AstValue _tmp_vt = _vt;
-		//if (!StrongExprBuilder (_func_ctx, _expr_raw->strongExpr () [0], _strong_expect_type.value (), _tmp_vt))
-		//	return false;
+		////// TODO
+		////std::vector<AstValue> _v;
+		////auto _expr_raws = _expr_raw->strongExpr ();
+		////for (size_t i = 0; i < _expr_raws.size (); ++i) {
+		////	AstValue _tmp_vt {};
+		////	if (!StrongExprBuilder (_func_ctx, _expr_raws [i], _strong_expect_type.value (), _tmp_vt))
+		////		return false;
+		////	_v.push_back (_tmp_vt);
+		////}
 
-		//auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
-		//if (_weak_suffix_raw) {
-		//	if (_weak_suffix_raw->allAssign () || _weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
-		//		AstValue _other_tmp_vt {};
-		//		if (!StrongExprBuilder (_func_ctx, _weak_suffix_raw->strongExpr (0), _strong_expect_type.value (), _other_tmp_vt))
-		//			return false;
-		//		std::string _op_str = "";
-		//		if (_weak_suffix_raw->allAssign ()) {
-		//			_op_str = _weak_suffix_raw->allAssign ()->getText ();
-		//		} else if (_weak_suffix_raw->equalOp ()) {
-		//			_op_str = _weak_suffix_raw->equalOp ()->getText ();
-		//		} else if (_weak_suffix_raw->notEqualOp ()) {
-		//			_op_str = _weak_suffix_raw->notEqualOp ()->getText ();
-		//		} else {
-		//			LOG_TODO (_weak_suffix_raw->start);
-		//			return false;
-		//		}
-		//		_tmp_vt = _func_ctx.DoOper2 (_tmp_vt, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
-		//		if (!_tmp_vt.IsValid ())
-		//			return false;
-		//		_vt = _tmp_vt;
-		//	} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
-		//		LOG_TODO (_weak_suffix_raw->start);
-		//		return false;
-		//	} else if (_weak_suffix_raw->ltOps ().size () > 0 || _weak_suffix_raw->gtOps ().size () > 0) {
-		//		LOG_TODO (_weak_suffix_raw->start);
-		//		return false;
-		//	}
-		//} else {
-		//	_vt = _tmp_vt;
-		//}
-		return true;
+		//////AstValue _tmp_vt = _vt;
+		//////if (!StrongExprBuilder (_func_ctx, _expr_raw->strongExpr () [0], _strong_expect_type.value (), _tmp_vt))
+		//////	return false;
+
+		//////auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
+		//////if (_weak_suffix_raw) {
+		//////	if (_weak_suffix_raw->allAssign () || _weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
+		//////		AstValue _other_tmp_vt {};
+		//////		if (!StrongExprBuilder (_func_ctx, _weak_suffix_raw->strongExpr (0), _strong_expect_type.value (), _other_tmp_vt))
+		//////			return false;
+		//////		std::string _op_str = "";
+		//////		if (_weak_suffix_raw->allAssign ()) {
+		//////			_op_str = _weak_suffix_raw->allAssign ()->getText ();
+		//////		} else if (_weak_suffix_raw->equalOp ()) {
+		//////			_op_str = _weak_suffix_raw->equalOp ()->getText ();
+		//////		} else if (_weak_suffix_raw->notEqualOp ()) {
+		//////			_op_str = _weak_suffix_raw->notEqualOp ()->getText ();
+		//////		} else {
+		//////			LOG_TODO (_weak_suffix_raw->start);
+		//////			return false;
+		//////		}
+		//////		_tmp_vt = _func_ctx.DoOper2 (_tmp_vt, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
+		//////		if (!_tmp_vt.IsValid ())
+		//////			return false;
+		//////		_vt = _tmp_vt;
+		//////	} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
+		//////		LOG_TODO (_weak_suffix_raw->start);
+		//////		return false;
+		//////	} else if (_weak_suffix_raw->ltOps ().size () > 0 || _weak_suffix_raw->gtOps ().size () > 0) {
+		//////		LOG_TODO (_weak_suffix_raw->start);
+		//////		return false;
+		//////	}
+		//////} else {
+		//////	_vt = _tmp_vt;
+		//////}
+		////return true;
 	}
 
-	bool _MiddleExprBuilder_calc_expect_type (std::vector<std::shared_ptr<_StrongValueCtx>> &_vals, std::vector<std::shared_ptr<_StrongOpCtx>> _ops, std::string _expect_type, size_t _cur_level) {
+	std::optional<std::shared_ptr<_StrongExprTreeCtx>> _MiddleExprBuilder_calc_tree (std::vector<_StrongValueCtx *> &_vals, std::vector<_StrongOpCtx *> &_ops) {
+		if (_vals.size () == 0 || (_vals.size () != _ops.size () + 1)) {
+			return std::nullopt;
+		} else {
+			auto _tree_ctx = std::make_shared<_StrongExprTreeCtx> ();
+			if (_vals.size () == 1) {
+				_tree_ctx._left = _vals [0];
+			} else {
+				size_t _max = _ops [0]->_level, _pos = 0;
+				for (size_t i = 1; i < _ops.size (); ++i) {
+					if (_ops [i]->_level > _max) {
+						_max = _ops [i]->_level;
+						_pos = i;
+					}
+				}
+				//
+				std::vector<_StrongValueCtx *> _tmp_vals;
+				std::vector<_StrongOpCtx *> _tmp_ops;
+				_tmp_vals.assign (_vals.begin (), _vals.begin () + _pos);
+				if (_pos > 0)
+					_tmp_ops.assign (_ops.begin (), _ops.begin () + _pos - 1);
+				auto _left = _MiddleExprBuilder_calc_tree (_tmp_vals, _tmp_ops);
+				if (!_left.has_value ())
+					return std::nullopt;
+				_tree_ctx._left = _left.value ();
+				//
+				_tmp_vals.clear ();
+				_tmp_ops.clear ();
+			}
+			return _tree_ctx;
+		}
+	}
+
+	AstValue _MiddleExprBuilder_process (std::vector<_StrongValueCtx *> &_vals, std::vector<_StrongOpCtx *> &_ops, size_t _cur_level) {
 
 	}
 
