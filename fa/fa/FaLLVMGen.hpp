@@ -3,6 +3,7 @@
 
 
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -43,22 +44,53 @@
 
 
 
-class FaLLVMGen {
-	struct _StrongValueCtx {
-		FaParser::StrongExprContext *_expr_raw;
-		AstValue _val;
-		std::string _expect_type;
-	};
-	struct _StrongOpCtx {
-		FaParser::AllOp2Context *_op_raw;
-		size_t _level;
-	};
-	struct _StrongExprTreeCtx : std::enable_shared_from_this<FaLLVMGen::_StrongExprTreeCtx> {
-		std::variant<FaLLVMGen::_StrongValueCtx *, std::shared_ptr<_StrongExprTreeCtx>> _left;
-		std::optional<FaLLVMGen::_StrongOpCtx *> _op;
-		std::optional<std::variant<FaLLVMGen::_StrongValueCtx *, std::shared_ptr<_StrongExprTreeCtx>>> _right;
-	};
+struct _ValueCtx {
+	FaParser::StrongExprBaseContext *_base_raw;
+	AstValue _val;
+	std::string _expect_type;
+};
+struct _OperCtx {
+	std::string _op;
+	antlr4::Token *_t;
+};
+struct _Op1PrefixExprTreeCtx;
+struct _Op1SuffixExprTreeCtx;
+struct _Op2ExprTreeCtx;
+struct _OpNExprTreeCtx;
+struct _IfExprTreeCtx;
+using _ExprOrValue = std::variant<
+	_ValueCtx,
+	std::shared_ptr<_Op1PrefixExprTreeCtx>,
+	std::shared_ptr<_Op1SuffixExprTreeCtx>,
+	std::shared_ptr<_Op2ExprTreeCtx>,
+	std::shared_ptr<_OpNExprTreeCtx>,
+	std::shared_ptr<_IfExprTreeCtx>
+>;
+struct _Op1PrefixExprTreeCtx: std::enable_shared_from_this<_Op1PrefixExprTreeCtx> {
+	_OperCtx								_op;
+	_ExprOrValue							_left;
+};
+struct _Op1SuffixExprTreeCtx: std::enable_shared_from_this<_Op1SuffixExprTreeCtx> {
+	_ExprOrValue							_left;
+	_OperCtx								_op;
+};
+struct _Op2ExprTreeCtx: std::enable_shared_from_this<_Op2ExprTreeCtx> {
+	_ExprOrValue							_left;
+	_OperCtx								_op;
+	_ExprOrValue							_right;
+};
+struct _OpNExprTreeCtx: std::enable_shared_from_this<_OpNExprTreeCtx> {
+	_ExprOrValue							_left;
+	_OperCtx								_op;
+	std::vector<_ExprOrValue>				_right;
+};
+struct _IfExprTreeCtx: std::enable_shared_from_this<_IfExprTreeCtx> {
+	std::vector<_ExprOrValue>				_conds;
+	std::vector<FaParser::StmtContext *>	_bodys1_raw;
+	std::vector<_ExprOrValue>				_bodys2;
+};
 
+class FaLLVMGen {
 public:
 	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor), m_module_name (_module_name) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
@@ -283,30 +315,71 @@ private:
 	}
 
 	AstValue ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext *_expr_raw, std::string _expect_type) {
-		auto _middles = _expr_raw->middleExpr ();
-		AstValue _val {};
-		for (int i = (int) _middles.size () - 1; i >= 0; --i) {
-			AstValue _val2 = MiddleExprBuilder (_func_ctx, _middles [i], _expect_type);
-			if (!_val2.IsValid ())
-				return std::nullopt;
-			if (i == (int) _middles.size () - 1) {
-				_val = _val2;
-			} else {
-				_val = _func_ctx.DoOper2 (_val2, _expr_raw->allAssign ((size_t) i)->getText (), _val, _middles [i]->start);
-				if (!_val.IsValid ())
-					return std::nullopt;
-			}
+		static bool s_init = true;
+		static std::function<std::optional<_ExprOrValue> (FaParser::ExprContext *)> s_parse_expr;
+		static std::function<std::optional<_ExprOrValue> (FaParser::MiddleExprContext *)> s_parse_middle_expr;
+		static std::function<std::optional<_ExprOrValue> (FaParser::StrongExprContext *)> s_parse_strong_expr;
+		static std::function<std::optional<_ExprOrValue> (FaParser::StrongExprBaseContext *)> s_parse_strong_expr_base;
+		if (s_init) {
+			s_init = false;
+			s_parse_expr = [] (FaParser::ExprContext *_expr_raw) -> std::optional<_ExprOrValue> {
+				auto _exprs = _expr_raw->middleExpr ();
+				auto _ops = _expr_raw->allAssign ();
+				if (_exprs.size () == 1) {
+					return s_parse_middle_expr (_exprs [0]);
+				} else {
+					_ExprOrValue _val, _val2;
+					for (size_t i = 0; i < _ops.size (); ++i) {
+						auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
+						auto _tmp_val = s_parse_middle_expr (_exprs [i]);
+						if (!_tmp_val.has_value ())
+							return std::nullopt;
+						_ptr->_left = _tmp_val.value ();
+						_ptr->_op = { _ops [i]->getText (), _ops [i]->start };
+						if (i == 0) {
+							_val = _val2 = _ptr;
+						} else {
+							std::get<std::shared_ptr<_Op2ExprTreeCtx>> (_val2)->_right = _ptr;
+							_val2 = std::get<std::shared_ptr<_Op2ExprTreeCtx>> (_val2)->_right;
+						}
+					}
+					auto _tmp_val = s_parse_middle_expr (_exprs [_exprs.size () - 1]);
+					if (!_tmp_val.has_value ())
+						return std::nullopt;
+					std::get<std::shared_ptr<_Op2ExprTreeCtx>> (_val2)->_right = _tmp_val.value ();
+					return _val;
+				}
+			};
+			s_parse_middle_expr = [] (FaParser::MiddleExprContext *_expr_raw) ->std::optional<_ExprOrValue> {
+				// TODO
+			};
+			// TODO
 		}
-		return _val;
+
+		//auto _middles = _expr_raw->middleExpr ();
+		//AstValue _val {};
+		//for (int i = (int) _middles.size () - 1; i >= 0; --i) {
+		//	AstValue _val2 = MiddleExprBuilder (_func_ctx, _middles [i], _expect_type);
+		//	if (!_val2.IsValid ())
+		//		return std::nullopt;
+		//	if (i == (int) _middles.size () - 1) {
+		//		_val = _val2;
+		//	} else {
+		//		_val = _func_ctx.DoOper2 (_val2, _expr_raw->allAssign ((size_t) i)->getText (), _val, _middles [i]->start);
+		//		if (!_val.IsValid ())
+		//			return std::nullopt;
+		//	}
+		//}
+		//return _val;
 	}
 
 	AstValue MiddleExprBuilder (FuncContext &_func_ctx, FaParser::MiddleExprContext *_expr_raw, std::string _expect_type) {
 		// 整理数据
-		std::vector<_StrongValueCtx *> _vals;
+		std::vector<std::shared_ptr<_StrongValueCtx>> _vals;
 		for (auto _strong_expr : _expr_raw->strongExpr ())
-			_vals.push_back (new _StrongValueCtx { _strong_expr, std::nullopt, "" });
+			_vals.push_back (std::make_shared<_StrongValueCtx> (_strong_expr, std::nullopt, ""));
 		//
-		std::vector<_StrongOpCtx *> _ops;
+		std::vector<std::shared_ptr<_StrongOpCtx>> _ops;
 		bool _change_type = false;
 		for (auto _op_raw : _expr_raw->allOp2 ()) {
 			std::string _op = _op_raw->getText ();
@@ -325,25 +398,21 @@ private:
 				LOG_TODO (_op_raw->start);
 				return std::nullopt;
 			}
-			_ops.push_back (new _StrongOpCtx { _op_raw, s_priv_level [_op] });
+			_ops.push_back (std::make_shared<_StrongOpCtx> (_op_raw, s_priv_level [_op]));
 		}
 
 		// 转为树状结构
-		auto _tree_ctx = _MiddleExprBuilder_calc_tree (_vals, _ops);
-		if (!_tree_ctx.has_value ())
+		auto _otree_ctx = _MiddleExprBuilder_calc_tree (_vals, _ops);
+		if (!_otree_ctx.has_value ())
 			return std::nullopt;
+		auto _tree_ctx = _otree_ctx.value ();
 
 		// TODO 计算期望类型
+		if (!_expr_calc_expect (_tree_ctx, _expect_type))
+			return std::nullopt;
 
 		// TODO 按优先级迭代计算
-		AstValue _ret = _MiddleExprBuilder_process (_vals, _ops, 9);
-		for (auto _val : _vals)
-			delete _val;
-		_vals.clear ();
-		for (auto _op : _ops)
-			delete _op;
-		_ops.clear ();
-		return _ret;
+		return _MiddleExprBuilder_process (_tree_ctx);
 
 
 
@@ -433,40 +502,57 @@ private:
 		////return true;
 	}
 
-	std::optional<std::shared_ptr<_StrongExprTreeCtx>> _MiddleExprBuilder_calc_tree (std::vector<_StrongValueCtx *> &_vals, std::vector<_StrongOpCtx *> &_ops) {
+	std::optional<_StrongExprOrValue> _MiddleExprBuilder_calc_tree (std::vector<std::shared_ptr<_StrongValueCtx>> &_vals, std::vector<std::shared_ptr<_StrongOpCtx>> &_ops) {
 		if (_vals.size () == 0 || (_vals.size () != _ops.size () + 1)) {
 			return std::nullopt;
+		} else if (_vals.size () == 1) {
+			return std::make_shared<_StrongValueCtx> (_vals [0]);
 		} else {
 			auto _tree_ctx = std::make_shared<_StrongExprTreeCtx> ();
-			if (_vals.size () == 1) {
-				_tree_ctx._left = _vals [0];
-			} else {
-				size_t _max = _ops [0]->_level, _pos = 0;
-				for (size_t i = 1; i < _ops.size (); ++i) {
-					if (_ops [i]->_level > _max) {
-						_max = _ops [i]->_level;
-						_pos = i;
-					}
+			size_t _max = _ops [0]->_level, _pos = 0;
+			for (size_t i = 1; i < _ops.size (); ++i) {
+				if (_ops [i]->_level > _max) {
+					_max = _ops [i]->_level;
+					_pos = i;
 				}
-				//
-				std::vector<_StrongValueCtx *> _tmp_vals;
-				std::vector<_StrongOpCtx *> _tmp_ops;
-				_tmp_vals.assign (_vals.begin (), _vals.begin () + _pos);
-				if (_pos > 0)
-					_tmp_ops.assign (_ops.begin (), _ops.begin () + _pos - 1);
-				auto _left = _MiddleExprBuilder_calc_tree (_tmp_vals, _tmp_ops);
-				if (!_left.has_value ())
-					return std::nullopt;
-				_tree_ctx._left = _left.value ();
-				//
-				_tmp_vals.clear ();
-				_tmp_ops.clear ();
 			}
+			//
+			std::vector<std::shared_ptr<_StrongValueCtx>> _tmp_vals;
+			std::vector<std::shared_ptr<_StrongOpCtx>> _tmp_ops;
+			_tmp_vals.assign (_vals.begin (), _vals.begin () + _pos + 1);
+			if (_tmp_vals.size () > 1)
+				_tmp_ops.assign (_ops.begin (), _ops.begin () + _pos);
+			auto _tmp = _MiddleExprBuilder_calc_tree (_tmp_vals, _tmp_ops);
+			if (!_tmp.has_value ())
+				return std::nullopt;
+			_tree_ctx->_left = _tmp.value ();
+			_tree_ctx->_op = _ops [_pos];
+			//
+			_tmp_vals.clear ();
+			_tmp_ops.clear ();
+			_tmp_vals.assign (_vals.begin () + _pos + 1, _vals.end ());
+			if (_tmp_vals.size () > 1)
+				_tmp_ops.assign (_ops.begin () + _pos + 1, _ops.end ());
+			auto _tmp = _MiddleExprBuilder_calc_tree (_tmp_vals, _tmp_ops);
+			if (!_tmp.has_value ())
+				return std::nullopt;
+			_tree_ctx->_right = _tmp.value ();
 			return _tree_ctx;
 		}
 	}
 
-	AstValue _MiddleExprBuilder_process (std::vector<_StrongValueCtx *> &_vals, std::vector<_StrongOpCtx *> &_ops, size_t _cur_level) {
+	std::optional<std::string> _expr_calc_expect (_StrongExprOrValue &_tree_ctx, std::string _expect_type) {
+		if (_tree_ctx.index () == 0) {
+			// tree
+			auto _tree = std::get<0> (_tree_ctx);
+		} else {
+			// value
+			auto _val = std::get<1> (_tree_ctx);
+			_val->_expr_raw
+		}
+	}
+
+	AstValue _MiddleExprBuilder_process (_StrongExprOrValue &_tree_ctx) {
 
 	}
 
