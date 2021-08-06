@@ -53,41 +53,41 @@ struct _OperCtx {
 	std::string _op;
 	antlr4::Token *_t;
 };
-struct _Op1PrefixExprTreeCtx;
-struct _Op1SuffixExprTreeCtx;
+struct _Op1ExprTreeCtx;
 struct _Op2ExprTreeCtx;
 struct _OpNExprTreeCtx;
 struct _IfExprTreeCtx;
 using _ExprOrValue = std::variant<
 	_ValueCtx,
-	std::shared_ptr<_Op1PrefixExprTreeCtx>,
-	std::shared_ptr<_Op1SuffixExprTreeCtx>,
+	std::shared_ptr<_Op1ExprTreeCtx>,
 	std::shared_ptr<_Op2ExprTreeCtx>,
 	std::shared_ptr<_OpNExprTreeCtx>,
 	std::shared_ptr<_IfExprTreeCtx>
 >;
-struct _Op1PrefixExprTreeCtx: std::enable_shared_from_this<_Op1PrefixExprTreeCtx> {
+enum class _Op1Type { Prefix, Suffix };
+struct _Op1ExprTreeCtx: std::enable_shared_from_this<_Op1ExprTreeCtx> {
 	_OperCtx								_op;
 	_ExprOrValue							_left;
-};
-struct _Op1SuffixExprTreeCtx: std::enable_shared_from_this<_Op1SuffixExprTreeCtx> {
-	_ExprOrValue							_left;
-	_OperCtx								_op;
+	_Op1Type								_type;
+	std::string								_expect_type;
 };
 struct _Op2ExprTreeCtx: std::enable_shared_from_this<_Op2ExprTreeCtx> {
 	_ExprOrValue							_left;
 	_OperCtx								_op;
 	_ExprOrValue							_right;
+	std::string								_expect_type;
 };
 struct _OpNExprTreeCtx: std::enable_shared_from_this<_OpNExprTreeCtx> {
 	_ExprOrValue							_left;
 	_OperCtx								_op;
 	std::vector<_ExprOrValue>				_right;
+	std::string								_expect_type;
 };
 struct _IfExprTreeCtx: std::enable_shared_from_this<_IfExprTreeCtx> {
 	std::vector<_ExprOrValue>				_conds;
 	std::vector<FaParser::StmtContext *>	_bodys1_raw;
 	std::vector<_ExprOrValue>				_bodys2;
+	std::string								_expect_type;
 };
 
 class FaLLVMGen {
@@ -418,8 +418,16 @@ private:
 				_ptr->_right = _tmp_val.value ();
 				return _ptr;
 			};
-			s_parse_strong_expr = [] (FaParser::StrongExprContext *) -> std::optional<_ExprOrValue> {};
-			s_parse_strong_expr_base = [] (FaParser::StrongExprBaseContext *) -> std::optional<_ExprOrValue> {};
+			s_parse_strong_expr = [] (FaParser::StrongExprContext *_expr_raw) -> std::optional<_ExprOrValue> {
+				auto _tmp_val = s_parse_strong_expr_base (_expr_raw->strongExprBase ());
+				if (!_tmp_val.has_value ())
+					return std::nullopt;
+				_ExprOrValue _val = _tmp_val.value ();
+				auto _prefix_raws = _expr_raw->strongExprPrefix ();
+				auto _suffix_raws = _expr_raw->strongExprSuffix ();
+
+			};
+			s_parse_strong_expr_base = [] (FaParser::StrongExprBaseContext *_expr_raw) -> std::optional<_ExprOrValue> {};
 			// TODO
 		}
 
