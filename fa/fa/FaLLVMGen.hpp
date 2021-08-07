@@ -423,12 +423,41 @@ private:
 				if (!_tmp_val.has_value ())
 					return std::nullopt;
 				_ExprOrValue _val = _tmp_val.value ();
+				//
 				auto _prefix_raws = _expr_raw->strongExprPrefix ();
+				for (auto _prefix_raw : _prefix_raws) {
+					auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
+					_ptr->_op = _OperCtx { _prefix_raw->getText (), _prefix_raw->start };
+					_ptr->_left = _val;
+					_ptr->_type = _Op1Type::Prefix;
+					_val = _ptr;
+				}
+				//
 				auto _suffix_raws = _expr_raw->strongExprSuffix ();
-
+				for (int i = (int) _suffix_raws.size () - 1; i >= 0; --i) {
+					auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
+					_ptr->_op = _OperCtx { _suffix_raws [i]->getText (), _suffix_raws [i]->start };
+					_ptr->_left = _val;
+					_ptr->_type = _Op1Type::Suffix;
+					_val = _ptr;
+				}
+				return _val;
 			};
-			s_parse_strong_expr_base = [] (FaParser::StrongExprBaseContext *_expr_raw) -> std::optional<_ExprOrValue> {};
-			// TODO
+			s_parse_strong_expr_base = [] (FaParser::StrongExprBaseContext *_expr_raw) -> std::optional<_ExprOrValue> {
+				if (_expr_raw->ids ()) {
+
+				} else if (_expr_raw->ColonColon ()) {
+
+				} else if (_expr_raw->literal ()) {
+
+				} else if (_expr_raw->ifExpr ()) {
+
+				} else if (_expr_raw->quotExpr ()) {
+					return s_parse_expr (_expr_raw->quotExpr ()->expr ());
+				} else {
+					LOG_TODO (_expr_raw->start);
+				}
+			};
 		}
 
 		//auto _middles = _expr_raw->middleExpr ();
@@ -575,178 +604,6 @@ private:
 		//////	_vt = _tmp_vt;
 		//////}
 		////return true;
-	}
-
-	std::optional<_StrongExprOrValue> _MiddleExprBuilder_calc_tree (std::vector<std::shared_ptr<_StrongValueCtx>> &_vals, std::vector<std::shared_ptr<_StrongOpCtx>> &_ops) {
-		if (_vals.size () == 0 || (_vals.size () != _ops.size () + 1)) {
-			return std::nullopt;
-		} else if (_vals.size () == 1) {
-			return std::make_shared<_StrongValueCtx> (_vals [0]);
-		} else {
-			auto _tree_ctx = std::make_shared<_StrongExprTreeCtx> ();
-			size_t _max = _ops [0]->_level, _pos = 0;
-			for (size_t i = 1; i < _ops.size (); ++i) {
-				if (_ops [i]->_level > _max) {
-					_max = _ops [i]->_level;
-					_pos = i;
-				}
-			}
-			//
-			std::vector<std::shared_ptr<_StrongValueCtx>> _tmp_vals;
-			std::vector<std::shared_ptr<_StrongOpCtx>> _tmp_ops;
-			_tmp_vals.assign (_vals.begin (), _vals.begin () + _pos + 1);
-			if (_tmp_vals.size () > 1)
-				_tmp_ops.assign (_ops.begin (), _ops.begin () + _pos);
-			auto _tmp = _MiddleExprBuilder_calc_tree (_tmp_vals, _tmp_ops);
-			if (!_tmp.has_value ())
-				return std::nullopt;
-			_tree_ctx->_left = _tmp.value ();
-			_tree_ctx->_op = _ops [_pos];
-			//
-			_tmp_vals.clear ();
-			_tmp_ops.clear ();
-			_tmp_vals.assign (_vals.begin () + _pos + 1, _vals.end ());
-			if (_tmp_vals.size () > 1)
-				_tmp_ops.assign (_ops.begin () + _pos + 1, _ops.end ());
-			auto _tmp = _MiddleExprBuilder_calc_tree (_tmp_vals, _tmp_ops);
-			if (!_tmp.has_value ())
-				return std::nullopt;
-			_tree_ctx->_right = _tmp.value ();
-			return _tree_ctx;
-		}
-	}
-
-	std::optional<std::string> _expr_calc_expect (_StrongExprOrValue &_tree_ctx, std::string _expect_type) {
-		if (_tree_ctx.index () == 0) {
-			// tree
-			auto _tree = std::get<0> (_tree_ctx);
-		} else {
-			// value
-			auto _val = std::get<1> (_tree_ctx);
-			_val->_expr_raw
-		}
-	}
-
-	AstValue _MiddleExprBuilder_process (_StrongExprOrValue &_tree_ctx) {
-
-	}
-
-	AstValue StrongExprBuilder (FuncContext &_func_ctx, FaParser::StrongExprContext *_expr_raw, std::string _expect_type) {
-		bool _current = AstCheck::TypeNotChangeOnCurrentWrapper (_expr_raw);
-		AstValue _val {};
-		if (_current)
-			_val = _vt;
-		if (!StrongExprBaseBuilder (_func_ctx, _expr_raw->strongExprBase (), _expect_type, _vt))
-			return false;
-
-
-
-
-
-
-
-		if (!StrongExprBaseBuilder (_func_ctx, _expr_raw->strongExprBase (), ))
-		auto _base_raw = _expr_raw->strongExprBase ();
-		 else if (_base_raw->PointOp ()) {
-			LOG_TODO (_base_raw->start);
-			return false;
-		} else {
-			
-		}
-
-		// 处理后缀
-		for (auto _suffix_raw : _expr_raw->strongExprSuffix ()) {
-			if (_suffix_raw->QuotYuanL ()) {
-				// 处理调用
-				if (!_val.IsFunction ()) {
-					LOG_ERROR (_suffix_raw->start, "无法将目标作为函数来调用");
-					return false;
-				}
-				std::vector<AstValue> _args;
-				for (auto _arg_expr : _suffix_raw->expr ()) {
-					AstValue _oarg {};
-					// TODO: 计算期望类型
-					if (!ExprBuilder (_func_ctx, _arg_expr, "", _oarg))
-						return false;
-					if (!_oarg.IsValue ()) {
-						LOG_ERROR (_arg_expr->start, "参数只接收值类型");
-						return false;
-					}
-					_args.push_back (_oarg);
-				}
-				_val = _func_ctx.FuncInvoke (_val, _args);
-			} else if (_suffix_raw->QuotFangL ()) {
-				// TODO 处理索引
-				LOG_TODO (_suffix_raw->start);
-				return false;
-			} else {
-				LOG_TODO (_suffix_raw->start);
-				return false;
-			}
-		}
-
-		//处理前缀
-		for (int i = (int) _expr_raw->strongExprPrefix ().size () - 1; i >= 0; --i) {
-			auto _prefix_raw = _expr_raw->strongExprPrefix () [i];
-			std::string _prefix_text = _prefix_raw->getText ();
-			if (_prefix_text == "~") {
-				// TODO bool类型取反
-			} else if (_prefix_text == "-") {
-				// TODO 数字类型取负
-			}
-			LOG_TODO (_expr_raw->start);
-			return false;
-		}
-
-		if (!_assigned) {
-			_vt = _val;
-			// TODO 返回结果前检查是否符合期望
-		}
-		return true;
-	}
-
-	AstValue StrongExprBaseBuilder (FuncContext &_func_ctx, FaParser::StrongExprBaseContext *_expr_raw, std::string _expect_type) {
-		if (_expr_raw->ids ()) {
-			// 计算_val
-			_vt = _func_ctx.GetVariable (_expr_raw->ids ()->getText ());
-			if (!_vt.IsValid ())
-				return false;
-			// TODO 计算是否符合期望
-		} else if (_expr_raw->ColonColon ()) {
-			// 外部 C API 调用
-			std::string _cur_name = _expr_raw->getText ();
-			if (m_imports.contains (_cur_name)) {
-				_vt = m_imports [_cur_name];
-			} else {
-				LOG_ERROR (_expr_raw->start, fmt::format ("未定义的外部符号：{}", _cur_name));
-				return false;
-			}
-		} else if (_expr_raw->literal ()) {
-			_vt = AstValue { m_value_builder, _expr_raw->literal () };
-			// TODO 计算是否符合期望
-		} else if (_expr_raw->ifExpr ()) {
-			std::vector<FaParser::ExprContext *> _conds;
-			std::vector<std::vector<FaParser::StmtContext *>> _bodys1;
-			std::vector<FaParser::ExprContext *> _bodys2;
-			std::tie (_conds, _bodys1, _bodys2) = m_visitor->visit (_expr_raw->ifExpr ()).as<std::tuple<
-				std::vector<FaParser::ExprContext *>,
-				std::vector<std::vector<FaParser::StmtContext *>>,
-				std::vector<FaParser::ExprContext *>
-				>> ();
-			// TODO: 计算期望的类型
-			// TODO: 此处用新的变量替换_vt
-			AstValue _tmp_vt = _func_ctx.DefineVariable ("");
-			if (!IfExprBuilder (_func_ctx, _conds, _bodys1, _bodys2, "", _vt))
-				return false;
-		} else if (_expr_raw->quotExpr ()) {
-			// TODO: 计算期望的类型
-			if (!ExprBuilder (_func_ctx, _expr_raw->quotExpr ()->expr (), "", _vt))
-				return false;
-		} else {
-			LOG_TODO (_expr_raw->start);
-			return false;
-		}
-		return true;
 	}
 
 	bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
