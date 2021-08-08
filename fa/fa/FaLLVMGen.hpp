@@ -321,6 +321,7 @@ private:
 		static std::function<std::optional<_ExprOrValue> (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *> &_op_raws, std::vector<size_t> &_op_levels)> s_parse_middle_expr2;
 		static std::function<std::optional<_ExprOrValue> (FaParser::StrongExprContext *)> s_parse_strong_expr;
 		static std::function<std::optional<_ExprOrValue> (FaParser::StrongExprBaseContext *)> s_parse_strong_expr_base;
+		static std::function<std::optional<_ExprOrValue> (FaParser::IfExprContext *)> s_parse_if_expr;
 		if (s_init) {
 			s_init = false;
 			s_parse_expr = [] (FaParser::ExprContext *_expr_raw) -> std::optional<_ExprOrValue> {
@@ -458,182 +459,41 @@ private:
 					LOG_TODO (_expr_raw->start);
 				}
 			};
-		}
-
-		//auto _middles = _expr_raw->middleExpr ();
-		//AstValue _val {};
-		//for (int i = (int) _middles.size () - 1; i >= 0; --i) {
-		//	AstValue _val2 = MiddleExprBuilder (_func_ctx, _middles [i], _expect_type);
-		//	if (!_val2.IsValid ())
-		//		return std::nullopt;
-		//	if (i == (int) _middles.size () - 1) {
-		//		_val = _val2;
-		//	} else {
-		//		_val = _func_ctx.DoOper2 (_val2, _expr_raw->allAssign ((size_t) i)->getText (), _val, _middles [i]->start);
-		//		if (!_val.IsValid ())
-		//			return std::nullopt;
-		//	}
-		//}
-		//return _val;
-	}
-
-	AstValue MiddleExprBuilder (FuncContext &_func_ctx, FaParser::MiddleExprContext *_expr_raw, std::string _expect_type) {
-		// 整理数据
-		std::vector<std::shared_ptr<_StrongValueCtx>> _vals;
-		for (auto _strong_expr : _expr_raw->strongExpr ())
-			_vals.push_back (std::make_shared<_StrongValueCtx> (_strong_expr, std::nullopt, ""));
-		//
-		std::vector<std::shared_ptr<_StrongOpCtx>> _ops;
-		bool _change_type = false;
-		for (auto _op_raw : _expr_raw->allOp2 ()) {
-			std::string _op = _op_raw->getText ();
-			static std::map<std::string, size_t> s_priv_level {
-				{ "**", 1 },
-				{ "*", 2 }, { "/", 2 }, { "%", 2 },
-				{ "+", 3 }, { "-", 3 },
-				{ "<<", 4 }, { ">>", 4 },
-				{ "&", 5 }, { "|", 5 }, { "^", 5 },
-				{ "??", 6 },
-				{ "<", 7 }, { "<=", 7 }, { ">", 7 }, { ">=", 7 }, { "==", 7 }, { "!=", 7 },
-				{ "&&", 8 },
-				{ "||", 9 },
+			s_parse_if_expr = [] (FaParser::IfExprContext *_expr_raw)->std::optional<_ExprOrValue> {
+				auto _if_expr = std::make_shared<_IfExprTreeCtx> ();
+				_if_expr->_conds = _expr_raw->expr ();
 			};
-			if (!s_priv_level.contains (_op)) {
-				LOG_TODO (_op_raw->start);
-				return std::nullopt;
-			}
-			_ops.push_back (std::make_shared<_StrongOpCtx> (_op_raw, s_priv_level [_op]));
 		}
-
-		// 转为树状结构
-		auto _otree_ctx = _MiddleExprBuilder_calc_tree (_vals, _ops);
-		if (!_otree_ctx.has_value ())
-			return std::nullopt;
-		auto _tree_ctx = _otree_ctx.value ();
-
-		// TODO 计算期望类型
-		if (!_expr_calc_expect (_tree_ctx, _expect_type))
-			return std::nullopt;
-
-		// TODO 按优先级迭代计算
-		return _MiddleExprBuilder_process (_tree_ctx);
-
-
-
-
-
-
-
-
-		////auto _strong_exprs = _expr_raw->strongExpr ();
-		////std::vector<AstValue> _vals;
-		////_vals.resize (_strong_exprs.size ());
-		////std::vector<std::string> _ops;
-		////std::vector<size_t> _op_levels;
-		////for (auto _op_raw : _expr_raw->allOp2 ()) {
-		////	std::string _op = _op_raw->getText ();
-		////	_ops.push_back (_op);
-		////	if (!s_priv_level.contains (_op)) {
-		////		LOG_TODO (_op_raw->start);
-		////		return std::nullopt;
-		////	}
-		////	_op_levels.push_back (s_priv_level [_op]);
-		////}
-		////for (size_t i = 0; i < 8; ++i) {
-		////	for (size_t j = 0; j < _ops.size (); ++j) {
-		////		if (_op_levels [j] == i) {
-		////			if (!_vals [j].IsValid ())
-		////				_vals [j] = StrongExprBuilder (_func_ctx, _strong_exprs [j], "");
-		////		}
-		////	}
-		////}
-
-
-
-
-
-
-		////// 计算强表达式类型
-		////auto _strong_expect_type = AstCheck::GetStrongExprExpectType (_expr_raw, _expect_type);
-		////if (!_strong_expect_type.has_value ())
-		////	return false;
-
-		////// TODO
-		////std::vector<AstValue> _v;
-		////auto _expr_raws = _expr_raw->strongExpr ();
-		////for (size_t i = 0; i < _expr_raws.size (); ++i) {
-		////	AstValue _tmp_vt {};
-		////	if (!StrongExprBuilder (_func_ctx, _expr_raws [i], _strong_expect_type.value (), _tmp_vt))
-		////		return false;
-		////	_v.push_back (_tmp_vt);
-		////}
-
-		//////AstValue _tmp_vt = _vt;
-		//////if (!StrongExprBuilder (_func_ctx, _expr_raw->strongExpr () [0], _strong_expect_type.value (), _tmp_vt))
-		//////	return false;
-
-		//////auto _weak_suffix_raw = _expr_raw->weakExprSuffix ();
-		//////if (_weak_suffix_raw) {
-		//////	if (_weak_suffix_raw->allAssign () || _weak_suffix_raw->equalOp () || _weak_suffix_raw->notEqualOp ()) {
-		//////		AstValue _other_tmp_vt {};
-		//////		if (!StrongExprBuilder (_func_ctx, _weak_suffix_raw->strongExpr (0), _strong_expect_type.value (), _other_tmp_vt))
-		//////			return false;
-		//////		std::string _op_str = "";
-		//////		if (_weak_suffix_raw->allAssign ()) {
-		//////			_op_str = _weak_suffix_raw->allAssign ()->getText ();
-		//////		} else if (_weak_suffix_raw->equalOp ()) {
-		//////			_op_str = _weak_suffix_raw->equalOp ()->getText ();
-		//////		} else if (_weak_suffix_raw->notEqualOp ()) {
-		//////			_op_str = _weak_suffix_raw->notEqualOp ()->getText ();
-		//////		} else {
-		//////			LOG_TODO (_weak_suffix_raw->start);
-		//////			return false;
-		//////		}
-		//////		_tmp_vt = _func_ctx.DoOper2 (_tmp_vt, _op_str, _other_tmp_vt, _weak_suffix_raw->start);
-		//////		if (!_tmp_vt.IsValid ())
-		//////			return false;
-		//////		_vt = _tmp_vt;
-		//////	} else if (_weak_suffix_raw->allOp2 ().size () > 0) {
-		//////		LOG_TODO (_weak_suffix_raw->start);
-		//////		return false;
-		//////	} else if (_weak_suffix_raw->ltOps ().size () > 0 || _weak_suffix_raw->gtOps ().size () > 0) {
-		//////		LOG_TODO (_weak_suffix_raw->start);
-		//////		return false;
-		//////	}
-		//////} else {
-		//////	_vt = _tmp_vt;
-		//////}
-		////return true;
 	}
 
-	bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
-		AstValue _cond {}, _tmp_vt {};
-		if (_conds_raw.size () == 0) {
-			if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
-				return false;
-			if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
-				return false;
-			_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
-			return true;
-		}
-		//
-		if (!ExprBuilder (_func_ctx, _conds_raw [0], "bool", _cond))
-			return false;
-		_conds_raw.erase (_conds_raw.begin ());
-		_func_ctx.IfElse (_cond, [&] () {
-			if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
-				return false;
-			_bodys_raw1.erase (_bodys_raw1.begin ());
-			if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
-				return false;
-			_bodys_raw2.erase (_bodys_raw2.begin ());
-			_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
-			return true;
-		}, [&] () {
-			return IfExprBuilder (_func_ctx, _conds_raw, _bodys_raw1, _bodys_raw2, _expect_type, _vt);
-		});
-		return true;
-	}
+	//bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
+	//	AstValue _cond {}, _tmp_vt {};
+	//	if (_conds_raw.size () == 0) {
+	//		if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
+	//			return false;
+	//		if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
+	//			return false;
+	//		_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
+	//		return true;
+	//	}
+	//	//
+	//	if (!ExprBuilder (_func_ctx, _conds_raw [0], "bool", _cond))
+	//		return false;
+	//	_conds_raw.erase (_conds_raw.begin ());
+	//	_func_ctx.IfElse (_cond, [&] () {
+	//		if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
+	//			return false;
+	//		_bodys_raw1.erase (_bodys_raw1.begin ());
+	//		if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
+	//			return false;
+	//		_bodys_raw2.erase (_bodys_raw2.begin ());
+	//		_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
+	//		return true;
+	//	}, [&] () {
+	//		return IfExprBuilder (_func_ctx, _conds_raw, _bodys_raw1, _bodys_raw2, _expect_type, _vt);
+	//	});
+	//	return true;
+	//}
 
 	CodeVisitor *m_visitor = nullptr;
 	std::string m_module_name;
