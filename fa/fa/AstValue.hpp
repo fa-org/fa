@@ -25,31 +25,27 @@ public:
 	AstValue () {}
 	AstValue (std::nullopt_t) {}
 	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
-		std::optional<llvm::Value *> _val;
 		if (_literal->BoolLiteral ()) {
-			_val = _value_builder->Build ("bool", _literal->getText (), _literal->start);
+			m_value_type = "bool";
 		} else if (_literal->IntLiteral ()) {
-			_val = _value_builder->Build ("int32", _literal->getText (), _literal->start);
+			m_value_type = "int";
 		} else if (_literal->FloatLiteral ()) {
-			_val = _value_builder->Build ("float64", _literal->getText (), _literal->start);
+			m_value_type = "float";
 		} else if (_literal->String1Literal ()) {
-			std::string _data1 = _literal->getText ();
-			_data1 = _data1.substr (1, _data1.size () - 2);
-			std::string _data2;
-			_data2.reserve (_data1.size ());
-			_val = _value_builder->Build ("string", _literal->getText (), _literal->start);
+			m_value_type = "string";
 		} else {
 			LOG_ERROR (_literal->start, "未知数据类型");
+			return;
 		}
-
-		if (_val.has_value ()) {
+		std::optional<std::tuple<llvm::Value *, std::string>> _oval = _value_builder->Build (m_value_type, _literal->getText (), _literal->start);
+		if (_oval.has_value ()) {
 			m_type = AstObjectType::Value;
-			m_value = _val.value ();
+			std::tie (m_value, m_value_type) = _oval.value ();
 		}
 	}
-	AstValue (llvm::AllocaInst *_var): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var) {}
-	AstValue (llvm::Value *_value): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value) {}
-	AstValue (llvm::Function *_func): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func) {}
+	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var) {}
+	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value) {}
+	AstValue (llvm::Function *_func, std::string _value_type): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func) {}
 	AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
@@ -186,6 +182,7 @@ private:
 	AstObjectType m_type = AstObjectType::None;
 	llvm::Value *m_value = nullptr;
 	llvm::Function *m_func = nullptr;
+	std::string m_value_type = "";
 };
 
 

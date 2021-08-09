@@ -5,6 +5,7 @@
 
 #include <optional>
 #include <string>
+#include <tuple>
 
 #include <llvm/ADT/APFloat.h>
 #include <llvm/IR/Type.h>
@@ -30,18 +31,18 @@ public:
 		m_builder = std::make_shared<llvm::IRBuilder<>> (*m_ctx);
 	}
 
-	std::optional<llvm::Value *> Build (std::string _type, std::string _value, antlr4::Token *_t) {
+	std::optional<std::tuple<llvm::Value *, std::string>> Build (std::string _type, std::string _value, antlr4::Token *_t) {
 		if (_type == "bool") {
 			if (_value == "true") {
-				return llvm::ConstantInt::getTrue (*m_ctx);
+				return std::make_tuple<llvm::Value *, std::string> (llvm::ConstantInt::getTrue (*m_ctx), "bool");
 			} else if (_value == "false") {
-				return llvm::ConstantInt::getFalse (*m_ctx);
+				return std::make_tuple<llvm::Value *, std::string> (llvm::ConstantInt::getFalse (*m_ctx), "bool");
 			}
 		} else if (_type == "string") {
 			_value = _value.substr (1, _value.size () - 2);
 			std::optional<std::string> _tmp_value = StringProcessor::TransformMean (_value, _t);
 			if (_tmp_value.has_value ()) {
-				return m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ());
+				return std::make_tuple<llvm::Value *, std::string> (m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ()), "string");
 			}
 		} else if (_type.find ("int") != std::string::npos) {
 			std::optional<llvm::Type *> _tp = m_etype_map->GetType (_type, _t);
