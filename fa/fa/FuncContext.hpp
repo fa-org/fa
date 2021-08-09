@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <antlr4-runtime/Token.h>
@@ -24,7 +25,7 @@
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<ValueBuilder> _value_builder) : m_ctx (_ctx), m_module (_module), m_type_map (_type_map), m_value_builder (_value_builder) {}
+	FuncContext (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<ValueBuilder> _value_builder): m_ctx (_ctx), m_module (_module), m_type_map (_type_map), m_value_builder (_value_builder) {}
 
 	bool InitFunc (std::string _func_name, FaParser::TypeContext *_ret_type) {
 		static std::vector<FaParser::TypeContext *> _arg_types;
@@ -60,7 +61,7 @@ public:
 	}
 
 	AstValue DefineVariable (std::string _type, antlr4::Token *_t, std::string _name = "") {
-		if (_name != "" && _get_local_var (_name)) {
+		if (_name != "" && GetVariable (_name).IsValid ()) {
 			LOG_ERROR (_t, fmt::format ("重复定义的变量：{}", _name));
 			return std::nullopt;
 		}
@@ -68,14 +69,28 @@ public:
 		if (!_ret_type.has_value ())
 			return std::nullopt;
 		auto _inst = m_builder->CreateAlloca (_ret_type.value ());
-		(*m_local_vars.rbegin ()) [_name] = _inst;
-		return _inst;
+		(*m_local_vars.rbegin ()) [_name] = { _inst, _type };
+		return AstValue { _inst, _type };
 	}
-	AstValue DefineVariable (FaParser::TypeContext *_type, std::string _name = "") { return DefineVariable (_type->getText (), _type->start, _name); }
-	AstValue GetVariable (std::string _name) { return _get_local_var (_name); }
+	AstValue DefineVariable (FaParser::TypeContext *_type, std::string _name = "") {
+		return DefineVariable (_type->getText (), _type->start, _name);
+	}
+	AstValue GetVariable (std::string _name) {
+		for (size_t i = 0; i < m_local_vars.size (); ++i) {
+			if (m_local_vars [i].contains (_name)) {
+				auto &[_var, _type] = m_local_vars [i][_name];
+				return AstValue { _var, _type };
+			}
+		}
+		return std::nullopt;
+	}
 
-	void Return () { m_builder->CreateRetVoid (); }
-	void Return (AstValue &_op1) { m_builder->CreateRet (_op1.Value (*m_builder)); }
+	void Return () {
+		m_builder->CreateRetVoid ();
+	}
+	void Return (AstValue &_op1) {
+		m_builder->CreateRet (_op1.Value (*m_builder));
+	}
 	AstValue DoOper1 (AstValue &_op1, std::string _op, antlr4::Token *_t) {
 		return _op1.DoOper1 (*m_builder, m_value_builder, _op, _t);
 	}
@@ -83,10 +98,12 @@ public:
 		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t);
 	}
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
+		auto [_ret_type, _arg_types] = _func.GetFuncType ();
+		// TODO: 检查类型
 		std::vector<llvm::Value *> _sargs;
 		for (auto _arg : _args)
 			_sargs.push_back (_arg.Value (*m_builder));
-		return _func.FunctionCall (*m_builder, _sargs);
+		llvm::Value *_val = _func.FuncInvoke (*m_builder, _sargs);
 	}
 
 	bool IfElse (AstValue &_cond, std::function<bool ()> _true_ctx, std::function<bool ()> _false_ctx) {
@@ -110,14 +127,6 @@ public:
 	}
 
 private:
-	llvm::AllocaInst *_get_local_var (std::string _name) {
-		for (size_t i = 0; i < m_local_vars.size (); ++i) {
-			if (m_local_vars [i].contains (_name))
-				return m_local_vars [i][_name];
-		}
-		return nullptr;
-	}
-
 	std::shared_ptr<llvm::LLVMContext> m_ctx;
 	std::shared_ptr<llvm::Module> m_module;
 	std::shared_ptr<TypeMap> m_type_map;
@@ -125,7 +134,7 @@ private:
 	//
 	llvm::Function *m_f = nullptr;
 	std::shared_ptr<llvm::IRBuilder<>> m_builder;
-	std::vector<std::map<std::string, llvm::AllocaInst *>> m_local_vars;
+	std::vector<std::map<std::string, std::tuple<llvm::AllocaInst *, std::string>>> m_local_vars;
 };
 
 

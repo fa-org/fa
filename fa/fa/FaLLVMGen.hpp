@@ -448,8 +448,10 @@ private:
 					return _ValueCtx { _expr_raw, _val };
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
-				if (m_imports.contains (_name))
-					return _ValueCtx { _expr_raw, m_imports [_name] };
+				if (m_imports.contains (_name)) {
+					auto &[_func, _func_type] = m_imports [_name];
+					return _ValueCtx { _expr_raw, AstValue { _func, _func_type } };
+				}
 			} else if (_expr_raw->literal ()) {
 				AstValue _oval { m_value_builder, _expr_raw->literal () };
 				if (_oval.IsValid ())
@@ -524,7 +526,7 @@ private:
 	std::shared_ptr<ValueBuilder> m_value_builder;
 
 	std::vector<std::string> m_uses;
-	std::map<std::string, llvm::Function *> m_imports;
+	std::map<std::string, std::tuple<llvm::Function *, std::string>> m_imports;
 	std::vector<std::string> m_libs;
 };
 

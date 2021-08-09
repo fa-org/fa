@@ -3,8 +3,11 @@
 
 
 
+#include <functional>
+#include <memory>
 #include <optional>
 #include <string>
+#include <tuple>
 
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
@@ -46,13 +49,14 @@ public:
 	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var) {}
 	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value) {}
 	AstValue (llvm::Function *_func, std::string _value_type): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func) {}
-	AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
-	AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
-	AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
 	AstValue &operator= (const AstValue &_o) {
 		m_type = _o.m_type;
 		m_value = _o.m_value;
 		m_func = _o.m_func;
+		m_value_type = _o.m_value_type;
 		return *this;
 	}
 
@@ -71,7 +75,7 @@ public:
 			return nullptr;
 		}
 	}
-	llvm::CallInst *FunctionCall (llvm::IRBuilder<> &_builder, std::vector<llvm::Value *> &_args) {
+	llvm::CallInst *FuncInvoke (llvm::IRBuilder<> &_builder, std::vector<llvm::Value *> &_args) {
 		if (m_type != AstObjectType::Func || m_func == nullptr)
 			return nullptr;
 		return _builder.CreateCall (m_func, _args);
@@ -85,33 +89,36 @@ public:
 		} else {
 			std::string _typestr = TypeMap::GetTypeName (m_value->getType ());
 			if (_op == "-") {
-				std::optional<llvm::Value *> _tmp2 = _value_builder->Build (_typestr, "0", _t);
+				auto _tmp2 = _value_builder->Build (m_value_type, "0", _t);
 				if (!_tmp2.has_value ())
 					return std::nullopt;
-				return _builder.CreateSub (_tmp2.value (), _tmp);
+				auto [_tmp_val, _] = _tmp2.value ();
+				return AstValue { _builder.CreateSub (_tmp_val, _tmp), m_value_type };
 			} else if (_op == "++" || _op == "--") {
-				std::optional<llvm::Value *> _tmp2 = _value_builder->Build (_typestr, "1", _t);
+				auto _tmp2 = _value_builder->Build (m_value_type, "1", _t);
 				if (!_tmp2.has_value ())
 					return std::nullopt;
+				auto [_tmp_val, _] = _tmp2.value ();
 				AstValue _v;
 				if (_op == "++") {
-					_v = _builder.CreateAdd (Value (_builder), _tmp2.value ());
+					_v = AstValue { _builder.CreateAdd (Value (_builder), _tmp_val), m_value_type };
 				} else {
-					_v = _builder.CreateSub (Value (_builder), _tmp2.value ());
+					_v = AstValue { _builder.CreateSub (Value (_builder), _tmp_val), m_value_type };
 				}
 				if (!m_value)
 					return std::nullopt;
 				_builder.CreateStore (_v.Value (_builder), m_value);
 				return *this;
 			} else if (_op == "~") {
-				if (_typestr != "bool") {
+				if (m_value_type != "bool") {
 					LOG_ERROR (_t, "非bool类型数据无法取反");
 					return std::nullopt;
 				}
-				std::optional<llvm::Value *> _tmp2 = _value_builder->Build (_typestr, "true", _t);
+				auto _tmp2 = _value_builder->Build (m_value_type, "true", _t);
 				if (!_tmp2.has_value ())
 					return std::nullopt;
-				return _builder.CreateSub (_tmp2.value (), _tmp);
+				auto [_tmp_val, _] = _tmp2.value ();
+				return AstValue { _builder.CreateSub (_tmp_val, _tmp), m_value_type };
 			}
 		}
 
@@ -124,16 +131,16 @@ public:
 		AstValue _tmp;
 		if (_op.size () == 1) {
 			switch (_op [0]) {
-			case '+': return _builder.CreateAdd (Value (_builder), _other.Value (_builder));
-			case '-': return _builder.CreateSub (Value (_builder), _other.Value (_builder));
-			case '*': return _builder.CreateMul (Value (_builder), _other.Value (_builder));
-			case '/': return _builder.CreateSDiv (Value (_builder), _other.Value (_builder));
-			case '%': return _builder.CreateSRem (Value (_builder), _other.Value (_builder));
-			case '|': return _builder.CreateOr (Value (_builder), _other.Value (_builder));
-			case '&': return _builder.CreateAnd (Value (_builder), _other.Value (_builder));
-			case '^': return _builder.CreateXor (Value (_builder), _other.Value (_builder));
-			case '<': return _builder.CreateICmpSLT (Value (_builder), _other.Value (_builder));
-			case '>': return _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder));
+			case '+': return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '-': return AstValue { _builder.CreateSub (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '*': return AstValue { _builder.CreateMul (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '/': return AstValue { _builder.CreateSDiv (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '%': return AstValue { _builder.CreateSRem (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '|': return AstValue { _builder.CreateOr (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '&': return AstValue { _builder.CreateAnd (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '^': return AstValue { _builder.CreateXor (Value (_builder), _other.Value (_builder)), m_value_type };
+			case '<': return AstValue { _builder.CreateICmpSLT (Value (_builder), _other.Value (_builder)), "bool" };
+			case '>': return AstValue { _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder)), "bool" };
 			case '=':
 				_builder.CreateStore (_other.Value (_builder), m_value);
 				return *this;
@@ -141,21 +148,34 @@ public:
 		} else if (_op.size () == 2) {
 			if (_op [0] == _op [1]) {
 				switch (_op [0]) {
-				case '?': return _builder.CreateAdd (Value (_builder), _other.Value (_builder));
-				case '*': return _builder.CreateAdd (Value (_builder), _other.Value (_builder));
-				case '&': return _builder.CreateAnd (Value (_builder), _other.Value (_builder));
-				case '|': return _builder.CreateOr (Value (_builder), _other.Value (_builder));
-				case '<': return _builder.CreateShl (Value (_builder), _other.Value (_builder));
+				case '?':
+				{
+					std::string _tmp_value_type = "";
+					if (m_value_type [m_value_type.size () - 1] == '?') {
+						_tmp_value_type = m_value_type.substr (0, m_value_type.size () - 1);
+					} else if (m_value_type [m_value_type.size () - 2] == '?') {
+						_tmp_value_type = m_value_type.substr (0, m_value_type.size () - 1);
+						_tmp_value_type [_tmp_value_type.size () - 1] = m_value_type [m_value_type.size () - 1];
+					} else {
+						LOG_ERROR (_t, "目标类型不可为空，无法使用 ?? 运算符");
+						return std::nullopt;
+					}
+					return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), _tmp_value_type };
+				}
+				case '*': return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), m_value_type };
+				case '&': return AstValue { _builder.CreateAnd (Value (_builder), _other.Value (_builder)), m_value_type };
+				case '|': return AstValue { _builder.CreateOr (Value (_builder), _other.Value (_builder)), m_value_type };
+				case '<': return AstValue { _builder.CreateShl (Value (_builder), _other.Value (_builder)), m_value_type };
 				case '>':
 					_tmp = _other.DoOper1 (_builder, _value_builder, "-", _t);
-					return _builder.CreateShl (Value (_builder), _tmp.Value (_builder));
+					return AstValue { _builder.CreateShl (Value (_builder), _tmp.Value (_builder)), m_value_type };
 				case '=':
-					return _builder.CreateICmpEQ (Value (_builder), _other.Value (_builder));
+					return AstValue { _builder.CreateICmpEQ (Value (_builder), _other.Value (_builder)), "bool" };
 				}
 			} else if (_op [1] == '=') {
 				switch (_op [0]) {
-				case '<': return _builder.CreateICmpSLE (Value (_builder), _other.Value (_builder));
-				case '>': return _builder.CreateICmpSGE (Value (_builder), _other.Value (_builder));
+				case '<': return AstValue { _builder.CreateICmpSLE (Value (_builder), _other.Value (_builder)), "bool" };
+				case '>': return AstValue { _builder.CreateICmpSGE (Value (_builder), _other.Value (_builder)), "bool" };
 				case '+':
 				case '-':
 				case '*':
@@ -166,7 +186,7 @@ public:
 				case '^':
 					_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 1), _other, _t);
 					return DoOper2 (_builder, _value_builder, "=", _tmp, _t);
-				case '!': return _builder.CreateICmpNE (Value (_builder), _other.Value (_builder));
+				case '!': return AstValue { _builder.CreateICmpNE (Value (_builder), _other.Value (_builder)), "bool" };
 				}
 			}
 		} else if (_op.size () == 3) {
@@ -176,6 +196,58 @@ public:
 			}
 		}
 		return std::nullopt;
+	}
+
+	std::string GetType () { return m_value_type; }
+	std::tuple<std::string, std::vector<std::string>> GetFuncType () {
+		static std::function<std::string (std::string)> s_trim = [] (std::string _s) {
+			_s.erase (0, _s.find_first_not_of (' '));
+			_s.erase (_s.find_last_not_of (' ') + 1);
+			return _s;
+		};
+
+		// 解析函数类型
+		if (!this->IsFunction ())
+			return { "", {} };
+		std::string _full_str = m_value_type.substr (m_value_type.find ('<') + 1);
+		_full_str = _full_str.substr (0, _full_str.size () - 1);
+		_full_str = s_trim (_full_str);
+
+		// 读取一个完整类型
+		size_t _p = 0;
+		std::function<std::string (bool)> _read_type = [&] (bool _is_ret) {
+			std::string _str = "";
+			size_t _level = 0;
+			for (; _p < _full_str.size (); ++_p) {
+				char _ch = _full_str [_p];
+				if (_level == 0) {
+					if (_is_ret) {
+						if (_ch == '(')
+							break;
+					} else {
+						if (_ch == ')' || _ch == ',')
+							break;
+					}
+				}
+				//
+				if (_ch == '(' || _ch == '<') {
+					_level++;
+				} else if (_ch == ')' || _ch == '>') {
+					_level--;
+				}
+				_str += _ch;
+			}
+			++_p; // 每次返回时，_p总是遇到不需使用的字符，因此每次返回前跳过一个字符
+			return _str;
+		};
+		std::string _ret_type = s_trim (_read_type (true));
+		std::vector<std::string> _arg_types;
+		std::string _tmp_arg_type = s_trim (_read_type (false));
+		while (_tmp_arg_type != "") {
+			_arg_types.push_back (_tmp_arg_type);
+			_tmp_arg_type = s_trim (_read_type (false));
+		}
+		return { _ret_type, _arg_types };
 	}
 
 private:
