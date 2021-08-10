@@ -73,7 +73,7 @@ public:
 				}
 			}
 			if (_int.has_value ())
-				return llvm::ConstantInt::get (_tp.value (), _int.value ());
+				return std::make_tuple ((llvm::Value *) llvm::ConstantInt::get (_tp.value (), _int.value ()), _type);
 		}
 
 		LOG_ERROR (_t, fmt::format ("值 \"{}\" 无法转为 \"{}\" 类型。", _value, _type));
