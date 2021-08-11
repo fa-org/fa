@@ -36,7 +36,7 @@ public:
 		if (!_oret_type.has_value ())
 			return false;
 		//
-		llvm::FunctionType *_ft;
+		llvm::FunctionType *_ft = nullptr;
 		if (_arg_types.size () == 0) {
 			_ft = llvm::FunctionType::get (_oret_type.value (), false);
 		} else {
@@ -54,9 +54,9 @@ public:
 		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", m_f);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
 		m_builder->SetInsertPoint (_bb);
-		//
+		////
 		m_local_vars.reserve (32);
-		m_local_vars.emplace_back (std::map<std::string, llvm::AllocaInst *> ());
+		m_local_vars.emplace_back (std::map<std::string, std::tuple<llvm::AllocaInst *, std::string>> {});
 		return true;
 	}
 
@@ -85,18 +85,10 @@ public:
 		return std::nullopt;
 	}
 
-	void Return () {
-		m_builder->CreateRetVoid ();
-	}
-	void Return (AstValue &_op1) {
-		m_builder->CreateRet (_op1.Value (*m_builder));
-	}
-	AstValue DoOper1 (AstValue &_op1, std::string _op, antlr4::Token *_t) {
-		return _op1.DoOper1 (*m_builder, m_value_builder, _op, _t);
-	}
-	AstValue DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token *_t) {
-		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t);
-	}
+	void Return () { m_builder->CreateRetVoid (); }
+	void Return (AstValue &_op1) { m_builder->CreateRet (_op1.Value (*m_builder)); }
+	AstValue DoOper1 (AstValue &_op1, std::string _op, antlr4::Token *_t) { return _op1.DoOper1 (*m_builder, m_value_builder, _op, _t); }
+	AstValue DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token *_t) { return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t); }
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
 		auto [_ret_type, _arg_types] = _func.GetFuncType ();
 		// TODO: 检查类型
@@ -104,6 +96,8 @@ public:
 		for (auto _arg : _args)
 			_sargs.push_back (_arg.Value (*m_builder));
 		llvm::Value *_val = _func.FuncInvoke (*m_builder, _sargs);
+		// TODO: 生成函数返回对象
+		return std::nullopt;
 	}
 
 	bool IfElse (AstValue &_cond, std::function<bool ()> _true_ctx, std::function<bool ()> _false_ctx) {

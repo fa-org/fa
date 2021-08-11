@@ -45,50 +45,85 @@
 
 
 struct _ValueCtx {
-	FaParser::StrongExprBaseContext *_base_raw;
-	AstValue _val;
-	std::string _expect_type;
+	_ValueCtx (FaParser::StrongExprBaseContext *__base_raw, AstValue __val, std::string __expect_type): _base_raw (__base_raw), _val (__val), _expect_type (__expect_type) {}
+
+	FaParser::StrongExprBaseContext *_base_raw = nullptr;
+	AstValue _val {};
+	std::string _expect_type = "";
 };
 struct _OperCtx {
-	std::string _op;
-	antlr4::Token *_t;
+	std::string _op = "";
+	antlr4::Token *_t = nullptr;
 };
 struct _Op1ExprTreeCtx;
 struct _Op2ExprTreeCtx;
 struct _OpNExprTreeCtx;
 struct _IfExprTreeCtx;
-using _ExprOrValue = std::variant<
-	_ValueCtx,
-	std::shared_ptr<_Op1ExprTreeCtx>,
-	std::shared_ptr<_Op2ExprTreeCtx>,
-	std::shared_ptr<_OpNExprTreeCtx>,
-	std::shared_ptr<_IfExprTreeCtx>
->;
+struct _ExprOrValue {
+	_ExprOrValue () {}
+	_ExprOrValue (std::shared_ptr<_ValueCtx> __val): _val (__val) {}
+	_ExprOrValue (std::shared_ptr<_Op1ExprTreeCtx> __op1_expr): _op1_expr (__op1_expr) {}
+	_ExprOrValue (std::shared_ptr<_Op2ExprTreeCtx> __op2_expr): _op2_expr (__op2_expr) {}
+	_ExprOrValue (std::shared_ptr<_OpNExprTreeCtx> __opN_expr): _opN_expr (__opN_expr) {}
+	_ExprOrValue (std::shared_ptr<_IfExprTreeCtx> __if_expr): _if_expr (__if_expr) {}
+
+	std::shared_ptr<_ValueCtx> _val;
+	std::shared_ptr<_Op1ExprTreeCtx> _op1_expr;
+	std::shared_ptr<_Op2ExprTreeCtx> _op2_expr;
+	std::shared_ptr<_OpNExprTreeCtx> _opN_expr;
+	std::shared_ptr<_IfExprTreeCtx> _if_expr;
+
+	std::string GetExpectType ();
+};
+//using _ExprOrValue = std::variant<
+//	_ValueCtx,
+//	std::shared_ptr<_Op1ExprTreeCtx>,
+//	std::shared_ptr<_Op2ExprTreeCtx>,
+//	std::shared_ptr<_OpNExprTreeCtx>,
+//	std::shared_ptr<_IfExprTreeCtx>
+//>;
 enum class _Op1Type { Prefix, Suffix };
-struct _Op1ExprTreeCtx: std::enable_shared_from_this<_Op1ExprTreeCtx> {
+struct _Op1ExprTreeCtx {
 	_OperCtx											_op;
 	_ExprOrValue										_left;
 	_Op1Type											_type;
 	std::string											_expect_type;
 };
-struct _Op2ExprTreeCtx: std::enable_shared_from_this<_Op2ExprTreeCtx> {
+struct _Op2ExprTreeCtx {
 	_ExprOrValue										_left;
 	_OperCtx											_op;
 	_ExprOrValue										_right;
 	std::string											_expect_type;
 };
-struct _OpNExprTreeCtx: std::enable_shared_from_this<_OpNExprTreeCtx> {
+struct _OpNExprTreeCtx {
 	_ExprOrValue										_left;
 	_OperCtx											_op;
-	std::vector<_ExprOrValue>							_right;
+	std::vector<_ExprOrValue>							_rights;
 	std::string											_expect_type;
 };
-struct _IfExprTreeCtx: std::enable_shared_from_this<_IfExprTreeCtx> {
+struct _IfExprTreeCtx {
 	std::vector<_ExprOrValue>							_conds;
 	std::vector<std::vector<FaParser::StmtContext *>>	_bodys1_raw;
 	std::vector<_ExprOrValue>							_bodys2;
 	std::string											_expect_type;
 };
+inline std::string _ExprOrValue::GetExpectType () {
+	if (_val) {
+		return _val->_expect_type;
+	} else if (_op1_expr) {
+		return _op1_expr->_expect_type;
+	} else if (_op2_expr) {
+		return _op2_expr->_expect_type;
+	} else if (_opN_expr) {
+		return _opN_expr->_expect_type;
+	} else if (_if_expr) {
+		return _if_expr->_expect_type;
+	} else {
+		return "";
+	}
+}
+
+
 
 class FaLLVMGen {
 public:
@@ -105,7 +140,7 @@ public:
 			FaParser::ImportBlockContext *,
 			std::vector<FaParser::ClassBlockContext *>,
 			FaParser::FaEntryMainFuncBlockContext *
-		>> ();
+			>> ();
 		m_uses = _uses;
 
 		// 引用外部模块
@@ -199,16 +234,19 @@ private:
 				std::vector<FaParser::ETypeContext *>,
 				std::string
 				>> ();
-			llvm::Function *_f = m_module->getFunction (_name);
-			if (_f == nullptr) {
-				std::optional<llvm::Type *> _ret_type = m_type_map->GetExternType (_ret_type_raw);
-				if (!_ret_type.has_value ())
+			//llvm::Function *_f = m_module->getFunction (_name);
+			std::string _code_name = fmt::format ("::{}", _name);
+			if (!m_imports.contains (_code_name)) {
+				auto _ret_otype = m_type_map->GetExternType (_ret_type_raw);
+				if (!_ret_otype.has_value ())
 					return false;
-				std::optional<std::vector<llvm::Type *>> _arg_types = m_type_map->GetExternTypes (_arg_types_raw);
-				if (!_arg_types.has_value ())
+				auto [_ret_type, _ret_type_str] = _ret_otype.value ();
+				auto _arg_otypes = m_type_map->GetExternTypes (_arg_types_raw);
+				if (!_arg_otypes.has_value ())
 					return false;
-				llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type.value (), _arg_types.value (), false);
-				_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, _name, *m_module);
+				auto [_arg_types, _arg_types_str] = _arg_otypes.value ();
+				llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type, _arg_types, false);
+				llvm::Function *_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, _name, *m_module);
 				if (_cc == "__cdecl") {
 					_f->setCallingConv (llvm::CallingConv::C);
 				} else if (_cc == "__stdcall") {
@@ -216,8 +254,13 @@ private:
 				} else if (_cc == "__fastcall") {
 					_f->setCallingConv (llvm::CallingConv::X86_FastCall);
 				}
+				std::string _func_type = fmt::format ("Func<{} (", _ret_type_str);
+				for (std::string _arg_type_str : _arg_types_str)
+					_func_type += fmt::format ("{}, ", _arg_type_str);
+				_func_type [_func_type.size () - 2] = ')';
+				_func_type [_func_type.size () - 1] = '>';
+				m_imports [_code_name] = { _f, _func_type };
 			}
-			m_imports [fmt::format ("::{}", _name)] = _f;
 		}
 		return true;
 	}
@@ -226,7 +269,7 @@ private:
 		auto [_ret_type_raw, _stmts_raw] = m_visitor->visit (_mctx).as<std::tuple<
 			FaParser::TypeContext *,
 			std::vector<FaParser::StmtContext *>
-		>> ();
+			>> ();
 		FuncContext _func_ctx { m_ctx, m_module, m_type_map, m_value_builder };
 		if (!_func_ctx.InitFunc ("FaEntryMain", _ret_type_raw))
 			return false;
@@ -254,11 +297,9 @@ private:
 							_func_ctx.Return ();
 					}
 				} else if (_normal_stmt_raw->Break ()) {
-					// TODO break
 					LOG_TODO (_normal_stmt_raw->start);
 					return false;
 				} else if (_normal_stmt_raw->Continue ()) {
-					// TODO continue
 					LOG_TODO (_normal_stmt_raw->start);
 					return false;
 				} else {
@@ -271,11 +312,10 @@ private:
 				std::tie (_conds, _bodys) = m_visitor->visit (_stmt_raw->ifStmt ()).as<std::tuple<
 					std::vector<FaParser::ExprContext *>,
 					std::vector<std::vector<FaParser::StmtContext *>>
-				>> ();
+					>> ();
 				if (!IfStmtBuilder (_func_ctx, _conds, _bodys))
 					return false;
 			} else if (_stmt_raw->whileStmt ()) {
-				// TODO
 				LOG_TODO (_stmt_raw->start);
 				return false;
 			} else if (_stmt_raw->defVarStmt ()) {
@@ -327,7 +367,7 @@ private:
 			if (_exprs.size () == 1)
 				return _parse_middle_expr (_exprs [0]);
 			//
-			_ExprOrValue _val;
+			_ExprOrValue _val {};
 			std::shared_ptr<_Op2ExprTreeCtx> _val2;
 			for (size_t i = 0; i < _ops.size (); ++i) {
 				auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
@@ -351,111 +391,142 @@ private:
 			return _val;
 		};
 		_parse_middle_expr = [&] (FaParser::MiddleExprContext *_expr_raw) -> std::optional<_ExprOrValue> {
-				auto _exprs = _expr_raw->strongExpr ();
-				auto _ops = _expr_raw->allOp2 ();
-				std::vector<size_t> _op_levels;
-				for (auto _op : _ops) {
-					static std::map<std::string, size_t> s_priv_level {
-						{ "**", 1 },
-						{ "*", 2 }, { "/", 2 }, { "%", 2 },
-						{ "+", 3 }, { "-", 3 },
-						{ "<<", 4 }, { ">>", 4 },
-						{ "&", 5 }, { "|", 5 }, { "^", 5 },
-						{ "??", 6 },
-						{ "<", 7 }, { "<=", 7 }, { ">", 7 }, { ">=", 7 }, { "==", 7 }, { "!=", 7 },
-						{ "&&", 8 },
-						{ "||", 9 },
-					};
-					std::string _op_str = _op->getText ();
-					if (!s_priv_level.contains (_op_str)) {
-						LOG_TODO (_op->start);
-						return std::nullopt;
-					}
-					_op_levels.push_back (s_priv_level [_op_str]);
-				}
-				return _parse_middle_expr2 (_exprs, _ops, _op_levels);
-			};
-		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *>&_op_raws, std::vector<size_t> &_op_levels) -> std::optional<_ExprOrValue> {
-				if (_expr_raws.size () == 1)
-					return _parse_strong_expr (_expr_raws [0]);
-				size_t _pos = 0, _pos_level = _op_levels [0];
-				for (size_t i = 1; i < _op_levels.size (); ++i) {
-					if (_op_levels [i] > _pos_level) {
-						_pos = i;
-						_pos_level = _op_levels [i];
-					}
-				}
-				//
-				auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
-				std::vector<FaParser::StrongExprContext *> _tmp_expr_raws;
-				std::vector<FaParser::AllOp2Context *> _tmp_op_raws;
-				std::vector<size_t> _tmp_op_levels;
-				_tmp_expr_raws.assign (_expr_raws.begin (), _expr_raws.begin () + _pos + 1);
-				if (_tmp_expr_raws.size () > 1) {
-					_tmp_op_raws.assign (_op_raws.begin (), _op_raws.begin () + _pos);
-					_tmp_op_levels.assign (_op_levels.begin (), _op_levels.begin () + _pos);
-				}
-				auto _tmp_val = _parse_middle_expr2 (_tmp_expr_raws, _tmp_op_raws, _tmp_op_levels);
-				if (!_tmp_val.has_value ())
+			auto _exprs = _expr_raw->strongExpr ();
+			auto _ops = _expr_raw->allOp2 ();
+			std::vector<size_t> _op_levels;
+			for (auto _op : _ops) {
+				static std::map<std::string, size_t> s_priv_level {
+					{ "**", 1 },
+					{ "*", 2 }, { "/", 2 }, { "%", 2 },
+					{ "+", 3 }, { "-", 3 },
+					{ "<<", 4 }, { ">>", 4 },
+					{ "&", 5 }, { "|", 5 }, { "^", 5 },
+					{ "??", 6 },
+					{ "<", 7 }, { "<=", 7 }, { ">", 7 }, { ">=", 7 }, { "==", 7 }, { "!=", 7 },
+					{ "&&", 8 },
+					{ "||", 9 },
+				};
+				std::string _op_str = _op->getText ();
+				if (!s_priv_level.contains (_op_str)) {
+					LOG_TODO (_op->start);
 					return std::nullopt;
-				_ptr->_left = _tmp_val.value ();
-				//
-				_ptr->_op = _OperCtx { _op_raws [_pos]->getText (), _op_raws [_pos]->start };
-				//
-				_tmp_expr_raws.clear ();
-				_tmp_op_raws.clear ();
-				_tmp_op_levels.clear ();
-				_tmp_expr_raws.assign (_expr_raws.begin () + _pos + 1, _expr_raws.end ());
-				if (_tmp_expr_raws.size () > 1) {
-					_tmp_op_raws.assign (_op_raws.begin () + _pos + 1, _op_raws.end ());
-					_tmp_op_levels.assign (_op_levels.begin () + _pos + 1, _op_levels.end ());
 				}
-				auto _tmp_val = _parse_middle_expr2 (_tmp_expr_raws, _tmp_op_raws, _tmp_op_levels);
-				if (!_tmp_val.has_value ())
-					return std::nullopt;
-				_ptr->_right = _tmp_val.value ();
-				return _ptr;
-			};
+				_op_levels.push_back (s_priv_level [_op_str]);
+			}
+			return _parse_middle_expr2 (_exprs, _ops, _op_levels);
+		};
+		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *> &_op_raws, std::vector<size_t> &_op_levels) -> std::optional<_ExprOrValue> {
+			if (_expr_raws.size () == 1)
+				return _parse_strong_expr (_expr_raws [0]);
+			size_t _pos = 0, _pos_level = _op_levels [0];
+			for (size_t i = 1; i < _op_levels.size (); ++i) {
+				if (_op_levels [i] > _pos_level) {
+					_pos = i;
+					_pos_level = _op_levels [i];
+				}
+			}
+			//
+			auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
+			std::vector<FaParser::StrongExprContext *> _tmp_expr_raws;
+			std::vector<FaParser::AllOp2Context *> _tmp_op_raws;
+			std::vector<size_t> _tmp_op_levels;
+			_tmp_expr_raws.assign (_expr_raws.begin (), _expr_raws.begin () + _pos + 1);
+			if (_tmp_expr_raws.size () > 1) {
+				_tmp_op_raws.assign (_op_raws.begin (), _op_raws.begin () + _pos);
+				_tmp_op_levels.assign (_op_levels.begin (), _op_levels.begin () + _pos);
+			}
+			auto _tmp_val = _parse_middle_expr2 (_tmp_expr_raws, _tmp_op_raws, _tmp_op_levels);
+			if (!_tmp_val.has_value ())
+				return std::nullopt;
+			_ptr->_left = _tmp_val.value ();
+			//
+			_ptr->_op = _OperCtx { _op_raws [_pos]->getText (), _op_raws [_pos]->start };
+			//
+			_tmp_expr_raws.clear ();
+			_tmp_op_raws.clear ();
+			_tmp_op_levels.clear ();
+			_tmp_expr_raws.assign (_expr_raws.begin () + _pos + 1, _expr_raws.end ());
+			if (_tmp_expr_raws.size () > 1) {
+				_tmp_op_raws.assign (_op_raws.begin () + _pos + 1, _op_raws.end ());
+				_tmp_op_levels.assign (_op_levels.begin () + _pos + 1, _op_levels.end ());
+			}
+			_tmp_val = _parse_middle_expr2 (_tmp_expr_raws, _tmp_op_raws, _tmp_op_levels);
+			if (!_tmp_val.has_value ())
+				return std::nullopt;
+			_ptr->_right = _tmp_val.value ();
+			return _ptr;
+		};
 		_parse_strong_expr = [&] (FaParser::StrongExprContext *_expr_raw) -> std::optional<_ExprOrValue> {
-				auto _tmp_val = _parse_strong_expr_base (_expr_raw->strongExprBase ());
-				if (!_tmp_val.has_value ())
-					return std::nullopt;
-				_ExprOrValue _val = _tmp_val.value ();
-				//
-				auto _prefix_raws = _expr_raw->strongExprPrefix ();
-				for (auto _prefix_raw : _prefix_raws) {
+			auto _tmp_val = _parse_strong_expr_base (_expr_raw->strongExprBase ());
+			if (!_tmp_val.has_value ())
+				return std::nullopt;
+			_ExprOrValue _val = _tmp_val.value ();
+			//
+			//auto _prefix_raws = _expr_raw->strongExprPrefix ();
+			//for (auto _prefix_raw : _prefix_raws) {
+			//	auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
+			//	_ptr->_op = _OperCtx { _prefix_raw->getText (), _prefix_raw->start };
+			//	_ptr->_left = _val;
+			//	_ptr->_type = _Op1Type::Prefix;
+			//	//_ptr->_expect_type = _val.
+			//	_val = _ptr;
+			//}
+			////
+			//auto _suffix_raws = _expr_raw->strongExprSuffix ();
+			//for (int i = (int) _suffix_raws.size () - 1; i >= 0; --i) {
+			//	auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
+			//	_ptr->_op = _OperCtx { _suffix_raws [i]->getText (), _suffix_raws [i]->start };
+			//	_ptr->_left = _val;
+			//	_ptr->_type = _Op1Type::Suffix;
+			//	_val = _ptr;
+			//}
+			for (auto _suffix_raw : _expr_raw->strongExprSuffix ()) {
+				if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
 					auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
-					_ptr->_op = _OperCtx { _prefix_raw->getText (), _prefix_raw->start };
-					_ptr->_left = _val;
-					_ptr->_type = _Op1Type::Prefix;
-					_val = _ptr;
-				}
-				//
-				auto _suffix_raws = _expr_raw->strongExprSuffix ();
-				for (int i = (int) _suffix_raws.size () - 1; i >= 0; --i) {
-					auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
-					_ptr->_op = _OperCtx { _suffix_raws [i]->getText (), _suffix_raws [i]->start };
+					_ptr->_op = _OperCtx { _suffix_raw->getText (), _suffix_raw->start };
 					_ptr->_left = _val;
 					_ptr->_type = _Op1Type::Suffix;
+					_ptr->_expect_type = "";
 					_val = _ptr;
+				} else if (_suffix_raw->QuotYuanL ()) {
+					auto _ptr = std::make_shared<_OpNExprTreeCtx> ();
+					_ptr->_left = _val;
+					_ptr->_op = _OperCtx { "()", _suffix_raw->start };
+					for (auto _right_expr_raw : _suffix_raw->expr ()) {
+						auto _right_oval = _parse_expr (_right_expr_raw);
+						if (!_right_oval.has_value ())
+							return std::nullopt;
+						_ptr->_rights.push_back (_right_oval.value ());
+					}
+					_ptr->_expect_type = _val.GetExpectType ();
+				} else if (_suffix_raw->QuotFangL ()) {
+					// TODO
+				} else if (_suffix_raw->PointOp ()) {
+					// TODO
+				} else {
+					LOG_TODO (_expr_raw->start);
+					return std::nullopt;
 				}
-				return _val;
-			};
+			}
+
+			// TODO: 前缀
+			return _val;
+		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext *_expr_raw) -> std::optional<_ExprOrValue> {
 			if (_expr_raw->ids ()) {
 				auto _val = _func_ctx.GetVariable (_expr_raw->ids ()->getText ());
 				if (_val.IsValid ())
-					return _ValueCtx { _expr_raw, _val };
+					return std::make_shared<_ValueCtx> (_expr_raw, _val, _val.GetType ());
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
 				if (m_imports.contains (_name)) {
 					auto &[_func, _func_type] = m_imports [_name];
-					return _ValueCtx { _expr_raw, AstValue { _func, _func_type } };
+					return std::make_shared<_ValueCtx> (_expr_raw, AstValue { _func, _func_type }, _func_type);
 				}
 			} else if (_expr_raw->literal ()) {
 				AstValue _oval { m_value_builder, _expr_raw->literal () };
 				if (_oval.IsValid ())
-					return _ValueCtx { _expr_raw, _oval, _type };
+					return std::make_shared<_ValueCtx> (_expr_raw, _oval, _oval.GetType ());
 			} else if (_expr_raw->ifExpr ()) {
 				return _parse_if_expr (_expr_raw->ifExpr ());
 			} else if (_expr_raw->quotExpr ()) {
