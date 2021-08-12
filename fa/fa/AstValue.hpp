@@ -22,7 +22,7 @@
 
 
 class AstValue {
-	enum class AstObjectType { None, Value, Var, Func, TypeStr };
+	enum class AstObjectType { None, Value, Var, Func, TypeStr, MemberStr };
 
 public:
 	AstValue () {}
@@ -49,6 +49,7 @@ public:
 	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var) {}
 	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value) {}
 	AstValue (llvm::Function *_func, std::string _value_type): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func) {}
+	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
 	//AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
 	//AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
 	//AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
@@ -65,6 +66,7 @@ public:
 	bool IsVariable () const { return m_type == AstObjectType::Var; }
 	bool IsFunction () const { return m_type == AstObjectType::Func; }
 	bool IsTypeStr () const { return m_type == AstObjectType::Value || m_type == AstObjectType::Var || m_type == AstObjectType::TypeStr; }
+	bool IsMember () const { return m_type == AstObjectType::MemberStr; }
 
 	llvm::Value *Value (llvm::IRBuilder<> &_builder) {
 		if (m_type == AstObjectType::Value) {
@@ -254,6 +256,7 @@ private:
 	AstObjectType m_type = AstObjectType::None;
 	llvm::Value *m_value = nullptr;
 	llvm::Function *m_func = nullptr;
+	std::string m_member = "";
 	std::string m_value_type = "";
 };
 

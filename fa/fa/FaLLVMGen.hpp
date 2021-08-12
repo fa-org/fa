@@ -502,7 +502,13 @@ private:
 				} else if (_suffix_raw->QuotFangL ()) {
 					// TODO
 				} else if (_suffix_raw->PointOp ()) {
-					// TODO
+					auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
+					//auto _tmp_val = _parse_middle_expr (_exprs [i]);
+					//if (!_tmp_val.has_value ())
+					//	return std::nullopt;
+					_ptr->_left = _val;
+					_ptr->_op = { ".", _suffix_raw->start };
+					_ptr->_right = _ExprOrValue { std::make_shared<_ValueCtx> (_suffix_raw->Id ()->getText ()) };
 				} else {
 					LOG_TODO (_expr_raw->start);
 					return std::nullopt;

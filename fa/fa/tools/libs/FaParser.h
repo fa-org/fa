@@ -931,14 +931,12 @@ public:
     antlr4::tree::TerminalNode *SubSubOp();
     antlr4::tree::TerminalNode *QuotYuanL();
     antlr4::tree::TerminalNode *QuotYuanR();
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
+    std::vector<ExprOptContext *> exprOpt();
+    ExprOptContext* exprOpt(size_t i);
     std::vector<antlr4::tree::TerminalNode *> Comma();
     antlr4::tree::TerminalNode* Comma(size_t i);
     antlr4::tree::TerminalNode *QuotFangL();
     antlr4::tree::TerminalNode *QuotFangR();
-    std::vector<ExprOptContext *> exprOpt();
-    ExprOptContext* exprOpt(size_t i);
     std::vector<antlr4::tree::TerminalNode *> Colon();
     antlr4::tree::TerminalNode* Colon(size_t i);
     antlr4::tree::TerminalNode *PointOp();
