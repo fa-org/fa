@@ -3,14 +3,13 @@
 
 
 
+#include <format>
 #include <optional>
 #include <string>
 #include <tuple>
 
 #include <llvm/IR/Type.h>
 #include <llvm/IR/DerivedTypes.h>
-
-#include <fmt/core.h>
 
 #include "FaVisitor.h"
 #include "FaParser.h"
@@ -52,7 +51,7 @@ public:
 		} else if (_name == "float128") {
 			return llvm::Type::getFP128Ty (*m_ctx);
 		}
-		LOG_ERROR (_t, fmt::format ("无法识别的类型 [{}]", _name));
+		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _name));
 		return std::nullopt;
 	}
 
@@ -151,7 +150,7 @@ public:
 				return std::make_tuple ((llvm::Type *) llvm::Type::getDoublePtrTy (*m_ctx), std::string ("float64*"));
 			}
 		}
-		LOG_ERROR (_etype_ctx->start, fmt::format ("无法识别的外部接口函数类型 [{}]", _name));
+		LOG_ERROR (_etype_ctx->start, std::format ("无法识别的外部接口函数类型 [{}]", _name));
 		return std::nullopt;
 	}
 

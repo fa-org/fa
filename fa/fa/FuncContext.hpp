@@ -3,6 +3,7 @@
 
 
 
+#include <format>
 #include <functional>
 #include <map>
 #include <memory>
@@ -16,7 +17,6 @@
 #include <llvm/IR/CallingConv.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Function.h>
-#include <fmt/core.h>
 
 #include "TypeMap.hpp"
 #include "AstValue.hpp"
@@ -62,7 +62,7 @@ public:
 
 	AstValue DefineVariable (std::string _type, antlr4::Token *_t, std::string _name = "") {
 		if (_name != "" && GetVariable (_name).IsValid ()) {
-			LOG_ERROR (_t, fmt::format ("重复定义的变量：{}", _name));
+			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
 			return std::nullopt;
 		}
 		std::optional<llvm::Type *> _ret_type = m_type_map->GetType (_type, _t);

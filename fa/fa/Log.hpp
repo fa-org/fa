@@ -3,12 +3,12 @@
 
 
 
+#include <format>
 #include <iostream>
 #include <string>
 #include <string_view>
 #include <tuple>
 
-#include <fmt/core.h>
 #include <antlr4-runtime/Token.h>
 
 
@@ -57,23 +57,23 @@ public:
 		s_code = _code;
 	}
 	static void Info (const char *_file, int _line, antlr4::Token *_t, std::string _data) {
-		std::string _prefix = fmt::format ("[{}:{}] ", _process_file (_file), _line);
-		std::string _content = _t ? fmt::format ("位于 [{}:{} pos {}] 的信息：", s_file, _t->getLine (), _t->getCharPositionInLine ()): "";
-		std::cout << fmt::format ("{}{}{}", _prefix, _content, _data) << std::endl;
+		std::string _prefix = std::format ("[{}:{}] ", _process_file (_file), _line);
+		std::string _content = _t ? std::format ("位于 [{}:{} pos {}] 的信息：", s_file, _t->getLine (), _t->getCharPositionInLine ()): "";
+		std::cout << std::format ("{}{}{}", _prefix, _content, _data) << std::endl;
 		_print_line_code (_t);
 	}
 
 	static void Warning (const char *_file, int _line, antlr4::Token *_t, std::string _data) {
-		std::string _prefix = fmt::format ("[{}:{}] ", _process_file (_file), _line);
-		std::string _content = _t ? fmt::format ("位于 [{}:{} pos {}] 的警告：", s_file, _t->getLine (), _t->getCharPositionInLine ()): "";
-		std::cout << fmt::format ("{}{}{}", _prefix, _content, _data) << std::endl;
+		std::string _prefix = std::format ("[{}:{}] ", _process_file (_file), _line);
+		std::string _content = _t ? std::format ("位于 [{}:{} pos {}] 的警告：", s_file, _t->getLine (), _t->getCharPositionInLine ()): "";
+		std::cout << std::format ("{}{}{}", _prefix, _content, _data) << std::endl;
 		_print_line_code (_t);
 	}
 
 	static void Error (const char *_file, int _line, antlr4::Token *_t, std::string _data) {
-		std::string _prefix = fmt::format ("[{}:{}] ", _process_file (_file), _line);
-		std::string _content = _t ? fmt::format ("位于 [{}:{} pos {}] 的错误：", s_file, _t->getLine (), _t->getCharPositionInLine ()) : "";
-		std::cout << fmt::format ("{}{}{}", _prefix, _content, _data) << std::endl;
+		std::string _prefix = std::format ("[{}:{}] ", _process_file (_file), _line);
+		std::string _content = _t ? std::format ("位于 [{}:{} pos {}] 的错误：", s_file, _t->getLine (), _t->getCharPositionInLine ()) : "";
+		std::cout << std::format ("{}{}{}", _prefix, _content, _data) << std::endl;
 		_print_line_code (_t);
 	}
 
