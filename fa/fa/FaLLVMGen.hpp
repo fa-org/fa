@@ -45,13 +45,18 @@
 
 
 struct _ValueCtx {
-	_ValueCtx (FaParser::StrongExprBaseContext *__base_raw, AstValue __val, std::string __expect_type): _base_raw (__base_raw), _val (__val), _expect_type (__expect_type) {}
+	_ValueCtx (AstValue __val, antlr4::Token *__t, std::string __expect_type): _val (__val), _t (__t), _expect_type (__expect_type) {}
 
-	FaParser::StrongExprBaseContext *_base_raw = nullptr;
 	AstValue _val {};
+	antlr4::Token *_t = nullptr;
 	std::string _expect_type = "";
 };
 struct _OperCtx {
+	_OperCtx (FaParser::AllAssignContext *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {}
+	_OperCtx (FaParser::AllOp2Context *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {}
+	_OperCtx (std::string __op, FaParser::StrongExprPrefixContext *_op_raw): _op (__op), _t (_op_raw->start) {}
+	_OperCtx (std::string __op, FaParser::StrongExprSuffixContext *_op_raw): _op (__op), _t (_op_raw->start) {}
+
 	std::string _op = "";
 	antlr4::Token *_t = nullptr;
 };
@@ -94,6 +99,23 @@ struct _Op2ExprTreeCtx {
 	_OperCtx											_op;
 	_ExprOrValue										_right;
 	std::string											_expect_type;
+
+	bool CalcExpectType () {
+		const static std::set<std::string> s_compare_ops { ">", ">=", "<", "<=", "==", "!=" };
+		std::string _op_str = _op._op;
+		if (s_compare_ops.contains (_op_str)) {
+			_expect_type = "bool";
+			return true;
+		}
+
+		if (_op_str == "??") {
+			// TODO
+			return false;
+		}
+
+		_expect_type = _left.GetExpectType ();
+		return _expect_type != "";
+	}
 };
 struct _OpNExprTreeCtx {
 	_ExprOrValue										_left;
@@ -364,30 +386,30 @@ private:
 		_parse_expr = [&] (FaParser::ExprContext *_expr_raw) -> std::optional<_ExprOrValue> {
 			auto _exprs = _expr_raw->middleExpr ();
 			auto _ops = _expr_raw->allAssign ();
-			if (_exprs.size () == 1)
-				return _parse_middle_expr (_exprs [0]);
-			//
-			_ExprOrValue _val {};
-			std::shared_ptr<_Op2ExprTreeCtx> _val2;
-			for (size_t i = 0; i < _ops.size (); ++i) {
-				auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
-				auto _tmp_val = _parse_middle_expr (_exprs [i]);
-				if (!_tmp_val.has_value ())
-					return std::nullopt;
-				_ptr->_left = _tmp_val.value ();
-				_ptr->_op = { _ops [i]->getText (), _ops [i]->start };
-				if (i == 0) {
-					_val2 = _ptr;
-					_val = _val2;
-				} else {
-					_val2->_right = _ptr;
-					_val2 = _ptr;
-				}
-			}
-			auto _tmp_val = _parse_middle_expr (_exprs [_exprs.size () - 1]);
-			if (!_tmp_val.has_value ())
+			auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1]);
+			if (!_oval.has_value ())
 				return std::nullopt;
-			_val2->_right = _tmp_val.value ();
+			_ExprOrValue _val = _oval.value ();
+			for (int i = (int) _ops.size () - 1; i >= 0; --i) {
+				auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
+				_oval = _parse_middle_expr (_exprs [i]);
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_ptr->_left = _oval.value ();
+				_ptr->_op = _OperCtx { _ops [i] };
+				_ptr->_right = _val;
+
+				// 检查 _left 是否可赋值
+				std::string _type_str = _ptr->_left.GetExpectType ();
+				if (_type_str [0] != '$') {
+					LOG_ERROR (_ops [i]->start, "对象不可被赋值");
+					return std::nullopt;
+				}
+				// TODO 检查 _left 是否能接受 _right 类型变量
+				// _expect_type改为不可赋值
+				_ptr->_expect_type = _type_str.substr (1);
+				_val = _ExprOrValue { _ptr };
+			}
 			return _val;
 		};
 		_parse_middle_expr = [&] (FaParser::MiddleExprContext *_expr_raw) -> std::optional<_ExprOrValue> {
@@ -440,7 +462,7 @@ private:
 				return std::nullopt;
 			_ptr->_left = _tmp_val.value ();
 			//
-			_ptr->_op = _OperCtx { _op_raws [_pos]->getText (), _op_raws [_pos]->start };
+			_ptr->_op = _OperCtx { _op_raws [_pos] };
 			//
 			_tmp_expr_raws.clear ();
 			_tmp_op_raws.clear ();
@@ -461,61 +483,58 @@ private:
 			if (!_tmp_val.has_value ())
 				return std::nullopt;
 			_ExprOrValue _val = _tmp_val.value ();
-			//
-			//auto _prefix_raws = _expr_raw->strongExprPrefix ();
-			//for (auto _prefix_raw : _prefix_raws) {
-			//	auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
-			//	_ptr->_op = _OperCtx { _prefix_raw->getText (), _prefix_raw->start };
-			//	_ptr->_left = _val;
-			//	_ptr->_type = _Op1Type::Prefix;
-			//	//_ptr->_expect_type = _val.
-			//	_val = _ptr;
-			//}
-			////
-			//auto _suffix_raws = _expr_raw->strongExprSuffix ();
-			//for (int i = (int) _suffix_raws.size () - 1; i >= 0; --i) {
-			//	auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
-			//	_ptr->_op = _OperCtx { _suffix_raws [i]->getText (), _suffix_raws [i]->start };
-			//	_ptr->_left = _val;
-			//	_ptr->_type = _Op1Type::Suffix;
-			//	_val = _ptr;
-			//}
 			for (auto _suffix_raw : _expr_raw->strongExprSuffix ()) {
 				if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
 					auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
-					_ptr->_op = _OperCtx { _suffix_raw->getText (), _suffix_raw->start };
+					_ptr->_op = _OperCtx { _suffix_raw->getText (), _suffix_raw };
 					_ptr->_left = _val;
 					_ptr->_type = _Op1Type::Suffix;
-					_ptr->_expect_type = "";
+					_ptr->_expect_type = _val.GetExpectType ();
+					if (_ptr->_expect_type [0] != '$') {
+						LOG_ERROR (_suffix_raw->start, "对象不可被赋值");
+						return std::nullopt;
+					}
 					_val = _ptr;
-				} else if (_suffix_raw->QuotYuanL ()) {
+				} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
 					auto _ptr = std::make_shared<_OpNExprTreeCtx> ();
 					_ptr->_left = _val;
-					_ptr->_op = _OperCtx { "()", _suffix_raw->start };
-					for (auto _right_expr_raw : _suffix_raw->expr ()) {
-						auto _right_oval = _parse_expr (_right_expr_raw);
-						if (!_right_oval.has_value ())
-							return std::nullopt;
-						_ptr->_rights.push_back (_right_oval.value ());
+					_ptr->_op = _OperCtx { _suffix_raw->QuotYuanL () ? "()" : "[]", _suffix_raw};
+					for (auto _right_expr_raw : _suffix_raw->exprOpt ()) {
+						if (_right_expr_raw->expr ()) {
+							auto _right_oval = _parse_expr (_right_expr_raw->expr ());
+							if (!_right_oval.has_value ())
+								return std::nullopt;
+							_ptr->_rights.push_back (_right_oval.value ());
+						} else {
+							_ptr->_rights.push_back (_ExprOrValue { std::make_shared<_ValueCtx> (AstValue {}, _right_expr_raw->start) });
+						}
 					}
 					_ptr->_expect_type = _val.GetExpectType ();
-				} else if (_suffix_raw->QuotFangL ()) {
-					// TODO
+					_val = _ptr;
 				} else if (_suffix_raw->PointOp ()) {
 					auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
-					//auto _tmp_val = _parse_middle_expr (_exprs [i]);
-					//if (!_tmp_val.has_value ())
-					//	return std::nullopt;
 					_ptr->_left = _val;
-					_ptr->_op = { ".", _suffix_raw->start };
-					_ptr->_right = _ExprOrValue { std::make_shared<_ValueCtx> (_suffix_raw->Id ()->getText ()) };
+					_ptr->_op = _OperCtx { ".", _suffix_raw };
+					_ptr->_right = _ExprOrValue { std::make_shared<_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol ()) };
+					if (!_ptr->CalcExpectType ()) {
+						LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
+						return std::nullopt;
+					}
+					_val = _ptr;
 				} else {
 					LOG_TODO (_expr_raw->start);
 					return std::nullopt;
 				}
 			}
-
-			// TODO: 前缀
+			auto _prefix_raws = _expr_raw->strongExprPrefix ();
+			for (auto _prefix_praw = _prefix_raws.rbegin (); _prefix_praw != _prefix_raws.rend (); ++_prefix_praw) {
+				auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
+				_ptr->_op = _OperCtx { (*_prefix_praw)->getText (), *_prefix_praw };
+				_ptr->_left = _val;
+				_ptr->_type = _Op1Type::Prefix;
+				_ptr->_expect_type = _val.GetExpectType ();
+				_val = _ptr;
+			}
 			return _val;
 		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext *_expr_raw) -> std::optional<_ExprOrValue> {
@@ -564,6 +583,7 @@ private:
 		if (!_oev.has_value ())
 			return std::nullopt;
 		_ExprOrValue _ev = _oev.value ();
+		// TODO
 	}
 
 	//bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {

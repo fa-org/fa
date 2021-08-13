@@ -57,6 +57,7 @@ public:
 		m_type = _o.m_type;
 		m_value = _o.m_value;
 		m_func = _o.m_func;
+		m_member = _o.m_member;
 		m_value_type = _o.m_value_type;
 		return *this;
 	}
