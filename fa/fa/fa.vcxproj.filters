@@ -87,5 +87,8 @@
     <ClInclude Include="ExpectCheck.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="OperAST.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
