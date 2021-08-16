@@ -3,6 +3,7 @@
 
 
 
+#include <format>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -125,7 +126,7 @@ public:
 			}
 		}
 
-		LOG_ERROR (_t, fmt::format ("暂不支持的运算符 {}", _op));
+		LOG_ERROR (_t, std::format ("暂不支持的运算符 {}", _op));
 		return std::nullopt;
 	}
 	AstValue DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue &_other, antlr4::Token *_t) {

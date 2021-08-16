@@ -20,6 +20,7 @@
 
 #include "TypeMap.hpp"
 #include "AstValue.hpp"
+#include "OperAST.hpp"
 
 
 
@@ -118,6 +119,10 @@ public:
 		//
 		m_builder->SetInsertPoint (_endif_bb);
 		return true;
+	}
+
+	std::optional<std::tuple<std::string, std::vector<std::string>>> GetFuncType (_ExprOrValue &_val) {
+		return std::nullopt
 	}
 
 private:
