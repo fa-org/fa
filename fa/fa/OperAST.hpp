@@ -11,6 +11,9 @@
 
 
 
+enum class _Op1Type { Prefix, Suffix };
+enum class _Op2Type { Assign, NoChange, Compare, Other };
+
 struct _ValueCtx {
 	_ValueCtx (AstValue __val, antlr4::Token *__t, std::string __expect_type): _val (__val), _t (__t), _expect_type (__expect_type) {}
 
@@ -18,12 +21,7 @@ struct _ValueCtx {
 	antlr4::Token *_t = nullptr;
 	std::string _expect_type = "";
 };
-enum class _Op1Type {
-	Prefix, Suffix
-};
-enum class _Op2Type {
-	Assign, NoChange, Compare, Other
-};
+
 struct _Oper1Ctx {
 	_Oper1Ctx (FaParser::StrongExprPrefixContext *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {}
 	_Oper1Ctx (FaParser::StrongExprSuffixContext *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {
@@ -36,6 +34,7 @@ struct _Oper1Ctx {
 	antlr4::Token *_t = nullptr;
 	_Op1Type _type = _Op1Type::Prefix;
 };
+
 struct _Oper2Ctx {
 	_Oper2Ctx (FaParser::AllAssignContext *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start), _type (_Op2Type::Assign) {}
 	_Oper2Ctx (FaParser::AllOp2Context *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {
@@ -61,6 +60,7 @@ struct _Oper2Ctx {
 	antlr4::Token *_t = nullptr;
 	_Op2Type _type = _Op2Type::Other;
 };
+
 struct _Op1ExprTreeCtx;
 struct _Op2ExprTreeCtx;
 struct _OpNExprTreeCtx;
@@ -81,6 +81,7 @@ struct _ExprOrValue {
 
 	std::string GetExpectType ();
 };
+
 //using _ExprOrValue = std::variant<
 //	_ValueCtx,
 //	std::shared_ptr<_Op1ExprTreeCtx>,
@@ -93,6 +94,7 @@ struct _Op1ExprTreeCtx {
 	_ExprOrValue										_left;
 	std::string											_expect_type;
 };
+
 struct _Op2ExprTreeCtx {
 	_ExprOrValue										_left;
 	_Oper2Ctx											_op;
@@ -116,18 +118,21 @@ struct _Op2ExprTreeCtx {
 		return _expect_type != "";
 	}
 };
+
 struct _OpNExprTreeCtx {
 	_ExprOrValue										_left;
 	_Oper2Ctx											_op;
 	std::vector<_ExprOrValue>							_rights;
 	std::string											_expect_type;
 };
+
 struct _IfExprTreeCtx {
 	std::vector<_ExprOrValue>							_conds;
 	std::vector<std::vector<FaParser::StmtContext *>>	_bodys1_raw;
 	std::vector<_ExprOrValue>							_bodys2;
 	std::string											_expect_type;
 };
+
 inline std::string _ExprOrValue::GetExpectType () {
 	if (_val) {
 		return _val->_expect_type;

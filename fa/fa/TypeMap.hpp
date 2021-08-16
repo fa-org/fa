@@ -4,6 +4,7 @@
 
 
 #include <format>
+#include <initializer_list>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -23,35 +24,35 @@ public:
 	TypeMap (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx): m_visitor (_visitor), m_ctx (_ctx) {}
 
 	std::optional<llvm::Type *> GetType (FaParser::TypeContext *_type_ctx) {
-		auto _name = _type_ctx->getText ();
-		return GetType (_name, _type_ctx->start);
+		auto _stype = _type_ctx->getText ();
+		return GetType (_stype, _type_ctx->start);
 	}
 
-	std::optional<llvm::Type *> GetType (std::string _name, antlr4::Token *_t) {
-		if (_name == "void") {
+	std::optional<llvm::Type *> GetType (std::string _stype, antlr4::Token *_t) {
+		if (_stype == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
-		} else if (_name == "bool") {
+		} else if (_stype == "bool") {
 			return (llvm::Type *) llvm::Type::getInt1Ty (*m_ctx);
-		} else if (_name == "int8") {
+		} else if (_stype == "int8") {
 			return (llvm::Type *) llvm::Type::getInt8Ty (*m_ctx);
-		} else if (_name == "int16") {
+		} else if (_stype == "int16") {
 			return (llvm::Type *) llvm::Type::getInt16Ty (*m_ctx);
-		} else if (_name == "int32") {
+		} else if (_stype == "int32") {
 			return (llvm::Type *) llvm::Type::getInt32Ty (*m_ctx);
-		} else if (_name == "int64") {
+		} else if (_stype == "int64") {
 			return (llvm::Type *) llvm::Type::getInt64Ty (*m_ctx);
-		} else if (_name == "int128") {
+		} else if (_stype == "int128") {
 			return (llvm::Type *) llvm::Type::getInt128Ty (*m_ctx);
-		} else if (_name == "float16") {
+		} else if (_stype == "float16") {
 			return llvm::Type::getBFloatTy (*m_ctx);
-		} else if (_name == "float32") {
+		} else if (_stype == "float32") {
 			return llvm::Type::getFloatTy (*m_ctx);
-		} else if (_name == "float64") {
+		} else if (_stype == "float64") {
 			return llvm::Type::getDoubleTy (*m_ctx);
-		} else if (_name == "float128") {
+		} else if (_stype == "float128") {
 			return llvm::Type::getFP128Ty (*m_ctx);
 		}
-		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _name));
+		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _stype));
 		return std::nullopt;
 	}
 
@@ -66,6 +67,7 @@ public:
 		return _types;
 	}
 
+	// 获取类型名称
 	static std::string GetTypeName (llvm::Type *_type) {
 		switch (_type->getTypeID ()) {
 		case llvm::Type::HalfTyID:
@@ -100,6 +102,17 @@ public:
 		break;
 		}
 		return "";
+	}
+
+	// 识别类型是否为可选类型
+	static bool IsOptional (std::string _stype) {
+		return *_stype.crbegin () == '?';
+	}
+
+	// 获取同时兼容存储多种类型的类型
+	static std::optional<std::string> GetCompatibleType (antlr4::Token *_t, std::initializer_list<std::string> _types) {
+		LOG_TODO (_t);
+		return std::nullopt;
 	}
 
 
