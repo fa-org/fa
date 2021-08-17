@@ -41,6 +41,7 @@
 #include "AstValue.hpp"
 #include "FuncContext.hpp"
 #include "OperAST.hpp"
+#include "FuncType.hpp"
 
 
 
@@ -147,38 +148,26 @@ private:
 	bool ProcessImports (std::vector<FaParser::ImportStmtContext *> _imports_raw) {
 		// https://blog.csdn.net/adream307/article/details/83820543
 		for (FaParser::ImportStmtContext *_import_func_raw : _imports_raw) {
-			auto [_name, _ret_type_raw, _arg_types_raw, _cc] = m_visitor->visit (_import_func_raw).as<std::tuple<
+			auto [_name, _ret_type_raw, _arg_types_raw, _cc_str] = m_visitor->visit (_import_func_raw).as<std::tuple<
 				std::string,
 				FaParser::ETypeContext *,
 				std::vector<FaParser::ETypeContext *>,
 				std::string
-				>> ();
-			//llvm::Function *_f = m_module->getFunction (_name);
-			std::string _code_name = std::format ("::{}", _name);
-			if (!m_imports.contains (_code_name)) {
-				auto _ret_otype = m_type_map->GetExternType (_ret_type_raw);
-				if (!_ret_otype.has_value ())
-					return false;
-				auto [_ret_type, _ret_type_str] = _ret_otype.value ();
-				auto _arg_otypes = m_type_map->GetExternTypes (_arg_types_raw);
-				if (!_arg_otypes.has_value ())
-					return false;
-				auto [_arg_types, _arg_types_str] = _arg_otypes.value ();
-				llvm::FunctionType *_ft = llvm::FunctionType::get (_ret_type, _arg_types, false);
-				llvm::Function *_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, _name, *m_module);
-				if (_cc == "__cdecl") {
-					_f->setCallingConv (llvm::CallingConv::C);
-				} else if (_cc == "__stdcall") {
-					_f->setCallingConv (llvm::CallingConv::X86_StdCall);
-				} else if (_cc == "__fastcall") {
-					_f->setCallingConv (llvm::CallingConv::X86_FastCall);
+			>> ();
+			std::string _func_name = std::format ("::{}", _name);
+			if (!m_funcs.contains (_func_name)) {
+				llvm::CallingConv::ID _cc = llvm::CallingConv::C;
+				if (_cc_str == "__cdecl") {
+					_cc = llvm::CallingConv::C;
+				} else if (_cc_str == "__stdcall") {
+					_cc = llvm::CallingConv::X86_StdCall;
+				} else if (_cc_str == "__fastcall") {
+					_cc = llvm::CallingConv::X86_FastCall;
 				}
-				std::string _func_type = std::format ("Func<{} (", _ret_type_str);
-				for (std::string _arg_type_str : _arg_types_str)
-					_func_type += std::format ("{}, ", _arg_type_str);
-				_func_type [_func_type.size () - 2] = ')';
-				_func_type [_func_type.size () - 1] = '>';
-				m_imports [_code_name] = { _f, _func_type };
+				auto _oft = FuncType::MakeExtern (m_type_map, m_module, _func_name, _ret_type_raw, _arg_types_raw, _cc);
+				if (!_oft.has_value ())
+					return false;
+				m_funcs [_func_name] = _oft.value ();
 			}
 		}
 		return true;
@@ -188,10 +177,12 @@ private:
 		auto [_ret_type_raw, _stmts_raw] = m_visitor->visit (_mctx).as<std::tuple<
 			FaParser::TypeContext *,
 			std::vector<FaParser::StmtContext *>
-			>> ();
-		FuncContext _func_ctx { m_ctx, m_module, m_type_map, m_value_builder };
-		if (!_func_ctx.InitFunc ("FaEntryMain", _ret_type_raw))
+		>> ();
+		std::vector<FaParser::TypeContext *> _arg_type_raws;
+		auto _oft = FuncType::Make (m_type_map, m_module, "::@main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C);
+		if (!_oft.has_value ())
 			return false;
+		FuncContext _func_ctx { m_ctx, m_module, m_type_map, m_value_builder, _oft.value () };
 		return StmtBuilder (_func_ctx, _stmts_raw);
 	}
 
@@ -480,7 +471,8 @@ private:
 					_ptr->_left = _val;
 					_ptr->_op = _Oper2Ctx { _suffix_raw };
 					for (auto _right_expr_raw : _suffix_raw->exprOpt ()) {
-						// TODO: 找到目标方法，识别结果类型
+						// 找到目标方法，TODO: 识别结果类型
+						auto [_ret_type, _arg_types] = AstValue::GetFuncType (_val.GetExpectType ());
 						if (_right_expr_raw->expr ()) {
 							auto _right_oval = _parse_expr (_right_expr_raw->expr (), "");
 							if (!_right_oval.has_value ())
@@ -524,9 +516,9 @@ private:
 					return std::make_shared<_ValueCtx> (_val, _expr_raw, std::format ("${}", _val.GetType ()));
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
-				if (m_imports.contains (_name)) {
-					auto &[_func, _func_type] = m_imports [_name];
-					return std::make_shared<_ValueCtx> (AstValue { _func, _func_type }, _expr_raw, _func_type);
+				if (m_funcs.contains (_name)) {
+					auto _f = m_funcs [_name];
+					return std::make_shared<_ValueCtx> (_f->GetFuncValue (), _expr_raw, _f->m_type);
 				}
 			} else if (_expr_raw->literal ()) {
 				AstValue _oval { m_value_builder, _expr_raw->literal () };
@@ -607,7 +599,7 @@ private:
 	std::shared_ptr<ValueBuilder> m_value_builder;
 
 	std::vector<std::string> m_uses;
-	std::map<std::string, std::tuple<llvm::Function *, std::string>> m_imports;
+	std::map<std::string, std::shared_ptr<FuncType>> m_funcs;
 	std::vector<std::string> m_libs;
 };
 

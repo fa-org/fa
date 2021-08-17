@@ -5,6 +5,7 @@
 
 #include <format>
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 #include <string>
@@ -47,9 +48,9 @@ public:
 			std::tie (m_value, m_value_type) = _oval.value ();
 		}
 	}
-	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var) {}
-	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value) {}
-	AstValue (llvm::Function *_func, std::string _value_type): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func) {}
+	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var), m_value_type (_value_type) {}
+	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value), m_value_type (_value_type) {}
+	AstValue (llvm::Function *_func, std::string _value_type): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func), m_value_type (_value_type) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
 	//AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
 	//AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
@@ -203,63 +204,23 @@ public:
 	}
 
 	std::string GetType () { return m_value_type; }
-	std::tuple<std::string, std::vector<std::string>> GetFuncType () {
-		static std::function<std::string (std::string)> s_trim = [] (std::string _s) {
-			_s.erase (0, _s.find_first_not_of (' '));
-			_s.erase (_s.find_last_not_of (' ') + 1);
-			return _s;
-		};
 
-		// 解析函数类型
-		if (!this->IsFunction ())
-			return { "", {} };
-		std::string _full_str = m_value_type.substr (m_value_type.find ('<') + 1);
-		_full_str = _full_str.substr (0, _full_str.size () - 1);
-		_full_str = s_trim (_full_str);
-
-		// 读取一个完整类型
-		size_t _p = 0;
-		std::function<std::string (bool)> _read_type = [&] (bool _is_ret) {
-			std::string _str = "";
-			size_t _level = 0;
-			for (; _p < _full_str.size (); ++_p) {
-				char _ch = _full_str [_p];
-				if (_level == 0) {
-					if (_is_ret) {
-						if (_ch == '(')
-							break;
-					} else {
-						if (_ch == ')' || _ch == ',')
-							break;
-					}
-				}
-				//
-				if (_ch == '(' || _ch == '<') {
-					_level++;
-				} else if (_ch == ')' || _ch == '>') {
-					_level--;
-				}
-				_str += _ch;
-			}
-			++_p; // 每次返回时，_p总是遇到不需使用的字符，因此每次返回前跳过一个字符
-			return _str;
-		};
-		std::string _ret_type = s_trim (_read_type (true));
-		std::vector<std::string> _arg_types;
-		std::string _tmp_arg_type = s_trim (_read_type (false));
-		while (_tmp_arg_type != "") {
-			_arg_types.push_back (_tmp_arg_type);
-			_tmp_arg_type = s_trim (_read_type (false));
-		}
-		return { _ret_type, _arg_types };
-	}
+	// 方法示例：Func<int32 (string, ing64)>
+	// 数组示例：Array<string [int]>
+	//
+	// 定义一个函数类型
+	static void SetFuncType (std::string _type, std::tuple<std::string, std::vector<std::string>> _val) { m_func_map [_type] = _val; }
+	// 解析一个函数类型
+	std::tuple<std::string, std::vector<std::string>> GetFuncType () { return m_func_map[m_value_type]; }
+	static std::tuple<std::string, std::vector<std::string>> GetFuncType (std::string _type) { return m_func_map [_type]; }
 
 private:
-	AstObjectType m_type = AstObjectType::None;
-	llvm::Value *m_value = nullptr;
-	llvm::Function *m_func = nullptr;
-	std::string m_member = "";
-	std::string m_value_type = "";
+	AstObjectType	m_type = AstObjectType::None;
+	llvm::Value		*m_value = nullptr;
+	llvm::Function	*m_func = nullptr;
+	std::string		m_member = "";
+	std::string		m_value_type = "";
+	inline static std::map<std::string, std::tuple<std::string, std::vector<std::string>>> m_func_map;
 };
 
 

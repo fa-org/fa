@@ -21,44 +21,19 @@
 #include "TypeMap.hpp"
 #include "AstValue.hpp"
 #include "OperAST.hpp"
+#include "FuncType.hpp"
 
 
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<ValueBuilder> _value_builder): m_ctx (_ctx), m_module (_module), m_type_map (_type_map), m_value_builder (_value_builder) {}
-
-	bool InitFunc (std::string _func_name, FaParser::TypeContext *_ret_type) {
-		static std::vector<FaParser::TypeContext *> _arg_types;
-		return InitFunc (_func_name, _ret_type, _arg_types);
-	}
-	bool InitFunc (std::string _func_name, FaParser::TypeContext *_ret_type, std::vector<FaParser::TypeContext *> &_arg_types) {
-		std::optional<llvm::Type *> _oret_type = m_type_map->GetType (_ret_type);
-		if (!_oret_type.has_value ())
-			return false;
-		//
-		llvm::FunctionType *_ft = nullptr;
-		if (_arg_types.size () == 0) {
-			_ft = llvm::FunctionType::get (_oret_type.value (), false);
-		} else {
-			std::vector<llvm::Type *> _arg_stypes;
-			for (auto _arg_type : _arg_types) {
-				std::optional<llvm::Type *> _oarg_type = m_type_map->GetType (_arg_type);
-				if (!_oarg_type.has_value ())
-					return false;
-				_arg_stypes.push_back (_oarg_type.value ());
-			}
-			_ft = llvm::FunctionType::get (_oret_type.value (), _arg_stypes, false);
-		}
-		m_f = llvm::Function::Create (_ft, llvm::Function::ExternalLinkage, _func_name, *m_module);
-		m_f->setCallingConv (llvm::CallingConv::C);
-		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", m_f);
+	FuncContext (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<ValueBuilder> _value_builder, std::shared_ptr<FuncType> _func_type): m_ctx (_ctx), m_module (_module), m_type_map (_type_map), m_value_builder (_value_builder), m_func_type (_func_type) {
+		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
 		m_builder->SetInsertPoint (_bb);
 		////
 		m_local_vars.reserve (32);
 		m_local_vars.emplace_back (std::map<std::string, std::tuple<llvm::AllocaInst *, std::string>> {});
-		return true;
 	}
 
 	AstValue DefineVariable (std::string _type, antlr4::Token *_t, std::string _name = "") {
@@ -102,9 +77,9 @@ public:
 	}
 
 	bool IfElse (AstValue &_cond, std::function<bool ()> _true_ctx, std::function<bool ()> _false_ctx) {
-		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", m_f);
-		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", m_f);
-		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", m_f);
+		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
+		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
+		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
 		m_builder->CreateCondBr (_cond.Value (*m_builder), _true_bb, _false_bb);
 		//
 		m_builder->SetInsertPoint (_true_bb);
@@ -122,7 +97,14 @@ public:
 	}
 
 	std::optional<std::tuple<std::string, std::vector<std::string>>> GetFuncType (_ExprOrValue &_val) {
-		return std::nullopt
+		if (_val._val) {
+			AstValue &_val2 = _val._val->_val;
+			if (_val2.IsFunction ())
+				return _val2.GetFuncType ();
+		} else if (_val._opN_expr) {
+
+		}
+		return std::nullopt;
 	}
 
 private:
@@ -130,8 +112,8 @@ private:
 	std::shared_ptr<llvm::Module> m_module;
 	std::shared_ptr<TypeMap> m_type_map;
 	std::shared_ptr<ValueBuilder> m_value_builder;
+	std::shared_ptr<FuncType> m_func_type;
 	//
-	llvm::Function *m_f = nullptr;
 	std::shared_ptr<llvm::IRBuilder<>> m_builder;
 	std::vector<std::map<std::string, std::tuple<llvm::AllocaInst *, std::string>>> m_local_vars;
 };

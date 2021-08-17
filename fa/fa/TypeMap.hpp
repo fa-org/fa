@@ -23,6 +23,16 @@ class TypeMap {
 public:
 	TypeMap (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx): m_visitor (_visitor), m_ctx (_ctx) {}
 
+	std::optional<std::tuple<std::string, llvm::Type *>> GetTypeT (FaParser::TypeContext *_type_ctx) {
+		auto _stype = _type_ctx->getText ();
+		auto _otype = GetType (_stype, _type_ctx->start);
+		if (_otype.has_value ()) {
+			return std::make_tuple (_stype, _otype.value ());
+		} else {
+			return std::nullopt;
+		}
+	}
+
 	std::optional<llvm::Type *> GetType (FaParser::TypeContext *_type_ctx) {
 		auto _stype = _type_ctx->getText ();
 		return GetType (_stype, _type_ctx->start);
@@ -65,6 +75,20 @@ public:
 			_types.push_back (_type.value ());
 		}
 		return _types;
+	}
+
+	std::optional<std::tuple<std::vector<std::string>, std::vector<llvm::Type *>>> GetTypesT (std::vector<FaParser::TypeContext *> _types_raw) {
+		std::vector<std::string> _type_strs;
+		std::vector<llvm::Type *> _types;
+		for (FaParser::TypeContext *_type_raw : _types_raw) {
+			std::string _type_str = _type_raw->getText ();
+			std::optional<llvm::Type *> _type = GetType (_type_str, _type_raw->start);
+			if (!_type.has_value ())
+				return std::nullopt;
+			_type_strs.push_back (_type_str);
+			_types.push_back (_type.value ());
+		}
+		return std::make_tuple (_type_strs, _types);
 	}
 
 	// 获取类型名称
