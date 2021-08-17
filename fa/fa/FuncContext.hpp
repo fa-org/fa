@@ -27,8 +27,8 @@
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<ValueBuilder> _value_builder, std::shared_ptr<FuncType> _func_type): m_ctx (_ctx), m_module (_module), m_type_map (_type_map), m_value_builder (_value_builder), m_func_type (_func_type) {
-		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
+	FuncContext (std::shared_ptr<FuncTypes> _func_types, std::string _func_name): m_ctx (_func_types->m_ctx), m_module (_func_types->m_module), m_type_map (_func_types->m_type_map), m_value_builder (_func_types->m_value_builder), m_func_type (_func_types->GetFunc (_func_name)) {
+		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->m_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
 		m_builder->SetInsertPoint (_bb);
 		////
@@ -77,9 +77,9 @@ public:
 	}
 
 	bool IfElse (AstValue &_cond, std::function<bool ()> _true_ctx, std::function<bool ()> _false_ctx) {
-		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
-		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
-		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->_fp);
+		llvm::BasicBlock *_true_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->m_fp);
+		llvm::BasicBlock *_false_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->m_fp);
+		llvm::BasicBlock *_endif_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func_type->m_fp);
 		m_builder->CreateCondBr (_cond.Value (*m_builder), _true_bb, _false_bb);
 		//
 		m_builder->SetInsertPoint (_true_bb);

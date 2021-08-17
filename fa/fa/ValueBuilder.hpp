@@ -3,6 +3,7 @@
 
 
 
+#include <format>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -76,7 +77,7 @@ public:
 				return std::make_tuple ((llvm::Value *) llvm::ConstantInt::get (_tp.value (), _int.value ()), _type);
 		}
 
-		LOG_ERROR (_t, fmt::format ("值 \"{}\" 无法转为 \"{}\" 类型。", _value, _type));
+		LOG_ERROR (_t, std::format ("值 \"{}\" 无法转为 \"{}\" 类型。", _value, _type));
 		return std::nullopt;
 	}
 

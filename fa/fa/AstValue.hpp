@@ -20,6 +20,7 @@
 #include "ValueBuilder.hpp"
 #include "TypeMap.hpp"
 #include "Log.hpp"
+#include "FuncType.hpp"
 
 
 
@@ -50,7 +51,7 @@ public:
 	}
 	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var), m_value_type (_value_type) {}
 	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value), m_value_type (_value_type) {}
-	AstValue (llvm::Function *_func, std::string _value_type): m_type (_func ? AstObjectType::Func : AstObjectType::None), m_func (_func), m_value_type (_value_type) {}
+	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_type) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
 	//AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
 	//AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
@@ -83,7 +84,7 @@ public:
 	llvm::CallInst *FuncInvoke (llvm::IRBuilder<> &_builder, std::vector<llvm::Value *> &_args) {
 		if (m_type != AstObjectType::Func || m_func == nullptr)
 			return nullptr;
-		return _builder.CreateCall (m_func, _args);
+		return _builder.CreateCall (m_func->m_fp, _args);
 	}
 	AstValue DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token *_t) {
 		if (!IsValue ())
@@ -205,22 +206,15 @@ public:
 
 	std::string GetType () { return m_value_type; }
 
-	// 方法示例：Func<int32 (string, ing64)>
-	// 数组示例：Array<string [int]>
-	//
-	// 定义一个函数类型
-	static void SetFuncType (std::string _type, std::tuple<std::string, std::vector<std::string>> _val) { m_func_map [_type] = _val; }
 	// 解析一个函数类型
-	std::tuple<std::string, std::vector<std::string>> GetFuncType () { return m_func_map[m_value_type]; }
-	static std::tuple<std::string, std::vector<std::string>> GetFuncType (std::string _type) { return m_func_map [_type]; }
+	std::tuple<std::string, std::vector<std::string>> GetFuncType () { return { m_func->m_ret_type, m_func->m_arg_types }; }
 
 private:
-	AstObjectType	m_type = AstObjectType::None;
-	llvm::Value		*m_value = nullptr;
-	llvm::Function	*m_func = nullptr;
-	std::string		m_member = "";
-	std::string		m_value_type = "";
-	inline static std::map<std::string, std::tuple<std::string, std::vector<std::string>>> m_func_map;
+	AstObjectType				m_type = AstObjectType::None;
+	llvm::Value					*m_value = nullptr;
+	std::shared_ptr<FuncType>	m_func;
+	std::string					m_member = "";
+	std::string					m_value_type = "";
 };
 
 

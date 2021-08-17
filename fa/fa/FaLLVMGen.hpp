@@ -49,9 +49,10 @@ class FaLLVMGen {
 public:
 	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor), m_module_name (_module_name) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
-		m_module = std::make_shared<llvm::Module> (_module_name, *m_ctx);
-		m_type_map = std::make_shared<TypeMap> (_visitor, m_ctx);
-		m_value_builder = std::make_shared<ValueBuilder> (_visitor, m_ctx, m_module);
+		m_module = std::make_shared<llvm::Module> (m_module_name, *m_ctx);
+		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx);
+		m_value_builder = std::make_shared<ValueBuilder> (m_visitor, m_ctx, m_module);
+		m_func_types = std::make_shared<FuncTypes> (m_type_map, m_module);
 	}
 
 	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
@@ -155,7 +156,7 @@ private:
 				std::string
 			>> ();
 			std::string _func_name = std::format ("::{}", _name);
-			if (!m_funcs.contains (_func_name)) {
+			if (!m_func_types->Contains (_func_name)) {
 				llvm::CallingConv::ID _cc = llvm::CallingConv::C;
 				if (_cc_str == "__cdecl") {
 					_cc = llvm::CallingConv::C;
@@ -164,10 +165,8 @@ private:
 				} else if (_cc_str == "__fastcall") {
 					_cc = llvm::CallingConv::X86_FastCall;
 				}
-				auto _oft = FuncType::MakeExtern (m_type_map, m_module, _func_name, _ret_type_raw, _arg_types_raw, _cc);
-				if (!_oft.has_value ())
+				if (!m_func_types->MakeExtern (_func_name, _ret_type_raw, _arg_types_raw, _cc))
 					return false;
-				m_funcs [_func_name] = _oft.value ();
 			}
 		}
 		return true;
@@ -179,10 +178,9 @@ private:
 			std::vector<FaParser::StmtContext *>
 		>> ();
 		std::vector<FaParser::TypeContext *> _arg_type_raws;
-		auto _oft = FuncType::Make (m_type_map, m_module, "::@main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C);
-		if (!_oft.has_value ())
+		if (!m_func_types->Make ("::fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
 			return false;
-		FuncContext _func_ctx { m_ctx, m_module, m_type_map, m_value_builder, _oft.value () };
+		FuncContext _func_ctx { m_func_types, "::fa_main" };
 		return StmtBuilder (_func_ctx, _stmts_raw);
 	}
 
@@ -470,9 +468,11 @@ private:
 					auto _ptr = std::make_shared<_OpNExprTreeCtx> ();
 					_ptr->_left = _val;
 					_ptr->_op = _Oper2Ctx { _suffix_raw };
+					auto [_ret_type, _arg_types] = AstValue::GetFuncType (_val.GetExpectType ());
+					auto _suffix_exprs = _suffix_raw->exprOpt ();
+					
 					for (auto _right_expr_raw : _suffix_raw->exprOpt ()) {
 						// 找到目标方法，TODO: 识别结果类型
-						auto [_ret_type, _arg_types] = AstValue::GetFuncType (_val.GetExpectType ());
 						if (_right_expr_raw->expr ()) {
 							auto _right_oval = _parse_expr (_right_expr_raw->expr (), "");
 							if (!_right_oval.has_value ())
@@ -516,7 +516,7 @@ private:
 					return std::make_shared<_ValueCtx> (_val, _expr_raw, std::format ("${}", _val.GetType ()));
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
-				if (m_funcs.contains (_name)) {
+				if (m_func_types->Contains (_name)) {
 					auto _f = m_funcs [_name];
 					return std::make_shared<_ValueCtx> (_f->GetFuncValue (), _expr_raw, _f->m_type);
 				}
@@ -597,9 +597,9 @@ private:
 	std::shared_ptr<llvm::Module> m_module;
 	std::shared_ptr<TypeMap> m_type_map;
 	std::shared_ptr<ValueBuilder> m_value_builder;
+	std::shared_ptr<FuncTypes> m_func_types;
 
 	std::vector<std::string> m_uses;
-	std::map<std::string, std::shared_ptr<FuncType>> m_funcs;
 	std::vector<std::string> m_libs;
 };
 
