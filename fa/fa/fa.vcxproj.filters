@@ -90,5 +90,8 @@
     <ClInclude Include="FuncType.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ClassType.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

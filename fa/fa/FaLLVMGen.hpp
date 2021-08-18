@@ -42,6 +42,7 @@
 #include "FuncContext.hpp"
 #include "OperAST.hpp"
 #include "FuncType.hpp"
+#include "ClassType.hpp"
 
 
 
@@ -52,7 +53,7 @@ public:
 		m_module = std::make_shared<llvm::Module> (m_module_name, *m_ctx);
 		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx);
 		m_value_builder = std::make_shared<ValueBuilder> (m_visitor, m_ctx, m_module);
-		m_func_types = std::make_shared<FuncTypes> (m_type_map, m_module);
+		m_global_funcs = std::make_shared<FuncTypes> (m_type_map, m_module);
 	}
 
 	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
@@ -156,7 +157,7 @@ private:
 				std::string
 			>> ();
 			std::string _func_name = std::format ("::{}", _name);
-			if (!m_func_types->Contains (_func_name)) {
+			if (!m_global_funcs->Contains (_func_name)) {
 				llvm::CallingConv::ID _cc = llvm::CallingConv::C;
 				if (_cc_str == "__cdecl") {
 					_cc = llvm::CallingConv::C;
@@ -165,7 +166,7 @@ private:
 				} else if (_cc_str == "__fastcall") {
 					_cc = llvm::CallingConv::X86_FastCall;
 				}
-				if (!m_func_types->MakeExtern (_func_name, _ret_type_raw, _arg_types_raw, _cc))
+				if (!m_global_funcs->MakeExtern (_func_name, _ret_type_raw, _arg_types_raw, _cc))
 					return false;
 			}
 		}
@@ -178,9 +179,9 @@ private:
 			std::vector<FaParser::StmtContext *>
 		>> ();
 		std::vector<FaParser::TypeContext *> _arg_type_raws;
-		if (!m_func_types->Make ("::fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
+		if (!m_global_funcs->Make ("::fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
 			return false;
-		FuncContext _func_ctx { m_func_types, "::fa_main" };
+		FuncContext _func_ctx { m_global_funcs, "::fa_main" };
 		return StmtBuilder (_func_ctx, _stmts_raw);
 	}
 
@@ -468,21 +469,27 @@ private:
 					auto _ptr = std::make_shared<_OpNExprTreeCtx> ();
 					_ptr->_left = _val;
 					_ptr->_op = _Oper2Ctx { _suffix_raw };
-					auto [_ret_type, _arg_types] = AstValue::GetFuncType (_val.GetExpectType ());
-					auto _suffix_exprs = _suffix_raw->exprOpt ();
-					
-					for (auto _right_expr_raw : _suffix_raw->exprOpt ()) {
-						// 找到目标方法，TODO: 识别结果类型
-						if (_right_expr_raw->expr ()) {
-							auto _right_oval = _parse_expr (_right_expr_raw->expr (), "");
+					auto _func = m_global_funcs->GetFunc (_val.GetExpectType ());
+					auto _expr_opt_raws = _suffix_raw->exprOpt ();
+					if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
+						_expr_opt_raws.clear ();
+					if (_expr_opt_raws.size () != _func->m_arg_types.size ()) {
+						LOG_ERROR (_suffix_raw->start, "参数数量不匹配");
+						return std::nullopt;
+					}
+					for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
+						if (_expr_opt_raws [i]->expr ()) {
+							auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
 							if (!_right_oval.has_value ())
 								return std::nullopt;
 							_ptr->_rights.push_back (_right_oval.value ());
 						} else {
-							_ptr->_rights.push_back (_ExprOrValue { std::make_shared<_ValueCtx> (AstValue {}, _right_expr_raw->start, "?") });
+							//_ptr->_rights.push_back (_ExprOrValue { std::make_shared<_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
+							LOG_TODO (_expr_opt_raws [i]->start);
+							return std::nullopt;
 						}
 					}
-					_ptr->_expect_type = _val.GetExpectType ();
+					_ptr->_expect_type = _func->m_ret_type;
 					_val = _ptr;
 				} else if (_suffix_raw->PointOp ()) {
 					auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
@@ -511,23 +518,23 @@ private:
 		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
 			if (_expr_raw->ids ()) {
-				auto _val = _func_ctx.GetVariable (_expr_raw->ids ()->getText ());
+				auto _val = FindValueType (_func_ctx, _expr_raw->ids ()->getText ());
 				if (_val.IsValid ())
-					return std::make_shared<_ValueCtx> (_val, _expr_raw, std::format ("${}", _val.GetType ()));
+					return std::make_shared<_ValueCtx> (_val, _expr_raw, _val.GetType ());
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
-				if (m_func_types->Contains (_name)) {
-					auto _f = m_funcs [_name];
-					return std::make_shared<_ValueCtx> (_f->GetFuncValue (), _expr_raw, _f->m_type);
+				if (m_global_funcs->Contains (_name)) {
+					auto _f = m_global_funcs->GetFunc (_name);
+					return std::make_shared<_ValueCtx> (AstValue { _f }, _expr_raw, _f->m_type);
 				}
 			} else if (_expr_raw->literal ()) {
 				AstValue _oval { m_value_builder, _expr_raw->literal () };
 				if (_oval.IsValid ())
 					return std::make_shared<_ValueCtx> (_oval, _expr_raw, _oval.GetType ());
 			} else if (_expr_raw->ifExpr ()) {
-				return _parse_if_expr (_expr_raw->ifExpr ());
+				return _parse_if_expr (_expr_raw->ifExpr (), _exp_type);
 			} else if (_expr_raw->quotExpr ()) {
-				return _parse_expr (_expr_raw->quotExpr ()->expr ());
+				return _parse_expr (_expr_raw->quotExpr ()->expr (), _exp_type);
 			}
 			LOG_TODO (_expr_raw->start);
 			return std::nullopt;
@@ -535,14 +542,22 @@ private:
 		_parse_if_expr = [&] (FaParser::IfExprContext *_expr_raw, std::string _exp_type)->std::optional<_ExprOrValue> {
 			auto _if_expr = std::make_shared<_IfExprTreeCtx> ();
 			for (auto _cond_raw : _expr_raw->expr ()) {
-				auto _cond_oval = _parse_expr (_cond_raw);
+				auto _cond_oval = _parse_expr (_cond_raw, "bool");
 				if (!_cond_oval.has_value ())
 					return std::nullopt;
 				_if_expr->_conds.push_back (_cond_oval.value ());
 			}
 			for (auto _body_raw : _expr_raw->quotStmtExpr ()) {
+				if (!_func_ctx.CreateVirtualEnv<bool> ([&] () {
+					auto _stmts = _body_raw->stmt ();
+					if (!StmtBuilder (_func_ctx, _stmts))
+						return false;
+					return true;
+				}))
+					return std::nullopt;
+				// TODO XXXXXXXXXX变量已缓存到 _func_ctx 里了，现在需要获取表达式结果类型
 				_if_expr->_bodys1_raw.push_back (_body_raw->stmt ());
-				auto _stmt_oval = _parse_expr (_body_raw->expr ());
+				auto _stmt_oval = _parse_expr (_body_raw->expr (), _exp_type);
 				if (!_stmt_oval.has_value ())
 					return std::nullopt;
 				_if_expr->_bodys2.push_back (_stmt_oval.value ());
@@ -591,13 +606,33 @@ private:
 	//	return true;
 	//}
 
+	std::optional<ClassType> FindClassType (FuncContext &_func_ctx, std::string _raw_name) {
+		// TODO 如果没找到，但有 . 运算符，那么递归
+	}
+
+	AstValue FindValueType (FuncContext &_func_ctx, std::string _raw_name) {
+		size_t _p = _raw_name.rfind ('.');
+		if (_p != std::string::npos) {
+			// 包含 . 运算符，前半段可能是类或对象
+			auto _oct = FindClassType (_func_ctx, _raw_name.substr (0, _p));
+			if (_oct.has_value ()) {
+				return _oct.value ().GetMember (_raw_name.substr (_p + 1));
+			}
+		} else {
+			// 不包含 . 运算符，可能是变量、类方法或类属性
+			return _func_ctx.GetVariable (_raw_name);
+		}
+		return std::nullopt;
+	}
+
 	CodeVisitor *m_visitor = nullptr;
 	std::string m_module_name;
 	std::shared_ptr<llvm::LLVMContext> m_ctx;
 	std::shared_ptr<llvm::Module> m_module;
 	std::shared_ptr<TypeMap> m_type_map;
 	std::shared_ptr<ValueBuilder> m_value_builder;
-	std::shared_ptr<FuncTypes> m_func_types;
+	std::shared_ptr<FuncTypes> m_global_funcs;
+	std::shared_ptr<ClassTypes> m_global_classes;
 
 	std::vector<std::string> m_uses;
 	std::vector<std::string> m_libs;

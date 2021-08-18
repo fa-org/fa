@@ -51,7 +51,7 @@ public:
 	}
 	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var), m_value_type (_value_type) {}
 	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value), m_value_type (_value_type) {}
-	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_type) {}
+	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_name) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
 	//AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
 	//AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
@@ -206,7 +206,7 @@ public:
 
 	std::string GetType () { return m_value_type; }
 
-	// 解析一个函数类型
+	std::string GetFuncReturnType () { return m_func->m_ret_type; }
 	std::tuple<std::string, std::vector<std::string>> GetFuncType () { return { m_func->m_ret_type, m_func->m_arg_types }; }
 
 private:
