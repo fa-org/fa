@@ -514,23 +514,35 @@ private:
 				_ptr->_expect_type = _val.GetExpectType ();
 				_val = _ptr;
 			}
+
+			if (_exp_type != "" && _val.GetExpectType () != _exp_type) {
+				// TODO 外到内层层转换类型
+			}
 			return _val;
 		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
 			if (_expr_raw->ids ()) {
 				auto _val = FindValueType (_func_ctx, _expr_raw->ids ()->getText ());
-				if (_val.IsValid ())
-					return std::make_shared<_ValueCtx> (_val, _expr_raw, _val.GetType ());
+				if (!_val.IsValid ())
+					return std::nullopt;
+				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
+					return std::nullopt;
+				return std::make_shared<_ValueCtx> (_val, _expr_raw, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
-				if (m_global_funcs->Contains (_name)) {
-					auto _f = m_global_funcs->GetFunc (_name);
-					return std::make_shared<_ValueCtx> (AstValue { _f }, _expr_raw, _f->m_type);
-				}
+				if (!m_global_funcs->Contains (_name))
+					return std::nullopt;
+				auto _f = m_global_funcs->GetFunc (_name);
+				if (!TypeMap::CanImplicitConvTo (_f->m_type, _exp_type))
+					return std::nullopt;
+				return std::make_shared<_ValueCtx> (AstValue { _f }, _expr_raw, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->literal ()) {
-				AstValue _oval { m_value_builder, _expr_raw->literal () };
-				if (_oval.IsValid ())
-					return std::make_shared<_ValueCtx> (_oval, _expr_raw, _oval.GetType ());
+				AstValue _val { m_value_builder, _expr_raw->literal () };
+				if (_val.IsValid ())
+					return std::nullopt;
+				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
+					return std::nullopt;
+				return std::make_shared<_ValueCtx> (_val, _expr_raw, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->ifExpr ()) {
 				return _parse_if_expr (_expr_raw->ifExpr (), _exp_type);
 			} else if (_expr_raw->quotExpr ()) {
@@ -547,22 +559,38 @@ private:
 					return std::nullopt;
 				_if_expr->_conds.push_back (_cond_oval.value ());
 			}
+
+			// 计算期望类型
+			std::vector<std::string> _exp_types;
 			for (auto _body_raw : _expr_raw->quotStmtExpr ()) {
+				// 在虚拟环境中计算类型，避免影响真实环境
 				if (!_func_ctx.CreateVirtualEnv<bool> ([&] () {
+					// 遍历代码，寻找所有新定义变量，在计算最后表达式类型时可能需要用到
 					auto _stmts = _body_raw->stmt ();
 					if (!StmtBuilder (_func_ctx, _stmts))
 						return false;
+
+					// 获取表达式类型
+					//_if_expr->_bodys1_raw.push_back (_body_raw->stmt ());
+					auto _stmt_oval = _parse_expr (_body_raw->expr (), _exp_type);
+					if (!_stmt_oval.has_value ())
+						return false;
+					//_if_expr->_bodys2.push_back (_stmt_oval.value ());
+					_exp_types.push_back (_stmt_oval.value ().GetExpectType ());
 					return true;
 				}))
 					return std::nullopt;
-				// TODO XXXXXXXXXX变量已缓存到 _func_ctx 里了，现在需要获取表达式结果类型
-				_if_expr->_bodys1_raw.push_back (_body_raw->stmt ());
-				auto _stmt_oval = _parse_expr (_body_raw->expr (), _exp_type);
-				if (!_stmt_oval.has_value ())
-					return std::nullopt;
-				_if_expr->_bodys2.push_back (_stmt_oval.value ());
 			}
-			// TODO 计算期望类型
+			auto _real_exp_otype = TypeMap::GetCompatibleType (_expr_raw->start, _exp_types);
+			if (!_real_exp_otype.has_value ())
+				return std::nullopt;
+			_if_expr->_expect_type = _real_exp_otype.value ();
+
+			// 根据真实期望类型生成代码
+			for (auto _body_raw : _expr_raw->quotStmtExpr ()) {
+				_if_expr->_bodys1_raw.push_back (_body_raw->stmt ());
+				_if_expr->_bodys2.push_back (_body_raw->expr ());
+			}
 			return _if_expr;
 		};
 
@@ -572,7 +600,10 @@ private:
 			return std::nullopt;
 		_ExprOrValue _ev = _oev.value ();
 
-		// 判定是否满足期望
+		//// 判定是否满足期望 （这块代码貌似没必要）
+		//if (!TypeMap::CanImplicitConvTo (_ev.GetExpectType (), _expect_type)) {
+		//	return std::nullopt;
+		//}
 
 		// 生成代码
 	}

@@ -135,8 +135,19 @@ public:
 
 	// 获取同时兼容存储多种类型的类型
 	static std::optional<std::string> GetCompatibleType (antlr4::Token *_t, std::initializer_list<std::string> _types) {
+		std::vector<std::string> _v { _types };
+		return GetCompatibleType (_t, _v);
+	}
+	static std::optional<std::string> GetCompatibleType (antlr4::Token *_t, std::vector<std::string> &_types) {
 		LOG_TODO (_t);
 		return std::nullopt;
+	}
+
+	static bool CanImplicitConvTo (std::string _src, std::string _dest) {
+		if (_src == _dest || _dest == "" || std::format ("{}?", _src) == _dest)
+			return true;
+	 	// TODO
+		return false;
 	}
 
 

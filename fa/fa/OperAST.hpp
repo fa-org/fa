@@ -129,7 +129,7 @@ struct _OpNExprTreeCtx {
 struct _IfExprTreeCtx {
 	std::vector<_ExprOrValue>							_conds;
 	std::vector<std::vector<FaParser::StmtContext *>>	_bodys1_raw;
-	std::vector<_ExprOrValue>							_bodys2;
+	std::vector<FaParser::ExprContext *>				_bodys2;
 	std::string											_expect_type;
 };
 
