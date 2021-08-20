@@ -144,7 +144,47 @@ public:
 	}
 
 	static bool CanImplicitConvTo (std::string _src, std::string _dest) {
-		if (_src == _dest || _dest == "" || std::format ("{}?", _src) == _dest)
+		if (_dest == "") {
+			return true;
+		} else if (_src == "") {
+			return false;
+		}
+
+		// 移除&符号
+		size_t _p = _src.size ();
+		if (_src [_p - 1] == '&') {
+			_src = _src.erase (_p - 1);
+		} else if (_src [_p - 2] == '&') {
+			_src = _src.erase (_p - 2);
+		}
+		_p = _dest.size ();
+		if (_dest [_p - 1] == '&') {
+			_dest = _dest.erase (_p - 1);
+		} else if (_dest [_p - 2] == '&') {
+			_dest = _dest.erase (_p - 2);
+		}
+
+		// 识别可赋值类型
+		bool _s = _src [0] == '$', _d = _dest [0] == '$';
+		if ((!_s) && _d) {
+			return false;
+		} else if (_s && (!_d)) {
+			_src = _src.substr (1);
+		}
+
+		// 识别可空类型
+		_s = *_src.crbegin () == '?';
+		_d = *_dest.crbegin () == '?';
+		if ((!_s) && _d) {
+			_dest = _dest.substr (0, _dest.size () - 1);
+		} else if (_s && (!_d)) {
+			return false;
+		} else if (_s && _d) {
+			_src = _src.substr (0, _src.size () - 1);
+			_dest = _dest.substr (0, _dest.size () - 1);
+		}
+
+		if (_src == _dest)
 			return true;
 	 	// TODO
 		return false;

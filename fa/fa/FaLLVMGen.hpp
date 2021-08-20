@@ -274,49 +274,60 @@ private:
 		_parse_expr = [&] (FaParser::ExprContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
 			auto _exprs = _expr_raw->middleExpr ();
 			auto _ops = _expr_raw->allAssign ();
-			auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _exp_type);
+			auto _oval = _parse_middle_expr (_exprs [0], "");
 			if (!_oval.has_value ())
 				return std::nullopt;
 			_ExprOrValue _val = _oval.value ();
-			if (_exp_type.empty ())
-				_exp_type = _val.GetExpectType ();
-			if (_exp_type [0] == '$' && _ops.size () > 0) {
-				LOG_ERROR (_ops [_ops.size () - 1]->start, "表达式已包括赋值运算符，不可再次赋值");
+			std::string _var_type = _val.GetExpectType ();
+			if (!TypeMap::CanImplicitConvTo (_var_type, _exp_type)) {
+				LOG_ERROR (_expr_raw->start, std::format ("无法将类型由 {} 转为 {}", _var_type, _exp_type));
 				return std::nullopt;
 			}
-			//
-			std::string _exp_type2 = std::format ("${}", _exp_type);
-			for (int i = (int) _ops.size () - 1; i >= 0; --i) {
-				auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
-				_oval = _parse_middle_expr (_exprs [i], _exp_type2);
-				if (!_oval.has_value ())
-					return std::nullopt;
-				_ptr->_left = _oval.value ();
-				_ptr->_op = _Oper2Ctx { _ops [i] };
-				_ptr->_right = _val;
+			// TODO TODO TODO
+			//auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _exp_type);
+			//if (!_oval.has_value ())
+			//	return std::nullopt;
+			//_ExprOrValue _val = _oval.value ();
+			//if (_exp_type.empty ())
+			//	_exp_type = _val.GetExpectType ();
+			//if (_exp_type [0] == '$' && _ops.size () > 0) {
+			//	LOG_ERROR (_ops [_ops.size () - 1]->start, "表达式已包括赋值运算符，不可再次赋值");
+			//	return std::nullopt;
+			//}
+			////
+			//std::string _exp_type2 = std::format ("${}", _exp_type);
+			//for (int i = (int) _ops.size () - 1; i >= 0; --i) {
+			//	auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
+			//	_oval = _parse_middle_expr (_exprs [i], _exp_type2);
+			//	if (!_oval.has_value ())
+			//		return std::nullopt;
+			//	_ptr->_left = _oval.value ();
+			//	_ptr->_op = _Oper2Ctx { _ops [i] };
+			//	_ptr->_right = _val;
 
-				// 更新类型
-				std::string _var_type = _ptr->_left.GetExpectType ();
-				if (_var_type != _exp_type2) {
-					// TODO 检查类型是否能隐式转换
-					LOG_TODO (_ops [i]->start);
+			//	// 更新类型
+			//	std::string _var_type = _ptr->_left.GetExpectType ();
+			//	if (_var_type != _exp_type2) {
+			//		// TODO 检查类型是否能隐式转换
+			//		if (TypeMap::CanImplicitConvTo (_var_type, _exp_type2))
+			//		LOG_TODO (_ops [i]->start);
 
-					// 如果第二个数字是最后一个值那么重新计算一次期望类型
-					if (i == (int) _ops.size () - 1) {
-						_oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _var_type.substr (1));
-						if (!_oval.has_value ())
-							return std::nullopt;
-						_ptr->_right = _oval.value ();
-					}
-					return std::nullopt;
-				}
-				_exp_type2 = _var_type;
+			//		// 如果第二个数字是最后一个值那么重新计算一次期望类型
+			//		if (i == (int) _ops.size () - 1) {
+			//			_oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _var_type.substr (1));
+			//			if (!_oval.has_value ())
+			//				return std::nullopt;
+			//			_ptr->_right = _oval.value ();
+			//		}
+			//		return std::nullopt;
+			//	}
+			//	_exp_type2 = _var_type;
 
-				// _expect_type改为不可赋值
-				_ptr->_expect_type = _exp_type2.substr (1);
-				_val = _ExprOrValue { _ptr };
-			}
-			return _val;
+			//	// _expect_type改为不可赋值
+			//	_ptr->_expect_type = _exp_type2.substr (1);
+			//	_val = _ExprOrValue { _ptr };
+			//}
+			//return _val;
 		};
 		_parse_middle_expr = [&] (FaParser::MiddleExprContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
 			auto _exprs = _expr_raw->strongExpr ();
