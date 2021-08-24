@@ -53,7 +53,7 @@ public:
 		m_module = std::make_shared<llvm::Module> (m_module_name, *m_ctx);
 		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx);
 		m_value_builder = std::make_shared<ValueBuilder> (m_visitor, m_ctx, m_module);
-		m_global_funcs = std::make_shared<FuncTypes> (m_type_map, m_module);
+		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder);
 	}
 
 	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
@@ -62,7 +62,7 @@ public:
 			FaParser::ImportBlockContext *,
 			std::vector<FaParser::ClassBlockContext *>,
 			FaParser::FaEntryMainFuncBlockContext *
-			>> ();
+		>> ();
 		m_uses = _uses;
 
 		// 引用外部模块
@@ -265,71 +265,43 @@ private:
 
 	AstValue ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext *_expr_raw, std::string _expect_type) {
 		// 定义解析函数
-		std::function<std::optional<_ExprOrValue> (FaParser::ExprContext *, std::string)> _parse_expr;
-		std::function<std::optional<_ExprOrValue> (FaParser::MiddleExprContext *, std::string)> _parse_middle_expr;
-		std::function<std::optional<_ExprOrValue> (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *> &_op_raws, std::vector<size_t> &_op_levels, std::string)> _parse_middle_expr2;
-		std::function<std::optional<_ExprOrValue> (FaParser::StrongExprContext *, std::string)> _parse_strong_expr;
-		std::function<std::optional<_ExprOrValue> (FaParser::StrongExprBaseContext *, std::string)> _parse_strong_expr_base;
-		std::function<std::optional<_ExprOrValue> (FaParser::IfExprContext *, std::string)> _parse_if_expr;
-		_parse_expr = [&] (FaParser::ExprContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext *, std::string)> _parse_expr;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::MiddleExprContext *, std::string)> _parse_middle_expr;
+		std::function<std::optional<_AST_ExprOrValue> (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *> &_op_raws, std::vector<size_t> &_op_levels, std::string)> _parse_middle_expr2;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprContext *, std::string)> _parse_strong_expr;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprBaseContext *, std::string)> _parse_strong_expr_base;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::IfExprContext *, std::string)> _parse_if_expr;
+		_parse_expr = [&] (FaParser::ExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			auto _exprs = _expr_raw->middleExpr ();
 			auto _ops = _expr_raw->allAssign ();
-			auto _oval = _parse_middle_expr (_exprs [0], "");
+			auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], "");
 			if (!_oval.has_value ())
 				return std::nullopt;
-			_ExprOrValue _val = _oval.value ();
-			std::string _var_type = _val.GetExpectType ();
-			if (!TypeMap::CanImplicitConvTo (_var_type, _exp_type)) {
-				LOG_ERROR (_expr_raw->start, std::format ("无法将类型由 {} 转为 {}", _var_type, _exp_type));
+			_AST_ExprOrValue _val = _oval.value ();
+			if (_exp_type.empty ())
+				_exp_type = _val.GetExpectType ();
+			if (_exp_type [0] == '$' && _ops.size () > 0) {
+				LOG_ERROR (_ops [_ops.size () - 1]->start, "表达式已包括赋值运算符，不可再次赋值");
 				return std::nullopt;
 			}
-			// TODO TODO TODO
-			//auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _exp_type);
-			//if (!_oval.has_value ())
-			//	return std::nullopt;
-			//_ExprOrValue _val = _oval.value ();
-			//if (_exp_type.empty ())
-			//	_exp_type = _val.GetExpectType ();
-			//if (_exp_type [0] == '$' && _ops.size () > 0) {
-			//	LOG_ERROR (_ops [_ops.size () - 1]->start, "表达式已包括赋值运算符，不可再次赋值");
-			//	return std::nullopt;
-			//}
-			////
-			//std::string _exp_type2 = std::format ("${}", _exp_type);
-			//for (int i = (int) _ops.size () - 1; i >= 0; --i) {
-			//	auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
-			//	_oval = _parse_middle_expr (_exprs [i], _exp_type2);
-			//	if (!_oval.has_value ())
-			//		return std::nullopt;
-			//	_ptr->_left = _oval.value ();
-			//	_ptr->_op = _Oper2Ctx { _ops [i] };
-			//	_ptr->_right = _val;
-
-			//	// 更新类型
-			//	std::string _var_type = _ptr->_left.GetExpectType ();
-			//	if (_var_type != _exp_type2) {
-			//		// TODO 检查类型是否能隐式转换
-			//		if (TypeMap::CanImplicitConvTo (_var_type, _exp_type2))
-			//		LOG_TODO (_ops [i]->start);
-
-			//		// 如果第二个数字是最后一个值那么重新计算一次期望类型
-			//		if (i == (int) _ops.size () - 1) {
-			//			_oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _var_type.substr (1));
-			//			if (!_oval.has_value ())
-			//				return std::nullopt;
-			//			_ptr->_right = _oval.value ();
-			//		}
-			//		return std::nullopt;
-			//	}
-			//	_exp_type2 = _var_type;
-
-			//	// _expect_type改为不可赋值
-			//	_ptr->_expect_type = _exp_type2.substr (1);
-			//	_val = _ExprOrValue { _ptr };
-			//}
-			//return _val;
+			//
+			for (int i = (int) _ops.size () - 1; i >= 0; --i) {
+				std::string _exp_type2 = _val.GetExpectType ();
+				if (_exp_type2 [0] != '$')
+					_exp_type2 = std::format ("${}", _exp_type2);
+				auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
+				_oval = _parse_middle_expr (_exprs [i], _exp_type2);
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_ptr->_left = _oval.value ();
+				_ptr->_op = _AST_Oper2Ctx { _ops [i] };
+				_ptr->_right = _val;
+				_ptr->_expect_type = _ptr->_left.GetExpectType ().substr (1);
+				_val = _AST_ExprOrValue { _ptr };
+			}
+			return _val;
 		};
-		_parse_middle_expr = [&] (FaParser::MiddleExprContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
+		_parse_middle_expr = [&] (FaParser::MiddleExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			auto _exprs = _expr_raw->strongExpr ();
 			auto _ops = _expr_raw->allOp2 ();
 			std::vector<size_t> _op_levels;
@@ -344,7 +316,7 @@ private:
 			}
 			return _parse_middle_expr2 (_exprs, _ops, _op_levels, _exp_type);
 		};
-		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *> &_op_raws, std::vector<size_t> &_op_levels, std::string _exp_type) -> std::optional<_ExprOrValue> {
+		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *> &_op_raws, std::vector<size_t> &_op_levels, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raws.size () == 1)
 				return _parse_strong_expr (_expr_raws [0], _exp_type);
 			size_t _pos = 0, _pos_level = _op_levels [0];
@@ -356,8 +328,8 @@ private:
 			}
 
 			// 根据优先级拆分为两块
-			auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
-			_ptr->_op = _Oper2Ctx { _op_raws [_pos] };
+			auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
+			_ptr->_op = _AST_Oper2Ctx { _op_raws [_pos] };
 			std::vector<FaParser::StrongExprContext *> _expr_raws_L, _expr_raws_R;
 			std::vector<FaParser::AllOp2Context *> _op_raws_L, _op_raws_R;
 			std::vector<size_t> _op_levels_L, _op_levels_R;
@@ -459,16 +431,16 @@ private:
 			_ptr->_expect_type = _exp_type;
 			return _ptr;
 		};
-		_parse_strong_expr = [&] (FaParser::StrongExprContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
+		_parse_strong_expr = [&] (FaParser::StrongExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			// 内到外层层叠加类型
 			auto _oval = _parse_strong_expr_base (_expr_raw->strongExprBase (), "");
 			if (!_oval.has_value ())
 				return std::nullopt;
-			_ExprOrValue _val = _oval.value ();
+			_AST_ExprOrValue _val = _oval.value ();
 			for (auto _suffix_raw : _expr_raw->strongExprSuffix ()) {
 				if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
-					auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
-					_ptr->_op = _Oper1Ctx { _suffix_raw };
+					auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
+					_ptr->_op = _AST_Oper1Ctx { _suffix_raw };
 					_ptr->_left = _val;
 					_ptr->_expect_type = _val.GetExpectType ();
 					if (_ptr->_expect_type [0] != '$') {
@@ -477,9 +449,9 @@ private:
 					}
 					_val = _ptr;
 				} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
-					auto _ptr = std::make_shared<_OpNExprTreeCtx> ();
+					auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
 					_ptr->_left = _val;
-					_ptr->_op = _Oper2Ctx { _suffix_raw };
+					_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
 					auto _func = m_global_funcs->GetFunc (_val.GetExpectType ());
 					auto _expr_opt_raws = _suffix_raw->exprOpt ();
 					if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
@@ -495,7 +467,7 @@ private:
 								return std::nullopt;
 							_ptr->_rights.push_back (_right_oval.value ());
 						} else {
-							//_ptr->_rights.push_back (_ExprOrValue { std::make_shared<_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
+							//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
 							LOG_TODO (_expr_opt_raws [i]->start);
 							return std::nullopt;
 						}
@@ -503,10 +475,10 @@ private:
 					_ptr->_expect_type = _func->m_ret_type;
 					_val = _ptr;
 				} else if (_suffix_raw->PointOp ()) {
-					auto _ptr = std::make_shared<_Op2ExprTreeCtx> ();
+					auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
 					_ptr->_left = _val;
-					_ptr->_op = _Oper2Ctx { _suffix_raw };
-					_ptr->_right = _ExprOrValue { std::make_shared<_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
+					_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
+					_ptr->_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
 					if (!_ptr->CalcExpectType ()) {
 						LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
 						return std::nullopt;
@@ -519,8 +491,8 @@ private:
 			}
 			auto _prefix_raws = _expr_raw->strongExprPrefix ();
 			for (auto _prefix_praw = _prefix_raws.rbegin (); _prefix_praw != _prefix_raws.rend (); ++_prefix_praw) {
-				auto _ptr = std::make_shared<_Op1ExprTreeCtx> ();
-				_ptr->_op = _Oper1Ctx { *_prefix_praw };
+				auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
+				_ptr->_op = _AST_Oper1Ctx { *_prefix_praw };
 				_ptr->_left = _val;
 				_ptr->_expect_type = _val.GetExpectType ();
 				_val = _ptr;
@@ -531,14 +503,14 @@ private:
 			}
 			return _val;
 		};
-		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext *_expr_raw, std::string _exp_type) -> std::optional<_ExprOrValue> {
+		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raw->ids ()) {
 				auto _val = FindValueType (_func_ctx, _expr_raw->ids ()->getText ());
 				if (!_val.IsValid ())
 					return std::nullopt;
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
 					return std::nullopt;
-				return std::make_shared<_ValueCtx> (_val, _expr_raw, _exp_type == "" ? _val.GetType () : _exp_type);
+				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
 				if (!m_global_funcs->Contains (_name))
@@ -546,14 +518,14 @@ private:
 				auto _f = m_global_funcs->GetFunc (_name);
 				if (!TypeMap::CanImplicitConvTo (_f->m_type, _exp_type))
 					return std::nullopt;
-				return std::make_shared<_ValueCtx> (AstValue { _f }, _expr_raw, _exp_type == "" ? _f->m_type : _exp_type);
+				return std::make_shared<_AST_ValueCtx> (AstValue { _f }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->literal ()) {
 				AstValue _val { m_value_builder, _expr_raw->literal () };
 				if (_val.IsValid ())
 					return std::nullopt;
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
 					return std::nullopt;
-				return std::make_shared<_ValueCtx> (_val, _expr_raw, _exp_type == "" ? _val.GetType () : _exp_type);
+				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->ifExpr ()) {
 				return _parse_if_expr (_expr_raw->ifExpr (), _exp_type);
 			} else if (_expr_raw->quotExpr ()) {
@@ -562,8 +534,8 @@ private:
 			LOG_TODO (_expr_raw->start);
 			return std::nullopt;
 		};
-		_parse_if_expr = [&] (FaParser::IfExprContext *_expr_raw, std::string _exp_type)->std::optional<_ExprOrValue> {
-			auto _if_expr = std::make_shared<_IfExprTreeCtx> ();
+		_parse_if_expr = [&] (FaParser::IfExprContext *_expr_raw, std::string _exp_type)->std::optional<_AST_ExprOrValue> {
+			auto _if_expr = std::make_shared<_AST_IfExprTreeCtx> ();
 			for (auto _cond_raw : _expr_raw->expr ()) {
 				auto _cond_oval = _parse_expr (_cond_raw, "bool");
 				if (!_cond_oval.has_value ())
@@ -605,18 +577,17 @@ private:
 			return _if_expr;
 		};
 
-		// 生成新语法树
-		std::optional<_ExprOrValue> _oev = _parse_expr (_expr_raw, _expect_type);
+		// 解析并生成新语法树
+		std::optional<_AST_ExprOrValue> _oev = _parse_expr (_expr_raw, _expect_type);
 		if (!_oev.has_value ())
 			return std::nullopt;
-		_ExprOrValue _ev = _oev.value ();
+		_AST_ExprOrValue _ev = _oev.value ();
 
-		//// 判定是否满足期望 （这块代码貌似没必要）
-		//if (!TypeMap::CanImplicitConvTo (_ev.GetExpectType (), _expect_type)) {
-		//	return std::nullopt;
-		//}
-
-		// 生成代码
+		// TODO 生成代码
+		std::function<AstValue ()> _generate_code = [] () -> AstValue {
+			return std::nullopt;
+		};
+		return std::nullopt;
 	}
 
 	//bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
@@ -650,6 +621,7 @@ private:
 
 	std::optional<ClassType> FindClassType (FuncContext &_func_ctx, std::string _raw_name) {
 		// TODO 如果没找到，但有 . 运算符，那么递归
+		return std::nullopt;
 	}
 
 	AstValue FindValueType (FuncContext &_func_ctx, std::string _raw_name) {

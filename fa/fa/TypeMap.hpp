@@ -148,6 +148,8 @@ public:
 			return true;
 		} else if (_src == "") {
 			return false;
+		} else if (_dest == "$") {
+			return _src [0] == '$';
 		}
 
 		// ÒÆ³ı&·ûºÅ

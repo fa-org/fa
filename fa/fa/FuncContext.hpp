@@ -126,7 +126,7 @@ public:
 		}
 	}
 
-	std::optional<std::tuple<std::string, std::vector<std::string>>> GetFuncType (_ExprOrValue &_val) {
+	std::optional<std::tuple<std::string, std::vector<std::string>>> GetFuncType (_AST_ExprOrValue &_val) {
 		if (_val._val) {
 			AstValue &_val2 = _val._val->_val;
 			if (_val2.IsFunction ())
