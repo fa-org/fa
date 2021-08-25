@@ -25,9 +25,10 @@
 
 
 class AstValue {
-	enum class AstObjectType { None, Value, Var, Func, TypeStr, MemberStr };
+	enum class AstObjectType { None, /*Void,*/ Value, Var, Func, TypeStr, MemberStr };
 
 public:
+	//static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
 	AstValue () {}
 	AstValue (std::nullopt_t) {}
 	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
@@ -66,6 +67,7 @@ public:
 	}
 
 	bool IsValid () const { return m_type != AstObjectType::None; }
+	//bool IsVoid () const { return m_type == AstObjectType::Void; }
 	bool IsValue () const { return m_type == AstObjectType::Value || m_type == AstObjectType::Var; }
 	bool IsVariable () const { return m_type == AstObjectType::Var; }
 	bool IsFunction () const { return m_type == AstObjectType::Func; }

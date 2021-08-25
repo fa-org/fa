@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <variant>
 #include <vector>
 
@@ -583,11 +584,44 @@ private:
 			return std::nullopt;
 		_AST_ExprOrValue _ev = _oev.value ();
 
-		// TODO 生成代码
-		std::function<AstValue ()> _generate_code = [] () -> AstValue {
+		// 生成代码
+		std::function<std::optional<std::tuple<AstValue, std::string>> (_AST_ExprOrValue _ast_ev)> _generate_code;
+		_generate_code = [&] (_AST_ExprOrValue _ast_ev) -> std::optional<std::tuple<AstValue, std::string>> {
+			std::string _rexp_type = _ast_ev.GetExpectType ();
+			if (_ast_ev._val) {
+				return std::make_tuple (_ast_ev._val->_val, _rexp_type);
+			} else if (_ast_ev._op1_expr) {
+				auto _oleft = _generate_code (_ast_ev._op1_expr->_left);
+				if (!_oleft.has_value ())
+					return std::nullopt;
+				auto [_left, _exp_type] = _oleft.value ();
+				// TODO 检查类型是否需要转换
+				auto _val = _func_ctx.DoOper1 (_left, _ast_ev._op1_expr->_op._op, _ast_ev._op1_expr->_op._t);
+				return std::make_tuple (_val, _rexp_type);
+			} else if (_ast_ev._op2_expr) {
+				auto _oleft = _generate_code (_ast_ev._op2_expr->_left);
+				if (!_oleft.has_value ())
+					return std::nullopt;
+				auto [_left, _exp_type] = _oleft.value ();
+				//
+				auto _oright = _generate_code (_ast_ev._op2_expr->_right);
+				if (!_oright.has_value ())
+					return std::nullopt;
+				auto [_right, _exp_type] = _oright.value ();
+				//
+				// TODO 检查类型是否需要转换
+				auto _val = _func_ctx.DoOper2 (_left, _ast_ev._op2_expr->_op._op, _right, _ast_ev._op2_expr->_op._t);
+				// TODO 检查类型是否需要转换
+				return std::make_tuple (_val, _rexp_type);
+			} else if (_ast_ev._opN_expr) {
+				// TODO
+			} else if (_ast_ev._if_expr) {
+				// TODO
+			}
+			LOG_TODO (nullptr);
 			return std::nullopt;
 		};
-		return std::nullopt;
+		return _generate_code (_ev);
 	}
 
 	//bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
