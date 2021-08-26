@@ -75,11 +75,11 @@ struct _AST_ExprOrValue {
 	_AST_ExprOrValue (std::shared_ptr<_AST_OpNExprTreeCtx> __opN_expr): _opN_expr (__opN_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_IfExprTreeCtx> __if_expr): _if_expr (__if_expr) {}
 
-	std::shared_ptr<_AST_ValueCtx> _val;
-	std::shared_ptr<_AST_Op1ExprTreeCtx> _op1_expr;
-	std::shared_ptr<_AST_Op2ExprTreeCtx> _op2_expr;
-	std::shared_ptr<_AST_OpNExprTreeCtx> _opN_expr;
-	std::shared_ptr<_AST_IfExprTreeCtx> _if_expr;
+	std::shared_ptr<_AST_ValueCtx>						_val;
+	std::shared_ptr<_AST_Op1ExprTreeCtx>				_op1_expr;
+	std::shared_ptr<_AST_Op2ExprTreeCtx>				_op2_expr;
+	std::shared_ptr<_AST_OpNExprTreeCtx>				_opN_expr;
+	std::shared_ptr<_AST_IfExprTreeCtx>					_if_expr;
 
 	std::string GetExpectType ();
 };
@@ -92,15 +92,15 @@ struct _AST_ExprOrValue {
 //	std::shared_ptr<_AST_IfExprTreeCtx>
 //>;
 struct _AST_Op1ExprTreeCtx {
-	_AST_Oper1Ctx											_op;
-	_AST_ExprOrValue										_left;
+	_AST_Oper1Ctx										_op;
+	_AST_ExprOrValue									_left;
 	std::string											_expect_type;
 };
 
 struct _AST_Op2ExprTreeCtx {
-	_AST_ExprOrValue										_left;
-	_AST_Oper2Ctx											_op;
-	_AST_ExprOrValue										_right;
+	_AST_ExprOrValue									_left;
+	_AST_Oper2Ctx										_op;
+	_AST_ExprOrValue									_right;
 	std::string											_expect_type;
 
 	bool CalcExpectType () {
@@ -122,14 +122,14 @@ struct _AST_Op2ExprTreeCtx {
 };
 
 struct _AST_OpNExprTreeCtx {
-	_AST_ExprOrValue										_left;
-	_AST_Oper2Ctx											_op;
-	std::vector<_AST_ExprOrValue>							_rights;
+	_AST_ExprOrValue									_left;
+	_AST_Oper2Ctx										_op;
+	std::vector<_AST_ExprOrValue>						_rights;
 	std::string											_expect_type;
 };
 
 struct _AST_IfExprTreeCtx {
-	std::vector<_AST_ExprOrValue>							_conds;
+	std::vector<_AST_ExprOrValue>						_conds;
 	std::vector<std::vector<FaParser::StmtContext *>>	_bodys1_raw;
 	std::vector<FaParser::ExprContext *>				_bodys2;
 	std::string											_expect_type;
