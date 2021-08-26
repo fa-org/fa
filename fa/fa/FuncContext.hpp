@@ -48,7 +48,8 @@ public:
 			return std::nullopt;
 		if (!m_virtual) {
 			auto _inst = m_builder->CreateAlloca (_ret_type.value ());
-			(*m_local_vars.rbegin ()) [_name] = { _inst, _type };
+			if (_name != "")
+				(*m_local_vars.rbegin ()) [_name] = { _inst, _type };
 			return AstValue { _inst, _type };
 		} else {
 			return AstValue { (llvm::AllocaInst *) nullptr, _type };

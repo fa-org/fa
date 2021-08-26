@@ -639,6 +639,7 @@ private:
 					_val = _trans_type (_val, _rexp_type);
 					return std::make_tuple (_val, _rexp_type);
 				} else if (_ast_ev._opN_expr->_op._op == "[]") {
+					// TODO
 					LOG_TODO (_ast_ev._opN_expr->_op._t);
 					return std::nullopt;
 				} else {
@@ -646,9 +647,38 @@ private:
 					return std::nullopt;
 				}
 			} else if (_ast_ev._if_expr) {
-				// TODO
-				LOG_TODO (_ast_ev._opN_expr->_op._t);
-				return std::nullopt;
+				AstValue _var_temp = _func_ctx.DefineVariable (_ast_ev._if_expr->_expect_type, _ast_ev._if_expr->_bodys2 [0]->start);
+				std::function<bool ()> _generate_ifexpr;
+				_generate_ifexpr = [&] () -> bool {
+					if (_ast_ev._if_expr->_conds.size () > 0) {
+						// if {} else
+						auto _ocond = _generate_code (_ast_ev._if_expr->_conds [0]);
+						if (!_ocond.has_value ())
+							return false;
+						_ast_ev._if_expr->_conds.erase (_ast_ev._if_expr->_conds.begin ());
+						auto _cond = std::get<0> (_ocond.value ());
+						return _func_ctx.IfElse (_cond, [&] () -> bool {
+							if (!StmtBuilder (_func_ctx, _ast_ev._if_expr->_bodys1_raw [0]))
+								return false;
+							_ast_ev._if_expr->_bodys1_raw.erase (_ast_ev._if_expr->_bodys1_raw.begin ());
+							AstValue _block_ret = ExprBuilder (_func_ctx, _ast_ev._if_expr->_bodys2 [0], _rexp_type);
+							if (!_block_ret.IsValid ())
+								return false;
+							AstValue _ret = _func_ctx.DoOper2 (_var_temp, "=", _block_ret, _ast_ev._if_expr->_bodys2 [0]->start);
+							if (!_ret.IsValid ())
+								return false;
+							_ast_ev._if_expr->_bodys2.erase (_ast_ev._if_expr->_bodys2.begin ());
+							return _generate_ifexpr ();
+						}, [&] () -> bool {
+							// TODO
+							return true;
+						});
+					} else {
+						// else {}
+						// TODO
+					}
+				};
+				_generate_ifexpr ();
 			}
 			LOG_TODO (nullptr);
 			return std::nullopt;
