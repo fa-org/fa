@@ -100,7 +100,7 @@ public:
 		}
 		_ret->m_fp = llvm::Function::Create (_ret->m_fp_type, llvm::Function::ExternalLinkage, _func_name, *m_module);
 		_ret->m_fp->setCallingConv (_cc);
-		m_funcs [_ret->m_type] = _ret;
+		m_funcs [_func_name] = _ret;
 		return true;
 	}
 

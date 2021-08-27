@@ -43,7 +43,7 @@ public:
 			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
 			return std::nullopt;
 		}
-		std::optional<llvm::Type *> _ret_type = m_type_map->GetType (_type, _t);
+		std::optional<llvm::Type *> _ret_type = m_type_map->GetType (_type.substr (1), _t);
 		if (!_ret_type.has_value ())
 			return std::nullopt;
 		if (!m_virtual) {

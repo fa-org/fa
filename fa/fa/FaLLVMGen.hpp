@@ -522,7 +522,7 @@ private:
 				return std::make_shared<_AST_ValueCtx> (AstValue { _f }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->literal ()) {
 				AstValue _val { m_value_builder, _expr_raw->literal () };
-				if (_val.IsValid ())
+				if (!_val.IsValid ())
 					return std::nullopt;
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
 					return std::nullopt;
@@ -587,6 +587,7 @@ private:
 		// 转换类型
 		std::function<AstValue (AstValue, std::string)> _trans_type = [] (AstValue _val, std::string _exp_type) -> AstValue {
 			// TODO
+			return _val;
 		};
 
 		// 生成代码
@@ -614,11 +615,11 @@ private:
 				auto _oright = _generate_code (_ast_ev._op2_expr->_right);
 				if (!_oright.has_value ())
 					return std::nullopt;
-				auto [_right, _exp_type] = _oright.value ();
-				_right = _trans_type (_right, _exp_type);
+				auto [_right, _exp_type2] = _oright.value ();
+				_right = _trans_type (_right, _exp_type2);
 				//
 				auto _val = _func_ctx.DoOper2 (_left, _ast_ev._op2_expr->_op._op, _right, _ast_ev._op2_expr->_op._t);
-				_val = _trans_type (_val, _exp_type);
+				_val = _trans_type (_val, _rexp_type);
 				return std::make_tuple (_val, _rexp_type);
 			} else if (_ast_ev._opN_expr) {
 				if (_ast_ev._opN_expr->_op._op == "()") {
@@ -648,6 +649,21 @@ private:
 				}
 			} else if (_ast_ev._if_expr) {
 				AstValue _var_temp = _func_ctx.DefineVariable (_ast_ev._if_expr->_expect_type, _ast_ev._if_expr->_bodys2 [0]->start);
+				//
+				std::function<bool ()> _process_first_block = [&] () {
+					if (!StmtBuilder (_func_ctx, _ast_ev._if_expr->_bodys1_raw [0]))
+						return false;
+					_ast_ev._if_expr->_bodys1_raw.erase (_ast_ev._if_expr->_bodys1_raw.begin ());
+					AstValue _block_ret = ExprBuilder (_func_ctx, _ast_ev._if_expr->_bodys2 [0], _rexp_type);
+					if (!_block_ret.IsValid ())
+						return false;
+					AstValue _ret = _func_ctx.DoOper2 (_var_temp, "=", _block_ret, _ast_ev._if_expr->_bodys2 [0]->start);
+					if (!_ret.IsValid ())
+						return false;
+					_ast_ev._if_expr->_bodys2.erase (_ast_ev._if_expr->_bodys2.begin ());
+					return true;
+				};
+				//
 				std::function<bool ()> _generate_ifexpr;
 				_generate_ifexpr = [&] () -> bool {
 					if (_ast_ev._if_expr->_conds.size () > 0) {
@@ -658,24 +674,13 @@ private:
 						_ast_ev._if_expr->_conds.erase (_ast_ev._if_expr->_conds.begin ());
 						auto _cond = std::get<0> (_ocond.value ());
 						return _func_ctx.IfElse (_cond, [&] () -> bool {
-							if (!StmtBuilder (_func_ctx, _ast_ev._if_expr->_bodys1_raw [0]))
-								return false;
-							_ast_ev._if_expr->_bodys1_raw.erase (_ast_ev._if_expr->_bodys1_raw.begin ());
-							AstValue _block_ret = ExprBuilder (_func_ctx, _ast_ev._if_expr->_bodys2 [0], _rexp_type);
-							if (!_block_ret.IsValid ())
-								return false;
-							AstValue _ret = _func_ctx.DoOper2 (_var_temp, "=", _block_ret, _ast_ev._if_expr->_bodys2 [0]->start);
-							if (!_ret.IsValid ())
-								return false;
-							_ast_ev._if_expr->_bodys2.erase (_ast_ev._if_expr->_bodys2.begin ());
-							return _generate_ifexpr ();
+							return _process_first_block ();
 						}, [&] () -> bool {
-							// TODO
-							return true;
+							return _generate_ifexpr ();
 						});
 					} else {
 						// else {}
-						// TODO
+						return _process_first_block ();
 					}
 				};
 				_generate_ifexpr ();
@@ -684,36 +689,10 @@ private:
 			return std::nullopt;
 		};
 		auto _oret = _generate_code (_ev);
+		if (!_oret.has_value ())
+			return std::nullopt;
+		return std::get<0> (_oret.value ());
 	}
-
-	//bool IfExprBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext *> &_conds_raw, std::vector<std::vector<FaParser::StmtContext *>> &_bodys_raw1, std::vector<FaParser::ExprContext *> &_bodys_raw2, std::string _expect_type, AstValue &_vt) {
-	//	AstValue _cond {}, _tmp_vt {};
-	//	if (_conds_raw.size () == 0) {
-	//		if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
-	//			return false;
-	//		if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
-	//			return false;
-	//		_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
-	//		return true;
-	//	}
-	//	//
-	//	if (!ExprBuilder (_func_ctx, _conds_raw [0], "bool", _cond))
-	//		return false;
-	//	_conds_raw.erase (_conds_raw.begin ());
-	//	_func_ctx.IfElse (_cond, [&] () {
-	//		if (!StmtBuilder (_func_ctx, _bodys_raw1 [0]))
-	//			return false;
-	//		_bodys_raw1.erase (_bodys_raw1.begin ());
-	//		if (!ExprBuilder (_func_ctx, _bodys_raw2 [0], _expect_type, _tmp_vt))
-	//			return false;
-	//		_bodys_raw2.erase (_bodys_raw2.begin ());
-	//		_func_ctx.DoOper2 (_vt, "=", _tmp_vt, _bodys_raw2 [0]->start);
-	//		return true;
-	//	}, [&] () {
-	//		return IfExprBuilder (_func_ctx, _conds_raw, _bodys_raw1, _bodys_raw2, _expect_type, _vt);
-	//	});
-	//	return true;
-	//}
 
 	std::optional<ClassType> FindClassType (FuncContext &_func_ctx, std::string _raw_name) {
 		// TODO 如果没找到，但有 . 运算符，那么递归
