@@ -275,32 +275,40 @@ private:
 		_parse_expr = [&] (FaParser::ExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			auto _exprs = _expr_raw->middleExpr ();
 			auto _ops = _expr_raw->allAssign ();
-			auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], "");
-			if (!_oval.has_value ())
-				return std::nullopt;
-			_AST_ExprOrValue _val = _oval.value ();
-			if (_exp_type.empty ())
-				_exp_type = _val.GetExpectType ();
-			if (_exp_type [0] == '$' && _ops.size () > 0) {
-				LOG_ERROR (_ops [_ops.size () - 1]->start, "表达式已包括赋值运算符，不可再次赋值");
-				return std::nullopt;
-			}
-			//
-			for (int i = (int) _ops.size () - 1; i >= 0; --i) {
-				std::string _exp_type2 = _val.GetExpectType ();
-				if (_exp_type2 [0] != '$')
-					_exp_type2 = std::format ("${}", _exp_type2);
-				auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
-				_oval = _parse_middle_expr (_exprs [i], _exp_type2);
-				if (!_oval.has_value ())
+			if (_exprs.size () == 1) {
+				return _parse_middle_expr (_exprs [0], _exp_type);
+			} else {
+				std::vector<_AST_ExprOrValue>
+				auto _oret = _parse_middle_expr (_exprs [0], "$");
+				if (!_oret.has_value ())
 					return std::nullopt;
-				_ptr->_left = _oval.value ();
-				_ptr->_op = _AST_Oper2Ctx { _ops [i] };
-				_ptr->_right = _val;
-				_ptr->_expect_type = _ptr->_left.GetExpectType ().substr (1);
-				_val = _AST_ExprOrValue { _ptr };
 			}
-			return _val;
+			//auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], "");
+			//if (!_oval.has_value ())
+			//	return std::nullopt;
+			//_AST_ExprOrValue _val = _oval.value ();
+			//if (_exp_type.empty ())
+			//	_exp_type = _val.GetExpectType ();
+			//if (_exp_type [0] == '$' && _ops.size () > 0) {
+			//	LOG_ERROR (_ops [_ops.size () - 1]->start, "表达式已包括赋值运算符，不可再次赋值");
+			//	return std::nullopt;
+			//}
+			////
+			//for (int i = (int) _ops.size () - 1; i >= 0; --i) {
+			//	std::string _exp_type2 = _val.GetExpectType ();
+			//	if (_exp_type2 [0] != '$')
+			//		_exp_type2 = std::format ("${}", _exp_type2);
+			//	auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
+			//	_oval = _parse_middle_expr (_exprs [i], _exp_type2);
+			//	if (!_oval.has_value ())
+			//		return std::nullopt;
+			//	_ptr->_left = _oval.value ();
+			//	_ptr->_op = _AST_Oper2Ctx { _ops [i] };
+			//	_ptr->_right = _val;
+			//	_ptr->_expect_type = _ptr->_left.GetExpectType ().substr (1);
+			//	_val = _AST_ExprOrValue { _ptr };
+			//}
+			//return _val;
 		};
 		_parse_middle_expr = [&] (FaParser::MiddleExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			auto _exprs = _expr_raw->strongExpr ();
