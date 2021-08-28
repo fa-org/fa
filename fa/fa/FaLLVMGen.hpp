@@ -278,10 +278,26 @@ private:
 			if (_exprs.size () == 1) {
 				return _parse_middle_expr (_exprs [0], _exp_type);
 			} else {
-				std::vector<_AST_ExprOrValue>
-				auto _oret = _parse_middle_expr (_exprs [0], "$");
-				if (!_oret.has_value ())
+				if (_exp_type != "" && _exp_type [0] == '$') {
+					LOG_ERROR (_ops [0]->start, "带赋值运算的表达式无法再次赋值");
 					return std::nullopt;
+				}
+				auto _oval = _parse_middle_expr (_exprs [0], "$");
+				if (!_oval.has_value ())
+					return std::nullopt;
+				auto _ret = std::make_shared<_AST_Op2ExprTreeCtx> ();
+				_ret->_left = _oval.value ();
+				_ret->_op = _AST_Oper2Ctx { _ops [0] };
+				std::string _cur_type = _ret->_left.GetExpectType ();
+				if (_cur_type [0] != '$') {
+					LOG_ERROR (_ops [0]->start, "当前表达式无法赋值");
+					return std::nullopt;
+				}
+				if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type))
+					return std::nullopt;
+				_ret->_expect_type = _exp_type;
+				_cur_type = _cur_type.substr (1);
+				
 			}
 			//auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], "");
 			//if (!_oval.has_value ())
