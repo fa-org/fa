@@ -282,49 +282,39 @@ private:
 					LOG_ERROR (_ops [0]->start, "带赋值运算的表达式无法再次赋值");
 					return std::nullopt;
 				}
+				auto _ret = std::make_shared<_AST_Op2ExprTreeCtx> ();
 				auto _oval = _parse_middle_expr (_exprs [0], "$");
 				if (!_oval.has_value ())
 					return std::nullopt;
-				auto _ret = std::make_shared<_AST_Op2ExprTreeCtx> ();
 				_ret->_left = _oval.value ();
 				_ret->_op = _AST_Oper2Ctx { _ops [0] };
 				std::string _cur_type = _ret->_left.GetExpectType ();
-				if (_cur_type [0] != '$') {
-					LOG_ERROR (_ops [0]->start, "当前表达式无法赋值");
-					return std::nullopt;
-				}
 				if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type))
 					return std::nullopt;
 				_ret->_expect_type = _exp_type;
-				_cur_type = _cur_type.substr (1);
-				
+				_exp_type = _cur_type.substr (1);
+				auto _cur = _ret;
+				for (size_t i = 1; i < _ops.size (); ++i) {
+					auto _cur_tmp = std::make_shared<_AST_Op2ExprTreeCtx> ();
+					_cur->_right = _cur_tmp;
+					_cur = _cur_tmp;
+					auto _oval = _parse_middle_expr (_exprs [i], "$");
+					if (!_oval.has_value ())
+						return std::nullopt;
+					_cur->_left = _oval.value ();
+					_cur->_op = _AST_Oper2Ctx { _ops [i] };
+					_cur_type = _cur->_left.GetExpectType ();
+					if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type))
+						return std::nullopt;
+					_cur->_expect_type = _exp_type;
+					_exp_type = _cur_type.substr (1);
+				}
+				_oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _exp_type);
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_cur->_right = _oval.value ();
+				return _ret;
 			}
-			//auto _oval = _parse_middle_expr (_exprs [_exprs.size () - 1], "");
-			//if (!_oval.has_value ())
-			//	return std::nullopt;
-			//_AST_ExprOrValue _val = _oval.value ();
-			//if (_exp_type.empty ())
-			//	_exp_type = _val.GetExpectType ();
-			//if (_exp_type [0] == '$' && _ops.size () > 0) {
-			//	LOG_ERROR (_ops [_ops.size () - 1]->start, "表达式已包括赋值运算符，不可再次赋值");
-			//	return std::nullopt;
-			//}
-			////
-			//for (int i = (int) _ops.size () - 1; i >= 0; --i) {
-			//	std::string _exp_type2 = _val.GetExpectType ();
-			//	if (_exp_type2 [0] != '$')
-			//		_exp_type2 = std::format ("${}", _exp_type2);
-			//	auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
-			//	_oval = _parse_middle_expr (_exprs [i], _exp_type2);
-			//	if (!_oval.has_value ())
-			//		return std::nullopt;
-			//	_ptr->_left = _oval.value ();
-			//	_ptr->_op = _AST_Oper2Ctx { _ops [i] };
-			//	_ptr->_right = _val;
-			//	_ptr->_expect_type = _ptr->_left.GetExpectType ().substr (1);
-			//	_val = _AST_ExprOrValue { _ptr };
-			//}
-			//return _val;
 		};
 		_parse_middle_expr = [&] (FaParser::MiddleExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			auto _exprs = _expr_raw->strongExpr ();
@@ -457,76 +447,103 @@ private:
 			return _ptr;
 		};
 		_parse_strong_expr = [&] (FaParser::StrongExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
-			// 内到外层层叠加类型
-			auto _oval = _parse_strong_expr_base (_expr_raw->strongExprBase (), "");
-			if (!_oval.has_value ())
-				return std::nullopt;
-			_AST_ExprOrValue _val = _oval.value ();
-			for (auto _suffix_raw : _expr_raw->strongExprSuffix ()) {
-				if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
+			if (_exp_type != "" && _exp_type != "$") {
+				// 外到内层层解析类型
+				// prefix 0->x
+				// suffix x->0
+				_AST_ExprOrValue _ret, _cur;
+				bool _init = true;
+				for (auto _prefix_raw : _expr_raw->strongExprPrefix ()) {
 					auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
-					_ptr->_op = _AST_Oper1Ctx { _suffix_raw };
-					_ptr->_left = _val;
-					_ptr->_expect_type = _val.GetExpectType ();
-					if (_ptr->_expect_type [0] != '$') {
-						LOG_ERROR (_suffix_raw->start, "对象不可被赋值");
-						return std::nullopt;
+					_ptr->_op = _AST_Oper1Ctx { _prefix_raw };
+					_ptr->_expect_type = _exp_type;
+					if (_init) {
+						_ret._op1_expr = _ptr;
+						_cur._op1_expr = _ptr;
+						_init = false;
+					} else {
+						_cur._op1_expr->_left = _ptr;
+						_cur = _cur._op1_expr->_left;
 					}
-					_val = _ptr;
-				} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
-					auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
-					_ptr->_left = _val;
-					_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
-					auto _func = m_global_funcs->GetFunc (_val.GetExpectType ());
-					auto _expr_opt_raws = _suffix_raw->exprOpt ();
-					if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
-						_expr_opt_raws.clear ();
-					if (_expr_opt_raws.size () != _func->m_arg_types.size ()) {
-						LOG_ERROR (_suffix_raw->start, "参数数量不匹配");
-						return std::nullopt;
-					}
-					for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
-						if (_expr_opt_raws [i]->expr ()) {
-							auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
-							if (!_right_oval.has_value ())
-								return std::nullopt;
-							_ptr->_rights.push_back (_right_oval.value ());
-						} else {
-							//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
-							LOG_TODO (_expr_opt_raws [i]->start);
+				}
+				auto _suffix_raws = _expr_raw->strongExprSuffix ();
+				for (auto _suffix_praw = _suffix_raws.rbegin (); _suffix_praw != _suffix_raws.rend (); ++_suffix_praw) {
+					// TODO
+					_init = false;
+				}
+				// TODO
+			} else {
+				// 内到外层层叠加类型
+				// suffix 0->x
+				// prefix x->0
+				auto _oval = _parse_strong_expr_base (_expr_raw->strongExprBase (), "");
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_AST_ExprOrValue _val = _oval.value ();
+				for (auto _suffix_raw : _expr_raw->strongExprSuffix ()) {
+					if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
+						auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
+						_ptr->_op = _AST_Oper1Ctx { _suffix_raw };
+						_ptr->_left = _val;
+						_ptr->_expect_type = _val.GetExpectType ();
+						if (_ptr->_expect_type [0] != '$') {
+							LOG_ERROR (_suffix_raw->start, "对象不可被赋值");
 							return std::nullopt;
 						}
-					}
-					_ptr->_expect_type = _func->m_ret_type;
-					_val = _ptr;
-				} else if (_suffix_raw->PointOp ()) {
-					auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
-					_ptr->_left = _val;
-					_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
-					_ptr->_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
-					if (!_ptr->CalcExpectType ()) {
-						LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
+						_val = _ptr;
+					} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
+						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
+						_ptr->_left = _val;
+						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
+						auto _func = m_global_funcs->GetFunc (_val.GetExpectType ());
+						auto _expr_opt_raws = _suffix_raw->exprOpt ();
+						if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
+							_expr_opt_raws.clear ();
+						if (_expr_opt_raws.size () != _func->m_arg_types.size ()) {
+							LOG_ERROR (_suffix_raw->start, "参数数量不匹配");
+							return std::nullopt;
+						}
+						for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
+							if (_expr_opt_raws [i]->expr ()) {
+								auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
+								if (!_right_oval.has_value ())
+									return std::nullopt;
+								_ptr->_rights.push_back (_right_oval.value ());
+							} else {
+								//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
+								LOG_TODO (_expr_opt_raws [i]->start);
+								return std::nullopt;
+							}
+						}
+						_ptr->_expect_type = _func->m_ret_type;
+						_val = _ptr;
+					} else if (_suffix_raw->PointOp ()) {
+						auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
+						_ptr->_left = _val;
+						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
+						_ptr->_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
+						if (!_ptr->CalcExpectType ()) {
+							LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
+							return std::nullopt;
+						}
+						_val = _ptr;
+					} else {
+						LOG_TODO (_expr_raw->start);
 						return std::nullopt;
 					}
-					_val = _ptr;
-				} else {
-					LOG_TODO (_expr_raw->start);
-					return std::nullopt;
 				}
+				auto _prefix_raws = _expr_raw->strongExprPrefix ();
+				for (auto _prefix_praw = _prefix_raws.rbegin (); _prefix_praw != _prefix_raws.rend (); ++_prefix_praw) {
+					auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
+					_ptr->_op = _AST_Oper1Ctx { *_prefix_praw };
+					_ptr->_left = _val;
+					_ptr->_expect_type = _val.GetExpectType ();
+					_val = _ptr;
+				}
+				if (!TypeMap::CanImplicitConvTo (_val.GetExpectType (), _exp_type))
+					return std::nullopt;
+				return _val;
 			}
-			auto _prefix_raws = _expr_raw->strongExprPrefix ();
-			for (auto _prefix_praw = _prefix_raws.rbegin (); _prefix_praw != _prefix_raws.rend (); ++_prefix_praw) {
-				auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
-				_ptr->_op = _AST_Oper1Ctx { *_prefix_praw };
-				_ptr->_left = _val;
-				_ptr->_expect_type = _val.GetExpectType ();
-				_val = _ptr;
-			}
-
-			if (_exp_type != "" && _val.GetExpectType () != _exp_type) {
-				// TODO 外到内层层转换类型
-			}
-			return _val;
 		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raw->ids ()) {
