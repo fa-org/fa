@@ -46,6 +46,14 @@ public:
 				return std::make_tuple<llvm::Value *, std::string> (m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ()), "string");
 			}
 		} else if (_type.find ("int") != std::string::npos) {
+			if (_type == "int") {
+				int64_t _i = std::stoll (_value);
+				if (_i <= 2147483647L && _i >= -2147483648L) {
+					_type = "int32";
+				} else {
+					_type = "int64";
+				}
+			}
 			std::optional<llvm::Type *> _tp = m_etype_map->GetType (_type, _t);
 			if (!_tp.has_value ())
 				return std::nullopt;

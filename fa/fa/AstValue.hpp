@@ -31,19 +31,40 @@ public:
 	//static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
 	AstValue () {}
 	AstValue (std::nullopt_t) {}
-	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal) {
+	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal, std::string _value_type) {
 		if (_literal->BoolLiteral ()) {
-			m_value_type = "bool";
+			if (_value_type == "") {
+				_value_type = "bool";
+			} else if (_value_type != "bool") {
+				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
+				return;
+			}
 		} else if (_literal->IntLiteral ()) {
-			m_value_type = "int";
+			if (_value_type == "") {
+				_value_type = "int";
+			} else if (_value_type.substr (0, 3) != "int") {
+				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
+				return;
+			}
 		} else if (_literal->FloatLiteral ()) {
-			m_value_type = "float";
+			if (_value_type == "") {
+				_value_type = "float64";
+			} else if (_value_type.substr (0, 5) != "float") {
+				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
+				return;
+			}
 		} else if (_literal->String1Literal ()) {
-			m_value_type = "string";
+			if (_value_type == "") {
+				_value_type = "string";
+			} else if (_value_type != "string") {
+				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
+				return;
+			}
 		} else {
 			LOG_ERROR (_literal->start, "未知数据类型");
 			return;
 		}
+		m_value_type = _value_type;
 		std::optional<std::tuple<llvm::Value *, std::string>> _oval = _value_builder->Build (m_value_type, _literal->getText (), _literal->start);
 		if (_oval.has_value ()) {
 			m_type = AstObjectType::Value;

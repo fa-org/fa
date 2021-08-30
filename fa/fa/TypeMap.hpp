@@ -139,6 +139,58 @@ public:
 		return GetCompatibleType (_t, _v);
 	}
 	static std::optional<std::string> GetCompatibleType (antlr4::Token *_t, std::vector<std::string> &_types) {
+		// 标记变量类型
+		bool _var = false;
+		bool _ref = false;
+		bool _option = false;
+		for (size_t i = 0; i < _types.size (); ++i) {
+			if (_types [i].size () > 0 && *_types [i].cbegin () == '$') {
+				_var = true;
+				_types [i].erase (_types [i].begin ());
+			}
+			if (_types [i].size () > 0 && *_types [i].crbegin () == '?') {
+				_option = true;
+				_types [i].erase (_types [i].begin () + (_types [i].size () - 1));
+			}
+			if (_types [i].size () > 0 && *_types [i].crbegin () == '&') {
+				_ref = true;
+				_types [i].erase (_types [i].begin () + (_types [i].size () - 1));
+			}
+			if (_types [i] == "") {
+				_types.erase (_types.begin () + i);
+				i--;
+			}
+		}
+
+		// 移除所有重复元素
+		for (size_t i = 1; i < _types.size (); ++i) {
+			for (size_t j = 0; j < i; ++j) {
+				if (_types [i] == _types [j]) {
+					_types.erase (_types.begin () + i);
+					--i;
+					break;
+				}
+			}
+		}
+
+		// 以第一个元素为基准，合并元素
+		while (_types.size () > 1) {
+			if (CanImplicitConvTo (*_types.rbegin (), _types [0])) {
+				_types.erase (_types.begin () + (_types.size () - 1));
+			} else if (CanImplicitConvTo (_types [0], *_types.rbegin ())) {
+				_types [0] = *_types.rbegin ();
+				_types.erase (_types.begin () + (_types.size () - 1));
+			} else {
+				LOG_ERROR (_t, std::format ("不兼容的变量类型：{}、{}", _types [0], *_types.rbegin ()));
+				return std::nullopt;
+			}
+		}
+
+		// 如果只剩一个元素
+		if (_types.size () == 1) {
+			return std::format ("{}{}", _var ? "$" : "", _types [0]);
+		}
+
 		LOG_TODO (_t);
 		return std::nullopt;
 	}

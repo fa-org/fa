@@ -253,7 +253,7 @@ private:
 		if (!_cond.IsValid ())
 			return false;
 		_conds_raw.erase (_conds_raw.begin ());
-		_func_ctx.IfElse (_cond, [&] () {
+		return _func_ctx.IfElse (_cond, [&] () {
 			if (!StmtBuilder (_func_ctx, _bodys_raw [0]))
 				return false;
 			_bodys_raw.erase (_bodys_raw.begin ());
@@ -261,7 +261,6 @@ private:
 		}, [&] () {
 			return IfStmtBuilder (_func_ctx, _conds_raw, _bodys_raw);
 		});
-		return true;
 	}
 
 	AstValue ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext *_expr_raw, std::string _expect_type) {
@@ -624,7 +623,7 @@ private:
 					return std::nullopt;
 				return std::make_shared<_AST_ValueCtx> (AstValue { _f }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->literal ()) {
-				AstValue _val { m_value_builder, _expr_raw->literal () };
+				AstValue _val { m_value_builder, _expr_raw->literal (), _exp_type };
 				if (!_val.IsValid ())
 					return std::nullopt;
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
@@ -751,7 +750,7 @@ private:
 					return std::nullopt;
 				}
 			} else if (_ast_ev._if_expr) {
-				AstValue _var_temp = _func_ctx.DefineVariable (_ast_ev._if_expr->_expect_type, _ast_ev._if_expr->_bodys2 [0]->start);
+				AstValue _var_temp = _func_ctx.DefineVariable (_rexp_type, _ast_ev._if_expr->_bodys2 [0]->start);
 				//
 				std::function<bool ()> _process_first_block = [&] () {
 					if (!StmtBuilder (_func_ctx, _ast_ev._if_expr->_bodys1_raw [0]))
@@ -786,7 +785,9 @@ private:
 						return _process_first_block ();
 					}
 				};
-				_generate_ifexpr ();
+				if (!_generate_ifexpr ())
+					return std::nullopt;
+				return std::make_tuple (_var_temp, _rexp_type);
 			}
 			LOG_TODO (nullptr);
 			return std::nullopt;
