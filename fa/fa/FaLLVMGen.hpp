@@ -329,7 +329,7 @@ private:
 				}
 				_op_levels.push_back (_level);
 			}
-			return _parse_middle_expr2 (_exprs, _ops, _op_levels, _exp_type);
+			return _parse_middle_expr2 (std::ref (_exprs), std::ref (_ops), std::ref (_op_levels), _exp_type);
 		};
 		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext *> &_expr_raws, std::vector<FaParser::AllOp2Context *> &_op_raws, std::vector<size_t> &_op_levels, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raws.size () == 1)
@@ -385,11 +385,11 @@ private:
 			}
 
 			// 计算结果
-			auto _oval = _parse_middle_expr2 (_expr_raws_L, _op_raws_L, _op_levels_L, _exp_type_L);
+			auto _oval = _parse_middle_expr2 (std::ref (_expr_raws_L), std::ref (_op_raws_L), std::ref (_op_levels_L), _exp_type_L);
 			if (!_oval.has_value ())
 				return std::nullopt;
 			_ptr->_left = _oval.value ();
-			_oval = _parse_middle_expr2 (_expr_raws_R, _op_raws_R, _op_levels_R, _exp_type_R);
+			_oval = _parse_middle_expr2 (std::ref (_expr_raws_R), std::ref (_op_raws_R), std::ref (_op_levels_R), _exp_type_R);
 			if (!_oval.has_value ())
 				return std::nullopt;
 			_ptr->_right = _oval.value ();
@@ -411,13 +411,13 @@ private:
 							return std::nullopt;
 						_exp_type = _exp_otype.value ();
 						if (_exp_type_L != _exp_type) {
-							_oval = _parse_middle_expr2 (_expr_raws_L, _op_raws_L, _op_levels_L, _exp_type_L);
+							_oval = _parse_middle_expr2 (std::ref (_expr_raws_L), std::ref (_op_raws_L), std::ref (_op_levels_L), _exp_type_L);
 							if (!_oval.has_value ())
 								return std::nullopt;
 							_ptr->_left = _oval.value ();
 						}
 						if (_exp_type_R != _exp_type) {
-							_oval = _parse_middle_expr2 (_expr_raws_R, _op_raws_R, _op_levels_R, _exp_type_R);
+							_oval = _parse_middle_expr2 (std::ref (_expr_raws_R), std::ref (_op_raws_R), std::ref (_op_levels_R), _exp_type_R);
 							if (!_oval.has_value ())
 								return std::nullopt;
 							_ptr->_right = _oval.value ();
@@ -453,25 +453,87 @@ private:
 				// suffix x->0
 				_AST_ExprOrValue _ret, _cur;
 				bool _init = true;
+				std::function<void (_AST_ExprOrValue)> _update_next = [&] (_AST_ExprOrValue _ev) {
+					if (_init) {
+						_init = false;
+						_ret = _cur = _ev;
+					} else {
+						if (_cur._op1_expr) {
+							_cur._op1_expr->_left = _ev;
+							_cur = _cur._op1_expr->_left;
+						} else if (_cur._op2_expr) {
+							_cur._op2_expr->_left = _ev;
+							_cur = _cur._op2_expr->_left;
+						} else if (_cur._opN_expr) {
+							_cur._opN_expr->_left = _ev;
+							_cur = _cur._opN_expr->_left;
+						}
+					}
+				};
+				//
 				for (auto _prefix_raw : _expr_raw->strongExprPrefix ()) {
 					auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
 					_ptr->_op = _AST_Oper1Ctx { _prefix_raw };
 					_ptr->_expect_type = _exp_type;
-					if (_init) {
-						_ret._op1_expr = _ptr;
-						_cur._op1_expr = _ptr;
-						_init = false;
-					} else {
-						_cur._op1_expr->_left = _ptr;
-						_cur = _cur._op1_expr->_left;
-					}
+					_update_next (_ptr);
 				}
+				//
 				auto _suffix_raws = _expr_raw->strongExprSuffix ();
 				for (auto _suffix_praw = _suffix_raws.rbegin (); _suffix_praw != _suffix_raws.rend (); ++_suffix_praw) {
-					// TODO
-					_init = false;
+					auto _suffix_raw = *_suffix_praw;
+					if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
+						auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
+						_ptr->_op = _AST_Oper1Ctx { _suffix_raw };
+						_ptr->_expect_type = _exp_type;
+						if (_ptr->_expect_type [0] != '$') {
+							LOG_ERROR (_suffix_raw->start, "对象不可被赋值");
+							return std::nullopt;
+						}
+						_update_next (_ptr);
+					} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
+						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
+						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
+						auto _func = m_global_funcs->GetFunc (_exp_type);
+						auto _expr_opt_raws = _suffix_raw->exprOpt ();
+						if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
+							_expr_opt_raws.clear ();
+						if (_expr_opt_raws.size () != _func->m_arg_types.size ()) {
+							LOG_ERROR (_suffix_raw->start, "参数数量不匹配");
+							return std::nullopt;
+						}
+						for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
+							if (_expr_opt_raws [i]->expr ()) {
+								auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
+								if (!_right_oval.has_value ())
+									return std::nullopt;
+								_ptr->_rights.push_back (_right_oval.value ());
+							} else {
+								//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
+								LOG_TODO (_expr_opt_raws [i]->start);
+								return std::nullopt;
+							}
+						}
+						_exp_type = _ptr->_expect_type = _func->m_ret_type;
+						_update_next (_ptr);
+					} else if (_suffix_raw->PointOp ()) {
+						auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
+						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
+						_ptr->_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
+						if (!_ptr->CalcExpectType ()) {
+							LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
+							return std::nullopt;
+						}
+						_update_next (_ptr);
+					} else {
+						LOG_TODO (_expr_raw->start);
+						return std::nullopt;
+					}
 				}
-				// TODO
+				auto _oval = _parse_strong_expr_base (_expr_raw->strongExprBase (), _exp_type);
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_update_next (_oval.value ());
+				return _ret;
 			} else {
 				// 内到外层层叠加类型
 				// suffix 0->x

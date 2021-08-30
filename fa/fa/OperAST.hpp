@@ -74,6 +74,14 @@ struct _AST_ExprOrValue {
 	_AST_ExprOrValue (std::shared_ptr<_AST_Op2ExprTreeCtx> __op2_expr): _op2_expr (__op2_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_OpNExprTreeCtx> __opN_expr): _opN_expr (__opN_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_IfExprTreeCtx> __if_expr): _if_expr (__if_expr) {}
+	_AST_ExprOrValue &operator= (const _AST_ExprOrValue &_o) {
+		_val = _o._val;
+		_op1_expr = _o._op1_expr;
+		_op2_expr = _o._op2_expr;
+		_opN_expr = _o._opN_expr;
+		_if_expr = _o._if_expr;
+		return *this;
+	}
 
 	std::shared_ptr<_AST_ValueCtx>						_val;
 	std::shared_ptr<_AST_Op1ExprTreeCtx>				_op1_expr;
