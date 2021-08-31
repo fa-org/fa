@@ -12,6 +12,7 @@
 #include <llvm/ADT/StringRef.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/DerivedTypes.h>
+#include <llvm/TableGen/Record.h>
 
 #include "FaVisitor.h"
 #include "FaParser.h"

@@ -13,10 +13,11 @@
 #include <vector>
 
 #include <antlr4-runtime/Token.h>
-#include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/CallingConv.h>
-#include <llvm/IR/Type.h>
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Type.h>
 
 #include "TypeMap.hpp"
 #include "AstValue.hpp"

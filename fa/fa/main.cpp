@@ -42,6 +42,11 @@ int main (int argc, char *argv[]) {
 //@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "ole32.lib";
 //@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
 
+public class AAA {
+	public int num1;
+	public int num2;
+}
+
 static int32 FaEntryMain () {
 	int32 n = if false {
 		10
