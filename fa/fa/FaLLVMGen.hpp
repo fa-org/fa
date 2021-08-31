@@ -137,7 +137,7 @@ public:
 		std::string _link_exe_path = R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)";
 		wchar_t *_env = get_env ("LIB", R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
 #endif
-		std::string _cmd = std::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:FaEntryMain /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
+		std::string _cmd = std::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:@fa_main /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
 		//std::string _cmd = R"(/OUT:"hello.exe" /MANIFEST /LTCG:incremental /NXCOMPAT /PDB:"hello.pdb" /DYNAMICBASE "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib" /DEBUG /MACHINE:X86 /OPT:REF /SAFESEH /INCREMENTAL:NO /PGD:"hello.pgd" /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ManifestFile:"hello.exe.intermediate.manifest" /LTCGOUT:"hello.iobj" /OPT:ICF /ERRORREPORT:PROMPT /ILK:"hello.ilk" /NOLOGO /TLBID:1)";
 		for (auto _lib : m_libs) {
 			_cmd += " ";
@@ -180,9 +180,9 @@ private:
 			std::vector<FaParser::StmtContext *>
 		>> ();
 		std::vector<FaParser::TypeContext *> _arg_type_raws;
-		if (!m_global_funcs->Make ("::fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
+		if (!m_global_funcs->Make ("@fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
 			return false;
-		FuncContext _func_ctx { m_global_funcs, "::fa_main" };
+		FuncContext _func_ctx { m_global_funcs, "@fa_main" };
 		return StmtBuilder (_func_ctx, _stmts_raw);
 	}
 
@@ -556,7 +556,7 @@ private:
 						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
 						_ptr->_left = _val;
 						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
-						auto _func = m_global_funcs->GetFunc (_val.GetExpectType ());
+						auto _func = m_global_funcs->GetFunc (_val.GetFuncName ());
 						auto _expr_opt_raws = _suffix_raw->exprOpt ();
 						if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
 							_expr_opt_raws.clear ();

@@ -55,8 +55,8 @@ public:
 			}
 		} else if (_literal->String1Literal ()) {
 			if (_value_type == "") {
-				_value_type = "string";
-			} else if (_value_type != "string") {
+				_value_type = "int8*";
+			} else if (_value_type != "int8*") {
 				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
 				return;
 			}

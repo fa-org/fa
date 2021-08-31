@@ -9,6 +9,7 @@
 #include <string>
 #include <tuple>
 
+#include <llvm/ADT/StringRef.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/DerivedTypes.h>
 

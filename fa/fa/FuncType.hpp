@@ -58,13 +58,13 @@ public:
 			std::stringstream _ss;
 			_ss << "Func<" << _ret->m_ret_type << "(";
 			for (size_t i = 0; i < m_arg_types.size (); ++i)
-				_ss << (i > 0 ? ", " : "") << m_arg_types [i];
+				_ss << (i > 0 ? ", " : "") << _ret->m_arg_types [i];
 			_ss << ")>";
 			_ret->m_type = _ss.str ();
 		}
 		_ret->m_fp = llvm::Function::Create (_ret->m_fp_type, llvm::Function::ExternalLinkage, _func_name.substr (2), *m_module);
 		_ret->m_fp->setCallingConv (_cc);
-		m_funcs [_ret->m_type] = _ret;
+		m_funcs [_func_name] = _ret;
 		return true;
 	}
 
@@ -104,7 +104,9 @@ public:
 		return true;
 	}
 
-	bool Contains (std::string _name) { return m_funcs.contains (_name); }
+	bool Contains (std::string _name) {
+		return m_funcs.contains (_name);
+	}
 
 	std::shared_ptr<FuncType> GetFunc (std::string _name) { return m_funcs [_name]; }
 

@@ -37,23 +37,21 @@ public:
 	}
 
 	AstValue DefineVariable (std::string _type, antlr4::Token *_t, std::string _name = "") {
-		if (_type [0] != '$')
-			_type = std::format ("${}", _type);
+		std::string _var_type = std::format ("${}", _type);
 		if (_name != "" && GetVariable (_name).IsValid ()) {
 			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
 			return std::nullopt;
 		}
-		std::optional<llvm::Type *> _ret_type = m_type_map->GetType (_type.substr (1), _t);
+		std::optional<llvm::Type *> _ret_type = m_type_map->GetType (_type, _t);
 		if (!_ret_type.has_value ())
 			return std::nullopt;
-		if (!m_virtual) {
-			auto _inst = m_builder->CreateAlloca (_ret_type.value ());
-			if (_name != "")
-				(*m_local_vars.rbegin ()) [_name] = { _inst, _type };
-			return AstValue { _inst, _type };
-		} else {
-			return AstValue { (llvm::AllocaInst *) nullptr, _type };
-		}
+		if (m_virtual)
+			return AstValue { (llvm::AllocaInst *) nullptr, _var_type };
+
+		auto _inst = m_builder->CreateAlloca (_ret_type.value ());
+		if (_name != "")
+			(*m_local_vars.rbegin ()) [_name] = { _inst, _var_type };
+		return AstValue { _inst, _var_type };
 	}
 	AstValue DefineVariable (FaParser::TypeContext *_type, std::string _name = "") {
 		return DefineVariable (_type->getText (), _type->start, _name);

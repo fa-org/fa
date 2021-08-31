@@ -90,6 +90,7 @@ struct _AST_ExprOrValue {
 	std::shared_ptr<_AST_IfExprTreeCtx>					_if_expr;
 
 	std::string GetExpectType ();
+	std::string GetFuncName ();
 };
 
 //using _AST_ExprOrValue = std::variant<
@@ -154,6 +155,14 @@ inline std::string _AST_ExprOrValue::GetExpectType () {
 		return _opN_expr->_expect_type;
 	} else if (_if_expr) {
 		return _if_expr->_expect_type;
+	} else {
+		return "";
+	}
+}
+
+inline std::string _AST_ExprOrValue::GetFuncName () {
+	if (_val) {
+		return _val->_val.GetType ();
 	} else {
 		return "";
 	}
