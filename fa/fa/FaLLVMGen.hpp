@@ -55,6 +55,7 @@ public:
 		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx);
 		m_value_builder = std::make_shared<ValueBuilder> (m_visitor, m_ctx, m_module);
 		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder);
+		m_global_classes = std::make_shared<ClassTypes> ();
 	}
 
 	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
@@ -71,13 +72,23 @@ public:
 		std::tie (_imports_raw, m_libs) = m_visitor->visit (_imports).as<std::tuple<
 			std::vector<FaParser::ImportStmtContext *>,
 			std::vector<std::string>
-			>> ();
+		>> ();
 		//m_imports.push_back ("puts");
 		//m_libs.push_back ("libcmt.lib");
 		if (!ProcessImports (_imports_raw))
 			return false;
 
-		// TODO: 编译类
+		// 编译类
+		for (auto _class_raw : _program_ctx->classBlock ()) {
+			std::string _name = _class_raw->Id ()->getText ();
+			auto _oclass = m_global_classes->GetClass (_name);
+			if (_oclass.has_value ()) {
+				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
+				return false;
+			}
+			// TODO
+			//auto _class = m_global_classes->CreateNewClass ();
+		}
 
 		if (!_entry) {
 			LOG_ERROR (nullptr, "未定义入口函数：FaEntryMain");
