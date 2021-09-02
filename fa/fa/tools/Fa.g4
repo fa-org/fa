@@ -107,6 +107,7 @@ gtOp:						QuotJianR;
 gtEqualOp:					QuotJianR Assign;
 equalOp:					Assign Assign;
 notEqualOp:					Exclam Assign;
+exprFuncDef:				Assign QuotJianR;
 
 
 selfOp2:					AddOp | SubOp | StarOp | DivOp | starStarOp | ModOp | AndOp | OrOp | XorOp | andAndOp | orOrOp | shiftLOp | shiftROp;
@@ -219,10 +220,13 @@ stmt:						normalStmt | ifStmt | whileStmt | defVarStmt;
 //
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
-classItemPart:				publicLevel? Static? Id Id;
-classItemFieldBlock:		classItemPart Semi;
-classItemFuncBlock:			classItemPart QuotYuanL typeVarList QuotYuanR QuotHuaL stmt* QuotHuaR;
-classBlock:					publicLevel? Class Id classParent? QuotHuaL (classItemFieldBlock | classItemFuncBlock)* QuotHuaR;
+classItemBegin:				publicLevel? Static? type;
+classItemVarExt:			QuotHuaL (Id Semi | (exprFuncDef (expr Semi) | (QuotHuaL stmt* QuotHuaR)))+ QuotHuaR;
+classItemVar:				classItemBegin Id ((Assign expr)? Semi) | (classItemVarExt (Assign expr Semi)?);
+classItemFuncName:			Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
+classItemFuncBody:			(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
+classItemFunc:				classItemBegin classItemFuncName QuotYuanL typeVarList QuotYuanR classItemFuncBody;
+classBlock:					publicLevel? Class Id classParent? QuotHuaL (classItemVar | classItemFunc)* QuotHuaR;
 
 
 

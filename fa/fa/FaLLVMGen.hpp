@@ -86,8 +86,13 @@ public:
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
 				return false;
 			}
-			// TODO
-			//auto _class = m_global_classes->CreateNewClass ();
+			//
+			auto _pl_raw = _class_raw->publicLevel ();
+			PublicLevel _pl = _pl_raw ? m_visitor->visit (_pl_raw).as<PublicLevel> () : PublicLevel::Internal;
+			std::shared_ptr<ClassType> _class = m_global_classes->CreateNewClass (_pl, _name);
+			if (_class_raw->classParent ()) {
+				auto _parents = _class_raw->classParent ()->ids ();
+			}
 		}
 
 		if (!_entry) {

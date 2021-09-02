@@ -73,6 +73,8 @@ public:
 
     virtual antlrcpp::Any visitNotEqualOp(FaParser::NotEqualOpContext *context) = 0;
 
+    virtual antlrcpp::Any visitExprFuncDef(FaParser::ExprFuncDefContext *context) = 0;
+
     virtual antlrcpp::Any visitSelfOp2(FaParser::SelfOp2Context *context) = 0;
 
     virtual antlrcpp::Any visitCompareOp2(FaParser::CompareOp2Context *context) = 0;
@@ -141,11 +143,17 @@ public:
 
     virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemPart(FaParser::ClassItemPartContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemBegin(FaParser::ClassItemBeginContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemFieldBlock(FaParser::ClassItemFieldBlockContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemVarExt(FaParser::ClassItemVarExtContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemFuncBlock(FaParser::ClassItemFuncBlockContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemVar(FaParser::ClassItemVarContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassItemFuncName(FaParser::ClassItemFuncNameContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassItemFuncBody(FaParser::ClassItemFuncBodyContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassItemFunc(FaParser::ClassItemFuncContext *context) = 0;
 
     virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *context) = 0;
 

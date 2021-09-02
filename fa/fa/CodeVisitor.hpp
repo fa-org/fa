@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "FaBaseVisitor.h"
+#include "ClassType.hpp"
 
 
 
@@ -83,6 +84,22 @@ public:
 		std::vector<FaParser::ClassBlockContext *> _classes = ctx->classBlock ();
 		auto _entry = dynamic_cast<FaParser::FaEntryMainFuncBlockContext *> (ctx->faEntryMainFuncBlock ());
 		return std::make_tuple (_uses, _imports, _classes, _entry);
+	}
+
+	antlrcpp::Any visitPublicLevel (FaParser::PublicLevelContext *context) override {
+		if (context->Public ()) {
+			return PublicLevel::Public;
+		} else if (context->Internal ()) {
+			return PublicLevel::Internal;
+		} else if (context->Protected ()) {
+			return PublicLevel::Protected;
+		} else if (context->Private ()) {
+			return PublicLevel::Private;
+		}
+	}
+
+	antlrcpp::Any visitClassParent (FaParser::ClassParentContext *context) override {
+		std::vector<std::string> _ids;
 	}
 };
 

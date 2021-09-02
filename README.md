@@ -50,3 +50,26 @@ https://zhuanlan.zhihu.com/p/25959684
 https://llvm.org/doxygen/classllvm_1_1StructType.html#a7cf5280be35cd0c973f40c7d87a11acd
 
 -->
+
+
+
+
+
+<!--
+public class TestClass {
+	public string field;
+	public string func () {}
+
+	public string Value1;
+	public string Value2 = "hello";
+	public string Value3 { get; set; }
+	public string Value4 { get; set; } = "hello";
+
+	CastFrom (int32 _n) {}
+	CastFrom (double _n) {}
+	CastFrom (string _s) {}
+	int32 CastTo () => 12;
+	double CastTo () => 0.0;
+	string CastTo () => "";
+}
+-->
