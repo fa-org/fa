@@ -42,10 +42,10 @@ public:
     RuleStrongExprPrefix = 51, RuleStrongExprSuffix = 52, RuleStrongExpr = 53, 
     RuleMiddleExpr = 54, RuleExpr = 55, RuleDefVarStmt = 56, RuleUseStmt = 57, 
     RuleNormalStmt = 58, RuleStmt = 59, RulePublicLevel = 60, RuleClassParent = 61, 
-    RuleClassItemBegin = 62, RuleClassItemVarExt = 63, RuleClassItemVar = 64, 
-    RuleClassItemFuncName = 65, RuleClassItemFuncBody = 66, RuleClassItemFunc = 67, 
-    RuleClassBlock = 68, RuleCallConvention = 69, RuleImportStmt = 70, RuleLibStmt = 71, 
-    RuleImportBlock = 72, RuleFaEntryMainFuncBlock = 73, RuleProgram = 74
+    RuleClassBegin = 62, RuleClassBlock = 63, RuleClassVarExt = 64, RuleClassVar = 65, 
+    RuleClassFuncName = 66, RuleClassFuncBody = 67, RuleClassFunc = 68, 
+    RuleCallConvention = 69, RuleImportStmt = 70, RuleLibStmt = 71, RuleImportBlock = 72, 
+    RuleFaEntryMainFuncBlock = 73, RuleProgram = 74
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -120,13 +120,13 @@ public:
   class StmtContext;
   class PublicLevelContext;
   class ClassParentContext;
-  class ClassItemBeginContext;
-  class ClassItemVarExtContext;
-  class ClassItemVarContext;
-  class ClassItemFuncNameContext;
-  class ClassItemFuncBodyContext;
-  class ClassItemFuncContext;
+  class ClassBeginContext;
   class ClassBlockContext;
+  class ClassVarExtContext;
+  class ClassVarContext;
+  class ClassFuncNameContext;
+  class ClassFuncBodyContext;
+  class ClassFuncContext;
   class CallConventionContext;
   class ImportStmtContext;
   class LibStmtContext;
@@ -1115,9 +1115,9 @@ public:
 
   ClassParentContext* classParent();
 
-  class  ClassItemBeginContext : public antlr4::ParserRuleContext {
+  class  ClassBeginContext : public antlr4::ParserRuleContext {
   public:
-    ClassItemBeginContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassBeginContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     TypeContext *type();
     PublicLevelContext *publicLevel();
@@ -1128,55 +1128,71 @@ public:
    
   };
 
-  ClassItemBeginContext* classItemBegin();
+  ClassBeginContext* classBegin();
 
-  class  ClassItemVarExtContext : public antlr4::ParserRuleContext {
+  class  ClassBlockContext : public antlr4::ParserRuleContext {
   public:
-    ClassItemVarExtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> QuotHuaL();
-    antlr4::tree::TerminalNode* QuotHuaL(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> QuotHuaR();
-    antlr4::tree::TerminalNode* QuotHuaR(size_t i);
+    antlr4::tree::TerminalNode *Class();
+    antlr4::tree::TerminalNode *Id();
+    antlr4::tree::TerminalNode *QuotHuaL();
+    antlr4::tree::TerminalNode *QuotHuaR();
+    PublicLevelContext *publicLevel();
+    ClassParentContext *classParent();
+    std::vector<ClassVarContext *> classVar();
+    ClassVarContext* classVar(size_t i);
+    std::vector<ClassFuncContext *> classFunc();
+    ClassFuncContext* classFunc(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ClassBlockContext* classBlock();
+
+  class  ClassVarExtContext : public antlr4::ParserRuleContext {
+  public:
+    ClassVarExtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *QuotHuaL();
+    antlr4::tree::TerminalNode *QuotHuaR();
     std::vector<antlr4::tree::TerminalNode *> Id();
     antlr4::tree::TerminalNode* Id(size_t i);
     std::vector<antlr4::tree::TerminalNode *> Semi();
     antlr4::tree::TerminalNode* Semi(size_t i);
-    std::vector<ExprFuncDefContext *> exprFuncDef();
-    ExprFuncDefContext* exprFuncDef(size_t i);
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
-    std::vector<StmtContext *> stmt();
-    StmtContext* stmt(size_t i);
+    std::vector<ClassFuncBodyContext *> classFuncBody();
+    ClassFuncBodyContext* classFuncBody(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  ClassItemVarExtContext* classItemVarExt();
+  ClassVarExtContext* classVarExt();
 
-  class  ClassItemVarContext : public antlr4::ParserRuleContext {
+  class  ClassVarContext : public antlr4::ParserRuleContext {
   public:
-    ClassItemVarContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassVarContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    ClassItemBeginContext *classItemBegin();
+    ClassBeginContext *classBegin();
     antlr4::tree::TerminalNode *Id();
     antlr4::tree::TerminalNode *Semi();
     antlr4::tree::TerminalNode *Assign();
     ExprContext *expr();
-    ClassItemVarExtContext *classItemVarExt();
+    ClassVarExtContext *classVarExt();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  ClassItemVarContext* classItemVar();
+  ClassVarContext* classVar();
 
-  class  ClassItemFuncNameContext : public antlr4::ParserRuleContext {
+  class  ClassFuncNameContext : public antlr4::ParserRuleContext {
   public:
-    ClassItemFuncNameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassFuncNameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Id();
     antlr4::tree::TerminalNode *QuotFangL();
@@ -1189,11 +1205,11 @@ public:
    
   };
 
-  ClassItemFuncNameContext* classItemFuncName();
+  ClassFuncNameContext* classFuncName();
 
-  class  ClassItemFuncBodyContext : public antlr4::ParserRuleContext {
+  class  ClassFuncBodyContext : public antlr4::ParserRuleContext {
   public:
-    ClassItemFuncBodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassFuncBodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     ExprFuncDefContext *exprFuncDef();
     ExprContext *expr();
@@ -1208,47 +1224,25 @@ public:
    
   };
 
-  ClassItemFuncBodyContext* classItemFuncBody();
+  ClassFuncBodyContext* classFuncBody();
 
-  class  ClassItemFuncContext : public antlr4::ParserRuleContext {
+  class  ClassFuncContext : public antlr4::ParserRuleContext {
   public:
-    ClassItemFuncContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassFuncContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    ClassItemBeginContext *classItemBegin();
-    ClassItemFuncNameContext *classItemFuncName();
+    ClassBeginContext *classBegin();
+    ClassFuncNameContext *classFuncName();
     antlr4::tree::TerminalNode *QuotYuanL();
     TypeVarListContext *typeVarList();
     antlr4::tree::TerminalNode *QuotYuanR();
-    ClassItemFuncBodyContext *classItemFuncBody();
+    ClassFuncBodyContext *classFuncBody();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  ClassItemFuncContext* classItemFunc();
-
-  class  ClassBlockContext : public antlr4::ParserRuleContext {
-  public:
-    ClassBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *Class();
-    antlr4::tree::TerminalNode *Id();
-    antlr4::tree::TerminalNode *QuotHuaL();
-    antlr4::tree::TerminalNode *QuotHuaR();
-    PublicLevelContext *publicLevel();
-    ClassParentContext *classParent();
-    std::vector<ClassItemVarContext *> classItemVar();
-    ClassItemVarContext* classItemVar(size_t i);
-    std::vector<ClassItemFuncContext *> classItemFunc();
-    ClassItemFuncContext* classItemFunc(size_t i);
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ClassBlockContext* classBlock();
+  ClassFuncContext* classFunc();
 
   class  CallConventionContext : public antlr4::ParserRuleContext {
   public:

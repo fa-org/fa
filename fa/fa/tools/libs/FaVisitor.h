@@ -143,19 +143,19 @@ public:
 
     virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemBegin(FaParser::ClassItemBeginContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassItemVarExt(FaParser::ClassItemVarExtContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassItemVar(FaParser::ClassItemVarContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassItemFuncName(FaParser::ClassItemFuncNameContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassItemFuncBody(FaParser::ClassItemFuncBodyContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassItemFunc(FaParser::ClassItemFuncContext *context) = 0;
+    virtual antlrcpp::Any visitClassBegin(FaParser::ClassBeginContext *context) = 0;
 
     virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassVarExt(FaParser::ClassVarExtContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassVar(FaParser::ClassVarContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassFuncName(FaParser::ClassFuncNameContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassFuncBody(FaParser::ClassFuncBodyContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassFunc(FaParser::ClassFuncContext *context) = 0;
 
     virtual antlrcpp::Any visitCallConvention(FaParser::CallConventionContext *context) = 0;
 

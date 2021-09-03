@@ -220,13 +220,15 @@ stmt:						normalStmt | ifStmt | whileStmt | defVarStmt;
 //
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
-classItemBegin:				publicLevel? Static? type;
-classItemVarExt:			QuotHuaL (Id Semi | (exprFuncDef (expr Semi) | (QuotHuaL stmt* QuotHuaR)))+ QuotHuaR;
-classItemVar:				classItemBegin Id ((Assign expr)? Semi) | (classItemVarExt (Assign expr Semi)?);
-classItemFuncName:			Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
-classItemFuncBody:			(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
-classItemFunc:				classItemBegin classItemFuncName QuotYuanL typeVarList QuotYuanR classItemFuncBody;
-classBlock:					publicLevel? Class Id classParent? QuotHuaL (classItemVar | classItemFunc)* QuotHuaR;
+classBegin:					publicLevel? Static? type;
+classBlock:					publicLevel? Class Id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
+//
+classVarExt:				QuotHuaL (Id Semi | classFuncBody)+ QuotHuaR;
+classVar:					classBegin Id ((Assign expr)? Semi) | (classVarExt (Assign expr Semi)?);
+//
+classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
+classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
+classFunc:					classBegin classFuncName QuotYuanL typeVarList QuotYuanR classFuncBody;
 
 
 

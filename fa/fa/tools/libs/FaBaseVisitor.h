@@ -263,31 +263,31 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassItemBegin(FaParser::ClassItemBeginContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassItemVarExt(FaParser::ClassItemVarExtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassItemVar(FaParser::ClassItemVarContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassItemFuncName(FaParser::ClassItemFuncNameContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassItemFuncBody(FaParser::ClassItemFuncBodyContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassItemFunc(FaParser::ClassItemFuncContext *ctx) override {
+  virtual antlrcpp::Any visitClassBegin(FaParser::ClassBeginContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassVarExt(FaParser::ClassVarExtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassVar(FaParser::ClassVarContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassFuncName(FaParser::ClassFuncNameContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassFuncBody(FaParser::ClassFuncBodyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassFunc(FaParser::ClassFuncContext *ctx) override {
     return visitChildren(ctx);
   }
 
