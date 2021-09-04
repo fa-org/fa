@@ -95,6 +95,8 @@ public:
 			return PublicLevel::Protected;
 		} else if (context->Private ()) {
 			return PublicLevel::Private;
+		} else {
+			return PublicLevel::Default;
 		}
 	}
 

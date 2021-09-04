@@ -8,39 +8,58 @@
 #include <optional>
 #include <string>
 
-#include "AstValue.hpp"
+//#include "AstValue.hpp"
 
 #include <llvm/IR/Type.h>
 
 
 
-enum class PublicLevel { Public, Internal, Protected, Private };
+enum class PublicLevel { Default, Public, Internal, Protected, Private };
 
-class ClassField {
+
+
+class ClassVar {
 public:
+	std::shared_ptr<ClassType>	m_parent;
 	std::string					m_name;
 	std::string					m_type_name;
 	llvm::Type					*m_type;
 
-	ClassField (std::string _name, std::string _type_name, llvm::Type *_type): m_name (_name), m_type_name (_type_name), m_type (_type) {}
+	ClassVar (std::shared_ptr<ClassType> _parent, std::string _name, std::string _type_name, llvm::Type *_type)
+		: m_parent (_parent), m_name (_name), m_type_name (_type_name), m_type (_type) {}
+};
+
+
+
+class ClassFunc {
+public:
+	ClassFunc () {}
 };
 
 
 
 class ClassType {
 public:
-	PublicLevel					m_level;
-	std::string					m_name;
-	std::vector<std::string>	m_parents;
-	std::vector<ClassField>		m_fields;
-	llvm::Type					*m_type = nullptr;
+	PublicLevel								m_level;
+	std::string								m_name;
+	std::vector<std::string>				m_parents;
+	std::vector<std::shared_ptr<ClassVar>>	m_fields;
+	llvm::Type								*m_type = nullptr;
 
 	ClassType (PublicLevel _level, std::string _name): m_level (_level), m_name (_name) {}
 	void AddParent (std::string _name) {
 		m_parents.push_back (_name);
 	}
 	void AddField (std::string _name, std::string _type_name, llvm::Type *_type) {
-		m_fields.push_back (ClassField { _name, _type_name, _type });
+		m_fields.push_back (std::make_shared<ClassVar> (_name, _type_name, _type));
+	}
+
+	std::optional<std::shared_ptr<ClassVar>> GetVar (std::string _name) {
+		for (auto _var : m_fields) {
+			if (_var->m_name == _name)
+				return _var;
+		}
+		return std::nullopt;
 	}
 };
 

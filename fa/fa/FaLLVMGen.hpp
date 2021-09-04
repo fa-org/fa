@@ -814,7 +814,7 @@ private:
 		return std::get<0> (_oret.value ());
 	}
 
-	std::optional<ClassType> FindClassType (FuncContext &_func_ctx, std::string _raw_name) {
+	std::optional<std::shared_ptr<ClassType>> FindClassType (FuncContext &_func_ctx, std::string _raw_name) {
 		// TODO 如果没找到，但有 . 运算符，那么递归
 		return std::nullopt;
 	}
@@ -825,7 +825,10 @@ private:
 			// 包含 . 运算符，前半段可能是类或对象
 			auto _oct = FindClassType (_func_ctx, _raw_name.substr (0, _p));
 			if (_oct.has_value ()) {
-				return _oct.value ().GetMember (_raw_name.substr (_p + 1));
+				auto _ovar = _oct.value ()->GetVar (_raw_name.substr (_p + 1));
+				if (_ovar.has_value ()) {
+
+				}
 			}
 		} else {
 			// 不包含 . 运算符，可能是变量、类方法或类属性
