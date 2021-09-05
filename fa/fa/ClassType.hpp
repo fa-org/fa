@@ -16,6 +16,8 @@
 
 enum class PublicLevel { Default, Public, Internal, Protected, Private };
 
+class ClassType;
+
 
 
 class ClassVar {
