@@ -108,7 +108,6 @@ public:
 
 			// 成员变量
 			for (auto _var_raw : _class_raw->classVar ()) {
-				_class->AddVar ();
 				// 访问级别
 				_pl = _public_level (_var_raw->publicLevel (), PublicLevel::Private);
 
@@ -120,30 +119,34 @@ public:
 
 				// 名称
 				_name = _var_raw->Id ()->getText ();
+				auto _var = _class->AddVar (_pl, _is_static, _type, _name);
 
-				// 初始值
-				std::optional<FaParser::ExprContext*> _init_value = std::nullopt;
-
-
-
-				if (_var_raw->classVarExt ()) {
+				// 初始值和 getter setter
+				auto _var_ext_raw = _var_raw->classVarExt ();
+				if (_var_ext_raw) {
 					// 属性变量，所有属性均为实体属性
 					// 初值
-					if (_var_raw->tmpAssignExpr ())
-						_init_value = _var_raw->tmpAssignExpr ()->expr ();
+					if (_var_ext_raw->tmpAssignExpr ())
+						_var->SetInitValue (_var_ext_raw->tmpAssignExpr ()->expr ());
 
-					// TODO
-					LOG_TODO (_var_raw->start);
-					return false;
+					// 类变量 getter setter
+					for (auto _ext_func_raw : _var_ext_raw->classVarExtFunc ()) {
+						_pl = _public_level (_ext_func_raw->publicLevel (), PublicLevel::Public);
+						auto [_suc, _err] = _var->AddVarFunc (_pl, _ext_func_raw->Id (), _ext_func_raw->classFuncBody ());
+						if (!_suc) {
+							LOG_ERROR (_ext_func_raw->start, _err);
+							return false;
+						}
+					}
 				} else {
 					// 普通变量
 					// 初值
 					if (_var_raw->tmpAssignExpr ())
-						_init_value = _var_raw->tmpAssignExpr ()->expr ();
+						_var->SetInitValue (_var_raw->tmpAssignExpr ()->expr ());
 				}
 			}
 
-			// 成员函数
+			// TODO 成员函数
 			for (auto _func_raw : _class_raw->classFunc ()) {
 				// 访问级别
 				_pl = _public_level (_func_raw->publicLevel (), PublicLevel::Private);

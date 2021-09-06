@@ -223,7 +223,8 @@ publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
 classStmt:					publicLevel? Class Id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
 //
-classVarExt:				QuotHuaL (Id Semi | classFuncBody)+ QuotHuaR tmpAssignExpr?;
+classVarExtFunc:			publicLevel? Id (Semi | classFuncBody);
+classVarExt:				QuotHuaL classVarExtFunc+ QuotHuaR tmpAssignExpr?;
 classVar:					publicLevel? Static? type Id (Semi | tmpAssignExpr | classVarExt);
 //
 classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
