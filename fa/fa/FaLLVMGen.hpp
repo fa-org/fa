@@ -78,20 +78,84 @@ public:
 		if (!ProcessImports (_imports_raw))
 			return false;
 
+		// 获取访问级别
+		std::function<PublicLevel (FaParser::PublicLevelContext *, PublicLevel)> _public_level = [&] (FaParser::PublicLevelContext *_public_raw, PublicLevel _default) {
+			if (_public_raw == nullptr)
+				return _default;
+			PublicLevel _ret = m_visitor->visit (_public_raw).as<PublicLevel> ();
+			return _ret == PublicLevel::Unknown ? _default : _ret;
+		};
+
 		// 编译类
 		for (auto _class_raw : _program_ctx->classBlock ()) {
+			// 访问级别
+			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
+
+			// 类名
 			std::string _name = _class_raw->Id ()->getText ();
 			auto _oclass = m_global_classes->GetClass (_name);
 			if (_oclass.has_value ()) {
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
 				return false;
 			}
-			//
-			auto _pl_raw = _class_raw->publicLevel ();
-			PublicLevel _pl = _pl_raw ? m_visitor->visit (_pl_raw).as<PublicLevel> () : PublicLevel::Internal;
 			std::shared_ptr<ClassType> _class = m_global_classes->CreateNewClass (_pl, _name);
+
+			// 父类型
 			if (_class_raw->classParent ()) {
-				auto _parents = _class_raw->classParent ()->ids ();
+				std::vector<std::string> _parents = m_visitor->visit (_class_raw->classParent ()).as<std::vector<std::string>> ();
+				_class->AddParents (_parents);
+			}
+
+			// 成员变量
+			for (auto _var_raw : _class_raw->classVar ()) {
+				_class->AddVar ();
+				// 访问级别
+				_pl = _public_level (_var_raw->publicLevel (), PublicLevel::Private);
+
+				// 是否静态
+				bool _is_static = !!_var_raw->Static ();
+
+				// 类型
+				std::string _type = _var_raw->type ()->getText ();
+
+				// 名称
+				_name = _var_raw->Id ()->getText ();
+
+				// 初始值
+				std::optional<FaParser::ExprContext*> _init_value = std::nullopt;
+
+
+
+				if (_var_raw->classVarExt ()) {
+					// 属性变量，所有属性均为实体属性
+					// 初值
+					if (_var_raw->tmpAssignExpr ())
+						_init_value = _var_raw->tmpAssignExpr ()->expr ();
+
+					// TODO
+					LOG_TODO (_var_raw->start);
+					return false;
+				} else {
+					// 普通变量
+					// 初值
+					if (_var_raw->tmpAssignExpr ())
+						_init_value = _var_raw->tmpAssignExpr ()->expr ();
+				}
+			}
+
+			// 成员函数
+			for (auto _func_raw : _class_raw->classFunc ()) {
+				// 访问级别
+				_pl = _public_level (_func_raw->publicLevel (), PublicLevel::Private);
+
+				// 是否静态
+				bool _is_static = !!_func_raw->Static ();
+
+				// 类型
+				std::string _type = _func_raw->type ()->getText ();
+
+				// 名称
+				_name = _func_raw->classFuncName ()->getText ();
 			}
 		}
 

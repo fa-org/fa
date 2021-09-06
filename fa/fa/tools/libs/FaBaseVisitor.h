@@ -239,6 +239,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitTmpAssignExpr(FaParser::TmpAssignExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitDefVarStmt(FaParser::DefVarStmtContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -263,11 +267,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassBegin(FaParser::ClassBeginContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *ctx) override {
+  virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -40,9 +40,9 @@ public:
     RuleQuotStmtPart = 43, RuleQuotStmtExpr = 44, RuleIfStmt = 45, RuleIfExpr = 46, 
     RuleWhileStmt = 47, RuleQuotExpr = 48, RuleExprOpt = 49, RuleStrongExprBase = 50, 
     RuleStrongExprPrefix = 51, RuleStrongExprSuffix = 52, RuleStrongExpr = 53, 
-    RuleMiddleExpr = 54, RuleExpr = 55, RuleDefVarStmt = 56, RuleUseStmt = 57, 
-    RuleNormalStmt = 58, RuleStmt = 59, RulePublicLevel = 60, RuleClassParent = 61, 
-    RuleClassBegin = 62, RuleClassBlock = 63, RuleClassVarExt = 64, RuleClassVar = 65, 
+    RuleMiddleExpr = 54, RuleExpr = 55, RuleTmpAssignExpr = 56, RuleDefVarStmt = 57, 
+    RuleUseStmt = 58, RuleNormalStmt = 59, RuleStmt = 60, RulePublicLevel = 61, 
+    RuleClassParent = 62, RuleClassStmt = 63, RuleClassVarExt = 64, RuleClassVar = 65, 
     RuleClassFuncName = 66, RuleClassFuncBody = 67, RuleClassFunc = 68, 
     RuleCallConvention = 69, RuleImportStmt = 70, RuleLibStmt = 71, RuleImportBlock = 72, 
     RuleFaEntryMainFuncBlock = 73, RuleProgram = 74
@@ -114,14 +114,14 @@ public:
   class StrongExprContext;
   class MiddleExprContext;
   class ExprContext;
+  class TmpAssignExprContext;
   class DefVarStmtContext;
   class UseStmtContext;
   class NormalStmtContext;
   class StmtContext;
   class PublicLevelContext;
   class ClassParentContext;
-  class ClassBeginContext;
-  class ClassBlockContext;
+  class ClassStmtContext;
   class ClassVarExtContext;
   class ClassVarContext;
   class ClassFuncNameContext;
@@ -1017,6 +1017,21 @@ public:
 
   ExprContext* expr();
 
+  class  TmpAssignExprContext : public antlr4::ParserRuleContext {
+  public:
+    TmpAssignExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Assign();
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *Semi();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  TmpAssignExprContext* tmpAssignExpr();
+
   class  DefVarStmtContext : public antlr4::ParserRuleContext {
   public:
     DefVarStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -1115,24 +1130,9 @@ public:
 
   ClassParentContext* classParent();
 
-  class  ClassBeginContext : public antlr4::ParserRuleContext {
+  class  ClassStmtContext : public antlr4::ParserRuleContext {
   public:
-    ClassBeginContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    TypeContext *type();
-    PublicLevelContext *publicLevel();
-    antlr4::tree::TerminalNode *Static();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ClassBeginContext* classBegin();
-
-  class  ClassBlockContext : public antlr4::ParserRuleContext {
-  public:
-    ClassBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Class();
     antlr4::tree::TerminalNode *Id();
@@ -1150,7 +1150,7 @@ public:
    
   };
 
-  ClassBlockContext* classBlock();
+  ClassStmtContext* classStmt();
 
   class  ClassVarExtContext : public antlr4::ParserRuleContext {
   public:
@@ -1164,6 +1164,7 @@ public:
     antlr4::tree::TerminalNode* Semi(size_t i);
     std::vector<ClassFuncBodyContext *> classFuncBody();
     ClassFuncBodyContext* classFuncBody(size_t i);
+    TmpAssignExprContext *tmpAssignExpr();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1176,12 +1177,13 @@ public:
   public:
     ClassVarContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    ClassBeginContext *classBegin();
+    TypeContext *type();
     antlr4::tree::TerminalNode *Id();
     antlr4::tree::TerminalNode *Semi();
-    antlr4::tree::TerminalNode *Assign();
-    ExprContext *expr();
+    TmpAssignExprContext *tmpAssignExpr();
     ClassVarExtContext *classVarExt();
+    PublicLevelContext *publicLevel();
+    antlr4::tree::TerminalNode *Static();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1230,12 +1232,14 @@ public:
   public:
     ClassFuncContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    ClassBeginContext *classBegin();
+    TypeContext *type();
     ClassFuncNameContext *classFuncName();
     antlr4::tree::TerminalNode *QuotYuanL();
     TypeVarListContext *typeVarList();
     antlr4::tree::TerminalNode *QuotYuanR();
     ClassFuncBodyContext *classFuncBody();
+    PublicLevelContext *publicLevel();
+    antlr4::tree::TerminalNode *Static();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1338,8 +1342,8 @@ public:
     std::vector<UseStmtContext *> useStmt();
     UseStmtContext* useStmt(size_t i);
     ImportBlockContext *importBlock();
-    std::vector<ClassBlockContext *> classBlock();
-    ClassBlockContext* classBlock(size_t i);
+    std::vector<ClassStmtContext *> classStmt();
+    ClassStmtContext* classStmt(size_t i);
     FaEntryMainFuncBlockContext *faEntryMainFuncBlock();
 
 

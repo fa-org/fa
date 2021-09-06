@@ -131,6 +131,8 @@ public:
 
     virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
 
+    virtual antlrcpp::Any visitTmpAssignExpr(FaParser::TmpAssignExprContext *context) = 0;
+
     virtual antlrcpp::Any visitDefVarStmt(FaParser::DefVarStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *context) = 0;
@@ -143,9 +145,7 @@ public:
 
     virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassBegin(FaParser::ClassBeginContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *context) = 0;
+    virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitClassVarExt(FaParser::ClassVarExtContext *context) = 0;
 

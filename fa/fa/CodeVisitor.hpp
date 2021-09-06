@@ -96,12 +96,15 @@ public:
 		} else if (context->Private ()) {
 			return PublicLevel::Private;
 		} else {
-			return PublicLevel::Default;
+			return PublicLevel::Unknown;
 		}
 	}
 
 	antlrcpp::Any visitClassParent (FaParser::ClassParentContext *context) override {
 		std::vector<std::string> _ids;
+		for (auto _parent_name_raw : context->ids ())
+			_ids.push_back (_parent_name_raw->getText ());
+		return _ids;
 	}
 };
 

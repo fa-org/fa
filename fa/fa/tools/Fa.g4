@@ -202,6 +202,7 @@ expr:						middleExpr (allAssign middleExpr)*;
 //
 // define variable
 //
+tmpAssignExpr:				Assign expr Semi;
 defVarStmt:					type Id Assign expr Semi;
 
 
@@ -220,15 +221,14 @@ stmt:						normalStmt | ifStmt | whileStmt | defVarStmt;
 //
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
-classBegin:					publicLevel? Static? type;
-classBlock:					publicLevel? Class Id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
+classStmt:					publicLevel? Class Id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
 //
-classVarExt:				QuotHuaL (Id Semi | classFuncBody)+ QuotHuaR;
-classVar:					classBegin Id ((Assign expr)? Semi) | (classVarExt (Assign expr Semi)?);
+classVarExt:				QuotHuaL (Id Semi | classFuncBody)+ QuotHuaR tmpAssignExpr?;
+classVar:					publicLevel? Static? type Id (Semi | tmpAssignExpr | classVarExt);
 //
 classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
-classFunc:					classBegin classFuncName QuotYuanL typeVarList QuotYuanR classFuncBody;
+classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList QuotYuanR classFuncBody;
 
 
 
@@ -246,7 +246,7 @@ importBlock:				(importStmt | libStmt)+;
 // fa_entry_main
 //
 faEntryMainFuncBlock:		Static type FaEntryMain QuotYuanL QuotYuanR QuotHuaL stmt* QuotHuaR;
-program:					useStmt* importBlock? classBlock* faEntryMainFuncBlock?;
+program:					useStmt* importBlock? classStmt* faEntryMainFuncBlock?;
 
 
 

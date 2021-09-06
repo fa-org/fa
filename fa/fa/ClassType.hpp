@@ -14,7 +14,7 @@
 
 
 
-enum class PublicLevel { Default, Public, Internal, Protected, Private };
+enum class PublicLevel { Unknown, Public, Internal, Protected, Private };
 
 class ClassType;
 
@@ -40,24 +40,24 @@ public:
 
 
 
-class ClassType {
+class ClassType: public std::enable_shared_from_this<ClassType> {
 public:
 	PublicLevel								m_level;
 	std::string								m_name;
 	std::vector<std::string>				m_parents;
-	std::vector<std::shared_ptr<ClassVar>>	m_fields;
+	std::vector<std::shared_ptr<ClassVar>>	m_vars;
 	llvm::Type								*m_type = nullptr;
 
 	ClassType (PublicLevel _level, std::string _name): m_level (_level), m_name (_name) {}
-	void AddParent (std::string _name) {
-		m_parents.push_back (_name);
+	void AddParents (std::vector<std::string> &_parents) {
+		m_parents.assign (_parents.cbegin (), _parents.cend ());
 	}
-	void AddField (std::string _name, std::string _type_name, llvm::Type *_type) {
-		m_fields.push_back (std::make_shared<ClassVar> (_name, _type_name, _type));
+	void AddVar (std::string _name, std::string _type_name, llvm::Type *_type) {
+		m_vars.push_back (std::make_shared<ClassVar> (shared_from_this (), _name, _type_name, _type));
 	}
 
 	std::optional<std::shared_ptr<ClassVar>> GetVar (std::string _name) {
-		for (auto _var : m_fields) {
+		for (auto _var : m_vars) {
 			if (_var->m_name == _name)
 				return _var;
 		}
