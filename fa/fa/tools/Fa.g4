@@ -144,14 +144,12 @@ ids:						Id (PointOp Id)*;
 //
 // type
 //
-typeAfter:					(QuotFangL QuotFangR) | AndOp | Qus;
-type:						Const? ( Id
-								| (Id QuotJianL type (Comma type)* QuotJianR)	// Lazy<int>
-								| (QuotYuanL type (Comma type)+ QuotYuanR)		// (int, string)
-							) typeAfter*;										// int[]&
-eTypeAfter:					(QuotFangL QuotFangR) | AndOp | StarOp;
-eSign:						Signed | Unsigned;
-eType:						Const? eSign? Id eTypeAfter*;					// int[]&
+typeAfter:					(QuotFangL QuotFangR) | AndOp | Qus | (QuotJianL type (Comma type)* QuotJianR);
+type:						(Id typeAfter*) | (QuotYuanL type (Comma type)+ QuotYuanR);
+typeNewable:				Id typeAfter*;
+//eTypeAfter:					(QuotFangL QuotFangR) | AndOp | StarOp;
+//eSign:						Signed | Unsigned;
+//eType:						Const? eSign? Id eTypeAfter*;					// int[]&
 
 
 
@@ -160,8 +158,8 @@ eType:						Const? eSign? Id eTypeAfter*;					// int[]&
 //
 typeVar:					type Id?;
 typeVarList:				typeVar (Comma typeVar)*;
-eTypeVar:					eType Id?;
-eTypeVarList:				eTypeVar (Comma eTypeVar)*;
+//eTypeVar:					eType Id?;
+//eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 
 
 
@@ -240,7 +238,7 @@ classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? Qu
 // import
 //
 callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
-importStmt:					AImport eType callConvention Id QuotYuanL eTypeVarList QuotYuanR Semi;
+importStmt:					AImport type callConvention Id QuotYuanL typeVarList QuotYuanR Semi;
 libStmt:					ALib String1Literal Semi;
 importBlock:				(importStmt | libStmt)+;
 
