@@ -58,7 +58,7 @@ public:
 		m_global_classes = std::make_shared<AstClasses> ();
 	}
 
-	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
+	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _out_file, std::string _namespace) {
 		auto [_uses, _imports, _classes, _entry] = m_visitor->visit (_program_ctx).as<std::tuple<
 			std::vector<std::string>,
 			FaParser::ImportBlockContext *,
@@ -92,7 +92,7 @@ public:
 			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
 
 			// 类名
-			std::string _name = _class_raw->Id ()->getText ();
+			std::string _name = std::format ("{}.{}", _namespace, _class_raw->Id ()->getText ());
 			auto _oclass = m_global_classes->GetClass (_name);
 			if (_oclass.has_value ()) {
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
@@ -146,7 +146,7 @@ public:
 				}
 			}
 
-			// TODO 成员函数
+			// 成员函数
 			for (auto _func_raw : _class_raw->classFunc ()) {
 				// 访问级别
 				_pl = _public_level (_func_raw->publicLevel (), PublicLevel::Private);
@@ -205,7 +205,7 @@ public:
 		m_module->setDataLayout (_target_machine->createDataLayout ());
 
 		std::error_code _ec;
-		llvm::raw_fd_ostream _dest (_file, _ec, llvm::sys::fs::F_None);
+		llvm::raw_fd_ostream _dest (_out_file, _ec, llvm::sys::fs::F_None);
 
 		if (_ec) {
 			LOG_ERROR (nullptr, "无法打开输出文件");

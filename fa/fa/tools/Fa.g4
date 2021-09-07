@@ -26,6 +26,7 @@ Else:						'else';
 FaEntryMain:				'FaEntryMain';
 If:							'if';
 Internal:					'internal';
+New:						'new';
 Public:						'public';
 Protected:					'protected';
 Private:					'private';
@@ -186,7 +187,9 @@ whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
 //
 quotExpr:					QuotYuanL expr QuotYuanR;
 exprOpt:					expr?;
-strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr;
+newExprItem:				Id (Assign expr)?;
+newExpr:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
+strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr | newExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// Ç°×º - ++ -- ~
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (QuotYuanL (exprOpt (Comma exprOpt)*) QuotYuanR)								//     Write ("")
