@@ -42,10 +42,10 @@ public:
     RuleStrongExprPrefix = 51, RuleStrongExprSuffix = 52, RuleStrongExpr = 53, 
     RuleMiddleExpr = 54, RuleExpr = 55, RuleTmpAssignExpr = 56, RuleDefVarStmt = 57, 
     RuleUseStmt = 58, RuleNormalStmt = 59, RuleStmt = 60, RulePublicLevel = 61, 
-    RuleClassParent = 62, RuleClassStmt = 63, RuleClassVarExt = 64, RuleClassVar = 65, 
-    RuleClassFuncName = 66, RuleClassFuncBody = 67, RuleClassFunc = 68, 
-    RuleCallConvention = 69, RuleImportStmt = 70, RuleLibStmt = 71, RuleImportBlock = 72, 
-    RuleFaEntryMainFuncBlock = 73, RuleProgram = 74
+    RuleClassParent = 62, RuleClassStmt = 63, RuleClassVarExtFunc = 64, 
+    RuleClassVarExt = 65, RuleClassVar = 66, RuleClassFuncName = 67, RuleClassFuncBody = 68, 
+    RuleClassFunc = 69, RuleCallConvention = 70, RuleImportStmt = 71, RuleLibStmt = 72, 
+    RuleImportBlock = 73, RuleFaEntryMainFuncBlock = 74, RuleProgram = 75
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -122,6 +122,7 @@ public:
   class PublicLevelContext;
   class ClassParentContext;
   class ClassStmtContext;
+  class ClassVarExtFuncContext;
   class ClassVarExtContext;
   class ClassVarContext;
   class ClassFuncNameContext;
@@ -1152,18 +1153,30 @@ public:
 
   ClassStmtContext* classStmt();
 
+  class  ClassVarExtFuncContext : public antlr4::ParserRuleContext {
+  public:
+    ClassVarExtFuncContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Id();
+    antlr4::tree::TerminalNode *Semi();
+    ClassFuncBodyContext *classFuncBody();
+    PublicLevelContext *publicLevel();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ClassVarExtFuncContext* classVarExtFunc();
+
   class  ClassVarExtContext : public antlr4::ParserRuleContext {
   public:
     ClassVarExtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *QuotHuaL();
     antlr4::tree::TerminalNode *QuotHuaR();
-    std::vector<antlr4::tree::TerminalNode *> Id();
-    antlr4::tree::TerminalNode* Id(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> Semi();
-    antlr4::tree::TerminalNode* Semi(size_t i);
-    std::vector<ClassFuncBodyContext *> classFuncBody();
-    ClassFuncBodyContext* classFuncBody(size_t i);
+    std::vector<ClassVarExtFuncContext *> classVarExtFunc();
+    ClassVarExtFuncContext* classVarExtFunc(size_t i);
     TmpAssignExprContext *tmpAssignExpr();
 
 

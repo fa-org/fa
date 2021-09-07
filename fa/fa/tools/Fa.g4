@@ -229,7 +229,7 @@ classVar:					publicLevel? Static? type Id (Semi | tmpAssignExpr | classVarExt);
 //
 classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
-classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList QuotYuanR classFuncBody;
+classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 
 
 

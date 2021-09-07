@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "FaBaseVisitor.h"
-#include "ClassType.hpp"
+#include "AstClass.hpp"
 
 
 
@@ -81,7 +81,7 @@ public:
 		for (auto _use_expr : ctx->useStmt ())
 			_uses.push_back (visitUseStmt (_use_expr));
 		FaParser::ImportBlockContext *_imports = ctx->importBlock ();
-		std::vector<FaParser::ClassBlockContext *> _classes = ctx->classBlock ();
+		std::vector<FaParser::ClassStmtContext *> _classes = ctx->classStmt ();
 		auto _entry = dynamic_cast<FaParser::FaEntryMainFuncBlockContext *> (ctx->faEntryMainFuncBlock ());
 		return std::make_tuple (_uses, _imports, _classes, _entry);
 	}

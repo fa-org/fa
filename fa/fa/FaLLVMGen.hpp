@@ -43,7 +43,7 @@
 #include "FuncContext.hpp"
 #include "OperAST.hpp"
 #include "FuncType.hpp"
-#include "ClassType.hpp"
+#include "AstClass.hpp"
 
 
 
@@ -55,14 +55,14 @@ public:
 		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx);
 		m_value_builder = std::make_shared<ValueBuilder> (m_visitor, m_ctx, m_module);
 		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder);
-		m_global_classes = std::make_shared<ClassTypes> ();
+		m_global_classes = std::make_shared<AstClasses> ();
 	}
 
 	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _file) {
 		auto [_uses, _imports, _classes, _entry] = m_visitor->visit (_program_ctx).as<std::tuple<
 			std::vector<std::string>,
 			FaParser::ImportBlockContext *,
-			std::vector<FaParser::ClassBlockContext *>,
+			std::vector<FaParser::ClassStmtContext *>,
 			FaParser::FaEntryMainFuncBlockContext *
 		>> ();
 		m_uses = _uses;
@@ -87,7 +87,7 @@ public:
 		};
 
 		// 编译类
-		for (auto _class_raw : _program_ctx->classBlock ()) {
+		for (auto _class_raw : _program_ctx->classStmt ()) {
 			// 访问级别
 			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
 
@@ -98,7 +98,7 @@ public:
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
 				return false;
 			}
-			std::shared_ptr<ClassType> _class = m_global_classes->CreateNewClass (_pl, _name);
+			std::shared_ptr<AstClass> _class = m_global_classes->CreateNewClass (_pl, _name);
 
 			// 父类型
 			if (_class_raw->classParent ()) {
@@ -132,7 +132,7 @@ public:
 					// 类变量 getter setter
 					for (auto _ext_func_raw : _var_ext_raw->classVarExtFunc ()) {
 						_pl = _public_level (_ext_func_raw->publicLevel (), PublicLevel::Public);
-						auto [_suc, _err] = _var->AddVarFunc (_pl, _ext_func_raw->Id (), _ext_func_raw->classFuncBody ());
+						auto [_suc, _err] = _var->AddVarFunc (_pl, _ext_func_raw->Id ()->getText (), _ext_func_raw->classFuncBody ());
 						if (!_suc) {
 							LOG_ERROR (_ext_func_raw->start, _err);
 							return false;
@@ -154,11 +154,25 @@ public:
 				// 是否静态
 				bool _is_static = !!_func_raw->Static ();
 
-				// 类型
-				std::string _type = _func_raw->type ()->getText ();
-
 				// 名称
 				_name = _func_raw->classFuncName ()->getText ();
+				auto _func = _class->AddFunc (_pl, _is_static, _name);
+
+				// 返回类型
+				_func->SetReturnType (_func_raw->type ()->getText ());
+
+				// 参数列表
+				std::vector<std::string> _arg_types;
+				if (_func_raw->typeVarList ()) {
+					for (auto _type_var_raw : _func_raw->typeVarList ()->typeVar ()) {
+						std::string _arg_type = _type_var_raw->type ()->getText ();
+						std::string _arg_name = _type_var_raw->Id () ? _type_var_raw->Id ()->getText () : "";
+						_func->SetArgumentTypeName (_arg_type, _arg_name);
+					}
+				}
+
+				// 函数体
+				_func->SetFuncBody (_func_raw->classFuncBody ());
 			}
 		}
 
@@ -884,7 +898,7 @@ private:
 		return std::get<0> (_oret.value ());
 	}
 
-	std::optional<std::shared_ptr<ClassType>> FindClassType (FuncContext &_func_ctx, std::string _raw_name) {
+	std::optional<std::shared_ptr<AstClass>> FindAstClass (FuncContext &_func_ctx, std::string _raw_name) {
 		// TODO 如果没找到，但有 . 运算符，那么递归
 		return std::nullopt;
 	}
@@ -893,7 +907,7 @@ private:
 		size_t _p = _raw_name.rfind ('.');
 		if (_p != std::string::npos) {
 			// 包含 . 运算符，前半段可能是类或对象
-			auto _oct = FindClassType (_func_ctx, _raw_name.substr (0, _p));
+			auto _oct = FindAstClass (_func_ctx, _raw_name.substr (0, _p));
 			if (_oct.has_value ()) {
 				auto _ovar = _oct.value ()->GetVar (_raw_name.substr (_p + 1));
 				if (_ovar.has_value ()) {
@@ -914,7 +928,7 @@ private:
 	std::shared_ptr<TypeMap> m_type_map;
 	std::shared_ptr<ValueBuilder> m_value_builder;
 	std::shared_ptr<FuncTypes> m_global_funcs;
-	std::shared_ptr<ClassTypes> m_global_classes;
+	std::shared_ptr<AstClasses> m_global_classes;
 
 	std::vector<std::string> m_uses;
 	std::vector<std::string> m_libs;

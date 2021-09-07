@@ -271,6 +271,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitClassVarExtFunc(FaParser::ClassVarExtFuncContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitClassVarExt(FaParser::ClassVarExtContext *ctx) override {
     return visitChildren(ctx);
   }
