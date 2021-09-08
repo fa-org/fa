@@ -41,7 +41,7 @@
 #include "ValueBuilder.hpp"
 #include "AstValue.hpp"
 #include "FuncContext.hpp"
-#include "OperAST.hpp"
+#include "AstExprOrValue.hpp"
 #include "FuncType.hpp"
 #include "AstClass.hpp"
 
@@ -734,6 +734,14 @@ private:
 			} else if (_expr_raw->quotExpr ()) {
 				return _parse_expr (_expr_raw->quotExpr ()->expr (), _exp_type);
 			} else if (_expr_raw->newExpr ()) {
+				auto _new_raw = _expr_raw->newExpr ();
+				if (_new_raw->ids ()) {
+					if (_exp_type != "") {
+						if (TypeMap::CanImplicitConvTo ())
+					}
+				} else {
+
+				}
 				//////////////////////////////////////////////// TODO
 			}
 			LOG_TODO (_expr_raw->start);

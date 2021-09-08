@@ -1,5 +1,5 @@
-#ifndef __OPER_AST_HPP__
-#define __OPER_AST_HPP__
+#ifndef __AST_EXPR_OR_VALUE_HPP__
+#define __AST_EXPR_OR_VALUE_HPP__
 
 
 
@@ -23,13 +23,14 @@ struct _AST_ValueCtx {
 };
 
 struct _AST_NewCtx {
-	_AST_NewCtx (std::vector<std::string> _cls_vars, std::vector<std::string> _params, std::string _expect_type): m_expect_type (_expect_type) {
+	_AST_NewCtx (std::vector<std::string> _cls_vars, std::vector<std::string> _params, std::string _tmp_type, std::string _expect_type): m_tmp_type (_tmp_type), m_expect_type (_expect_type) {
 		m_cls_vars.assign (_cls_vars.cbegin (), _cls_vars.cend ());
 		m_params.assign (_params.cbegin (), _params.cend ());
 	}
 
 	std::vector<std::string>	m_cls_vars;
 	std::vector<std::string>	m_params;
+	std::string					m_tmp_type = "";
 	std::string					m_expect_type = "";
 };
 
@@ -210,4 +211,4 @@ public:
 
 
 
-#endif //__OPER_AST_HPP__
+#endif //__AST_EXPR_OR_VALUE_HPP__

@@ -21,7 +21,7 @@
 
 #include "TypeMap.hpp"
 #include "AstValue.hpp"
-#include "OperAST.hpp"
+#include "AstExprOrValue.hpp"
 #include "FuncType.hpp"
 
 
@@ -127,12 +127,16 @@ public:
 	}
 
 	std::optional<std::tuple<std::string, std::vector<std::string>>> GetFuncType (_AST_ExprOrValue &_val) {
-		if (_val._val) {
-			AstValue &_val2 = _val._val->_val;
+		if (_val.m_val) {
+			AstValue &_val2 = _val.m_val->m_val;
 			if (_val2.IsFunction ())
 				return _val2.GetFuncType ();
-		} else if (_val._opN_expr) {
-
+		} else if (_val.m_opN_expr) {
+			auto _oftype = GetFuncType (_val.m_opN_expr->m_left);
+			if (_oftype.has_value ()) {
+				std::string _tmp_full = std::get<0> (_oftype.value ());
+				// TODO: 提取方法结果 _tmp_full 的函数类型返回值
+			}
 		}
 		return std::nullopt;
 	}
