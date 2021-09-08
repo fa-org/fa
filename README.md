@@ -52,24 +52,24 @@ fa 语言编译器（开发中）
 ```fa
 // 声明类实例
 public class TestClass {
- // 字段
- public string Value1;
- public string Value2 = "hello";
- public string Value3 { get; set; }
- public string Value4 { get; set; } = "hello";
+	// 字段
+	public string Value1;
+	public string Value2 = "hello";
+	public string Value3 { get; set; }
+	public string Value4 { get; set; } = "hello";
 
- // 可以被赋予哪些类型的值
- CastFrom (int32 _n) {}
- CastFrom (double _n) {}
- CastFrom (string _s) {}
+	// 可以被赋予哪些类型的值
+	CastFrom (int32 _n) {}
+	CastFrom (double _n) {}
+	CastFrom (string _s) {}
 
- // 能够隐式转换为哪些类型
- int32 CastTo () => 12;
- double CastTo () => 0.0;
- string CastTo () => "";
+	// 能够隐式转换为哪些类型
+	int32 CastTo () => 12;
+	double CastTo () => 0.0;
+	string CastTo () => "";
 
- // 定义函数
- public string func () {}
+	// 定义函数
+	public string func () {}
 }
 
 // 实例化类型

@@ -14,15 +14,15 @@ public:
   enum {
     AImport = 1, ALib = 2, Break = 3, CC__Cdecl = 4, CC__FastCall = 5, CC__StdCall = 6, 
     Continue = 7, Class = 8, Const = 9, Else = 10, FaEntryMain = 11, If = 12, 
-    Internal = 13, Public = 14, Protected = 15, Private = 16, Return = 17, 
-    Signed = 18, Static = 19, Unsigned = 20, Use = 21, While = 22, Assign = 23, 
-    ReverseOp = 24, AddAddOp = 25, SubSubOp = 26, PointOp = 27, AddOp = 28, 
-    SubOp = 29, StarOp = 30, DivOp = 31, ModOp = 32, OrOp = 33, AndOp = 34, 
-    XorOp = 35, Qus = 36, Comma = 37, ColonColon = 38, Colon = 39, Semi = 40, 
-    Exclam = 41, QuotFangL = 42, QuotFangR = 43, QuotJianL = 44, QuotJianR = 45, 
-    QuotHuaL = 46, QuotHuaR = 47, QuotYuanL = 48, QuotYuanR = 49, BoolLiteral = 50, 
-    IntLiteral = 51, FloatLiteral = 52, String1Literal = 53, Id = 54, Comment1 = 55, 
-    Comment2 = 56, WS = 57
+    Internal = 13, New = 14, Public = 15, Protected = 16, Private = 17, 
+    Return = 18, Signed = 19, Static = 20, Unsigned = 21, Use = 22, While = 23, 
+    Assign = 24, ReverseOp = 25, AddAddOp = 26, SubSubOp = 27, PointOp = 28, 
+    AddOp = 29, SubOp = 30, StarOp = 31, DivOp = 32, ModOp = 33, OrOp = 34, 
+    AndOp = 35, XorOp = 36, Qus = 37, Comma = 38, ColonColon = 39, Colon = 40, 
+    Semi = 41, Exclam = 42, QuotFangL = 43, QuotFangR = 44, QuotJianL = 45, 
+    QuotJianR = 46, QuotHuaL = 47, QuotHuaR = 48, QuotYuanL = 49, QuotYuanR = 50, 
+    BoolLiteral = 51, IntLiteral = 52, FloatLiteral = 53, String1Literal = 54, 
+    Id = 55, Comment1 = 56, Comment2 = 57, WS = 58
   };
 
   explicit FaLexer(antlr4::CharStream *input);

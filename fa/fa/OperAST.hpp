@@ -15,52 +15,63 @@ enum class _Op1Type { None, Prefix, Suffix };
 enum class _Op2Type { None, Assign, NoChange, Compare, Other };
 
 struct _AST_ValueCtx {
-	_AST_ValueCtx (AstValue __val, antlr4::Token *__t, std::string __expect_type): _val (__val), _t (__t), _expect_type (__expect_type) {}
+	_AST_ValueCtx (AstValue _val, antlr4::Token *_t, std::string _expect_type): m_val (_val), m_t (_t), m_expect_type (_expect_type) {}
 
-	AstValue _val {};
-	antlr4::Token *_t = nullptr;
-	std::string _expect_type = "";
+	AstValue					m_val {};
+	antlr4::Token				*m_t = nullptr;
+	std::string					m_expect_type = "";
+};
+
+struct _AST_NewCtx {
+	_AST_NewCtx (std::vector<std::string> _cls_vars, std::vector<std::string> _params, std::string _expect_type): m_expect_type (_expect_type) {
+		m_cls_vars.assign (_cls_vars.cbegin (), _cls_vars.cend ());
+		m_params.assign (_params.cbegin (), _params.cend ());
+	}
+
+	std::vector<std::string>	m_cls_vars;
+	std::vector<std::string>	m_params;
+	std::string					m_expect_type = "";
 };
 
 struct _AST_Oper1Ctx {
-	_AST_Oper1Ctx (): _type (_Op1Type::None) {}
-	_AST_Oper1Ctx (FaParser::StrongExprPrefixContext *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {}
-	_AST_Oper1Ctx (FaParser::StrongExprSuffixContext *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {
+	_AST_Oper1Ctx (): m_type (_Op1Type::None) {}
+	_AST_Oper1Ctx (FaParser::StrongExprPrefixContext *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {}
+	_AST_Oper1Ctx (FaParser::StrongExprSuffixContext *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {
 		if ((!_op_raw->AddAddOp ()) && (!_op_raw->SubSubOp ())) {
 			LOG_ERROR (_op_raw->start, "当前运算符无法解析为一元后缀表达式");
 		}
 	}
 
-	std::string _op = "";
-	antlr4::Token *_t = nullptr;
-	_Op1Type _type = _Op1Type::Prefix;
+	std::string					m_op = "";
+	antlr4::Token				*m_t = nullptr;
+	_Op1Type					m_type = _Op1Type::Prefix;
 };
 
 struct _AST_Oper2Ctx {
-	_AST_Oper2Ctx (): _type (_Op2Type::None) {}
-	_AST_Oper2Ctx (FaParser::AllAssignContext *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start), _type (_Op2Type::Assign) {}
-	_AST_Oper2Ctx (FaParser::AllOp2Context *_op_raw): _op (_op_raw->getText ()), _t (_op_raw->start) {
+	_AST_Oper2Ctx (): m_type (_Op2Type::None) {}
+	_AST_Oper2Ctx (FaParser::AllAssignContext *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start), m_type (_Op2Type::Assign) {}
+	_AST_Oper2Ctx (FaParser::AllOp2Context *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {
 		if (_op_raw->selfOp2 ()) {
-			_type = _Op2Type::NoChange;
+			m_type = _Op2Type::NoChange;
 		} else if (_op_raw->changeOp2 ()->compareOp2 ()) {
-			_type = _Op2Type::Compare;
+			m_type = _Op2Type::Compare;
 		}
 	}
-	_AST_Oper2Ctx (FaParser::StrongExprSuffixContext *_op_raw): _t (_op_raw->start) {
+	_AST_Oper2Ctx (FaParser::StrongExprSuffixContext *_op_raw): m_t (_op_raw->start) {
 		if (_op_raw->PointOp ()) {
-			_op = _op_raw->PointOp ()->getText ();
+			m_op = _op_raw->PointOp ()->getText ();
 		} else if (_op_raw->QuotYuanL ()) {
-			_op = "()";
+			m_op = "()";
 		} else if (_op_raw->QuotFangL ()) {
-			_op = "[]";
+			m_op = "[]";
 		} else {
 			LOG_ERROR (_op_raw->start, "当前运算符无法解析为二元表达式");
 		}
 	}
 
-	std::string _op = "";
-	antlr4::Token *_t = nullptr;
-	_Op2Type _type = _Op2Type::Other;
+	std::string					m_op = "";
+	antlr4::Token				*m_t = nullptr;
+	_Op2Type					m_type = _Op2Type::Other;
 };
 
 struct _AST_Op1ExprTreeCtx;
@@ -69,25 +80,28 @@ struct _AST_OpNExprTreeCtx;
 struct _AST_IfExprTreeCtx;
 struct _AST_ExprOrValue {
 	_AST_ExprOrValue () {}
-	_AST_ExprOrValue (std::shared_ptr<_AST_ValueCtx> __val): _val (__val) {}
-	_AST_ExprOrValue (std::shared_ptr<_AST_Op1ExprTreeCtx> __op1_expr): _op1_expr (__op1_expr) {}
-	_AST_ExprOrValue (std::shared_ptr<_AST_Op2ExprTreeCtx> __op2_expr): _op2_expr (__op2_expr) {}
-	_AST_ExprOrValue (std::shared_ptr<_AST_OpNExprTreeCtx> __opN_expr): _opN_expr (__opN_expr) {}
-	_AST_ExprOrValue (std::shared_ptr<_AST_IfExprTreeCtx> __if_expr): _if_expr (__if_expr) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_ValueCtx> val): m_val (val) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_NewCtx> newval): m_newval (newval) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_Op1ExprTreeCtx> op1_expr): m_op1_expr (op1_expr) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_Op2ExprTreeCtx> op2_expr): m_op2_expr (op2_expr) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_OpNExprTreeCtx> opN_expr): m_opN_expr (opN_expr) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_IfExprTreeCtx> if_expr): m_if_expr (if_expr) {}
 	_AST_ExprOrValue &operator= (const _AST_ExprOrValue &_o) {
-		_val = _o._val;
-		_op1_expr = _o._op1_expr;
-		_op2_expr = _o._op2_expr;
-		_opN_expr = _o._opN_expr;
-		_if_expr = _o._if_expr;
+		m_val = _o.m_val;
+		m_newval = _o.m_newval;
+		m_op1_expr = _o.m_op1_expr;
+		m_op2_expr = _o.m_op2_expr;
+		m_opN_expr = _o.m_opN_expr;
+		m_if_expr = _o.m_if_expr;
 		return *this;
 	}
 
-	std::shared_ptr<_AST_ValueCtx>						_val;
-	std::shared_ptr<_AST_Op1ExprTreeCtx>				_op1_expr;
-	std::shared_ptr<_AST_Op2ExprTreeCtx>				_op2_expr;
-	std::shared_ptr<_AST_OpNExprTreeCtx>				_opN_expr;
-	std::shared_ptr<_AST_IfExprTreeCtx>					_if_expr;
+	std::shared_ptr<_AST_ValueCtx>						m_val;
+	std::shared_ptr<_AST_NewCtx>						m_newval;
+	std::shared_ptr<_AST_Op1ExprTreeCtx>				m_op1_expr;
+	std::shared_ptr<_AST_Op2ExprTreeCtx>				m_op2_expr;
+	std::shared_ptr<_AST_OpNExprTreeCtx>				m_opN_expr;
+	std::shared_ptr<_AST_IfExprTreeCtx>					m_if_expr;
 
 	std::string GetExpectType ();
 	std::string GetFuncName ();
@@ -101,22 +115,22 @@ struct _AST_ExprOrValue {
 //	std::shared_ptr<_AST_IfExprTreeCtx>
 //>;
 struct _AST_Op1ExprTreeCtx {
-	_AST_Oper1Ctx										_op;
-	_AST_ExprOrValue									_left;
-	std::string											_expect_type;
+	_AST_Oper1Ctx										m_op;
+	_AST_ExprOrValue									m_left;
+	std::string											m_expect_type;
 };
 
 struct _AST_Op2ExprTreeCtx {
-	_AST_ExprOrValue									_left;
-	_AST_Oper2Ctx										_op;
-	_AST_ExprOrValue									_right;
-	std::string											_expect_type;
+	_AST_ExprOrValue									m_left;
+	_AST_Oper2Ctx										m_op;
+	_AST_ExprOrValue									m_right;
+	std::string											m_expect_type;
 
 	bool CalcExpectType () {
 		const static std::set<std::string> s_compare_ops { ">", ">=", "<", "<=", "==", "!=" };
-		std::string _op_str = _op._op;
+		std::string _op_str = m_op.m_op;
 		if (s_compare_ops.contains (_op_str)) {
-			_expect_type = "bool";
+			m_expect_type = "bool";
 			return true;
 		}
 
@@ -125,44 +139,46 @@ struct _AST_Op2ExprTreeCtx {
 			return false;
 		}
 
-		_expect_type = _left.GetExpectType ();
-		return _expect_type != "";
+		m_expect_type = m_left.GetExpectType ();
+		return m_expect_type != "";
 	}
 };
 
 struct _AST_OpNExprTreeCtx {
-	_AST_ExprOrValue									_left;
-	_AST_Oper2Ctx										_op;
-	std::vector<_AST_ExprOrValue>						_rights;
-	std::string											_expect_type;
+	_AST_ExprOrValue									m_left;
+	_AST_Oper2Ctx										m_op;
+	std::vector<_AST_ExprOrValue>						m_rights;
+	std::string											m_expect_type;
 };
 
 struct _AST_IfExprTreeCtx {
-	std::vector<_AST_ExprOrValue>						_conds;
-	std::vector<std::vector<FaParser::StmtContext *>>	_bodys1_raw;
-	std::vector<FaParser::ExprContext *>				_bodys2;
-	std::string											_expect_type;
+	std::vector<_AST_ExprOrValue>						m_conds;
+	std::vector<std::vector<FaParser::StmtContext *>>	m_bodys1_raw;
+	std::vector<FaParser::ExprContext *>				m_bodys2;
+	std::string											m_expect_type;
 };
 
 inline std::string _AST_ExprOrValue::GetExpectType () {
-	if (_val) {
-		return _val->_expect_type;
-	} else if (_op1_expr) {
-		return _op1_expr->_expect_type;
-	} else if (_op2_expr) {
-		return _op2_expr->_expect_type;
-	} else if (_opN_expr) {
-		return _opN_expr->_expect_type;
-	} else if (_if_expr) {
-		return _if_expr->_expect_type;
+	if (m_val) {
+		return m_val->m_expect_type;
+	} else if (m_newval) {
+		return m_newval->m_expect_type;
+	} else if (m_op1_expr) {
+		return m_op1_expr->m_expect_type;
+	} else if (m_op2_expr) {
+		return m_op2_expr->m_expect_type;
+	} else if (m_opN_expr) {
+		return m_opN_expr->m_expect_type;
+	} else if (m_if_expr) {
+		return m_if_expr->m_expect_type;
 	} else {
 		return "";
 	}
 }
 
 inline std::string _AST_ExprOrValue::GetFuncName () {
-	if (_val) {
-		return _val->_val.GetType ();
+	if (m_val) {
+		return m_val->m_val.GetType ();
 	} else {
 		return "";
 	}

@@ -159,15 +159,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitETypeAfter(FaParser::ETypeAfterContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitESign(FaParser::ESignContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitEType(FaParser::ETypeContext *ctx) override {
+  virtual antlrcpp::Any visitTypeNewable(FaParser::TypeNewableContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -176,14 +168,6 @@ public:
   }
 
   virtual antlrcpp::Any visitTypeVarList(FaParser::TypeVarListContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitETypeVar(FaParser::ETypeVarContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitETypeVarList(FaParser::ETypeVarListContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -212,6 +196,14 @@ public:
   }
 
   virtual antlrcpp::Any visitExprOpt(FaParser::ExprOptContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitNewExprItem(FaParser::NewExprItemContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitNewExpr(FaParser::NewExprContext *ctx) override {
     return visitChildren(ctx);
   }
 

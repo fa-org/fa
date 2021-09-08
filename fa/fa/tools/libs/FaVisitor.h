@@ -91,19 +91,11 @@ public:
 
     virtual antlrcpp::Any visitType(FaParser::TypeContext *context) = 0;
 
-    virtual antlrcpp::Any visitETypeAfter(FaParser::ETypeAfterContext *context) = 0;
-
-    virtual antlrcpp::Any visitESign(FaParser::ESignContext *context) = 0;
-
-    virtual antlrcpp::Any visitEType(FaParser::ETypeContext *context) = 0;
+    virtual antlrcpp::Any visitTypeNewable(FaParser::TypeNewableContext *context) = 0;
 
     virtual antlrcpp::Any visitTypeVar(FaParser::TypeVarContext *context) = 0;
 
     virtual antlrcpp::Any visitTypeVarList(FaParser::TypeVarListContext *context) = 0;
-
-    virtual antlrcpp::Any visitETypeVar(FaParser::ETypeVarContext *context) = 0;
-
-    virtual antlrcpp::Any visitETypeVarList(FaParser::ETypeVarListContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *context) = 0;
 
@@ -118,6 +110,10 @@ public:
     virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *context) = 0;
 
     virtual antlrcpp::Any visitExprOpt(FaParser::ExprOptContext *context) = 0;
+
+    virtual antlrcpp::Any visitNewExprItem(FaParser::NewExprItemContext *context) = 0;
+
+    virtual antlrcpp::Any visitNewExpr(FaParser::NewExprContext *context) = 0;
 
     virtual antlrcpp::Any visitStrongExprBase(FaParser::StrongExprBaseContext *context) = 0;
 

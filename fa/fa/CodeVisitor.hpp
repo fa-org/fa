@@ -24,22 +24,22 @@ public:
 
 	antlrcpp::Any visitImportStmt (FaParser::ImportStmtContext *ctx) override {
 		std::string _name = ctx->Id ()->getText ();
-		FaParser::ETypeContext *_ret_type_raw = ctx->eType ();
-		std::vector<FaParser::ETypeVarContext *> _arg_types_raw_tmp = ctx->eTypeVarList ()->eTypeVar ();
-		std::vector<FaParser::ETypeContext *> _arg_types_raw;
+		FaParser::TypeContext *_ret_type_raw = ctx->type ();
+		std::vector<FaParser::TypeVarContext *> _arg_types_raw_tmp = ctx->typeVarList ()->typeVar ();
+		std::vector<FaParser::TypeContext *> _arg_types_raw;
 		for (size_t i = 0; i < _arg_types_raw_tmp.size (); ++i)
-			_arg_types_raw.push_back (_arg_types_raw_tmp[i]->eType ());
+			_arg_types_raw.push_back (_arg_types_raw_tmp[i]->type ());
 		std::string _cc = ctx->callConvention ()->getText ();
 		return std::make_tuple (_name, _ret_type_raw, _arg_types_raw, _cc);
 	}
 
-	antlrcpp::Any visitEType (FaParser::ETypeContext *ctx) override {
-		auto _psign = ctx->eSign ();
-		bool _sign = _psign != nullptr ? (_psign->getText () == "signed") : true;
-		std::string _name = ctx->Id ()->getText ();
-		size_t _ptr_level = ctx->eTypeAfter ().size ();
-		return std::make_tuple (_sign, _name, _ptr_level);
-	}
+	//antlrcpp::Any visitEType (FaParser::ETypeContext *ctx) override {
+	//	auto _psign = ctx->eSign ();
+	//	bool _sign = _psign != nullptr ? (_psign->getText () == "signed") : true;
+	//	std::string _name = ctx->Id ()->getText ();
+	//	size_t _ptr_level = ctx->eTypeAfter ().size ();
+	//	return std::make_tuple (_sign, _name, _ptr_level);
+	//}
 
 	antlrcpp::Any visitIfStmt (FaParser::IfStmtContext *ctx) override {
 		std::vector<std::vector<FaParser::StmtContext *>> _bodys;

@@ -253,8 +253,8 @@ private:
 		for (FaParser::ImportStmtContext *_import_func_raw : _imports_raw) {
 			auto [_name, _ret_type_raw, _arg_types_raw, _cc_str] = m_visitor->visit (_import_func_raw).as<std::tuple<
 				std::string,
-				FaParser::ETypeContext *,
-				std::vector<FaParser::ETypeContext *>,
+				FaParser::TypeContext *,
+				std::vector<FaParser::TypeContext *>,
 				std::string
 			>> ();
 			std::string _func_name = std::format ("::{}", _name);
@@ -385,33 +385,33 @@ private:
 				auto _oval = _parse_middle_expr (_exprs [0], "$");
 				if (!_oval.has_value ())
 					return std::nullopt;
-				_ret->_left = _oval.value ();
-				_ret->_op = _AST_Oper2Ctx { _ops [0] };
-				std::string _cur_type = _ret->_left.GetExpectType ();
+				_ret->m_left = _oval.value ();
+				_ret->m_op = _AST_Oper2Ctx { _ops [0] };
+				std::string _cur_type = _ret->m_left.GetExpectType ();
 				if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type))
 					return std::nullopt;
-				_ret->_expect_type = _exp_type;
+				_ret->m_expect_type = _exp_type;
 				_exp_type = _cur_type.substr (1);
 				auto _cur = _ret;
 				for (size_t i = 1; i < _ops.size (); ++i) {
 					auto _cur_tmp = std::make_shared<_AST_Op2ExprTreeCtx> ();
-					_cur->_right = _cur_tmp;
+					_cur->m_right = _cur_tmp;
 					_cur = _cur_tmp;
 					auto _oval = _parse_middle_expr (_exprs [i], "$");
 					if (!_oval.has_value ())
 						return std::nullopt;
-					_cur->_left = _oval.value ();
-					_cur->_op = _AST_Oper2Ctx { _ops [i] };
-					_cur_type = _cur->_left.GetExpectType ();
+					_cur->m_left = _oval.value ();
+					_cur->m_op = _AST_Oper2Ctx { _ops [i] };
+					_cur_type = _cur->m_left.GetExpectType ();
 					if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type))
 						return std::nullopt;
-					_cur->_expect_type = _exp_type;
+					_cur->m_expect_type = _exp_type;
 					_exp_type = _cur_type.substr (1);
 				}
 				_oval = _parse_middle_expr (_exprs [_exprs.size () - 1], _exp_type);
 				if (!_oval.has_value ())
 					return std::nullopt;
-				_cur->_right = _oval.value ();
+				_cur->m_right = _oval.value ();
 				return _ret;
 			}
 		};
@@ -443,7 +443,7 @@ private:
 
 			// 根据优先级拆分为两块
 			auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
-			_ptr->_op = _AST_Oper2Ctx { _op_raws [_pos] };
+			_ptr->m_op = _AST_Oper2Ctx { _op_raws [_pos] };
 			std::vector<FaParser::StrongExprContext *> _expr_raws_L, _expr_raws_R;
 			std::vector<FaParser::AllOp2Context *> _op_raws_L, _op_raws_R;
 			std::vector<size_t> _op_levels_L, _op_levels_R;
@@ -460,21 +460,21 @@ private:
 
 			// 初步计算期望类型
 			std::string _exp_type_L = "", _exp_type_R = "";
-			if (_ptr->_op._type == _Op2Type::Assign) {
-				LOG_TODO (_ptr->_op._t);
+			if (_ptr->m_op.m_type == _Op2Type::Assign) {
+				LOG_TODO (_ptr->m_op.m_t);
 				return std::nullopt;
-			} else if (_ptr->_op._type == _Op2Type::NoChange) {
+			} else if (_ptr->m_op.m_type == _Op2Type::NoChange) {
 				if (_exp_type != "") {
 					_exp_type_L = _exp_type_R = _exp_type;
 				}
-			} else if (_ptr->_op._type == _Op2Type::Compare) {
+			} else if (_ptr->m_op.m_type == _Op2Type::Compare) {
 				if (_exp_type != "" && _exp_type != "bool") {
-					LOG_ERROR (_ptr->_op._t, std::format ("比较运算无法产生 {} 类型的值", _exp_type));
+					LOG_ERROR (_ptr->m_op.m_t, std::format ("比较运算无法产生 {} 类型的值", _exp_type));
 					return std::nullopt;
 				}
 			} else {
-				if (_ptr->_op._op != "??") {
-					LOG_TODO (_ptr->_op._t);
+				if (_ptr->m_op.m_op != "??") {
+					LOG_TODO (_ptr->m_op.m_t);
 					return std::nullopt;
 				}
 				if (_exp_type != "") {
@@ -487,25 +487,25 @@ private:
 			auto _oval = _parse_middle_expr2 (std::ref (_expr_raws_L), std::ref (_op_raws_L), std::ref (_op_levels_L), _exp_type_L);
 			if (!_oval.has_value ())
 				return std::nullopt;
-			_ptr->_left = _oval.value ();
+			_ptr->m_left = _oval.value ();
 			_oval = _parse_middle_expr2 (std::ref (_expr_raws_R), std::ref (_op_raws_R), std::ref (_op_levels_R), _exp_type_R);
 			if (!_oval.has_value ())
 				return std::nullopt;
-			_ptr->_right = _oval.value ();
+			_ptr->m_right = _oval.value ();
 
 			// 确定具体的期望
-			_exp_type_L = _ptr->_left.GetExpectType ();
-			_exp_type_R = _ptr->_right.GetExpectType ();
-			if (_ptr->_op._type == _Op2Type::Assign) {
-				LOG_TODO (_ptr->_op._t);
+			_exp_type_L = _ptr->m_left.GetExpectType ();
+			_exp_type_R = _ptr->m_right.GetExpectType ();
+			if (_ptr->m_op.m_type == _Op2Type::Assign) {
+				LOG_TODO (_ptr->m_op.m_t);
 				return std::nullopt;
-			} else if (_ptr->_op._type == _Op2Type::NoChange || _ptr->_op._type == _Op2Type::Compare) {
-				if ((_ptr->_op._type == _Op2Type::NoChange && _exp_type == "") || _ptr->_op._type == _Op2Type::Compare) {
+			} else if (_ptr->m_op.m_type == _Op2Type::NoChange || _ptr->m_op.m_type == _Op2Type::Compare) {
+				if ((_ptr->m_op.m_type == _Op2Type::NoChange && _exp_type == "") || _ptr->m_op.m_type == _Op2Type::Compare) {
 					if (_exp_type_L == _exp_type_R) {
 						_exp_type = _exp_type_L;
 					} else {
 						// 预期类型不同，那么获取适配类型
-						auto _exp_otype = TypeMap::GetCompatibleType (_ptr->_op._t, { _exp_type_L, _exp_type_R });
+						auto _exp_otype = TypeMap::GetCompatibleType (_ptr->m_op.m_t, { _exp_type_L, _exp_type_R });
 						if (!_exp_otype.has_value ())
 							return std::nullopt;
 						_exp_type = _exp_otype.value ();
@@ -513,20 +513,20 @@ private:
 							_oval = _parse_middle_expr2 (std::ref (_expr_raws_L), std::ref (_op_raws_L), std::ref (_op_levels_L), _exp_type_L);
 							if (!_oval.has_value ())
 								return std::nullopt;
-							_ptr->_left = _oval.value ();
+							_ptr->m_left = _oval.value ();
 						}
 						if (_exp_type_R != _exp_type) {
 							_oval = _parse_middle_expr2 (std::ref (_expr_raws_R), std::ref (_op_raws_R), std::ref (_op_levels_R), _exp_type_R);
 							if (!_oval.has_value ())
 								return std::nullopt;
-							_ptr->_right = _oval.value ();
+							_ptr->m_right = _oval.value ();
 						}
 					}
 				}
 			} else {
-				if (_ptr->_op._op == "??") {
+				if (_ptr->m_op.m_op == "??") {
 					if (_exp_type_L [_exp_type_L.size () - 1] != '?') {
-						LOG_ERROR (_ptr->_op._t, "不可空类型无法使用 ?? 运算");
+						LOG_ERROR (_ptr->m_op.m_t, "不可空类型无法使用 ?? 运算");
 						return std::nullopt;
 					}
 					if (_exp_type_R [_exp_type_R.size () - 1] == '?' && _exp_type_L == _exp_type_R) {
@@ -534,15 +534,15 @@ private:
 					} else if (_exp_type_L == std::format ("{}?", _exp_type_R)) {
 						_exp_type = _exp_type_R;
 					} else {
-						LOG_ERROR (_ptr->_op._t, "无法使用 ?? 运算");
+						LOG_ERROR (_ptr->m_op.m_t, "无法使用 ?? 运算");
 						return std::nullopt;
 					}
 				} else {
-					LOG_TODO (_ptr->_op._t);
+					LOG_TODO (_ptr->m_op.m_t);
 					return std::nullopt;
 				}
 			}
-			_ptr->_expect_type = _exp_type;
+			_ptr->m_expect_type = _exp_type;
 			return _ptr;
 		};
 		_parse_strong_expr = [&] (FaParser::StrongExprContext *_expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
@@ -557,23 +557,23 @@ private:
 						_init = false;
 						_ret = _cur = _ev;
 					} else {
-						if (_cur._op1_expr) {
-							_cur._op1_expr->_left = _ev;
-							_cur = _cur._op1_expr->_left;
-						} else if (_cur._op2_expr) {
-							_cur._op2_expr->_left = _ev;
-							_cur = _cur._op2_expr->_left;
-						} else if (_cur._opN_expr) {
-							_cur._opN_expr->_left = _ev;
-							_cur = _cur._opN_expr->_left;
+						if (_cur.m_op1_expr) {
+							_cur.m_op1_expr->m_left = _ev;
+							_cur = _cur.m_op1_expr->m_left;
+						} else if (_cur.m_op2_expr) {
+							_cur.m_op2_expr->m_left = _ev;
+							_cur = _cur.m_op2_expr->m_left;
+						} else if (_cur.m_opN_expr) {
+							_cur.m_opN_expr->m_left = _ev;
+							_cur = _cur.m_opN_expr->m_left;
 						}
 					}
 				};
 				//
 				for (auto _prefix_raw : _expr_raw->strongExprPrefix ()) {
 					auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
-					_ptr->_op = _AST_Oper1Ctx { _prefix_raw };
-					_ptr->_expect_type = _exp_type;
+					_ptr->m_op = _AST_Oper1Ctx { _prefix_raw };
+					_ptr->m_expect_type = _exp_type;
 					_update_next (_ptr);
 				}
 				//
@@ -582,16 +582,16 @@ private:
 					auto _suffix_raw = *_suffix_praw;
 					if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
 						auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
-						_ptr->_op = _AST_Oper1Ctx { _suffix_raw };
-						_ptr->_expect_type = _exp_type;
-						if (_ptr->_expect_type [0] != '$') {
+						_ptr->m_op = _AST_Oper1Ctx { _suffix_raw };
+						_ptr->m_expect_type = _exp_type;
+						if (_ptr->m_expect_type [0] != '$') {
 							LOG_ERROR (_suffix_raw->start, "对象不可被赋值");
 							return std::nullopt;
 						}
 						_update_next (_ptr);
 					} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
 						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
-						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
+						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
 						auto _func = m_global_funcs->GetFunc (_exp_type);
 						auto _expr_opt_raws = _suffix_raw->exprOpt ();
 						if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
@@ -605,19 +605,19 @@ private:
 								auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
 								if (!_right_oval.has_value ())
 									return std::nullopt;
-								_ptr->_rights.push_back (_right_oval.value ());
+								_ptr->m_rights.push_back (_right_oval.value ());
 							} else {
 								//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
 								LOG_TODO (_expr_opt_raws [i]->start);
 								return std::nullopt;
 							}
 						}
-						_exp_type = _ptr->_expect_type = _func->m_ret_type;
+						_exp_type = _ptr->m_expect_type = _func->m_ret_type;
 						_update_next (_ptr);
 					} else if (_suffix_raw->PointOp ()) {
 						auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
-						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
-						_ptr->_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
+						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
+						_ptr->m_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
 						if (!_ptr->CalcExpectType ()) {
 							LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
 							return std::nullopt;
@@ -644,18 +644,18 @@ private:
 				for (auto _suffix_raw : _expr_raw->strongExprSuffix ()) {
 					if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
 						auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
-						_ptr->_op = _AST_Oper1Ctx { _suffix_raw };
-						_ptr->_left = _val;
-						_ptr->_expect_type = _val.GetExpectType ();
-						if (_ptr->_expect_type [0] != '$') {
+						_ptr->m_op = _AST_Oper1Ctx { _suffix_raw };
+						_ptr->m_left = _val;
+						_ptr->m_expect_type = _val.GetExpectType ();
+						if (_ptr->m_expect_type [0] != '$') {
 							LOG_ERROR (_suffix_raw->start, "对象不可被赋值");
 							return std::nullopt;
 						}
 						_val = _ptr;
 					} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
 						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
-						_ptr->_left = _val;
-						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
+						_ptr->m_left = _val;
+						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
 						auto _func = m_global_funcs->GetFunc (_val.GetFuncName ());
 						auto _expr_opt_raws = _suffix_raw->exprOpt ();
 						if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
@@ -669,20 +669,20 @@ private:
 								auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
 								if (!_right_oval.has_value ())
 									return std::nullopt;
-								_ptr->_rights.push_back (_right_oval.value ());
+								_ptr->m_rights.push_back (_right_oval.value ());
 							} else {
 								//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
 								LOG_TODO (_expr_opt_raws [i]->start);
 								return std::nullopt;
 							}
 						}
-						_ptr->_expect_type = _func->m_ret_type;
+						_ptr->m_expect_type = _func->m_ret_type;
 						_val = _ptr;
 					} else if (_suffix_raw->PointOp ()) {
 						auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
-						_ptr->_left = _val;
-						_ptr->_op = _AST_Oper2Ctx { _suffix_raw };
-						_ptr->_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
+						_ptr->m_left = _val;
+						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
+						_ptr->m_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
 						if (!_ptr->CalcExpectType ()) {
 							LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
 							return std::nullopt;
@@ -696,9 +696,9 @@ private:
 				auto _prefix_raws = _expr_raw->strongExprPrefix ();
 				for (auto _prefix_praw = _prefix_raws.rbegin (); _prefix_praw != _prefix_raws.rend (); ++_prefix_praw) {
 					auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
-					_ptr->_op = _AST_Oper1Ctx { *_prefix_praw };
-					_ptr->_left = _val;
-					_ptr->_expect_type = _val.GetExpectType ();
+					_ptr->m_op = _AST_Oper1Ctx { *_prefix_praw };
+					_ptr->m_left = _val;
+					_ptr->m_expect_type = _val.GetExpectType ();
 					_val = _ptr;
 				}
 				if (!TypeMap::CanImplicitConvTo (_val.GetExpectType (), _exp_type))
@@ -733,6 +733,8 @@ private:
 				return _parse_if_expr (_expr_raw->ifExpr (), _exp_type);
 			} else if (_expr_raw->quotExpr ()) {
 				return _parse_expr (_expr_raw->quotExpr ()->expr (), _exp_type);
+			} else if (_expr_raw->newExpr ()) {
+				//////////////////////////////////////////////// TODO
 			}
 			LOG_TODO (_expr_raw->start);
 			return std::nullopt;
@@ -743,7 +745,7 @@ private:
 				auto _cond_oval = _parse_expr (_cond_raw, "bool");
 				if (!_cond_oval.has_value ())
 					return std::nullopt;
-				_if_expr->_conds.push_back (_cond_oval.value ());
+				_if_expr->m_conds.push_back (_cond_oval.value ());
 			}
 
 			// 计算期望类型
@@ -770,12 +772,12 @@ private:
 			auto _real_exp_otype = TypeMap::GetCompatibleType (_expr_raw->start, _exp_types);
 			if (!_real_exp_otype.has_value ())
 				return std::nullopt;
-			_if_expr->_expect_type = _real_exp_otype.value ();
+			_if_expr->m_expect_type = _real_exp_otype.value ();
 
 			// 根据真实期望类型生成代码
 			for (auto _body_raw : _expr_raw->quotStmtExpr ()) {
-				_if_expr->_bodys1_raw.push_back (_body_raw->stmt ());
-				_if_expr->_bodys2.push_back (_body_raw->expr ());
+				_if_expr->m_bodys1_raw.push_back (_body_raw->stmt ());
+				_if_expr->m_bodys2.push_back (_body_raw->expr ());
 			}
 			return _if_expr;
 		};
@@ -796,43 +798,43 @@ private:
 		std::function<std::optional<std::tuple<AstValue, std::string>> (_AST_ExprOrValue _ast_ev)> _generate_code;
 		_generate_code = [&] (_AST_ExprOrValue _ast_ev) -> std::optional<std::tuple<AstValue, std::string>> {
 			std::string _rexp_type = _ast_ev.GetExpectType ();
-			if (_ast_ev._val) {
-				auto _left = _trans_type (_ast_ev._val->_val, _rexp_type);
+			if (_ast_ev.m_val) {
+				auto _left = _trans_type (_ast_ev.m_val->m_val, _rexp_type);
 				return std::make_tuple (_left, _rexp_type);
-			} else if (_ast_ev._op1_expr) {
-				auto _oleft = _generate_code (_ast_ev._op1_expr->_left);
+			} else if (_ast_ev.m_op1_expr) {
+				auto _oleft = _generate_code (_ast_ev.m_op1_expr->m_left);
 				if (!_oleft.has_value ())
 					return std::nullopt;
 				auto [_left, _exp_type] = _oleft.value ();
 				_left = _trans_type (_left, _exp_type);
-				auto _val = _func_ctx.DoOper1 (_left, _ast_ev._op1_expr->_op._op, _ast_ev._op1_expr->_op._t);
+				auto _val = _func_ctx.DoOper1 (_left, _ast_ev.m_op1_expr->m_op.m_op, _ast_ev.m_op1_expr->m_op.m_t);
 				return std::make_tuple (_val, _rexp_type);
-			} else if (_ast_ev._op2_expr) {
-				auto _oleft = _generate_code (_ast_ev._op2_expr->_left);
+			} else if (_ast_ev.m_op2_expr) {
+				auto _oleft = _generate_code (_ast_ev.m_op2_expr->m_left);
 				if (!_oleft.has_value ())
 					return std::nullopt;
 				auto [_left, _exp_type] = _oleft.value ();
 				_left = _trans_type (_left, _exp_type);
 				//
-				auto _oright = _generate_code (_ast_ev._op2_expr->_right);
+				auto _oright = _generate_code (_ast_ev.m_op2_expr->m_right);
 				if (!_oright.has_value ())
 					return std::nullopt;
 				auto [_right, _exp_type2] = _oright.value ();
 				_right = _trans_type (_right, _exp_type2);
 				//
-				auto _val = _func_ctx.DoOper2 (_left, _ast_ev._op2_expr->_op._op, _right, _ast_ev._op2_expr->_op._t);
+				auto _val = _func_ctx.DoOper2 (_left, _ast_ev.m_op2_expr->m_op.m_op, _right, _ast_ev.m_op2_expr->m_op.m_t);
 				_val = _trans_type (_val, _rexp_type);
 				return std::make_tuple (_val, _rexp_type);
-			} else if (_ast_ev._opN_expr) {
-				if (_ast_ev._opN_expr->_op._op == "()") {
-					auto _oobj = _generate_code (_ast_ev._opN_expr->_left);
+			} else if (_ast_ev.m_opN_expr) {
+				if (_ast_ev.m_opN_expr->m_op.m_op == "()") {
+					auto _oobj = _generate_code (_ast_ev.m_opN_expr->m_left);
 					if (!_oobj.has_value ())
 						return std::nullopt;
 					AstValue _obj = std::get<0> (_oobj.value ());
 					std::vector<std::string> _arg_types = std::get<1> (_obj.GetFuncType ());
 					std::vector<AstValue> _args;
 					for (size_t i = 0; i < _arg_types.size (); ++i) {
-						auto _oarg = _generate_code (_ast_ev._opN_expr->_rights [i]);
+						auto _oarg = _generate_code (_ast_ev.m_opN_expr->m_rights [i]);
 						if (!_oarg.has_value ())
 							return std::nullopt;
 						auto _arg = _trans_type (std::get<0> (_oarg.value ()), _arg_types [i]);
@@ -841,39 +843,39 @@ private:
 					AstValue _val = _func_ctx.FuncInvoke (_obj, _args);
 					_val = _trans_type (_val, _rexp_type);
 					return std::make_tuple (_val, _rexp_type);
-				} else if (_ast_ev._opN_expr->_op._op == "[]") {
+				} else if (_ast_ev.m_opN_expr->m_op.m_op == "[]") {
 					// TODO
-					LOG_TODO (_ast_ev._opN_expr->_op._t);
+					LOG_TODO (_ast_ev.m_opN_expr->m_op.m_t);
 					return std::nullopt;
 				} else {
-					LOG_TODO (_ast_ev._opN_expr->_op._t);
+					LOG_TODO (_ast_ev.m_opN_expr->m_op.m_t);
 					return std::nullopt;
 				}
-			} else if (_ast_ev._if_expr) {
-				AstValue _var_temp = _func_ctx.DefineVariable (_rexp_type, _ast_ev._if_expr->_bodys2 [0]->start);
+			} else if (_ast_ev.m_if_expr) {
+				AstValue _var_temp = _func_ctx.DefineVariable (_rexp_type, _ast_ev.m_if_expr->m_bodys2 [0]->start);
 				//
 				std::function<bool ()> _process_first_block = [&] () {
-					if (!StmtBuilder (_func_ctx, _ast_ev._if_expr->_bodys1_raw [0]))
+					if (!StmtBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys1_raw [0]))
 						return false;
-					_ast_ev._if_expr->_bodys1_raw.erase (_ast_ev._if_expr->_bodys1_raw.begin ());
-					AstValue _block_ret = ExprBuilder (_func_ctx, _ast_ev._if_expr->_bodys2 [0], _rexp_type);
+					_ast_ev.m_if_expr->m_bodys1_raw.erase (_ast_ev.m_if_expr->m_bodys1_raw.begin ());
+					AstValue _block_ret = ExprBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys2 [0], _rexp_type);
 					if (!_block_ret.IsValid ())
 						return false;
-					AstValue _ret = _func_ctx.DoOper2 (_var_temp, "=", _block_ret, _ast_ev._if_expr->_bodys2 [0]->start);
+					AstValue _ret = _func_ctx.DoOper2 (_var_temp, "=", _block_ret, _ast_ev.m_if_expr->m_bodys2 [0]->start);
 					if (!_ret.IsValid ())
 						return false;
-					_ast_ev._if_expr->_bodys2.erase (_ast_ev._if_expr->_bodys2.begin ());
+					_ast_ev.m_if_expr->m_bodys2.erase (_ast_ev.m_if_expr->m_bodys2.begin ());
 					return true;
 				};
 				//
 				std::function<bool ()> _generate_ifexpr;
 				_generate_ifexpr = [&] () -> bool {
-					if (_ast_ev._if_expr->_conds.size () > 0) {
+					if (_ast_ev.m_if_expr->m_conds.size () > 0) {
 						// if {} else
-						auto _ocond = _generate_code (_ast_ev._if_expr->_conds [0]);
+						auto _ocond = _generate_code (_ast_ev.m_if_expr->m_conds [0]);
 						if (!_ocond.has_value ())
 							return false;
-						_ast_ev._if_expr->_conds.erase (_ast_ev._if_expr->_conds.begin ());
+						_ast_ev.m_if_expr->m_conds.erase (_ast_ev.m_if_expr->m_conds.begin ());
 						auto _cond = std::get<0> (_ocond.value ());
 						return _func_ctx.IfElse (_cond, [&] () -> bool {
 							return _process_first_block ();

@@ -25,11 +25,11 @@ class TypeMap {
 public:
 	TypeMap (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx): m_visitor (_visitor), m_ctx (_ctx) {}
 
-	std::optional<std::tuple<std::string, llvm::Type *>> GetTypeT (FaParser::TypeContext *_type_ctx) {
+	std::optional<std::tuple<llvm::Type *, std::string>> GetTypeT (FaParser::TypeContext *_type_ctx) {
 		auto _stype = _type_ctx->getText ();
 		auto _otype = GetType (_stype, _type_ctx->start);
 		if (_otype.has_value ()) {
-			return std::make_tuple (_stype, _otype.value ());
+			return std::make_tuple (_otype.value (), _stype);
 		} else {
 			return std::nullopt;
 		}
@@ -79,18 +79,18 @@ public:
 		return _types;
 	}
 
-	std::optional<std::tuple<std::vector<std::string>, std::vector<llvm::Type *>>> GetTypesT (std::vector<FaParser::TypeContext *> _types_raw) {
-		std::vector<std::string> _type_strs;
+	std::optional<std::tuple<std::vector<llvm::Type *>, std::vector<std::string>>> GetTypesT (std::vector<FaParser::TypeContext *> _types_raw) {
 		std::vector<llvm::Type *> _types;
+		std::vector<std::string> _type_strs;
 		for (FaParser::TypeContext *_type_raw : _types_raw) {
 			std::string _type_str = _type_raw->getText ();
 			std::optional<llvm::Type *> _type = GetType (_type_str, _type_raw->start);
 			if (!_type.has_value ())
 				return std::nullopt;
-			_type_strs.push_back (_type_str);
 			_types.push_back (_type.value ());
+			_type_strs.push_back (_type_str);
 		}
-		return std::make_tuple (_type_strs, _types);
+		return std::make_tuple (_types, _type_strs);
 	}
 
 	// 获取类型名称
@@ -248,69 +248,69 @@ public:
 
 
 
-	std::optional<std::tuple<llvm::Type *, std::string>> GetExternType (FaParser::ETypeContext *_etype_ctx) {
-		auto [_sign, _name, _ptr_level] = m_visitor->visitEType (_etype_ctx).as<std::tuple<bool, std::string, size_t>> ();
-		// _sign 好像暂时用不到
-		if (_name == "void") {
-			if (_ptr_level == 0) {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getVoidTy (*m_ctx), std::string ("void"));
-			} else {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
-			}
-		} else if (_name == "char") {
-			if (_ptr_level == 0) {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt8Ty (*m_ctx), std::string ("int8"));
-			} else {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
-			}
-		} else if (_name == "short") {
-			if (_ptr_level == 0) {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt16Ty (*m_ctx), std::string ("int16"));
-			} else {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt16PtrTy (*m_ctx), std::string ("int16*"));
-			}
-		} else if (_name == "int") {
-			if (_ptr_level == 0) {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt32Ty (*m_ctx), std::string ("int32"));
-			} else {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt32PtrTy (*m_ctx), std::string ("int32*"));
-			}
-		} else if (_name == "long") {
-			if (_ptr_level == 0) {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt64Ty (*m_ctx), std::string ("int64"));
-			} else {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getInt64PtrTy (*m_ctx), std::string ("int64*"));
-			}
-		} else if (_name == "float") {
-			if (_ptr_level == 0) {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getFloatTy (*m_ctx), std::string ("float32"));
-			} else {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getFloatPtrTy (*m_ctx), std::string ("float32*"));
-			}
-		} else if (_name == "double") {
-			if (_ptr_level == 0) {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getDoubleTy (*m_ctx), std::string ("float64"));
-			} else {
-				return std::make_tuple ((llvm::Type *) llvm::Type::getDoublePtrTy (*m_ctx), std::string ("float64*"));
-			}
-		}
-		LOG_ERROR (_etype_ctx->start, std::format ("无法识别的外部接口函数类型 [{}]", _name));
-		return std::nullopt;
-	}
+	//std::optional<std::tuple<llvm::Type *, std::string>> GetExternType (FaParser::ETypeContext *_etype_ctx) {
+	//	auto [_sign, _name, _ptr_level] = m_visitor->visitEType (_etype_ctx).as<std::tuple<bool, std::string, size_t>> ();
+	//	// _sign 好像暂时用不到
+	//	if (_name == "void") {
+	//		if (_ptr_level == 0) {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getVoidTy (*m_ctx), std::string ("void"));
+	//		} else {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
+	//		}
+	//	} else if (_name == "char") {
+	//		if (_ptr_level == 0) {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt8Ty (*m_ctx), std::string ("int8"));
+	//		} else {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
+	//		}
+	//	} else if (_name == "short") {
+	//		if (_ptr_level == 0) {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt16Ty (*m_ctx), std::string ("int16"));
+	//		} else {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt16PtrTy (*m_ctx), std::string ("int16*"));
+	//		}
+	//	} else if (_name == "int") {
+	//		if (_ptr_level == 0) {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt32Ty (*m_ctx), std::string ("int32"));
+	//		} else {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt32PtrTy (*m_ctx), std::string ("int32*"));
+	//		}
+	//	} else if (_name == "long") {
+	//		if (_ptr_level == 0) {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt64Ty (*m_ctx), std::string ("int64"));
+	//		} else {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt64PtrTy (*m_ctx), std::string ("int64*"));
+	//		}
+	//	} else if (_name == "float") {
+	//		if (_ptr_level == 0) {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getFloatTy (*m_ctx), std::string ("float32"));
+	//		} else {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getFloatPtrTy (*m_ctx), std::string ("float32*"));
+	//		}
+	//	} else if (_name == "double") {
+	//		if (_ptr_level == 0) {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getDoubleTy (*m_ctx), std::string ("float64"));
+	//		} else {
+	//			return std::make_tuple ((llvm::Type *) llvm::Type::getDoublePtrTy (*m_ctx), std::string ("float64*"));
+	//		}
+	//	}
+	//	LOG_ERROR (_etype_ctx->start, std::format ("无法识别的外部接口函数类型 [{}]", _name));
+	//	return std::nullopt;
+	//}
 
-	std::optional<std::tuple<std::vector<llvm::Type *>, std::vector<std::string>>> GetExternTypes (std::vector<FaParser::ETypeContext *> _types_raw) {
-		std::vector<llvm::Type *> _types;
-		std::vector<std::string> _type_strs;
-		for (FaParser::ETypeContext *_type_raw : _types_raw) {
-			auto _type = GetExternType (_type_raw);
-			if (!_type.has_value ())
-				return std::nullopt;
-			auto [_type0, _type_str] = _type.value ();
-			_types.push_back (_type0);
-			_type_strs.push_back (_type_str);
-		}
-		return std::make_tuple (_types, _type_strs);
-	}
+	//std::optional<std::tuple<std::vector<llvm::Type *>, std::vector<std::string>>> GetExternTypes (std::vector<FaParser::ETypeContext *> _types_raw) {
+	//	std::vector<llvm::Type *> _types;
+	//	std::vector<std::string> _type_strs;
+	//	for (FaParser::ETypeContext *_type_raw : _types_raw) {
+	//		auto _type = GetExternType (_type_raw);
+	//		if (!_type.has_value ())
+	//			return std::nullopt;
+	//		auto [_type0, _type_str] = _type.value ();
+	//		_types.push_back (_type0);
+	//		_type_strs.push_back (_type_str);
+	//	}
+	//	return std::make_tuple (_types, _type_strs);
+	//}
 
 private:
 	FaVisitor *m_visitor = nullptr;
