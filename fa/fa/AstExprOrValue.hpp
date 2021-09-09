@@ -23,15 +23,17 @@ struct _AST_ValueCtx {
 };
 
 struct _AST_NewCtx {
-	_AST_NewCtx (std::vector<std::string> _cls_vars, std::vector<std::string> _params, std::string _tmp_type, std::string _expect_type): m_tmp_type (_tmp_type), m_expect_type (_expect_type) {
+	_AST_NewCtx (std::string _tmp_type, std::string _expect_type): m_tmp_type (_tmp_type), m_expect_type (_expect_type) {}
+
+	void SetInitVars (std::vector<std::string> &_cls_vars, std::vector<_AST_ExprOrValue> &_params) {
 		m_cls_vars.assign (_cls_vars.cbegin (), _cls_vars.cend ());
 		m_params.assign (_params.cbegin (), _params.cend ());
 	}
 
-	std::vector<std::string>	m_cls_vars;
-	std::vector<std::string>	m_params;
-	std::string					m_tmp_type = "";
-	std::string					m_expect_type = "";
+	std::string						m_tmp_type = "";
+	std::string						m_expect_type = "";
+	std::vector<std::string>		m_cls_vars;
+	std::vector<_AST_ExprOrValue>	m_params;
 };
 
 struct _AST_Oper1Ctx {

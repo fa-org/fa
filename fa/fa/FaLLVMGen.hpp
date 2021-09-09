@@ -738,16 +738,41 @@ private:
 				std::string _cur_type = _new_raw->ids () ? _new_raw->ids ()->getText () : "";
 				if (_cur_type != "") {
 					if (_exp_type != "") {
-						if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type)) {
-							LOG_ERROR (_new_raw->start, std::format ("{} 类型无法转为 {} 类型", _cur_type, _exp_type));
-							return std::nullopt;
+						if (_cur_type != _exp_type) {
+							if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type)) {
+								LOG_ERROR (_new_raw->start, std::format ("{} 类型无法转为 {} 类型", _cur_type, _exp_type));
+								return std::nullopt;
+							}
+						} else {
+							_cur_type = "";
 						}
+					} else {
+						_exp_type = _cur_type;
+						_cur_type = "";
 					}
 				} else {
 					if (_exp_type == "")
 						_exp_type = "Json";
 				}
-				//////////////////////////////////////////////// TODO
+				auto _newval = std::make_shared<_AST_NewCtx> (_cur_type, _exp_type);
+				std::vector<std::string> _cls_vars;
+				std::vector<_AST_ExprOrValue> _params;
+				_newval->SetInitVars (_cls_vars, _params);
+				for (auto _item_raw : _new_raw->newExprItem ()) {
+					std::string _var_name = _item_raw->Id ()->getText ();
+					_cls_vars.push_back (_var_name);
+					if (_item_raw->middleExpr ()) {
+						//new Obj { _var = 3 };
+						auto _oval = _parse_middle_expr (_item_raw->middleExpr (), "TODO 期望类型");
+						if (!_oval.has_value ())
+							return std::nullopt;
+						_params.push_back (_oval.value ());
+					} else {
+						//new Obj { _var };
+						_params.push_back (std::make_shared<_AST_ValueCtx> (_func_ctx.GetVariable (_var_name), _item_raw->start, "TODO 期望类型"));
+					}
+				}
+				return _AST_ExprOrValue { _newval };
 			}
 			LOG_TODO (_expr_raw->start);
 			return std::nullopt;

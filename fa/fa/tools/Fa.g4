@@ -185,7 +185,7 @@ whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
 //
 quotExpr:					QuotYuanL expr QuotYuanR;
 exprOpt:					expr?;
-newExprItem:				Id (Assign expr)?;
+newExprItem:				Id (Assign middleExpr)?;
 newExpr:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
 strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr | newExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// ǰ׺ - ++ -- ~
