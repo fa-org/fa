@@ -49,7 +49,7 @@
 
 class FaLLVMGen {
 public:
-	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name): m_visitor (_visitor), m_module_name (_module_name) {
+	FaLLVMGen (CodeVisitor *_visitor, std::string _module_name, std::string _namespace): m_visitor (_visitor), m_module_name (_module_name), m_namespace (_namespace) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (m_module_name, *m_ctx);
 		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx);
@@ -58,7 +58,7 @@ public:
 		m_global_classes = std::make_shared<AstClasses> ();
 	}
 
-	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _out_file, std::string _namespace) {
+	bool Compile (FaParser::ProgramContext *_program_ctx, std::string _out_file) {
 		auto [_uses, _imports, _classes, _entry] = m_visitor->visit (_program_ctx).as<std::tuple<
 			std::vector<std::string>,
 			FaParser::ImportBlockContext *,
@@ -92,7 +92,7 @@ public:
 			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
 
 			// 类名
-			std::string _name = std::format ("{}.{}", _namespace, _class_raw->Id ()->getText ());
+			std::string _name = std::format ("{}.{}", m_namespace, _class_raw->Id ()->getText ());
 			auto _oclass = m_global_classes->GetClass (_name);
 			if (_oclass.has_value ()) {
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
@@ -735,12 +735,17 @@ private:
 				return _parse_expr (_expr_raw->quotExpr ()->expr (), _exp_type);
 			} else if (_expr_raw->newExpr ()) {
 				auto _new_raw = _expr_raw->newExpr ();
-				if (_new_raw->ids ()) {
+				std::string _cur_type = _new_raw->ids () ? _new_raw->ids ()->getText () : "";
+				if (_cur_type != "") {
 					if (_exp_type != "") {
-						if (TypeMap::CanImplicitConvTo ())
+						if (!TypeMap::CanImplicitConvTo (_cur_type, _exp_type)) {
+							LOG_ERROR (_new_raw->start, std::format ("{} 类型无法转为 {} 类型", _cur_type, _exp_type));
+							return std::nullopt;
+						}
 					}
 				} else {
-
+					if (_exp_type == "")
+						_exp_type = "Json";
 				}
 				//////////////////////////////////////////////// TODO
 			}
@@ -933,6 +938,7 @@ private:
 
 	CodeVisitor *m_visitor = nullptr;
 	std::string m_module_name;
+	std::string m_namespace;
 	std::shared_ptr<llvm::LLVMContext> m_ctx;
 	std::shared_ptr<llvm::Module> m_module;
 	std::shared_ptr<TypeMap> m_type_map;
