@@ -754,7 +754,9 @@ private:
 					if (_exp_type == "")
 						_exp_type = "Json";
 				}
+
 				auto _newval = std::make_shared<_AST_NewCtx> (_cur_type, _exp_type);
+				auto _ocls = FindAstClass (_func_ctx, );
 				std::vector<std::string> _cls_vars;
 				std::vector<_AST_ExprOrValue> _params;
 				_newval->SetInitVars (_cls_vars, _params);
