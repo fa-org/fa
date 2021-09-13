@@ -735,6 +735,7 @@ private:
 				return _parse_expr (_expr_raw->quotExpr ()->expr (), _exp_type);
 			} else if (_expr_raw->newExpr ()) {
 				auto _new_raw = _expr_raw->newExpr ();
+				// 处理预期与实际
 				std::string _cur_type = _new_raw->ids () ? _new_raw->ids ()->getText () : "";
 				if (_cur_type != "") {
 					if (_exp_type != "") {
@@ -755,25 +756,54 @@ private:
 						_exp_type = "Json";
 				}
 
+				// 检测类型
+				std::shared_ptr<AstClass> _cls;
+				if (_cur_type != "") {
+					auto _ocls = FindAstClass (_func_ctx, _cur_type);
+					if (!_ocls.has_value ()) {
+						LOG_ERROR (_new_raw->start, std::format ("未定义的标识符 {}", _cur_type));
+						return std::nullopt;
+					}
+					_cls = _ocls.value ();
+					_cur_type = _cls->m_name;
+				}
+				if (_exp_type != "") {
+					auto _ocls = FindAstClass (_func_ctx, _exp_type);
+					if (!_ocls.has_value ()) {
+						LOG_ERROR (_new_raw->start, std::format ("未定义的标识符 {}", _exp_type));
+						return std::nullopt;
+					}
+					if (!_cls)
+						_cls = _ocls.value ();
+					_exp_type = _ocls.value ()->m_name;
+				}
+
 				auto _newval = std::make_shared<_AST_NewCtx> (_cur_type, _exp_type);
-				auto _ocls = FindAstClass (_func_ctx, );
 				std::vector<std::string> _cls_vars;
 				std::vector<_AST_ExprOrValue> _params;
 				_newval->SetInitVars (_cls_vars, _params);
 				for (auto _item_raw : _new_raw->newExprItem ()) {
 					std::string _var_name = _item_raw->Id ()->getText ();
 					_cls_vars.push_back (_var_name);
+					auto _oclsvar = _cls->GetVar (_var_name);
+					if (!_oclsvar.has_value ()) {
+						LOG_ERROR (_new_raw->start, std::format ("类 {} 中未定义的标识符 {}", _cls->m_name, _var_name));
+						return std::nullopt;
+					}
+					std::string _var_exp_type = _oclsvar.value ()->m_type;
+
 					if (_item_raw->middleExpr ()) {
 						//new Obj { _var = 3 };
-						auto _oval = _parse_middle_expr (_item_raw->middleExpr (), "TODO 期望类型");
+						auto _oval = _parse_middle_expr (_item_raw->middleExpr (), _var_exp_type);
 						if (!_oval.has_value ())
 							return std::nullopt;
 						_params.push_back (_oval.value ());
 					} else {
 						//new Obj { _var };
-						_params.push_back (std::make_shared<_AST_ValueCtx> (_func_ctx.GetVariable (_var_name), _item_raw->start, "TODO 期望类型"));
+						_params.push_back (std::make_shared<_AST_ValueCtx> (_func_ctx.GetVariable (_var_name), _item_raw->start, _var_exp_type));
 					}
 				}
+
 				return _AST_ExprOrValue { _newval };
 			}
 			LOG_TODO (_expr_raw->start);
