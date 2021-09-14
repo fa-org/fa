@@ -86,7 +86,7 @@ public:
 			return _ret == PublicLevel::Unknown ? _default : _ret;
 		};
 
-		// 编译类
+		// 设置类结构
 		for (auto _class_raw : _program_ctx->classStmt ()) {
 			// 访问级别
 			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
@@ -176,13 +176,29 @@ public:
 			}
 		}
 
+		// 编译类
+		m_global_classes->EnumClasses ([] (std::shared_ptr<AstClass> _cls) -> bool {
+			for (auto _cls_func : _cls->m_funcs) {
+				auto _func_code = _cls_func->m_func;
+				// TODO
+			}
+		});
+
+		// 编译主函数
 		if (!_entry) {
 			LOG_ERROR (nullptr, "未定义入口函数：FaEntryMain");
 			return false;
 		}
-		if (!BuildFaEntryMain (_entry)) {
+		auto [_ret_type_raw, _stmts_raw] = m_visitor->visit (_entry).as<std::tuple<
+			FaParser::TypeContext *,
+			std::vector<FaParser::StmtContext *>
+		>> ();
+		std::vector<FaParser::TypeContext *> _arg_type_raws;
+		if (!m_global_funcs->Make ("@fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
 			return false;
-		}
+		FuncContext _func_ctx { m_global_funcs, "@fa_main" };
+		if (!StmtBuilder (_func_ctx, _stmts_raw))
+			return false;
 
 		llvm::InitializeAllTargetInfos ();
 		llvm::InitializeAllTargets ();
@@ -272,18 +288,6 @@ private:
 			}
 		}
 		return true;
-	}
-
-	bool BuildFaEntryMain (FaParser::FaEntryMainFuncBlockContext *_mctx) {
-		auto [_ret_type_raw, _stmts_raw] = m_visitor->visit (_mctx).as<std::tuple<
-			FaParser::TypeContext *,
-			std::vector<FaParser::StmtContext *>
-		>> ();
-		std::vector<FaParser::TypeContext *> _arg_type_raws;
-		if (!m_global_funcs->Make ("@fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
-			return false;
-		FuncContext _func_ctx { m_global_funcs, "@fa_main" };
-		return StmtBuilder (_func_ctx, _stmts_raw);
 	}
 
 	bool StmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::StmtContext *> &_stmts_raw) {
@@ -778,31 +782,31 @@ private:
 					_exp_type = _ocls.value ()->m_name;
 				}
 
-				auto _newval = std::make_shared<_AST_NewCtx> (_cur_type, _exp_type);
-				std::vector<std::string> _cls_vars;
-				std::vector<_AST_ExprOrValue> _params;
-				_newval->SetInitVars (_cls_vars, _params);
+				auto _newval = std::make_shared<_AST_NewCtx> (_cls, _exp_type);
 				for (auto _item_raw : _new_raw->newExprItem ()) {
 					std::string _var_name = _item_raw->Id ()->getText ();
-					_cls_vars.push_back (_var_name);
 					auto _oclsvar = _cls->GetVar (_var_name);
 					if (!_oclsvar.has_value ()) {
 						LOG_ERROR (_new_raw->start, std::format ("类 {} 中未定义的标识符 {}", _cls->m_name, _var_name));
 						return std::nullopt;
 					}
 					std::string _var_exp_type = _oclsvar.value ()->m_type;
-
+					_AST_ExprOrValue _var_value;
 					if (_item_raw->middleExpr ()) {
 						//new Obj { _var = 3 };
 						auto _oval = _parse_middle_expr (_item_raw->middleExpr (), _var_exp_type);
 						if (!_oval.has_value ())
 							return std::nullopt;
-						_params.push_back (_oval.value ());
+						_var_value = _oval.value ();
 					} else {
 						//new Obj { _var };
-						_params.push_back (std::make_shared<_AST_ValueCtx> (_func_ctx.GetVariable (_var_name), _item_raw->start, _var_exp_type));
+						_var_value = std::make_shared<_AST_ValueCtx> (_func_ctx.GetVariable (_var_name), _item_raw->start, _var_exp_type);
 					}
+					if (!_newval->SetInitVar (_var_name, _var_value, _item_raw->start))
+						return std::nullopt;
 				}
+				if (!_newval->CheckVarsAllInit (_new_raw->start))
+					return std::nullopt;
 
 				return _AST_ExprOrValue { _newval };
 			}

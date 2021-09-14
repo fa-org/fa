@@ -4,6 +4,7 @@
 
 
 #include <format>
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -138,10 +139,19 @@ public:
 			return std::nullopt;
 		}
 	}
+
 	std::shared_ptr<AstClass> CreateNewClass (PublicLevel _level, std::string _name) {
 		auto _cls = std::make_shared<AstClass> (_level, _name);
 		m_classes [_name] = _cls;
 		return _cls;
+	}
+
+	bool EnumClasses (std::function<bool (std::shared_ptr<AstClass>)> _cb) {
+		for (auto &[_key, _val] : m_classes) {
+			if (!_cb (_val))
+				return false;
+		}
+		return true;
 	}
 
 private:

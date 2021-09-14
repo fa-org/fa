@@ -3,6 +3,7 @@
 
 
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -23,17 +24,53 @@ struct _AST_ValueCtx {
 };
 
 struct _AST_NewCtx {
-	_AST_NewCtx (std::string _tmp_type, std::string _expect_type): m_tmp_type (_tmp_type), m_expect_type (_expect_type) {}
-
-	void SetInitVars (std::vector<std::string> &_cls_vars, std::vector<_AST_ExprOrValue> &_params) {
-		m_cls_vars.assign (_cls_vars.cbegin (), _cls_vars.cend ());
-		m_params.assign (_params.cbegin (), _params.cend ());
+	_AST_NewCtx (std::shared_ptr<AstClass> _cls, std::string _expect_type): m_cls (_cls), m_expect_type (_expect_type) {
+		for (auto _cls_var : m_cls->m_vars) {
+			if (_cls_var->m_is_static)
+				continue;
+			m_tvar_all.emplace (_cls_var->m_name);
+			m_tvar_all_copy.emplace (_cls_var->m_name);
+			if (!_cls_var->m_init_value)
+				m_tvar_init.emplace (_cls_var->m_name);
+		}
 	}
 
-	std::string						m_tmp_type = "";
+	// 设置初始化参数
+	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue _param, antlr4::Token *_t) {
+		if (!m_tvar_all.contains (_cls_var)) {
+			if (m_tvar_all_copy.contains (_cls_var)) {
+				LOG_ERROR (_t, "对象初始化时传递的 {} 参数重复", _cls_var);
+			} else {
+				LOG_ERROR (_t, "对象初始化不需要传递 {} 参数", _cls_var);
+			}
+			return false;
+		}
+		m_tvar_all.erase (_cls_var);
+		if (m_tvar_init.contains (_cls_var))
+			m_tvar_all.erase (_cls_var);
+		m_cls_vars.push_back (_cls_var);
+		m_params.push_back (_param);
+		return true;
+	}
+
+	// 检查是否所有参数已初始化
+	bool CheckVarsAllInit (antlr4::Token *_t) {
+		if (m_tvar_init.size () == 0)
+			return true;
+		for (auto _tvar_init : m_tvar_init)
+			LOG_ERROR (_t, "未初始化的参数 {}", _tvar_init);
+		return false;
+	}
+
+	std::shared_ptr<AstClass>		m_cls;
 	std::string						m_expect_type = "";
 	std::vector<std::string>		m_cls_vars;
 	std::vector<_AST_ExprOrValue>	m_params;
+
+private:
+	std::set<std::string>			m_tvar_all;
+	std::set<std::string>			m_tvar_all_copy;
+	std::set<std::string>			m_tvar_init;
 };
 
 struct _AST_Oper1Ctx {
