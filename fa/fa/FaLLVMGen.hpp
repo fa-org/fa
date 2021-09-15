@@ -177,10 +177,11 @@ public:
 		}
 
 		// ±àÒëÀà
-		m_global_classes->EnumClasses ([] (std::shared_ptr<AstClass> _cls) -> bool {
+		m_global_classes->EnumClasses ([&] (std::shared_ptr<AstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
-				auto _func_code = _cls_func->m_func;
+				//auto _func_code = _cls_func->m_func;
 				// TODO
+				m_global_funcs->Make (_cls->m_name, _cls_func->m_name, );
 			}
 		});
 
@@ -194,7 +195,7 @@ public:
 			std::vector<FaParser::StmtContext *>
 		>> ();
 		std::vector<FaParser::TypeContext *> _arg_type_raws;
-		if (!m_global_funcs->Make ("@fa_main", true, _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
+		if (!m_global_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
 			return false;
 		FuncContext _func_ctx { m_global_funcs, "@fa_main" };
 		if (!StmtBuilder (_func_ctx, _stmts_raw))

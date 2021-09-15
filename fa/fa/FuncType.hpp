@@ -23,7 +23,7 @@
 class FuncType {
 public:
 	std::string					m_name = "";
-	std::string					m_object_name = "";
+	std::string					m_class_name = "";
 	std::string					m_ret_type = "";
 	std::vector<std::string>	m_arg_types;
 	std::string					m_type = "";
@@ -68,14 +68,10 @@ public:
 		return true;
 	}
 
-	bool Make (std::string _func_name, bool _static, FaParser::TypeContext *_ret_type_raw, std::vector<FaParser::TypeContext *> &_arg_type_raws, llvm::CallingConv::ID _cc) {
+	bool Make (std::string _class_name, std::string _func_name, FaParser::TypeContext *_ret_type_raw, std::vector<FaParser::TypeContext *> &_arg_type_raws, llvm::CallingConv::ID _cc) {
 		auto _ret = std::make_shared<FuncType> ();
-		_ret->m_name = _func_name;
-		if (!_static) {
-			size_t _p = _func_name.rfind ("::");
-			if (_p != std::string::npos && _p > 0)
-				_ret->m_object_name = _func_name.substr (0, _p);
-		}
+		_ret->m_name = std::format ("{}{}{}", _class_name, _class_name == "" ? "::" : ".", _func_name);
+		_ret->m_class_name = _class_name;
 		auto _otype = m_type_map->GetTypeT (_ret_type_raw);
 		if (!_otype.has_value ())
 			return false;
