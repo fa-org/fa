@@ -68,7 +68,7 @@ public:
 		return true;
 	}
 
-	bool Make (std::string _class_name, std::string _func_name, FaParser::TypeContext *_ret_type_raw, std::vector<FaParser::TypeContext *> &_arg_type_raws, llvm::CallingConv::ID _cc) {
+	bool Make (std::string _class_name, std::string _func_name, FaParser::TypeContext *_ret_type_raw, std::vector<FaParser::TypeContext *> &_arg_type_raws, llvm::CallingConv::ID _cc = llvm::CallingConv::C) {
 		auto _ret = std::make_shared<FuncType> ();
 		_ret->m_name = std::format ("{}{}{}", _class_name, _class_name == "" ? "::" : ".", _func_name);
 		_ret->m_class_name = _class_name;

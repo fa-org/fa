@@ -70,21 +70,21 @@ public:
 // 类方法
 class AstClassFunc {
 public:
-	PublicLevel						m_pv;					// 公开级别
-	bool							m_is_static;			// 是否静态
-	std::string						m_name;					// 方法名称
-	std::string						m_ret_type;				// 返回类型
-	std::vector<std::string>		m_arg_types;			// 参数类型列表
-	std::vector<std::string>		m_arg_names;			// 参数名称列表
-	FaParser::ClassFuncBodyContext *m_func = nullptr;		// 函数体
+	PublicLevel								m_pv;						// 公开级别
+	bool									m_is_static;				// 是否静态
+	std::string								m_name;						// 方法名称
+	FaParser::TypeContext*					m_ret_type_raw = nullptr;	// 返回类型
+	std::vector<FaParser::TypeContext*>		m_arg_type_raws;			// 参数类型列表
+	std::vector<std::string>				m_arg_names;				// 参数名称列表
+	FaParser::ClassFuncBodyContext*			m_func = nullptr;			// 函数体
 
 	AstClassFunc (PublicLevel _pv, bool _is_static, std::string _name)
 		: m_pv (_pv), m_is_static (_is_static), m_name (_name) {}
 
-	void SetReturnType (std::string _ret_type) { m_ret_type = _ret_type; }
+	void SetReturnType (FaParser::TypeContext* _ret_type_raw) { m_ret_type_raw = _ret_type_raw; }
 
-	void SetArgumentTypeName (std::string _type, std::string _name) {
-		m_arg_types.push_back (_type);
+	void SetArgumentTypeName (FaParser::TypeContext* _type_raw, std::string _name) {
+		m_arg_type_raws.push_back (_type_raw);
 		m_arg_names.push_back (_name);
 	}
 

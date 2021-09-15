@@ -159,15 +159,17 @@ public:
 				auto _func = _class->AddFunc (_pl, _is_static, _name);
 
 				// 返回类型
-				_func->SetReturnType (_func_raw->type ()->getText ());
+				_func->SetReturnType (_func_raw->type ());
 
 				// 参数列表
+				if (!_is_static)
+					_func->SetArgumentTypeName (_class->GetType (), "this");
+				//
 				std::vector<std::string> _arg_types;
 				if (_func_raw->typeVarList ()) {
 					for (auto _type_var_raw : _func_raw->typeVarList ()->typeVar ()) {
-						std::string _arg_type = _type_var_raw->type ()->getText ();
 						std::string _arg_name = _type_var_raw->Id () ? _type_var_raw->Id ()->getText () : "";
-						_func->SetArgumentTypeName (_arg_type, _arg_name);
+						_func->SetArgumentTypeName (_type_var_raw->type (), _arg_name);
 					}
 				}
 
@@ -181,7 +183,7 @@ public:
 			for (auto _cls_func : _cls->m_funcs) {
 				//auto _func_code = _cls_func->m_func;
 				// TODO
-				m_global_funcs->Make (_cls->m_name, _cls_func->m_name, );
+				m_global_funcs->Make (_cls->m_name, _cls_func->m_name, _cls_func->m_ret_type_raw, _cls_func->m_arg_type_raws);
 			}
 		});
 
@@ -195,7 +197,7 @@ public:
 			std::vector<FaParser::StmtContext *>
 		>> ();
 		std::vector<FaParser::TypeContext *> _arg_type_raws;
-		if (!m_global_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws, llvm::CallingConv::C))
+		if (!m_global_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws))
 			return false;
 		FuncContext _func_ctx { m_global_funcs, "@fa_main" };
 		if (!StmtBuilder (_func_ctx, _stmts_raw))
