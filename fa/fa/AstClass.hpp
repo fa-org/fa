@@ -17,6 +17,8 @@
 
 #include <llvm/IR/Type.h>
 
+#include <FaParser.h>
+
 
 
 enum class PublicLevel { Unknown, Public, Internal, Protected, Private };
@@ -73,18 +75,28 @@ public:
 	PublicLevel								m_pv;						// 公开级别
 	bool									m_is_static;				// 是否静态
 	std::string								m_name;						// 方法名称
-	FaParser::TypeContext*					m_ret_type_raw = nullptr;	// 返回类型
-	std::vector<FaParser::TypeContext*>		m_arg_type_raws;			// 参数类型列表
+	std::string								m_name_abi;					// 接口实际方法名称
+	std::string								m_ret_type;					// 返回类型
+	antlr4::Token							*m_ret_type_t = nullptr;	//
+	std::vector<std::string>				m_arg_types;				// 参数类型列表
+	std::vector<antlr4::Token*>				m_arg_type_ts;				// 参数类型列表
 	std::vector<std::string>				m_arg_names;				// 参数名称列表
 	FaParser::ClassFuncBodyContext*			m_func = nullptr;			// 函数体
 
 	AstClassFunc (PublicLevel _pv, bool _is_static, std::string _name)
 		: m_pv (_pv), m_is_static (_is_static), m_name (_name) {}
 
-	void SetReturnType (FaParser::TypeContext* _ret_type_raw) { m_ret_type_raw = _ret_type_raw; }
+	void SetReturnType (FaParser::TypeContext *_ret_type_raw) {
+		m_ret_type = _ret_type_raw->getText ();
+		m_ret_type_t = _ret_type_raw->start;
+	}
 
-	void SetArgumentTypeName (FaParser::TypeContext* _type_raw, std::string _name) {
-		m_arg_type_raws.push_back (_type_raw);
+	void SetArgumentTypeName (FaParser::TypeContext *_arg_type_raw, std::string _name) {
+		SetArgumentTypeName (_arg_type_raw->getText (), _arg_type_raw->start, _name);
+	}
+	void SetArgumentTypeName (std::string _arg_type, antlr4::Token *_arg_type_t, std::string _name) {
+		m_arg_types.push_back (_arg_type);
+		m_arg_type_ts.push_back (_arg_type_t);
 		m_arg_names.push_back (_name);
 	}
 
@@ -125,6 +137,10 @@ public:
 				return _var;
 		}
 		return std::nullopt;
+	}
+
+	std::string GetType () {
+		return std::format ("{}&", m_name);
 	}
 };
 

@@ -75,8 +75,8 @@ static int32 FaEntryMain () {
 	_cts.fill ();
 	FaParser _parser { &_cts };
 	CodeVisitor _visitor;
-	FaLLVMGen _gen { &_visitor, "hello" };
-	auto _success = _gen.Compile (_parser.program (), "hello.obj", "HelloProject");
+	FaLLVMGen _gen { &_visitor, "hello", "HelloProject"};
+	auto _success = _gen.Compile (_parser.program (), "hello");
 	if (_success) {
 		std::cout << "compile success." << std::endl;
 		//std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");

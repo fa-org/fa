@@ -23,12 +23,13 @@
 #include "AstValue.hpp"
 #include "AstExprOrValue.hpp"
 #include "FuncType.hpp"
+#include "Log.hpp"
 
 
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name): m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module), m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder), m_func (_global_funcs->GetFunc (_func_name)) {
+	FuncContext (std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type): m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module), m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder), m_func (_global_funcs->GetFunc (_func_name)), m_exp_type (_exp_type) {
 		llvm::BasicBlock *_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
 		m_builder->SetInsertPoint (_bb);
@@ -38,6 +39,7 @@ public:
 	}
 
 	AstValue DefineVariable (std::string _type, antlr4::Token *_t, std::string _name = "") {
+		// TODO 这儿判断是否virtual
 		std::string _var_type = std::format ("${}", _type);
 		if (_name != "" && GetVariable (_name).IsValid ()) {
 			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
@@ -67,14 +69,25 @@ public:
 		return std::nullopt;
 	}
 
-	void Return () {
+	bool Return (antlr4::Token *_t) {
+		if (m_exp_type != "void") {
+			LOG_ERROR (_t, std::format ("需返回 {} 类型值", m_exp_type));
+			return false;
+		}
 		if (!m_virtual)
 			m_builder->CreateRetVoid ();
+		return true;
 	}
-	void Return (AstValue &_op1) {
+	bool Return (AstValue &_op1, antlr4::Token *_t) {
+		if (_op1.GetType () != m_exp_type) {
+			LOG_ERROR (_t, std::format ("需返回 {} 类型值", m_exp_type));
+			return false;
+		}
 		if (!m_virtual)
 			m_builder->CreateRet (_op1.Value (*m_builder));
+		return true;
 	}
+	std::string GetReturnType () { return m_exp_type; }
 	AstValue DoOper1 (AstValue &_op1, std::string _op, antlr4::Token *_t) {
 		if (!m_virtual) {
 			return _op1.DoOper1 (*m_builder, m_value_builder, _op, _t);
@@ -83,6 +96,7 @@ public:
 		}
 	}
 	AstValue DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token *_t) {
+		// TODO 这儿判断是否virtual
 		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t);
 	}
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
@@ -155,14 +169,15 @@ public:
 	}
 
 private:
-	std::shared_ptr<llvm::LLVMContext> m_ctx;
-	std::shared_ptr<llvm::Module> m_module;
-	std::shared_ptr<TypeMap> m_type_map;
-	std::shared_ptr<ValueBuilder> m_value_builder;
-	std::shared_ptr<FuncType> m_func;
+	std::shared_ptr<llvm::LLVMContext>												m_ctx;
+	std::shared_ptr<llvm::Module>													m_module;
+	std::shared_ptr<TypeMap>														m_type_map;
+	std::shared_ptr<ValueBuilder>													m_value_builder;
+	std::shared_ptr<FuncType>														m_func;
+	std::string																		m_exp_type;
 	//
-	std::shared_ptr<llvm::IRBuilder<>> m_builder;
-	std::vector<std::map<std::string, std::tuple<llvm::AllocaInst *, std::string>>> m_local_vars;
+	std::shared_ptr<llvm::IRBuilder<>>												m_builder;
+	std::vector<std::map<std::string, std::tuple<llvm::AllocaInst *, std::string>>>	m_local_vars;
 	//
 	bool m_virtual = false;
 };

@@ -163,7 +163,7 @@ public:
 
 				// 参数列表
 				if (!_is_static)
-					_func->SetArgumentTypeName (_class->GetType (), "this");
+					_func->SetArgumentTypeName (_class->GetType (), _func_raw->start, "this");
 				//
 				std::vector<std::string> _arg_types;
 				if (_func_raw->typeVarList ()) {
@@ -181,10 +181,29 @@ public:
 		// 编译类
 		m_global_classes->EnumClasses ([&] (std::shared_ptr<AstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
-				//auto _func_code = _cls_func->m_func;
-				// TODO
-				m_global_funcs->Make (_cls->m_name, _cls_func->m_name, _cls_func->m_ret_type_raw, _cls_func->m_arg_type_raws);
+				_cls_func->m_name_abi = _cls_func->m_name;
+				if (!m_global_funcs->Make (_cls->m_name, _cls_func->m_name_abi, _cls_func->m_ret_type, _cls_func->m_ret_type_t, _cls_func->m_arg_types, _cls_func->m_arg_type_ts))
+					return false;
+				FuncContext _func_ctx { m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type };
+				auto _expr_raw = _cls_func->m_func->expr ();
+				if (_expr_raw) {
+					AstValue _val = ExprBuilder (_func_ctx, _expr_raw, _cls_func->m_ret_type);
+					if (!_val.IsValid ())
+						return false;
+					if (_val.IsVoid ()) {
+						if (!_func_ctx.Return (_expr_raw->start))
+							return false;
+					} else {
+						if (!_func_ctx.Return (_val, _expr_raw->start))
+							return false;
+					}
+				} else {
+					auto _stmt = _cls_func->m_func->stmt ();
+					if (!StmtBuilder (_func_ctx, _stmt))
+						return false;
+				}
 			}
+			return true;
 		});
 
 		// 编译主函数
@@ -197,9 +216,10 @@ public:
 			std::vector<FaParser::StmtContext *>
 		>> ();
 		std::vector<FaParser::TypeContext *> _arg_type_raws;
-		if (!m_global_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws))
+		std::string _fa_main = "@fa_main";
+		if (!m_global_funcs->Make ("", _fa_main, _ret_type_raw, _arg_type_raws))
 			return false;
-		FuncContext _func_ctx { m_global_funcs, "@fa_main" };
+		FuncContext _func_ctx { m_global_funcs, "@fa_main", _ret_type_raw->getText () };
 		if (!StmtBuilder (_func_ctx, _stmts_raw))
 			return false;
 
@@ -299,7 +319,8 @@ private:
 				FaParser::NormalStmtContext *_normal_stmt_raw = _stmt_raw->normalStmt ();
 				if (_normal_stmt_raw->Return () || _normal_stmt_raw->expr ()) {
 					if (_normal_stmt_raw->expr ()) {
-						AstValue _value = ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), "");
+						std::string _exp_type = _normal_stmt_raw->Return () ? _func_ctx.GetReturnType () : "";
+						AstValue _value = ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), _exp_type);
 						if (!_value.IsValid ())
 							return false;
 						if (_normal_stmt_raw->Return ()) {
@@ -307,11 +328,14 @@ private:
 								LOG_ERROR (_normal_stmt_raw->start, "无法返回表达式结果");
 								return false;
 							}
-							_func_ctx.Return (_value);
+							if (!_func_ctx.Return (_value, _normal_stmt_raw->start))
+								return false;
 						}
 					} else {
-						if (_normal_stmt_raw->Return ())
-							_func_ctx.Return ();
+						if (_normal_stmt_raw->Return ()) {
+							if (!_func_ctx.Return (_normal_stmt_raw->start))
+								return false;
+						}
 					}
 				} else if (_normal_stmt_raw->Break ()) {
 					LOG_TODO (_normal_stmt_raw->start);

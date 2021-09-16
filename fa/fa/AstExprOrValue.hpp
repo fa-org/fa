@@ -12,6 +12,8 @@
 
 
 
+struct _AST_ExprOrValue;
+
 enum class _Op1Type { None, Prefix, Suffix };
 enum class _Op2Type { None, Assign, NoChange, Compare, Other };
 
@@ -36,12 +38,12 @@ struct _AST_NewCtx {
 	}
 
 	// 设置初始化参数
-	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue _param, antlr4::Token *_t) {
+	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue &_param, antlr4::Token *_t) {
 		if (!m_tvar_all.contains (_cls_var)) {
 			if (m_tvar_all_copy.contains (_cls_var)) {
-				LOG_ERROR (_t, "对象初始化时传递的 {} 参数重复", _cls_var);
+				LOG_ERROR (_t, std::format ("对象初始化时传递的 {} 参数重复", _cls_var));
 			} else {
-				LOG_ERROR (_t, "对象初始化不需要传递 {} 参数", _cls_var);
+				LOG_ERROR (_t, std::format ("对象初始化不需要传递 {} 参数", _cls_var));
 			}
 			return false;
 		}
@@ -58,7 +60,7 @@ struct _AST_NewCtx {
 		if (m_tvar_init.size () == 0)
 			return true;
 		for (auto _tvar_init : m_tvar_init)
-			LOG_ERROR (_t, "未初始化的参数 {}", _tvar_init);
+			LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
 		return false;
 	}
 
