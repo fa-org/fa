@@ -4,7 +4,9 @@
 
 
 #include <format>
+#include <functional>
 #include <initializer_list>
+#include <map>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -23,9 +25,9 @@
 //template<int bitsize>
 class TypeMap {
 public:
-	TypeMap (FaVisitor *_visitor, std::shared_ptr<llvm::LLVMContext> _ctx): m_visitor (_visitor), m_ctx (_ctx) {}
+	TypeMap (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<AstClasses> _global_classes, std::string _namespace): m_visitor (_visitor), m_ctx (_ctx), m_global_classes (_global_classes), m_namespace (_namespace) {}
 
-	std::optional<std::tuple<llvm::Type *, std::string>> GetTypeT (FaParser::TypeContext *_type_ctx) {
+	std::optional<std::tuple<llvm::Type* , std::string>> GetTypeT (FaParser::TypeContext* _type_ctx) {
 		auto _stype = _type_ctx->getText ();
 		auto _otype = GetType (_stype, _type_ctx->start);
 		if (_otype.has_value ()) {
@@ -35,26 +37,26 @@ public:
 		}
 	}
 
-	std::optional<llvm::Type *> GetType (FaParser::TypeContext *_type_ctx) {
+	std::optional<llvm::Type* > GetType (FaParser::TypeContext* _type_ctx) {
 		auto _stype = _type_ctx->getText ();
 		return GetType (_stype, _type_ctx->start);
 	}
 
-	std::optional<llvm::Type *> GetType (std::string _stype, antlr4::Token *_t) {
+	std::optional<llvm::Type* > GetType (std::string _stype, antlr4::Token* _t) {
 		if (_stype == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_stype == "bool") {
-			return (llvm::Type *) llvm::Type::getInt1Ty (*m_ctx);
+			return (llvm::Type* ) llvm::Type::getInt1Ty (*m_ctx);
 		} else if (_stype == "int8") {
-			return (llvm::Type *) llvm::Type::getInt8Ty (*m_ctx);
+			return (llvm::Type* ) llvm::Type::getInt8Ty (*m_ctx);
 		} else if (_stype == "int16") {
-			return (llvm::Type *) llvm::Type::getInt16Ty (*m_ctx);
+			return (llvm::Type* ) llvm::Type::getInt16Ty (*m_ctx);
 		} else if (_stype == "int32") {
-			return (llvm::Type *) llvm::Type::getInt32Ty (*m_ctx);
+			return (llvm::Type* ) llvm::Type::getInt32Ty (*m_ctx);
 		} else if (_stype == "int64") {
-			return (llvm::Type *) llvm::Type::getInt64Ty (*m_ctx);
+			return (llvm::Type* ) llvm::Type::getInt64Ty (*m_ctx);
 		} else if (_stype == "int128") {
-			return (llvm::Type *) llvm::Type::getInt128Ty (*m_ctx);
+			return (llvm::Type* ) llvm::Type::getInt128Ty (*m_ctx);
 		} else if (_stype == "float16") {
 			return llvm::Type::getBFloatTy (*m_ctx);
 		} else if (_stype == "float32") {
@@ -63,15 +65,21 @@ public:
 			return llvm::Type::getDoubleTy (*m_ctx);
 		} else if (_stype == "float128") {
 			return llvm::Type::getFP128Ty (*m_ctx);
+		} else if (_stype == "cstr") {
+			return llvm::Type::getInt8PtrTy (*m_ctx);
+		} else {
+			auto _ocls = m_global_classes->GetClass (_stype, m_namespace);
+			if (_ocls.has_value ())
+				return _ocls.value ()->GetType ();
 		}
 		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _stype));
 		return std::nullopt;
 	}
 
-	std::optional<std::vector<llvm::Type *>> GetTypes (std::vector<FaParser::TypeContext *> _types_raw) {
-		std::vector<llvm::Type *> _types;
-		for (FaParser::TypeContext *_type_raw : _types_raw) {
-			std::optional<llvm::Type *> _type = GetType (_type_raw);
+	std::optional<std::vector<llvm::Type* >> GetTypes (std::vector<FaParser::TypeContext* > _types_raw) {
+		std::vector<llvm::Type* > _types;
+		for (FaParser::TypeContext* _type_raw : _types_raw) {
+			std::optional<llvm::Type* > _type = GetType (_type_raw);
 			if (!_type.has_value ())
 				return std::nullopt;
 			_types.push_back (_type.value ());
@@ -79,12 +87,12 @@ public:
 		return _types;
 	}
 
-	std::optional<std::tuple<std::vector<llvm::Type *>, std::vector<std::string>>> GetTypesT (std::vector<FaParser::TypeContext *> _types_raw) {
-		std::vector<llvm::Type *> _types;
+	std::optional<std::tuple<std::vector<llvm::Type* >, std::vector<std::string>>> GetTypesT (std::vector<FaParser::TypeContext* > _types_raw) {
+		std::vector<llvm::Type* > _types;
 		std::vector<std::string> _type_strs;
-		for (FaParser::TypeContext *_type_raw : _types_raw) {
+		for (FaParser::TypeContext* _type_raw : _types_raw) {
 			std::string _type_str = _type_raw->getText ();
-			std::optional<llvm::Type *> _type = GetType (_type_str, _type_raw->start);
+			std::optional<llvm::Type* > _type = GetType (_type_str, _type_raw->start);
 			if (!_type.has_value ())
 				return std::nullopt;
 			_types.push_back (_type.value ());
@@ -94,7 +102,7 @@ public:
 	}
 
 	// 获取类型名称
-	static std::string GetTypeName (llvm::Type *_type) {
+	static std::string GetTypeName (llvm::Type* _type) {
 		switch (_type->getTypeID ()) {
 		case llvm::Type::HalfTyID:
 		case llvm::Type::BFloatTyID:
@@ -109,7 +117,7 @@ public:
 			return "void";
 		case llvm::Type::IntegerTyID:
 		{
-			llvm::IntegerType *_itype = (llvm::IntegerType *) _type;
+			llvm::IntegerType* _itype = (llvm::IntegerType* ) _type;
 			unsigned int _bit_width = _itype->getBitWidth ();
 			if (_bit_width == 1) {
 				return "bool";
@@ -132,29 +140,29 @@ public:
 
 	// 识别类型是否为可选类型
 	static bool IsOptional (std::string _stype) {
-		return *_stype.crbegin () == '?';
+		return* _stype.crbegin () == '?';
 	}
 
 	// 获取同时兼容存储多种类型的类型
-	static std::optional<std::string> GetCompatibleType (antlr4::Token *_t, std::initializer_list<std::string> _types) {
+	static std::optional<std::string> GetCompatibleType (antlr4::Token* _t, std::initializer_list<std::string> _types) {
 		std::vector<std::string> _v { _types };
 		return GetCompatibleType (_t, _v);
 	}
-	static std::optional<std::string> GetCompatibleType (antlr4::Token *_t, std::vector<std::string> &_types) {
+	static std::optional<std::string> GetCompatibleType (antlr4::Token* _t, std::vector<std::string> &_types) {
 		// 标记变量类型
 		bool _var = false;
 		bool _ref = false;
 		bool _option = false;
 		for (size_t i = 0; i < _types.size (); ++i) {
-			if (_types [i].size () > 0 && *_types [i].cbegin () == '$') {
+			if (_types [i].size () > 0 &&* _types [i].cbegin () == '$') {
 				_var = true;
 				_types [i].erase (_types [i].begin ());
 			}
-			if (_types [i].size () > 0 && *_types [i].crbegin () == '?') {
+			if (_types [i].size () > 0 &&* _types [i].crbegin () == '?') {
 				_option = true;
 				_types [i].erase (_types [i].begin () + (_types [i].size () - 1));
 			}
-			if (_types [i].size () > 0 && *_types [i].crbegin () == '&') {
+			if (_types [i].size () > 0 &&* _types [i].crbegin () == '&') {
 				_ref = true;
 				_types [i].erase (_types [i].begin () + (_types [i].size () - 1));
 			}
@@ -179,11 +187,11 @@ public:
 		while (_types.size () > 1) {
 			if (CanImplicitConvTo (*_types.rbegin (), _types [0])) {
 				_types.erase (_types.begin () + (_types.size () - 1));
-			} else if (CanImplicitConvTo (_types [0], *_types.rbegin ())) {
-				_types [0] = *_types.rbegin ();
+			} else if (CanImplicitConvTo (_types [0],* _types.rbegin ())) {
+				_types [0] =* _types.rbegin ();
 				_types.erase (_types.begin () + (_types.size () - 1));
 			} else {
-				LOG_ERROR (_t, std::format ("不兼容的变量类型：{}、{}", _types [0], *_types.rbegin ()));
+				LOG_ERROR (_t, std::format ("不兼容的变量类型：{}、{}", _types [0],* _types.rbegin ()));
 				return std::nullopt;
 			}
 		}
@@ -229,8 +237,8 @@ public:
 		}
 
 		// 识别可空类型
-		_s = *_src.crbegin () == '?';
-		_d = *_dest.crbegin () == '?';
+		_s =* _src.crbegin () == '?';
+		_d =* _dest.crbegin () == '?';
 		if ((!_s) && _d) {
 			_dest = _dest.substr (0, _dest.size () - 1);
 		} else if (_s && (!_d)) {
@@ -248,60 +256,60 @@ public:
 
 
 
-	//std::optional<std::tuple<llvm::Type *, std::string>> GetExternType (FaParser::ETypeContext *_etype_ctx) {
+	//std::optional<std::tuple<llvm::Type* , std::string>> GetExternType (FaParser::ETypeContext* _etype_ctx) {
 	//	auto [_sign, _name, _ptr_level] = m_visitor->visitEType (_etype_ctx).as<std::tuple<bool, std::string, size_t>> ();
 	//	// _sign 好像暂时用不到
 	//	if (_name == "void") {
 	//		if (_ptr_level == 0) {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getVoidTy (*m_ctx), std::string ("void"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getVoidTy (*m_ctx), std::string ("void"));
 	//		} else {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
 	//		}
 	//	} else if (_name == "char") {
 	//		if (_ptr_level == 0) {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt8Ty (*m_ctx), std::string ("int8"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt8Ty (*m_ctx), std::string ("int8"));
 	//		} else {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt8PtrTy (*m_ctx), std::string ("int8*"));
 	//		}
 	//	} else if (_name == "short") {
 	//		if (_ptr_level == 0) {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt16Ty (*m_ctx), std::string ("int16"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt16Ty (*m_ctx), std::string ("int16"));
 	//		} else {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt16PtrTy (*m_ctx), std::string ("int16*"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt16PtrTy (*m_ctx), std::string ("int16*"));
 	//		}
 	//	} else if (_name == "int") {
 	//		if (_ptr_level == 0) {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt32Ty (*m_ctx), std::string ("int32"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt32Ty (*m_ctx), std::string ("int32"));
 	//		} else {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt32PtrTy (*m_ctx), std::string ("int32*"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt32PtrTy (*m_ctx), std::string ("int32*"));
 	//		}
 	//	} else if (_name == "long") {
 	//		if (_ptr_level == 0) {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt64Ty (*m_ctx), std::string ("int64"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt64Ty (*m_ctx), std::string ("int64"));
 	//		} else {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getInt64PtrTy (*m_ctx), std::string ("int64*"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getInt64PtrTy (*m_ctx), std::string ("int64*"));
 	//		}
 	//	} else if (_name == "float") {
 	//		if (_ptr_level == 0) {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getFloatTy (*m_ctx), std::string ("float32"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getFloatTy (*m_ctx), std::string ("float32"));
 	//		} else {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getFloatPtrTy (*m_ctx), std::string ("float32*"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getFloatPtrTy (*m_ctx), std::string ("float32*"));
 	//		}
 	//	} else if (_name == "double") {
 	//		if (_ptr_level == 0) {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getDoubleTy (*m_ctx), std::string ("float64"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getDoubleTy (*m_ctx), std::string ("float64"));
 	//		} else {
-	//			return std::make_tuple ((llvm::Type *) llvm::Type::getDoublePtrTy (*m_ctx), std::string ("float64*"));
+	//			return std::make_tuple ((llvm::Type* ) llvm::Type::getDoublePtrTy (*m_ctx), std::string ("float64*"));
 	//		}
 	//	}
 	//	LOG_ERROR (_etype_ctx->start, std::format ("无法识别的外部接口函数类型 [{}]", _name));
 	//	return std::nullopt;
 	//}
 
-	//std::optional<std::tuple<std::vector<llvm::Type *>, std::vector<std::string>>> GetExternTypes (std::vector<FaParser::ETypeContext *> _types_raw) {
-	//	std::vector<llvm::Type *> _types;
+	//std::optional<std::tuple<std::vector<llvm::Type* >, std::vector<std::string>>> GetExternTypes (std::vector<FaParser::ETypeContext* > _types_raw) {
+	//	std::vector<llvm::Type* > _types;
 	//	std::vector<std::string> _type_strs;
-	//	for (FaParser::ETypeContext *_type_raw : _types_raw) {
+	//	for (FaParser::ETypeContext* _type_raw : _types_raw) {
 	//		auto _type = GetExternType (_type_raw);
 	//		if (!_type.has_value ())
 	//			return std::nullopt;
@@ -313,8 +321,10 @@ public:
 	//}
 
 private:
-	FaVisitor *m_visitor = nullptr;
+	FaVisitor* m_visitor = nullptr;
 	std::shared_ptr<llvm::LLVMContext> m_ctx = nullptr;
+	std::shared_ptr<AstClasses> m_global_classes;
+	std::string m_namespace;
 };
 
 

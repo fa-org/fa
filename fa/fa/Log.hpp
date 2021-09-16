@@ -32,7 +32,9 @@ class Log {
 		}
 	}
 
-	static void _print_line_code (antlr4::Token *_t) {
+	static void _print_line_code (antlr4::Token* _t) {
+		if (!_t)
+			return;
 		size_t _start = _t->getStartIndex () - _t->getCharPositionInLine ();
 		size_t _end1 = s_code.find ('\r', _start), _end2 = s_code.find ('\n', _start);
 		if (_end2 != std::string::npos) {
@@ -56,21 +58,21 @@ public:
 		s_file = _process_file (_file);
 		s_code = _code;
 	}
-	static void Info (const char *_file, int _line, antlr4::Token *_t, std::string _data) {
+	static void Info (const char* _file, int _line, antlr4::Token* _t, std::string _data) {
 		std::string _prefix = std::format ("[{}:{}] ", _process_file (_file), _line);
 		std::string _content = _t ? std::format ("位于 [{}:{} pos {}] 的信息：", s_file, _t->getLine (), _t->getCharPositionInLine ()): "";
 		std::cout << std::format ("{}{}{}", _prefix, _content, _data) << std::endl;
 		_print_line_code (_t);
 	}
 
-	static void Warning (const char *_file, int _line, antlr4::Token *_t, std::string _data) {
+	static void Warning (const char* _file, int _line, antlr4::Token* _t, std::string _data) {
 		std::string _prefix = std::format ("[{}:{}] ", _process_file (_file), _line);
 		std::string _content = _t ? std::format ("位于 [{}:{} pos {}] 的警告：", s_file, _t->getLine (), _t->getCharPositionInLine ()): "";
 		std::cout << std::format ("{}{}{}", _prefix, _content, _data) << std::endl;
 		_print_line_code (_t);
 	}
 
-	static void Error (const char *_file, int _line, antlr4::Token *_t, std::string _data) {
+	static void Error (const char* _file, int _line, antlr4::Token* _t, std::string _data) {
 		std::string _prefix = std::format ("[{}:{}] ", _process_file (_file), _line);
 		std::string _content = _t ? std::format ("位于 [{}:{} pos {}] 的错误：", s_file, _t->getLine (), _t->getCharPositionInLine ()) : "";
 		std::cout << std::format ("{}{}{}", _prefix, _content, _data) << std::endl;

@@ -3,9 +3,12 @@
 
 
 
+#include <functional>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <antlr4-runtime/Token.h>
 
 #include <FaParser.h>
 #include "AstValue.hpp"
@@ -18,29 +21,29 @@ enum class _Op1Type { None, Prefix, Suffix };
 enum class _Op2Type { None, Assign, NoChange, Compare, Other };
 
 struct _AST_ValueCtx {
-	_AST_ValueCtx (AstValue _val, antlr4::Token *_t, std::string _expect_type): m_val (_val), m_t (_t), m_expect_type (_expect_type) {}
+	_AST_ValueCtx (AstValue _val, antlr4::Token* _t, std::string _expect_type): m_val (_val), m_t (_t), m_expect_type (_expect_type) {}
 
 	AstValue					m_val {};
-	antlr4::Token				*m_t = nullptr;
+	antlr4::Token*				m_t = nullptr;
 	std::string					m_expect_type = "";
 };
 
 struct _AST_NewCtx {
-	_AST_NewCtx (std::shared_ptr<AstClass> _cls, std::string _expect_type): m_cls (_cls), m_expect_type (_expect_type) {
+	_AST_NewCtx (antlr4::Token* _t, std::shared_ptr<AstClass> _cls, std::string _expect_type): m_t (_t), m_cls (_cls), m_expect_type (_expect_type) {
 		for (auto _cls_var : m_cls->m_vars) {
 			if (_cls_var->m_is_static)
 				continue;
 			m_tvar_all.emplace (_cls_var->m_name);
-			m_tvar_all_copy.emplace (_cls_var->m_name);
+			m_tvar_all_tmp.emplace (_cls_var->m_name);
 			if (!_cls_var->m_init_value)
 				m_tvar_init.emplace (_cls_var->m_name);
 		}
 	}
 
 	// 设置初始化参数
-	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue &_param, antlr4::Token *_t) {
+	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue &_param, antlr4::Token* _t) {
 		if (!m_tvar_all.contains (_cls_var)) {
-			if (m_tvar_all_copy.contains (_cls_var)) {
+			if (m_tvar_all_tmp.contains (_cls_var)) {
 				LOG_ERROR (_t, std::format ("对象初始化时传递的 {} 参数重复", _cls_var));
 			} else {
 				LOG_ERROR (_t, std::format ("对象初始化不需要传递 {} 参数", _cls_var));
@@ -49,21 +52,33 @@ struct _AST_NewCtx {
 		}
 		m_tvar_all.erase (_cls_var);
 		if (m_tvar_init.contains (_cls_var))
-			m_tvar_all.erase (_cls_var);
+			m_tvar_init.erase (_cls_var);
 		m_cls_vars.push_back (_cls_var);
 		m_params.push_back (_param);
 		return true;
 	}
 
 	// 检查是否所有参数已初始化
-	bool CheckVarsAllInit (antlr4::Token *_t) {
-		if (m_tvar_init.size () == 0)
+	bool CheckVarsAllInit (antlr4::Token* _t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _cb) {
+		if (m_tvar_init.size () == 0) {
+			// new 表达式未指定，但带有默认参数的值，拷贝进去
+			for (auto _tvar : m_tvar_all) {
+				auto _var = m_cls->GetVar (_tvar).value ();
+				m_cls_vars.push_back (_tvar);
+				auto _oparam = _cb (_var->m_init_value, _var->m_type);
+				if (!_oparam.has_value ())
+					return false;
+				m_params.push_back (_oparam.value ());
+			}
 			return true;
-		for (auto _tvar_init : m_tvar_init)
-			LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
-		return false;
+		} else {
+			for (auto _tvar_init : m_tvar_init)
+				LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
+			return false;
+		}
 	}
 
+	antlr4::Token*					m_t = nullptr;
 	std::shared_ptr<AstClass>		m_cls;
 	std::string						m_expect_type = "";
 	std::vector<std::string>		m_cls_vars;
@@ -71,35 +86,35 @@ struct _AST_NewCtx {
 
 private:
 	std::set<std::string>			m_tvar_all;
-	std::set<std::string>			m_tvar_all_copy;
+	std::set<std::string>			m_tvar_all_tmp;
 	std::set<std::string>			m_tvar_init;
 };
 
 struct _AST_Oper1Ctx {
 	_AST_Oper1Ctx (): m_type (_Op1Type::None) {}
-	_AST_Oper1Ctx (FaParser::StrongExprPrefixContext *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {}
-	_AST_Oper1Ctx (FaParser::StrongExprSuffixContext *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {
+	_AST_Oper1Ctx (FaParser::StrongExprPrefixContext* _op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {}
+	_AST_Oper1Ctx (FaParser::StrongExprSuffixContext* _op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {
 		if ((!_op_raw->AddAddOp ()) && (!_op_raw->SubSubOp ())) {
 			LOG_ERROR (_op_raw->start, "当前运算符无法解析为一元后缀表达式");
 		}
 	}
 
 	std::string					m_op = "";
-	antlr4::Token				*m_t = nullptr;
+	antlr4::Token*				m_t = nullptr;
 	_Op1Type					m_type = _Op1Type::Prefix;
 };
 
 struct _AST_Oper2Ctx {
 	_AST_Oper2Ctx (): m_type (_Op2Type::None) {}
-	_AST_Oper2Ctx (FaParser::AllAssignContext *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start), m_type (_Op2Type::Assign) {}
-	_AST_Oper2Ctx (FaParser::AllOp2Context *_op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {
+	_AST_Oper2Ctx (FaParser::AllAssignContext* _op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start), m_type (_Op2Type::Assign) {}
+	_AST_Oper2Ctx (FaParser::AllOp2Context* _op_raw): m_op (_op_raw->getText ()), m_t (_op_raw->start) {
 		if (_op_raw->selfOp2 ()) {
 			m_type = _Op2Type::NoChange;
 		} else if (_op_raw->changeOp2 ()->compareOp2 ()) {
 			m_type = _Op2Type::Compare;
 		}
 	}
-	_AST_Oper2Ctx (FaParser::StrongExprSuffixContext *_op_raw): m_t (_op_raw->start) {
+	_AST_Oper2Ctx (FaParser::StrongExprSuffixContext* _op_raw): m_t (_op_raw->start) {
 		if (_op_raw->PointOp ()) {
 			m_op = _op_raw->PointOp ()->getText ();
 		} else if (_op_raw->QuotYuanL ()) {
@@ -112,7 +127,7 @@ struct _AST_Oper2Ctx {
 	}
 
 	std::string					m_op = "";
-	antlr4::Token				*m_t = nullptr;
+	antlr4::Token*				m_t = nullptr;
 	_Op2Type					m_type = _Op2Type::Other;
 };
 
@@ -135,7 +150,7 @@ struct _AST_ExprOrValue {
 		m_op2_expr = _o.m_op2_expr;
 		m_opN_expr = _o.m_opN_expr;
 		m_if_expr = _o.m_if_expr;
-		return *this;
+		return* this;
 	}
 
 	std::shared_ptr<_AST_ValueCtx>						m_val;
@@ -195,27 +210,25 @@ struct _AST_OpNExprTreeCtx {
 
 struct _AST_IfExprTreeCtx {
 	std::vector<_AST_ExprOrValue>						m_conds;
-	std::vector<std::vector<FaParser::StmtContext *>>	m_bodys1_raw;
-	std::vector<FaParser::ExprContext *>				m_bodys2;
+	std::vector<std::vector<FaParser::StmtContext* >>	m_bodys1_raw;
+	std::vector<FaParser::ExprContext* >				m_bodys2;
 	std::string											m_expect_type;
 };
 
 inline std::string _AST_ExprOrValue::GetExpectType () {
-	if (m_val) {
+	if (m_val)
 		return m_val->m_expect_type;
-	} else if (m_newval) {
+	if (m_newval)
 		return m_newval->m_expect_type;
-	} else if (m_op1_expr) {
+	if (m_op1_expr)
 		return m_op1_expr->m_expect_type;
-	} else if (m_op2_expr) {
+	if (m_op2_expr)
 		return m_op2_expr->m_expect_type;
-	} else if (m_opN_expr) {
+	if (m_opN_expr)
 		return m_opN_expr->m_expect_type;
-	} else if (m_if_expr) {
+	if (m_if_expr)
 		return m_if_expr->m_expect_type;
-	} else {
-		return "";
-	}
+	return "";
 }
 
 inline std::string _AST_ExprOrValue::GetFuncName () {

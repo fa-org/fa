@@ -13,7 +13,7 @@ class  FaLexer : public antlr4::Lexer {
 public:
   enum {
     AImport = 1, ALib = 2, Break = 3, CC__Cdecl = 4, CC__FastCall = 5, CC__StdCall = 6, 
-    Continue = 7, Class = 8, Const = 9, Else = 10, FaEntryMain = 11, If = 12, 
+    Continue = 7, Class = 8, Const = 9, Else = 10, FaMain = 11, If = 12, 
     Internal = 13, New = 14, Public = 15, Protected = 16, Private = 17, 
     Return = 18, Signed = 19, Static = 20, Unsigned = 21, Use = 22, While = 23, 
     Assign = 24, ReverseOp = 25, AddAddOp = 26, SubSubOp = 27, PointOp = 28, 

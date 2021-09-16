@@ -303,7 +303,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitFaEntryMainFuncBlock(FaParser::FaEntryMainFuncBlockContext *ctx) override {
+  virtual antlrcpp::Any visitFaMainFuncBlock(FaParser::FaMainFuncBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 

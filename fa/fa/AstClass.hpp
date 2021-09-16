@@ -15,6 +15,7 @@
 
 //#include "AstValue.hpp"
 
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Type.h>
 
 #include <FaParser.h>
@@ -45,7 +46,7 @@ public:
 	bool							m_is_static;			// 是否静态
 	std::string						m_type;					// 变量类型
 	std::string						m_name;					// 变量名称
-	FaParser::ExprContext		   *m_init_value = nullptr;	// 初始值
+	FaParser::ExprContext*			m_init_value = nullptr;	// 初始值
 	std::vector<AstClassVarFunc>	m_var_funcs;			// 变量 getter setter 函数
 
 	AstClassVar (PublicLevel _pv, bool _is_static, std::string _type, std::string _name)
@@ -77,7 +78,7 @@ public:
 	std::string								m_name;						// 方法名称
 	std::string								m_name_abi;					// 接口实际方法名称
 	std::string								m_ret_type;					// 返回类型
-	antlr4::Token							*m_ret_type_t = nullptr;	//
+	antlr4::Token*							m_ret_type_t = nullptr;		//
 	std::vector<std::string>				m_arg_types;				// 参数类型列表
 	std::vector<antlr4::Token*>				m_arg_type_ts;				// 参数类型列表
 	std::vector<std::string>				m_arg_names;				// 参数名称列表
@@ -86,21 +87,21 @@ public:
 	AstClassFunc (PublicLevel _pv, bool _is_static, std::string _name)
 		: m_pv (_pv), m_is_static (_is_static), m_name (_name) {}
 
-	void SetReturnType (FaParser::TypeContext *_ret_type_raw) {
+	void SetReturnType (FaParser::TypeContext* _ret_type_raw) {
 		m_ret_type = _ret_type_raw->getText ();
 		m_ret_type_t = _ret_type_raw->start;
 	}
 
-	void SetArgumentTypeName (FaParser::TypeContext *_arg_type_raw, std::string _name) {
+	void SetArgumentTypeName (FaParser::TypeContext* _arg_type_raw, std::string _name) {
 		SetArgumentTypeName (_arg_type_raw->getText (), _arg_type_raw->start, _name);
 	}
-	void SetArgumentTypeName (std::string _arg_type, antlr4::Token *_arg_type_t, std::string _name) {
+	void SetArgumentTypeName (std::string _arg_type, antlr4::Token* _arg_type_t, std::string _name) {
 		m_arg_types.push_back (_arg_type);
 		m_arg_type_ts.push_back (_arg_type_t);
 		m_arg_names.push_back (_name);
 	}
 
-	void SetFuncBody (FaParser::ClassFuncBodyContext *_func) { m_func = _func; }
+	void SetFuncBody (FaParser::ClassFuncBodyContext* _func) { m_func = _func; }
 };
 
 
@@ -112,7 +113,7 @@ public:
 	std::vector<std::string>					m_parents;
 	std::vector<std::shared_ptr<AstClassVar>>	m_vars;
 	std::vector<std::shared_ptr<AstClassFunc>>	m_funcs;
-	llvm::Type									*m_type = nullptr;
+	llvm::StructType*							m_type = nullptr;
 
 	AstClass (PublicLevel _level, std::string _name): m_level (_level), m_name (_name) {}
 	void AddParents (std::vector<std::string> &_parents) {
@@ -139,8 +140,19 @@ public:
 		return std::nullopt;
 	}
 
-	std::string GetType () {
+	std::string GetTypeStr () {
 		return std::format ("{}&", m_name);
+	}
+
+	llvm::Type* GetType () {
+		if (!m_type) {
+			std::vector<llvm::Type*> _v;
+			for (auto _var : m_vars) {
+				// TODO
+			}
+			m_type = llvm::StructType::create (_v);
+		}
+		return (llvm::Type*) m_type;
 	}
 };
 
@@ -148,12 +160,23 @@ public:
 
 class AstClasses {
 public:
-	std::optional<std::shared_ptr<AstClass>> GetClass (std::string _name) {
-		if (m_classes.contains (_name)) {
+	std::optional<std::shared_ptr<AstClass>> GetClass (std::string _name, std::string _namesapce) {
+		if (m_classes.contains (_name))
 			return m_classes [_name];
-		} else {
-			return std::nullopt;
+		size_t _p = _namesapce.find ('.');
+		std::string _tmp;
+		while (_p != std::string::npos) {
+			_tmp = std::format ("{}.{}", _namesapce.substr (0, _p), _name);
+			if (m_classes.contains (_tmp))
+				return m_classes [_tmp];
+			_p = _namesapce.find ('.', _p + 1);
+		};
+		if (_namesapce != "") {
+			_tmp = std::format ("{}.{}", _namesapce, _name);
+			if (m_classes.contains (_tmp))
+				return m_classes [_tmp];
 		}
+		return std::nullopt;
 	}
 
 	std::shared_ptr<AstClass> CreateNewClass (PublicLevel _level, std::string _name) {

@@ -13,7 +13,7 @@ class  FaParser : public antlr4::Parser {
 public:
   enum {
     AImport = 1, ALib = 2, Break = 3, CC__Cdecl = 4, CC__FastCall = 5, CC__StdCall = 6, 
-    Continue = 7, Class = 8, Const = 9, Else = 10, FaEntryMain = 11, If = 12, 
+    Continue = 7, Class = 8, Const = 9, Else = 10, FaMain = 11, If = 12, 
     Internal = 13, New = 14, Public = 15, Protected = 16, Private = 17, 
     Return = 18, Signed = 19, Static = 20, Unsigned = 21, Use = 22, While = 23, 
     Assign = 24, ReverseOp = 25, AddAddOp = 26, SubSubOp = 27, PointOp = 28, 
@@ -45,7 +45,7 @@ public:
     RuleClassStmt = 61, RuleClassVarExtFunc = 62, RuleClassVarExt = 63, 
     RuleClassVar = 64, RuleClassFuncName = 65, RuleClassFuncBody = 66, RuleClassFunc = 67, 
     RuleCallConvention = 68, RuleImportStmt = 69, RuleLibStmt = 70, RuleImportBlock = 71, 
-    RuleFaEntryMainFuncBlock = 72, RuleProgram = 73
+    RuleFaMainFuncBlock = 72, RuleProgram = 73
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -130,7 +130,7 @@ public:
   class ImportStmtContext;
   class LibStmtContext;
   class ImportBlockContext;
-  class FaEntryMainFuncBlockContext;
+  class FaMainFuncBlockContext;
   class ProgramContext; 
 
   class  AddAssignContext : public antlr4::ParserRuleContext {
@@ -1302,13 +1302,12 @@ public:
 
   ImportBlockContext* importBlock();
 
-  class  FaEntryMainFuncBlockContext : public antlr4::ParserRuleContext {
+  class  FaMainFuncBlockContext : public antlr4::ParserRuleContext {
   public:
-    FaEntryMainFuncBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    FaMainFuncBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *Static();
     TypeContext *type();
-    antlr4::tree::TerminalNode *FaEntryMain();
+    antlr4::tree::TerminalNode *FaMain();
     antlr4::tree::TerminalNode *QuotYuanL();
     antlr4::tree::TerminalNode *QuotYuanR();
     antlr4::tree::TerminalNode *QuotHuaL();
@@ -1321,7 +1320,7 @@ public:
    
   };
 
-  FaEntryMainFuncBlockContext* faEntryMainFuncBlock();
+  FaMainFuncBlockContext* faMainFuncBlock();
 
   class  ProgramContext : public antlr4::ParserRuleContext {
   public:
@@ -1332,7 +1331,7 @@ public:
     ImportBlockContext *importBlock();
     std::vector<ClassStmtContext *> classStmt();
     ClassStmtContext* classStmt(size_t i);
-    FaEntryMainFuncBlockContext *faEntryMainFuncBlock();
+    FaMainFuncBlockContext *faMainFuncBlock();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

@@ -15,7 +15,7 @@
 
 
 class StringProcessor {
-	static std::optional<char> _char_to_hex (char _ch, antlr4::Token *_t) {
+	static std::optional<char> _char_to_hex (char _ch, antlr4::Token* _t) {
 		if (_ch >= '0' && _ch <= '9') {
 			return _ch - '0';
 		} else if (_ch >= 'A' && _ch <= 'F') {
@@ -28,7 +28,7 @@ class StringProcessor {
 	}
 
 public:
-	static std::optional<std::string> TransformMean (std::string _s, antlr4::Token *_t) {
+	static std::optional<std::string> TransformMean (std::string _s, antlr4::Token* _t) {
 		std::string _tmp = _s;
 		std::optional<char> _c1, _c2;
 		for (size_t i = 0; i < _s.size (); ++i) {

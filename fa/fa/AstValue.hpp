@@ -25,13 +25,13 @@
 
 
 class AstValue {
-	enum class AstObjectType { None, Void, Value, Var, Func, TypeStr, MemberStr };
+	enum class AstObjectType { None, /*Void,*/ Value, Var, Func, TypeStr, MemberStr };
 
 public:
-	static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
+	//static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
 	AstValue () {}
-	AstValue (std::nullopt_t) {}
-	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext *_literal, std::string _value_type) {
+	//AstValue (std::nullopt_t) {}
+	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext* _literal, std::string _value_type) {
 		if (_literal->BoolLiteral ()) {
 			if (_value_type == "") {
 				_value_type = "bool";
@@ -55,8 +55,8 @@ public:
 			}
 		} else if (_literal->String1Literal ()) {
 			if (_value_type == "") {
-				_value_type = "int8*";
-			} else if (_value_type != "int8*") {
+				_value_type = "cstr";
+			} else if (_value_type != "cstr") {
 				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
 				return;
 			}
@@ -65,37 +65,37 @@ public:
 			return;
 		}
 		m_value_type = _value_type;
-		std::optional<std::tuple<llvm::Value *, std::string>> _oval = _value_builder->Build (m_value_type, _literal->getText (), _literal->start);
+		std::optional<std::tuple<llvm::Value* , std::string>> _oval = _value_builder->Build (m_value_type, _literal->getText (), _literal->start);
 		if (_oval.has_value ()) {
 			m_type = AstObjectType::Value;
 			std::tie (m_value, m_value_type) = _oval.value ();
 		}
 	}
-	AstValue (llvm::AllocaInst *_var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var), m_value_type (_value_type) {}
-	AstValue (llvm::Value *_value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value), m_value_type (_value_type) {}
+	AstValue (llvm::AllocaInst* _var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var), m_value_type (_value_type) {}
+	AstValue (llvm::Value* _value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value), m_value_type (_value_type) {}
 	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_name) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
-	//AstValue &operator= (const llvm::AllocaInst *_val) { AstValue _o { const_cast<llvm::AllocaInst *> (_val) }; return operator= (_o); }
-	//AstValue &operator= (const llvm::Value *_val) { AstValue _o { const_cast<llvm::Value *> (_val) }; return operator= (_o); }
-	//AstValue &operator= (const llvm::Function *_val) { AstValue _o { const_cast<llvm::Function *> (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::AllocaInst* _val) { AstValue _o { const_cast<llvm::AllocaInst* > (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::Value* _val) { AstValue _o { const_cast<llvm::Value* > (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::Function* _val) { AstValue _o { const_cast<llvm::Function* > (_val) }; return operator= (_o); }
 	AstValue &operator= (const AstValue &_o) {
 		m_type = _o.m_type;
 		m_value = _o.m_value;
 		m_func = _o.m_func;
 		m_member = _o.m_member;
 		m_value_type = _o.m_value_type;
-		return *this;
+		return* this;
 	}
 
 	bool IsValid () const { return m_type != AstObjectType::None; }
-	bool IsVoid () const { return m_type == AstObjectType::Void; }
+	//bool IsVoid () const { return m_type == AstObjectType::Void; }
 	bool IsValue () const { return m_type == AstObjectType::Value || m_type == AstObjectType::Var; }
 	bool IsVariable () const { return m_type == AstObjectType::Var; }
 	bool IsFunction () const { return m_type == AstObjectType::Func; }
 	bool IsTypeStr () const { return m_type == AstObjectType::Value || m_type == AstObjectType::Var || m_type == AstObjectType::TypeStr; }
 	bool IsMember () const { return m_type == AstObjectType::MemberStr; }
 
-	llvm::Value *Value (llvm::IRBuilder<> &_builder) {
+	llvm::Value* Value (llvm::IRBuilder<> &_builder) {
 		if (m_type == AstObjectType::Value) {
 			return m_value;
 		} else if (m_type == AstObjectType::Var) {
@@ -104,17 +104,17 @@ public:
 			return nullptr;
 		}
 	}
-	llvm::CallInst *FuncInvoke (llvm::IRBuilder<> &_builder, std::vector<llvm::Value *> &_args) {
+	llvm::CallInst* FuncInvoke (llvm::IRBuilder<> &_builder, std::vector<llvm::Value* > &_args) {
 		if (m_type != AstObjectType::Func || m_func == nullptr)
 			return nullptr;
 		return _builder.CreateCall (m_func->m_fp, _args);
 	}
-	AstValue DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token *_t) {
+	std::optional<AstValue> DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token* _t) {
 		if (!IsValue ())
 			return std::nullopt;
-		llvm::Value *_tmp = Value (_builder);
+		llvm::Value* _tmp = Value (_builder);
 		if (_op == "+") {
-			return *this;
+			return* this;
 		} else {
 			std::string _typestr = TypeMap::GetTypeName (m_value->getType ());
 			if (_op == "-") {
@@ -137,7 +137,7 @@ public:
 				if (!m_value)
 					return std::nullopt;
 				_builder.CreateStore (_v.Value (_builder), m_value);
-				return *this;
+				return* this;
 			} else if (_op == "~") {
 				if (m_value_type != "bool") {
 					LOG_ERROR (_t, "非bool类型数据无法取反");
@@ -154,10 +154,10 @@ public:
 		LOG_ERROR (_t, std::format ("暂不支持的运算符 {}", _op));
 		return std::nullopt;
 	}
-	AstValue DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue &_other, antlr4::Token *_t) {
+	std::optional<AstValue> DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue &_other, antlr4::Token* _t) {
 		if (!_other.IsValid ())
 			return std::nullopt;
-		AstValue _tmp;
+		std::optional<AstValue> _tmp;
 		if (_op.size () == 1) {
 			switch (_op [0]) {
 			case '+': return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), m_value_type };
@@ -172,7 +172,7 @@ public:
 			case '>': return AstValue { _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder)), "bool" };
 			case '=':
 				_builder.CreateStore (_other.Value (_builder), m_value);
-				return *this;
+				return* this;
 			}
 		} else if (_op.size () == 2) {
 			if (_op [0] == _op [1]) {
@@ -197,7 +197,9 @@ public:
 				case '<': return AstValue { _builder.CreateShl (Value (_builder), _other.Value (_builder)), m_value_type };
 				case '>':
 					_tmp = _other.DoOper1 (_builder, _value_builder, "-", _t);
-					return AstValue { _builder.CreateShl (Value (_builder), _tmp.Value (_builder)), m_value_type };
+					if (!_tmp.has_value ())
+						return std::nullopt;
+					return AstValue { _builder.CreateShl (Value (_builder), _tmp.value ().Value (_builder)), m_value_type };
 				case '=':
 					return AstValue { _builder.CreateICmpEQ (Value (_builder), _other.Value (_builder)), "bool" };
 				}
@@ -214,14 +216,18 @@ public:
 				case '&':
 				case '^':
 					_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 1), _other, _t);
-					return DoOper2 (_builder, _value_builder, "=", _tmp, _t);
+					if (!_tmp.has_value ())
+						return std::nullopt;
+					return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t);
 				case '!': return AstValue { _builder.CreateICmpNE (Value (_builder), _other.Value (_builder)), "bool" };
 				}
 			}
 		} else if (_op.size () == 3) {
 			if (_op == "<<=" || _op == ">>=") {
 				_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 2), _other, _t);
-				return DoOper2 (_builder, _value_builder, "=", _tmp, _t);
+				if (!_tmp.has_value ())
+					return std::nullopt;
+				return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t);
 			}
 		}
 		return std::nullopt;
@@ -234,7 +240,7 @@ public:
 
 private:
 	AstObjectType				m_type = AstObjectType::None;
-	llvm::Value					*m_value = nullptr;
+	llvm::Value*				m_value = nullptr;
 	std::shared_ptr<FuncType>	m_func;
 	std::string					m_member = "";
 	std::string					m_value_type = "";

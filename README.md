@@ -75,8 +75,8 @@ public class TestClass {
 }
 
 // 实例化类型
-var tc1 = TestClass { Value1 = "a", Value3 = "c" }; // 必填参数
-var tc2 = TestClass { Value1 = "a", Value2 = "b", Value3 = "c", Value4 = "d" }; // 包括可选参数
+var tc1 = new TestClass { Value1 = "a", Value3 = "c" }; // 必填参数
+var tc2 = new TestClass { Value1 = "a", Value2 = "b", Value3 = "c", Value4 = "d" }; // 包括可选参数
 ```
 
 ### 运行效果

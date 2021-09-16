@@ -11,7 +11,7 @@
 //	int lenNew = ::WideCharToMultiByte (ToType, 0, _old.data (), lenOld, nullptr, 0, nullptr, nullptr);
 //	std::string s;
 //	s.resize (lenNew);
-//	if (!::WideCharToMultiByte (ToType, 0, _old.data (), lenOld, const_cast<char *>(s.c_str ()), lenNew, nullptr, nullptr))
+//	if (!::WideCharToMultiByte (ToType, 0, _old.data (), lenOld, const_cast<char* >(s.c_str ()), lenNew, nullptr, nullptr))
 //		return "";
 //	return s.c_str ();
 //}
@@ -24,7 +24,7 @@ LPWCH get_env (std::string _key, std::string _val) {
 
 // 创建进程，并等待进程执行结束，并获取内容
 std::string get_process_output (std::string _cmd, LPWCH _env) {
-	//FILE *_p = _popen (_cmd.c_str (), "r");
+	//FILE* _p = _popen (_cmd.c_str (), "r");
 	//if (!_p)
 	//	return "";
 	//faw::String _ret = "";

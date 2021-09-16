@@ -25,10 +25,10 @@
 
 
 
-int main (int argc, char *argv[]) {
+int main (int argc, char* argv[]) {
 	std::filesystem::current_path ("D:\\fa_tmp");
 	std::string _code = R"(
-@import int __cdecl puts (const char*);
+@import int32 __cdecl puts (cstr);
 //// MT
 //@lib "libucrt.lib";
 //@lib "libcmt.lib";
@@ -43,11 +43,11 @@ int main (int argc, char *argv[]) {
 //@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
 
 public class AAA {
-	public int num1;
-	public int num2;
+	public int32 num1;
+	public int32 num2;
 }
 
-static int32 FaEntryMain () {
+int32 FaMain () {
 	var xx = new AAA { num1 = 3, num2 = 5 };
 	int32 n = if false {
 		10
@@ -75,8 +75,8 @@ static int32 FaEntryMain () {
 	_cts.fill ();
 	FaParser _parser { &_cts };
 	CodeVisitor _visitor;
-	FaLLVMGen _gen { &_visitor, "hello", "HelloProject"};
-	auto _success = _gen.Compile (_parser.program (), "hello");
+	FaLLVMGen _gen { &_visitor, "hello", "hello"};
+	auto _success = _gen.Compile (_parser.program (), "hello.obj");
 	if (_success) {
 		std::cout << "compile success." << std::endl;
 		//std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");

@@ -163,7 +163,7 @@ public:
 
     virtual antlrcpp::Any visitImportBlock(FaParser::ImportBlockContext *context) = 0;
 
-    virtual antlrcpp::Any visitFaEntryMainFuncBlock(FaParser::FaEntryMainFuncBlockContext *context) = 0;
+    virtual antlrcpp::Any visitFaMainFuncBlock(FaParser::FaMainFuncBlockContext *context) = 0;
 
     virtual antlrcpp::Any visitProgram(FaParser::ProgramContext *context) = 0;
 

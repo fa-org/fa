@@ -23,7 +23,7 @@ Continue:					'continue';
 Class:						'class';
 Const:						'const';
 Else:						'else';
-FaEntryMain:				'FaEntryMain';
+FaMain:						'FaMain';
 If:							'if';
 Internal:					'internal';
 New:						'new';
@@ -247,8 +247,8 @@ importBlock:				(importStmt | libStmt)+;
 //
 // fa_entry_main
 //
-faEntryMainFuncBlock:		Static type FaEntryMain QuotYuanL QuotYuanR QuotHuaL stmt* QuotHuaR;
-program:					useStmt* importBlock? classStmt* faEntryMainFuncBlock?;
+faMainFuncBlock:			type FaMain QuotYuanL QuotYuanR QuotHuaL stmt* QuotHuaR;
+program:					useStmt* importBlock? classStmt* faMainFuncBlock?;
 
 
 
