@@ -16,7 +16,7 @@ fa 语言编译器（开发中）
 
 - [ ] 基本语法
 	+ [x] 表达式（暂不完全）
-	+ [ ] 类、对象、继承
+	+ [x] 类、对象、继承（暂不完全）
 	+ [ ] 异步
 	+ [ ] linq
 - [ ] 编译系统
@@ -95,6 +95,8 @@ var tc2 = new TestClass { Value1 = "a", Value2 = "b", Value3 = "c", Value4 = "d"
 
 参考资料：
 
+
+
 https://zhuanlan.zhihu.com/p/25959684
 前言（就是本篇）
 考不上三本也能给自己心爱的语言加上Coroutine（一） - 知乎专栏
@@ -112,7 +114,44 @@ https://zhuanlan.zhihu.com/p/25959684
 考不上三本也能懂系列——实现C++类型系统（二）
 考不上三本也能懂系列——什么是C++的argument-dependent lookup
 
+
+
+编写LLVM Pass模块知识点梳理
+https://blog.csdn.net/u010940020/article/details/99721684
+
+
+
+LLVM新建全局变量
+https://www.cnblogs.com/jourluohua/p/10813824.html
+
+
+
+IR API(四)——操作IR的字符串、全局变量、全局常量及数组
+https://blog.csdn.net/qq_42570601/article/details/108007986
+
+
+
 创建结构体
 https://llvm.org/doxygen/classllvm_1_1StructType.html#a7cf5280be35cd0c973f40c7d87a11acd
+
+
+
+可微编程-自上而下的产品形态 5 Swift中的自动微分
+https://zhuanlan.zhihu.com/p/133721083
+
+
+
+LLVM新建全局变量
+https://www.cnblogs.com/jourluohua/p/10813824.html
+
+
+
+C++ IRBuilder::CreateStructGEP方法代码示例（有点水）
+https://vimsky.com/examples/detail/cpp-ex---IRBuilder-CreateStructGEP-method.html
+
+
+
+LLVM Language Reference Manual
+https://llvm.org/docs/LangRef.html
 
 -->
