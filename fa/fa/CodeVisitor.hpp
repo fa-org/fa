@@ -25,8 +25,8 @@ public:
 	antlrcpp::Any visitImportStmt (FaParser::ImportStmtContext* ctx) override {
 		std::string _name = ctx->Id ()->getText ();
 		FaParser::TypeContext* _ret_type_raw = ctx->type ();
-		std::vector<FaParser::TypeVarContext* > _arg_types_raw_tmp = ctx->typeVarList ()->typeVar ();
-		std::vector<FaParser::TypeContext* > _arg_types_raw;
+		std::vector<FaParser::TypeVarContext*> _arg_types_raw_tmp = ctx->typeVarList ()->typeVar ();
+		std::vector<FaParser::TypeContext*> _arg_types_raw;
 		for (size_t i = 0; i < _arg_types_raw_tmp.size (); ++i)
 			_arg_types_raw.push_back (_arg_types_raw_tmp[i]->type ());
 		std::string _cc = ctx->callConvention ()->getText ();
@@ -42,15 +42,15 @@ public:
 	//}
 
 	antlrcpp::Any visitIfStmt (FaParser::IfStmtContext* ctx) override {
-		std::vector<std::vector<FaParser::StmtContext* >> _bodys;
+		std::vector<std::vector<FaParser::StmtContext*>> _bodys;
 		for (auto _body_part_raw : ctx->quotStmtPart ())
 			_bodys.push_back (_body_part_raw->stmt ());
 		return std::make_tuple (ctx->expr (), _bodys);
 	}
 
 	antlrcpp::Any visitIfExpr (FaParser::IfExprContext* ctx) override {
-		std::vector<std::vector<FaParser::StmtContext* >> _bodys1;
-		std::vector<FaParser::ExprContext* > _bodys2;
+		std::vector<std::vector<FaParser::StmtContext*>> _bodys1;
+		std::vector<FaParser::ExprContext*> _bodys2;
 		for (auto _body_part_raw : ctx->quotStmtExpr ()) {
 			_bodys1.push_back (_body_part_raw->stmt ());
 			_bodys2.push_back (_body_part_raw->expr ());
@@ -59,7 +59,7 @@ public:
 	}
 
 	antlrcpp::Any visitImportBlock (FaParser::ImportBlockContext* ctx) override {
-		std::vector<FaParser::ImportStmtContext* > _imports;
+		std::vector<FaParser::ImportStmtContext*> _imports;
 		std::vector<std::string> _libs;
 		for (auto _import_item : ctx->importStmt ())
 			_imports.push_back (_import_item);
@@ -72,7 +72,7 @@ public:
 
 	antlrcpp::Any visitFaMainFuncBlock (FaParser::FaMainFuncBlockContext* ctx) override {
 		FaParser::TypeContext* _ret_type_raw = ctx->type ();
-		std::vector<FaParser::StmtContext* > _stmts_raw = ctx->stmt ();
+		std::vector<FaParser::StmtContext*> _stmts_raw = ctx->stmt ();
 		return std::make_tuple (_ret_type_raw, _stmts_raw);
 	}
 
@@ -81,8 +81,8 @@ public:
 		for (auto _use_expr : ctx->useStmt ())
 			_uses.push_back (visitUseStmt (_use_expr));
 		FaParser::ImportBlockContext* _imports = ctx->importBlock ();
-		std::vector<FaParser::ClassStmtContext* > _classes = ctx->classStmt ();
-		auto _entry = dynamic_cast<FaParser::FaMainFuncBlockContext* > (ctx->faMainFuncBlock ());
+		std::vector<FaParser::ClassStmtContext*> _classes = ctx->classStmt ();
+		auto _entry = dynamic_cast<FaParser::FaMainFuncBlockContext*> (ctx->faMainFuncBlock ());
 		return std::make_tuple (_uses, _imports, _classes, _entry);
 	}
 

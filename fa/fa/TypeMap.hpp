@@ -19,6 +19,7 @@
 #include "FaVisitor.h"
 #include "FaParser.h"
 #include "Log.hpp"
+#include "AstClass.hpp"
 
 
 
@@ -37,12 +38,12 @@ public:
 		}
 	}
 
-	std::optional<llvm::Type* > GetType (FaParser::TypeContext* _type_ctx) {
+	std::optional<llvm::Type*> GetType (FaParser::TypeContext* _type_ctx) {
 		auto _stype = _type_ctx->getText ();
 		return GetType (_stype, _type_ctx->start);
 	}
 
-	std::optional<llvm::Type* > GetType (std::string _stype, antlr4::Token* _t) {
+	std::optional<llvm::Type*> GetType (std::string _stype, antlr4::Token* _t) {
 		if (_stype == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_stype == "bool") {
@@ -70,16 +71,16 @@ public:
 		} else {
 			auto _ocls = m_global_classes->GetClass (_stype, m_namespace);
 			if (_ocls.has_value ())
-				return _ocls.value ()->GetType ();
+				return _ocls.value ()->GetType ([&] (std::string _stype, antlr4::Token* _t) { return GetType (_stype, _t); });
 		}
 		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _stype));
 		return std::nullopt;
 	}
 
-	std::optional<std::vector<llvm::Type* >> GetTypes (std::vector<FaParser::TypeContext* > _types_raw) {
-		std::vector<llvm::Type* > _types;
+	std::optional<std::vector<llvm::Type*>> GetTypes (std::vector<FaParser::TypeContext*> _types_raw) {
+		std::vector<llvm::Type*> _types;
 		for (FaParser::TypeContext* _type_raw : _types_raw) {
-			std::optional<llvm::Type* > _type = GetType (_type_raw);
+			std::optional<llvm::Type*> _type = GetType (_type_raw);
 			if (!_type.has_value ())
 				return std::nullopt;
 			_types.push_back (_type.value ());
@@ -87,12 +88,12 @@ public:
 		return _types;
 	}
 
-	std::optional<std::tuple<std::vector<llvm::Type* >, std::vector<std::string>>> GetTypesT (std::vector<FaParser::TypeContext* > _types_raw) {
-		std::vector<llvm::Type* > _types;
+	std::optional<std::tuple<std::vector<llvm::Type*>, std::vector<std::string>>> GetTypesT (std::vector<FaParser::TypeContext*> _types_raw) {
+		std::vector<llvm::Type*> _types;
 		std::vector<std::string> _type_strs;
 		for (FaParser::TypeContext* _type_raw : _types_raw) {
 			std::string _type_str = _type_raw->getText ();
-			std::optional<llvm::Type* > _type = GetType (_type_str, _type_raw->start);
+			std::optional<llvm::Type*> _type = GetType (_type_str, _type_raw->start);
 			if (!_type.has_value ())
 				return std::nullopt;
 			_types.push_back (_type.value ());
@@ -306,8 +307,8 @@ public:
 	//	return std::nullopt;
 	//}
 
-	//std::optional<std::tuple<std::vector<llvm::Type* >, std::vector<std::string>>> GetExternTypes (std::vector<FaParser::ETypeContext* > _types_raw) {
-	//	std::vector<llvm::Type* > _types;
+	//std::optional<std::tuple<std::vector<llvm::Type*>, std::vector<std::string>>> GetExternTypes (std::vector<FaParser::ETypeContext*> _types_raw) {
+	//	std::vector<llvm::Type*> _types;
 	//	std::vector<std::string> _type_strs;
 	//	for (FaParser::ETypeContext* _type_raw : _types_raw) {
 	//		auto _type = GetExternType (_type_raw);

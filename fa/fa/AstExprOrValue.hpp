@@ -3,6 +3,7 @@
 
 
 
+#include <algorithm>
 #include <functional>
 #include <set>
 #include <string>
@@ -59,24 +60,7 @@ struct _AST_NewCtx {
 	}
 
 	// 检查是否所有参数已初始化
-	bool CheckVarsAllInit (antlr4::Token* _t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _cb) {
-		if (m_tvar_init.size () == 0) {
-			// new 表达式未指定，但带有默认参数的值，拷贝进去
-			for (auto _tvar : m_tvar_all) {
-				auto _var = m_cls->GetVar (_tvar).value ();
-				m_cls_vars.push_back (_tvar);
-				auto _oparam = _cb (_var->m_init_value, _var->m_type);
-				if (!_oparam.has_value ())
-					return false;
-				m_params.push_back (_oparam.value ());
-			}
-			return true;
-		} else {
-			for (auto _tvar_init : m_tvar_init)
-				LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
-			return false;
-		}
-	}
+	bool CheckVarsAllInit (antlr4::Token *_t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext *, std::string)> _cb);
 
 	antlr4::Token*					m_t = nullptr;
 	std::shared_ptr<AstClass>		m_cls;
@@ -210,8 +194,8 @@ struct _AST_OpNExprTreeCtx {
 
 struct _AST_IfExprTreeCtx {
 	std::vector<_AST_ExprOrValue>						m_conds;
-	std::vector<std::vector<FaParser::StmtContext* >>	m_bodys1_raw;
-	std::vector<FaParser::ExprContext* >				m_bodys2;
+	std::vector<std::vector<FaParser::StmtContext*>>	m_bodys1_raw;
+	std::vector<FaParser::ExprContext*>				m_bodys2;
 	std::string											m_expect_type;
 };
 
@@ -237,6 +221,38 @@ inline std::string _AST_ExprOrValue::GetFuncName () {
 	} else {
 		return "";
 	}
+}
+
+inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token *_t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext *, std::string)> _cb) {
+	if (m_tvar_init.size () != 0) {
+		for (auto _tvar_init : m_tvar_init)
+			LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
+		return false;
+	}
+
+	// new 表达式未指定，但带有默认参数的值，拷贝进去
+	for (auto _tvar : m_tvar_all) {
+		auto _var = m_cls->GetVar (_tvar).value ();
+		m_cls_vars.push_back (_tvar);
+		auto _oparam = _cb (_var->m_init_value, _var->m_type);
+		if (!_oparam.has_value ())
+			return false;
+		m_params.push_back (_oparam.value ());
+	}
+
+	// 初始化参数列表排序
+	// TODO    m_cls_vars    m_params
+	std::vector<int> _vidx;
+	for (size_t i = 0; i < m_cls_vars.size (); ++i) {
+		auto _oidx = m_cls->GetVarIndex (m_cls_vars [i]);
+		_vidx.push_back ();
+	}
+	//for (size_t i = 0; i < _vidx.size () - 1; ++i) {
+	//	for (size_t j = i; j < _vidx.size (); ++j) {
+
+	//	}
+	//}
+	return true;
 }
 
 

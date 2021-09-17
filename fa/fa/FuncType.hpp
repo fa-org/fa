@@ -38,7 +38,7 @@ class FuncTypes {
 public:
 	FuncTypes (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<llvm::Module> _module, std::shared_ptr<ValueBuilder> _value_builder): m_ctx (_ctx), m_type_map (_type_map), m_module (_module), m_value_builder (_value_builder) {}
 
-	bool MakeExtern (std::string _func_name, FaParser::TypeContext* _ret_type_raw, std::vector<FaParser::TypeContext* > &_arg_type_raws, llvm::CallingConv::ID _cc) {
+	bool MakeExtern (std::string _func_name, FaParser::TypeContext* _ret_type_raw, std::vector<FaParser::TypeContext*> &_arg_type_raws, llvm::CallingConv::ID _cc) {
 		auto _ret = std::make_shared<FuncType> ();
 		_ret->m_name = _func_name;
 		auto _otype = m_type_map->GetTypeT (_ret_type_raw);
@@ -53,7 +53,7 @@ public:
 			auto _otypes = m_type_map->GetTypesT (_arg_type_raws);
 			if (!_otypes.has_value ())
 				return false;
-			std::vector<llvm::Type* > m_arg_types;
+			std::vector<llvm::Type*> m_arg_types;
 			std::tie (m_arg_types, _ret->m_arg_types) = _otypes.value ();
 			_ret->m_fp_type = llvm::FunctionType::get (_tmp_ret_type, m_arg_types, false);
 			std::stringstream _ss;
@@ -82,7 +82,7 @@ public:
 			_ret->m_fp_type = llvm::FunctionType::get (_ret_type_, false);
 			_ret->m_type = std::format ("Func<{} ()>", _ret->m_ret_type);
 		} else {
-			std::vector<llvm::Type* > _arg_types_;
+			std::vector<llvm::Type*> _arg_types_;
 			for (size_t i = 0; i < _arg_types.size (); ++i) {
 				_otype = m_type_map->GetType (_arg_types [i], _arg_type_ts [i]);
 				if (!_otype.has_value ())
@@ -102,9 +102,9 @@ public:
 		m_funcs [_func_name] = _ret;
 		return true;
 	}
-	bool Make (std::string _class_name, std::string &_func_name, FaParser::TypeContext* _ret_type_raw, const std::vector<FaParser::TypeContext* > &_arg_type_raws, llvm::CallingConv::ID _cc = llvm::CallingConv::C) {
+	bool Make (std::string _class_name, std::string &_func_name, FaParser::TypeContext* _ret_type_raw, const std::vector<FaParser::TypeContext*> &_arg_type_raws, llvm::CallingConv::ID _cc = llvm::CallingConv::C) {
 		std::vector<std::string> _arg_types;
-		std::vector<antlr4::Token* > _arg_type_ts;
+		std::vector<antlr4::Token*> _arg_type_ts;
 		for (auto _arg_type_raw : _arg_type_raws) {
 			_arg_types.push_back (_arg_type_raw->getText ());
 			_arg_type_ts.push_back (_arg_type_raw->start);

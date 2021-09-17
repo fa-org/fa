@@ -42,6 +42,7 @@ public:
 // 类变量
 class AstClassVar {
 public:
+	antlr4::Token*					m_t = nullptr;			//
 	PublicLevel						m_pv;					// 公开级别
 	bool							m_is_static;			// 是否静态
 	std::string						m_type;					// 变量类型
@@ -49,8 +50,8 @@ public:
 	FaParser::ExprContext*			m_init_value = nullptr;	// 初始值
 	std::vector<AstClassVarFunc>	m_var_funcs;			// 变量 getter setter 函数
 
-	AstClassVar (PublicLevel _pv, bool _is_static, std::string _type, std::string _name)
-		: m_pv (_pv), m_is_static (_is_static), m_type (_type), m_name (_name) {}
+	AstClassVar (antlr4::Token* _t, PublicLevel _pv, bool _is_static, std::string _type, std::string _name)
+		: m_t (_t), m_pv (_pv), m_is_static (_is_static), m_type (_type), m_name (_name) {}
 
 	void SetInitValue (FaParser::ExprContext* _init_value) { m_init_value = _init_value; }
 
@@ -120,8 +121,8 @@ public:
 		m_parents.assign (_parents.cbegin (), _parents.cend ());
 	}
 
-	std::shared_ptr<AstClassVar> AddVar (PublicLevel _pv, bool _is_static, std::string _type, std::string _name) {
-		auto _var = std::make_shared<AstClassVar> (_pv, _is_static, _type, _name);
+	std::shared_ptr<AstClassVar> AddVar (antlr4::Token* _t, PublicLevel _pv, bool _is_static, std::string _type, std::string _name) {
+		auto _var = std::make_shared<AstClassVar> (_t, _pv, _is_static, _type, _name);
 		m_vars.push_back (_var);
 		return _var;
 	}
@@ -139,16 +140,22 @@ public:
 		}
 		return std::nullopt;
 	}
-
-	std::string GetTypeStr () {
-		return std::format ("{}&", m_name);
+	std::optional<size_t> GetVarIndex (std::string _name) {
+		for (size_t i = 0; i < m_vars.size (); ++i) {
+			if (m_vars [i]->m_name == _name)
+				return i;
+		}
+		return std::nullopt;
 	}
 
-	llvm::Type* GetType () {
+	std::optional<llvm::Type*> GetType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) {
 		if (!m_type) {
 			std::vector<llvm::Type*> _v;
 			for (auto _var : m_vars) {
-				// TODO
+				auto _otype = _cb (_var->m_type, _var->m_t);
+				if (!_otype.has_value ())
+					return std::nullopt;
+				_v.push_back (_otype.value ());
 			}
 			m_type = llvm::StructType::create (_v);
 		}

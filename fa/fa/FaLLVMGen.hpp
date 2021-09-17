@@ -52,25 +52,25 @@ public:
 	FaLLVMGen (CodeVisitor* _visitor, std::string _module_name, std::string _namespace): m_visitor (_visitor), m_module_name (_module_name), m_namespace (_namespace) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (m_module_name,* m_ctx);
-		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx);
-		m_value_builder = std::make_shared<ValueBuilder> (m_visitor, m_ctx, m_module);
-		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder);
 		m_global_classes = std::make_shared<AstClasses> ();
+		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx, m_global_classes, m_namespace);
+		m_value_builder = std::make_shared<ValueBuilder> (m_type_map, m_ctx, m_module);
+		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder);
 	}
 
 	bool Compile (FaParser::ProgramContext* _program_ctx, std::string _out_file) {
 		auto [_uses, _imports, _classes, _entry] = m_visitor->visit (_program_ctx).as<std::tuple<
 			std::vector<std::string>,
 			FaParser::ImportBlockContext* ,
-			std::vector<FaParser::ClassStmtContext* >,
+			std::vector<FaParser::ClassStmtContext*>,
 			FaParser::FaMainFuncBlockContext* 
 		>> ();
 		m_uses = _uses;
 
 		// 引用外部模块
-		std::vector<FaParser::ImportStmtContext* > _imports_raw;
+		std::vector<FaParser::ImportStmtContext*> _imports_raw;
 		std::tie (_imports_raw, m_libs) = m_visitor->visit (_imports).as<std::tuple<
-			std::vector<FaParser::ImportStmtContext* >,
+			std::vector<FaParser::ImportStmtContext*>,
 			std::vector<std::string>
 		>> ();
 		//m_imports.push_back ("puts");
@@ -119,7 +119,7 @@ public:
 
 				// 名称
 				_name = _var_raw->Id ()->getText ();
-				auto _var = _class->AddVar (_pl, _is_static, _type, _name);
+				auto _var = _class->AddVar (_var_raw->start, _pl, _is_static, _type, _name);
 
 				// 初始值和 getter setter
 				auto _var_ext_raw = _var_raw->classVarExt ();
@@ -163,7 +163,7 @@ public:
 
 				// 参数列表
 				if (!_is_static)
-					_func->SetArgumentTypeName (_class->GetTypeStr (), _func_raw->start, "this");
+					_func->SetArgumentTypeName (_class->m_name, _func_raw->start, "this");
 				//
 				std::vector<std::string> _arg_types;
 				if (_func_raw->typeVarList ()) {
@@ -187,14 +187,14 @@ public:
 				FuncContext _func_ctx { m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type };
 				auto _expr_raw = _cls_func->m_func->expr ();
 				if (_expr_raw) {
-					AstValue _val = ExprBuilder (_func_ctx, _expr_raw, _cls_func->m_ret_type);
-					if (!_val.IsValid ())
+					std::optional<AstValue> _val = ExprBuilder (_func_ctx, _expr_raw, _cls_func->m_ret_type);
+					if (!_val.has_value ())
 						return false;
-					if (_val.IsVoid ()) {
+					if (_func_ctx.GetReturnType () == "void") {
 						if (!_func_ctx.Return (_expr_raw->start))
 							return false;
 					} else {
-						if (!_func_ctx.Return (_val, _expr_raw->start))
+						if (!_func_ctx.Return (_val.value (), _expr_raw->start))
 							return false;
 					}
 				} else {
@@ -213,9 +213,9 @@ public:
 		}
 		auto [_ret_type_raw, _stmts_raw] = m_visitor->visit (_entry).as<std::tuple<
 			FaParser::TypeContext* ,
-			std::vector<FaParser::StmtContext* >
+			std::vector<FaParser::StmtContext*>
 		>> ();
-		std::vector<FaParser::TypeContext* > _arg_type_raws;
+		std::vector<FaParser::TypeContext*> _arg_type_raws;
 		std::string _fa_main = "@fa_main";
 		if (!m_global_funcs->Make ("", _fa_main, _ret_type_raw, _arg_type_raws))
 			return false;
@@ -264,7 +264,7 @@ public:
 
 	std::string Link () {
 		wchar_t* get_env (std::string _key, std::string _val);
-#if 1
+#if 0
 		// home
 		std::string _link_exe_path = R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x86\link.exe)";
 		wchar_t* _env = get_env ("LIB", R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\ATLMFC\lib\x86;D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
@@ -287,13 +287,13 @@ public:
 	}
 
 private:
-	bool ProcessImports (std::vector<FaParser::ImportStmtContext* > _imports_raw) {
+	bool ProcessImports (std::vector<FaParser::ImportStmtContext*> _imports_raw) {
 		// https://blog.csdn.net/adream307/article/details/83820543
 		for (FaParser::ImportStmtContext* _import_func_raw : _imports_raw) {
 			auto [_name, _ret_type_raw, _arg_types_raw, _cc_str] = m_visitor->visit (_import_func_raw).as<std::tuple<
 				std::string,
 				FaParser::TypeContext* ,
-				std::vector<FaParser::TypeContext* >,
+				std::vector<FaParser::TypeContext*>,
 				std::string
 			>> ();
 			std::string _func_name = std::format ("::{}", _name);
@@ -313,22 +313,23 @@ private:
 		return true;
 	}
 
-	bool StmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::StmtContext* > &_stmts_raw) {
+	bool StmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::StmtContext*> &_stmts_raw) {
 		for (FaParser::StmtContext* _stmt_raw : _stmts_raw) {
 			if (_stmt_raw->normalStmt ()) {
 				FaParser::NormalStmtContext* _normal_stmt_raw = _stmt_raw->normalStmt ();
 				if (_normal_stmt_raw->Return () || _normal_stmt_raw->expr ()) {
 					if (_normal_stmt_raw->expr ()) {
 						std::string _exp_type = _normal_stmt_raw->Return () ? _func_ctx.GetReturnType () : "";
-						AstValue _value = ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), _exp_type);
-						if (!_value.IsValid ())
+						std::optional<AstValue> _oval = ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), _exp_type);
+						if (!_oval.has_value ())
 							return false;
+						AstValue _val = _oval.value ();
 						if (_normal_stmt_raw->Return ()) {
-							if (!_value.IsValue ()) {
+							if (!_val.IsValue ()) {
 								LOG_ERROR (_normal_stmt_raw->start, "无法返回表达式结果");
 								return false;
 							}
-							if (!_func_ctx.Return (_value, _normal_stmt_raw->start))
+							if (!_func_ctx.Return (_val, _normal_stmt_raw->start))
 								return false;
 						}
 					} else {
@@ -348,11 +349,11 @@ private:
 					return false;
 				}
 			} else if (_stmt_raw->ifStmt ()) {
-				std::vector<FaParser::ExprContext* > _conds;
-				std::vector<std::vector<FaParser::StmtContext* >> _bodys;
+				std::vector<FaParser::ExprContext*> _conds;
+				std::vector<std::vector<FaParser::StmtContext*>> _bodys;
 				std::tie (_conds, _bodys) = m_visitor->visit (_stmt_raw->ifStmt ()).as<std::tuple<
-					std::vector<FaParser::ExprContext* >,
-					std::vector<std::vector<FaParser::StmtContext* >>
+					std::vector<FaParser::ExprContext*>,
+					std::vector<std::vector<FaParser::StmtContext*>>
 					>> ();
 				if (!IfStmtBuilder (_func_ctx, _conds, _bodys))
 					return false;
@@ -364,15 +365,26 @@ private:
 				std::string _exp_type = _def_var_stmt_raw->type ()->getText ();
 				if (_exp_type == "var")
 					_exp_type = "";
-				AstValue _val = ExprBuilder (_func_ctx, _def_var_stmt_raw->expr (), _exp_type);
-				if (!_val.IsValid ())
+				std::optional<AstValue> _oval = ExprBuilder (_func_ctx, _def_var_stmt_raw->expr (), _exp_type);
+				if (!_oval.has_value ())
 					return false;
+				AstValue _val = _oval.value ();
 				if (_exp_type == "")
 					_exp_type = _val.GetType ();
-				AstValue _var = _func_ctx.DefineVariable (_exp_type, _def_var_stmt_raw->type ()->start, _def_var_stmt_raw->Id ()->getText ());
-				if (!_var.IsValid ())
-					return false;
-				_func_ctx.DoOper2 (_var, "=", _val, _def_var_stmt_raw->Assign ()->getSymbol ());
+				std::string _var_name = _def_var_stmt_raw->Id ()->getText ();
+				if (_val.GetTmpVarFlag ()) {
+					if (!_func_ctx.BindTempVariable (_def_var_stmt_raw->start, _val, _var_name))
+						return false;
+					_val.SetTmpVarFlag (false);
+				} else {
+					std::optional<AstValue> _ovar = _func_ctx.DefineVariable (_exp_type, _def_var_stmt_raw->type ()->start, _var_name);
+					if (!_ovar.has_value ())
+						return false;
+					AstValue _var = _ovar.value ();
+					auto _oval = _func_ctx.DoOper2 (_var, "=", _val, _def_var_stmt_raw->Assign ()->getSymbol ());
+					if (!_oval.has_value ())
+						return false;
+				}
 			} else {
 				LOG_ERROR (_stmt_raw->start, "未知的表达式");
 				return false;
@@ -381,15 +393,15 @@ private:
 		return true;
 	}
 
-	bool IfStmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext* > &_conds_raw, std::vector<std::vector<FaParser::StmtContext* >> &_bodys_raw) {
+	bool IfStmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext*> &_conds_raw, std::vector<std::vector<FaParser::StmtContext*>> &_bodys_raw) {
 		if (_conds_raw.size () == 0)
 			return StmtBuilder (_func_ctx, _bodys_raw [0]);
 		//
-		AstValue _cond = ExprBuilder (_func_ctx, _conds_raw [0], "bool");
-		if (!_cond.IsValid ())
+		std::optional<AstValue> _ocond = ExprBuilder (_func_ctx, _conds_raw [0], "bool");
+		if (!_ocond.has_value ())
 			return false;
 		_conds_raw.erase (_conds_raw.begin ());
-		return _func_ctx.IfElse (_cond, [&] () {
+		return _func_ctx.IfElse (_ocond.value (), [&] () {
 			if (!StmtBuilder (_func_ctx, _bodys_raw [0]))
 				return false;
 			_bodys_raw.erase (_bodys_raw.begin ());
@@ -399,11 +411,11 @@ private:
 		});
 	}
 
-	AstValue ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
+	std::optional<AstValue> ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
 		// 定义解析函数
 		std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext* , std::string)> _parse_expr;
 		std::function<std::optional<_AST_ExprOrValue> (FaParser::MiddleExprContext* , std::string)> _parse_middle_expr;
-		std::function<std::optional<_AST_ExprOrValue> (std::vector<FaParser::StrongExprContext* > &_expr_raws, std::vector<FaParser::AllOp2Context* > &_op_raws, std::vector<size_t> &_op_levels, std::string)> _parse_middle_expr2;
+		std::function<std::optional<_AST_ExprOrValue> (std::vector<FaParser::StrongExprContext*> &_expr_raws, std::vector<FaParser::AllOp2Context*> &_op_raws, std::vector<size_t> &_op_levels, std::string)> _parse_middle_expr2;
 		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprContext* , std::string)> _parse_strong_expr;
 		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprBaseContext* , std::string)> _parse_strong_expr_base;
 		std::function<std::optional<_AST_ExprOrValue> (FaParser::IfExprContext* , std::string)> _parse_if_expr;
@@ -433,7 +445,7 @@ private:
 					auto _cur_tmp = std::make_shared<_AST_Op2ExprTreeCtx> ();
 					_cur->m_right = _cur_tmp;
 					_cur = _cur_tmp;
-					auto _oval = _parse_middle_expr (_exprs [i], "$");
+					_oval = _parse_middle_expr (_exprs [i], "$");
 					if (!_oval.has_value ())
 						return std::nullopt;
 					_cur->m_left = _oval.value ();
@@ -466,7 +478,7 @@ private:
 			}
 			return _parse_middle_expr2 (std::ref (_exprs), std::ref (_ops), std::ref (_op_levels), _exp_type);
 		};
-		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext* > &_expr_raws, std::vector<FaParser::AllOp2Context* > &_op_raws, std::vector<size_t> &_op_levels, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
+		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext*> &_expr_raws, std::vector<FaParser::AllOp2Context*> &_op_raws, std::vector<size_t> &_op_levels, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raws.size () == 1)
 				return _parse_strong_expr (_expr_raws [0], _exp_type);
 			size_t _pos = 0, _pos_level = _op_levels [0];
@@ -480,8 +492,8 @@ private:
 			// 根据优先级拆分为两块
 			auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
 			_ptr->m_op = _AST_Oper2Ctx { _op_raws [_pos] };
-			std::vector<FaParser::StrongExprContext* > _expr_raws_L, _expr_raws_R;
-			std::vector<FaParser::AllOp2Context* > _op_raws_L, _op_raws_R;
+			std::vector<FaParser::StrongExprContext*> _expr_raws_L, _expr_raws_R;
+			std::vector<FaParser::AllOp2Context*> _op_raws_L, _op_raws_R;
 			std::vector<size_t> _op_levels_L, _op_levels_R;
 			_expr_raws_L.assign (_expr_raws.begin (), _expr_raws.begin () + _pos + 1);
 			if (_expr_raws_L.size () > 1) {
@@ -744,9 +756,10 @@ private:
 		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext* _expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raw->ids ()) {
-				auto _val = FindValueType (_func_ctx, _expr_raw->ids ()->getText ());
-				if (!_val.IsValid ())
+				std::optional<AstValue> _oval = FindValueType (_func_ctx, _expr_raw->ids ()->getText ());
+				if (!_oval.has_value ())
 					return std::nullopt;
+				AstValue _val = _oval.value ();
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
 					return std::nullopt;
 				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
@@ -759,9 +772,7 @@ private:
 					return std::nullopt;
 				return std::make_shared<_AST_ValueCtx> (AstValue { _f }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->literal ()) {
-				AstValue _val { m_value_builder, _expr_raw->literal (), _exp_type };
-				if (!_val.IsValid ())
-					return std::nullopt;
+				AstValue _val { m_value_builder, _expr_raw->literal () };
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
 					return std::nullopt;
 				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
@@ -814,7 +825,7 @@ private:
 					_exp_type = _ocls.value ()->m_name;
 				}
 
-				auto _newval = std::make_shared<_AST_NewCtx> (_cls, _exp_type);
+				auto _newval = std::make_shared<_AST_NewCtx> (_expr_raw->start, _cls, _exp_type);
 				for (auto _item_raw : _new_raw->newExprItem ()) {
 					std::string _var_name = _item_raw->Id ()->getText ();
 					auto _oclsvar = _cls->GetVar (_var_name);
@@ -832,7 +843,10 @@ private:
 						_var_value = _oval.value ();
 					} else {
 						//new Obj { _var };
-						_var_value = std::make_shared<_AST_ValueCtx> (_func_ctx.GetVariable (_var_name), _item_raw->start, _var_exp_type);
+						auto _oval = _func_ctx.GetVariable (_var_name);
+						if (!_oval.has_value ())
+							return std::nullopt;
+						_var_value = std::make_shared<_AST_ValueCtx> (_oval.value (), _item_raw->start, _var_exp_type);
 					}
 					if (!_newval->SetInitVar (_var_name, _var_value, _item_raw->start))
 						return std::nullopt;
@@ -897,6 +911,8 @@ private:
 		// 转换类型
 		std::function<AstValue (AstValue, std::string)> _trans_type = [] (AstValue _val, std::string _exp_type) -> AstValue {
 			// TODO
+			if (_exp_type == "void")
+				return AstValue::FromVoid ();
 			return _val;
 		};
 
@@ -908,7 +924,13 @@ private:
 				auto _left = _trans_type (_ast_ev.m_val->m_val, _rexp_type);
 				return std::make_tuple (_left, _rexp_type);
 			} else if (_ast_ev.m_newval) {
-				auto _left = _func_ctx.DefineVariable (_ast_ev.m_newval->m_cls->GetTypeStr (), _ast_ev.m_newval->m_t);
+				auto _oleft = _func_ctx.DefineVariable (_ast_ev.m_newval->m_cls->m_name, _ast_ev.m_newval->m_t);
+				if (!_oleft.has_value ())
+					return std::nullopt;
+				auto _left = _oleft.value ();
+				_left.SetTmpVarFlag (true);
+				// TODO 设置初始值
+				_func_ctx.InitClass (_left);
 				return std::make_tuple (_left, _rexp_type);
 			} else if (_ast_ev.m_op1_expr) {
 				auto _oleft = _generate_code (_ast_ev.m_op1_expr->m_left);
@@ -917,7 +939,9 @@ private:
 				auto [_left, _exp_type] = _oleft.value ();
 				_left = _trans_type (_left, _exp_type);
 				auto _val = _func_ctx.DoOper1 (_left, _ast_ev.m_op1_expr->m_op.m_op, _ast_ev.m_op1_expr->m_op.m_t);
-				return std::make_tuple (_val, _rexp_type);
+				if (!_val.has_value ())
+					return std::nullopt;
+				return std::make_tuple (_val.value (), _rexp_type);
 			} else if (_ast_ev.m_op2_expr) {
 				auto _oleft = _generate_code (_ast_ev.m_op2_expr->m_left);
 				if (!_oleft.has_value ())
@@ -931,8 +955,10 @@ private:
 				auto [_right, _exp_type2] = _oright.value ();
 				_right = _trans_type (_right, _exp_type2);
 				//
-				auto _val = _func_ctx.DoOper2 (_left, _ast_ev.m_op2_expr->m_op.m_op, _right, _ast_ev.m_op2_expr->m_op.m_t);
-				_val = _trans_type (_val, _rexp_type);
+				auto _oval = _func_ctx.DoOper2 (_left, _ast_ev.m_op2_expr->m_op.m_op, _right, _ast_ev.m_op2_expr->m_op.m_t);
+				if (!_oval.has_value ())
+					return std::nullopt;
+				auto _val = _trans_type (_oval.value (), _rexp_type);
 				return std::make_tuple (_val, _rexp_type);
 			} else if (_ast_ev.m_opN_expr) {
 				if (_ast_ev.m_opN_expr->m_op.m_op == "()") {
@@ -961,17 +987,21 @@ private:
 					return std::nullopt;
 				}
 			} else if (_ast_ev.m_if_expr) {
-				AstValue _var_temp = _func_ctx.DefineVariable (_rexp_type, _ast_ev.m_if_expr->m_bodys2 [0]->start);
+				auto _ovar_temp = _func_ctx.DefineVariable (_rexp_type, _ast_ev.m_if_expr->m_bodys2 [0]->start);
+				if (!_ovar_temp.has_value ())
+					return std::nullopt;
+				auto _var_temp = _ovar_temp.value ();
+				_var_temp.SetTmpVarFlag (true);
 				//
 				std::function<bool ()> _process_first_block = [&] () {
 					if (!StmtBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys1_raw [0]))
 						return false;
 					_ast_ev.m_if_expr->m_bodys1_raw.erase (_ast_ev.m_if_expr->m_bodys1_raw.begin ());
-					AstValue _block_ret = ExprBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys2 [0], _rexp_type);
-					if (!_block_ret.IsValid ())
+					auto _oblock_ret = ExprBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys2 [0], _rexp_type);
+					if (!_oblock_ret.has_value ())
 						return false;
-					AstValue _ret = _func_ctx.DoOper2 (_var_temp, "=", _block_ret, _ast_ev.m_if_expr->m_bodys2 [0]->start);
-					if (!_ret.IsValid ())
+					auto _ret = _func_ctx.DoOper2 (_var_temp, "=", _oblock_ret.value (), _ast_ev.m_if_expr->m_bodys2 [0]->start);
+					if (!_ret.has_value ())
 						return false;
 					_ast_ev.m_if_expr->m_bodys2.erase (_ast_ev.m_if_expr->m_bodys2.begin ());
 					return true;
@@ -1013,7 +1043,7 @@ private:
 		return m_global_classes->GetClass (_raw_name, m_namespace);
 	}
 
-	AstValue FindValueType (FuncContext &_func_ctx, std::string _raw_name) {
+	std::optional<AstValue> FindValueType (FuncContext &_func_ctx, std::string _raw_name) {
 		size_t _p = _raw_name.rfind ('.');
 		if (_p != std::string::npos) {
 			// 包含 . 运算符，前半段可能是类或对象

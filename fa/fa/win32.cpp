@@ -11,7 +11,7 @@
 //	int lenNew = ::WideCharToMultiByte (ToType, 0, _old.data (), lenOld, nullptr, 0, nullptr, nullptr);
 //	std::string s;
 //	s.resize (lenNew);
-//	if (!::WideCharToMultiByte (ToType, 0, _old.data (), lenOld, const_cast<char* >(s.c_str ()), lenNew, nullptr, nullptr))
+//	if (!::WideCharToMultiByte (ToType, 0, _old.data (), lenOld, const_cast<char*>(s.c_str ()), lenNew, nullptr, nullptr))
 //		return "";
 //	return s.c_str ();
 //}

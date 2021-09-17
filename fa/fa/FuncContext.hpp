@@ -38,14 +38,16 @@ public:
 		m_local_vars.emplace_back (std::map<std::string, std::tuple<llvm::AllocaInst* , std::string>> {});
 	}
 
-	AstValue DefineVariable (std::string _type, antlr4::Token* _t, std::string _name = "") {
-		// TODO 这儿判断是否virtual
+	std::optional<AstValue> DefineVariable (std::string _type, antlr4::Token* _t, std::string _name = "") {
+		if (_type [0] == '$')
+			_type = _type.substr (1);
 		std::string _var_type = std::format ("${}", _type);
-		if (_name != "" && GetVariable (_name).IsValid ()) {
+		// TODO 这儿判断是否virtual
+		if (_name != "" && GetVariable (_name).has_value ()) {
 			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
 			return std::nullopt;
 		}
-		std::optional<llvm::Type* > _ret_type = m_type_map->GetType (_type, _t);
+		std::optional<llvm::Type*> _ret_type = m_type_map->GetType (_type, _t);
 		if (!_ret_type.has_value ())
 			return std::nullopt;
 		if (m_virtual)
@@ -56,7 +58,7 @@ public:
 			(*m_local_vars.rbegin ()) [_name] = { _inst, _var_type };
 		return AstValue { _inst, _var_type };
 	}
-	AstValue GetVariable (std::string _name) {
+	std::optional<AstValue> GetVariable (std::string _name) {
 		for (auto _i = m_local_vars.rbegin (); _i != m_local_vars.rend (); ++_i) {
 			if (_i->contains (_name)) {
 				auto &[_var, _type] = (*_i)[_name];
@@ -64,6 +66,23 @@ public:
 			}
 		}
 		return std::nullopt;
+	}
+	bool BindTempVariable (antlr4::Token *_t, AstValue &_val, std::string _name) {
+		if (GetVariable (_name).has_value ()) {
+			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
+			return false;
+		}
+		(*m_local_vars.rbegin ()) [_name] = { (llvm::AllocaInst*) _val.ValueRaw (), _val.GetType () };
+		return true;
+	}
+
+	bool InitClass (AstValue &_cls, std::shared_ptr<_AST_NewCtx> _newval) {
+		//m_builder->CreateExtractElement
+		//m_builder->CreateGEP ();
+		for (size_t i = 0; i < _newval->m_cls_vars.size (); ++i) {
+			dasdsadsa
+		}
+		m_builder->CreateStructGEP (_cls.ValueRaw (), 0);
 	}
 
 	bool Return (antlr4::Token* _t) {
@@ -85,20 +104,20 @@ public:
 		return true;
 	}
 	std::string GetReturnType () { return m_exp_type; }
-	AstValue DoOper1 (AstValue &_op1, std::string _op, antlr4::Token* _t) {
+	std::optional<AstValue> DoOper1 (AstValue &_op1, std::string _op, antlr4::Token* _t) {
 		if (!m_virtual) {
 			return _op1.DoOper1 (*m_builder, m_value_builder, _op, _t);
 		} else {
 			return _op1;
 		}
 	}
-	AstValue DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token* _t) {
+	std::optional<AstValue> DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token* _t) {
 		// TODO 这儿判断是否virtual
 		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t);
 	}
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
 		if (!m_virtual) {
-			std::vector<llvm::Value* > _sargs;
+			std::vector<llvm::Value*> _sargs;
 			for (auto _arg : _args)
 				_sargs.push_back (_arg.Value (*m_builder));
 			llvm::Value* _val = _func.FuncInvoke (*m_builder, _sargs);

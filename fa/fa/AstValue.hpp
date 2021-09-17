@@ -25,59 +25,39 @@
 
 
 class AstValue {
-	enum class AstObjectType { None, /*Void,*/ Value, Var, Func, TypeStr, MemberStr };
+	enum class AstObjectType { /*None,*/ Void, Value, Var, Func, TypeStr, MemberStr };
 
 public:
-	//static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
+	static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
 	AstValue () {}
 	//AstValue (std::nullopt_t) {}
-	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext* _literal, std::string _value_type) {
+	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext* _literal) {
+		m_value_type = "";
 		if (_literal->BoolLiteral ()) {
-			if (_value_type == "") {
-				_value_type = "bool";
-			} else if (_value_type != "bool") {
-				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
-				return;
-			}
+			m_value_type = "bool";
 		} else if (_literal->IntLiteral ()) {
-			if (_value_type == "") {
-				_value_type = "int";
-			} else if (_value_type.substr (0, 3) != "int") {
-				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
-				return;
-			}
+			m_value_type = "int";
 		} else if (_literal->FloatLiteral ()) {
-			if (_value_type == "") {
-				_value_type = "float64";
-			} else if (_value_type.substr (0, 5) != "float") {
-				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
-				return;
-			}
+			m_value_type = "float64";
 		} else if (_literal->String1Literal ()) {
-			if (_value_type == "") {
-				_value_type = "cstr";
-			} else if (_value_type != "cstr") {
-				LOG_ERROR (_literal->start, std::format ("当前数据无法转为 {} 类型", _value_type));
-				return;
-			}
+			m_value_type = "cstr";
 		} else {
 			LOG_ERROR (_literal->start, "未知数据类型");
 			return;
 		}
-		m_value_type = _value_type;
 		std::optional<std::tuple<llvm::Value* , std::string>> _oval = _value_builder->Build (m_value_type, _literal->getText (), _literal->start);
 		if (_oval.has_value ()) {
 			m_type = AstObjectType::Value;
 			std::tie (m_value, m_value_type) = _oval.value ();
 		}
 	}
-	AstValue (llvm::AllocaInst* _var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::None), m_value (_var), m_value_type (_value_type) {}
-	AstValue (llvm::Value* _value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::None), m_value (_value), m_value_type (_value_type) {}
+	AstValue (llvm::AllocaInst* _var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::Void), m_value (_var), m_value_type (_value_type) {}
+	AstValue (llvm::Value* _value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::Void), m_value (_value), m_value_type (_value_type) {}
 	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_name) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
-	//AstValue &operator= (const llvm::AllocaInst* _val) { AstValue _o { const_cast<llvm::AllocaInst* > (_val) }; return operator= (_o); }
-	//AstValue &operator= (const llvm::Value* _val) { AstValue _o { const_cast<llvm::Value* > (_val) }; return operator= (_o); }
-	//AstValue &operator= (const llvm::Function* _val) { AstValue _o { const_cast<llvm::Function* > (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::AllocaInst* _val) { AstValue _o { const_cast<llvm::AllocaInst*> (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::Value* _val) { AstValue _o { const_cast<llvm::Value*> (_val) }; return operator= (_o); }
+	//AstValue &operator= (const llvm::Function* _val) { AstValue _o { const_cast<llvm::Function*> (_val) }; return operator= (_o); }
 	AstValue &operator= (const AstValue &_o) {
 		m_type = _o.m_type;
 		m_value = _o.m_value;
@@ -87,8 +67,8 @@ public:
 		return* this;
 	}
 
-	bool IsValid () const { return m_type != AstObjectType::None; }
-	//bool IsVoid () const { return m_type == AstObjectType::Void; }
+	//bool IsValid () const { return m_type != AstObjectType::None; }
+	bool IsVoid () const { return m_type == AstObjectType::Void; }
 	bool IsValue () const { return m_type == AstObjectType::Value || m_type == AstObjectType::Var; }
 	bool IsVariable () const { return m_type == AstObjectType::Var; }
 	bool IsFunction () const { return m_type == AstObjectType::Func; }
@@ -104,7 +84,8 @@ public:
 			return nullptr;
 		}
 	}
-	llvm::CallInst* FuncInvoke (llvm::IRBuilder<> &_builder, std::vector<llvm::Value* > &_args) {
+	llvm::Value* ValueRaw () { return m_value; }
+	llvm::CallInst* FuncInvoke (llvm::IRBuilder<> &_builder, std::vector<llvm::Value*> &_args) {
 		if (m_type != AstObjectType::Func || m_func == nullptr)
 			return nullptr;
 		return _builder.CreateCall (m_func->m_fp, _args);
@@ -155,8 +136,6 @@ public:
 		return std::nullopt;
 	}
 	std::optional<AstValue> DoOper2 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue &_other, antlr4::Token* _t) {
-		if (!_other.IsValid ())
-			return std::nullopt;
 		std::optional<AstValue> _tmp;
 		if (_op.size () == 1) {
 			switch (_op [0]) {
@@ -230,20 +209,27 @@ public:
 				return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t);
 			}
 		}
+
+		LOG_ERROR (_t, std::format ("暂不支持的运算符 {}", _op));
 		return std::nullopt;
 	}
 
 	std::string GetType () { return m_value_type; }
+	void SetType (std::string _value_type) { m_value_type = _value_type; }
+
+	bool GetTmpVarFlag () { return m_tmp_var_flag; }
+	void SetTmpVarFlag (bool _tmp_var_flag) { m_tmp_var_flag = _tmp_var_flag; }
 
 	std::string GetFuncReturnType () { return m_func->m_ret_type; }
 	std::tuple<std::string, std::vector<std::string>> GetFuncType () { return { m_func->m_ret_type, m_func->m_arg_types }; }
 
 private:
-	AstObjectType				m_type = AstObjectType::None;
+	AstObjectType				m_type = AstObjectType::Void;
 	llvm::Value*				m_value = nullptr;
 	std::shared_ptr<FuncType>	m_func;
 	std::string					m_member = "";
 	std::string					m_value_type = "";
+	bool						m_tmp_var_flag = false;
 };
 
 

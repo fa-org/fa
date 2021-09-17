@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 
+#include "AstExprOrValue.hpp"
 #include "FaParser.h"
 #include "FaLexer.h"
 #include "CodeVisitor.hpp"
@@ -49,21 +50,21 @@ public class AAA {
 
 int32 FaMain () {
 	var xx = new AAA { num1 = 3, num2 = 5 };
-	int32 n = if false {
-		10
-	} else {
-		if true {
-			20
-		} else {
-			30
-		}
-	};
+	//int32 n = if false {
+	//	10
+	//} else {
+	//	if true {
+	//		20
+	//	} else {
+	//		30
+	//	}
+	//};
 
-	if n == 20 {
-		::puts ("n == 20\n");
-	} else {
-		::puts ("n != 20\n");
-	}
+	//if n == 20 {
+	//	::puts ("n == 20\n");
+	//} else {
+	//	::puts ("n != 20\n");
+	//}
 	return 0;
 }
 )";

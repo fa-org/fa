@@ -26,9 +26,8 @@
 
 class ValueBuilder {
 public:
-	ValueBuilder (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module)
-		: m_visitor (_visitor), m_ctx (_ctx), m_module (_module) {
-		m_etype_map = std::make_shared<TypeMap> (_visitor, m_ctx);
+	ValueBuilder (std::shared_ptr<TypeMap> _type_map, std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<llvm::Module> _module)
+		: m_type_map (_type_map), m_ctx (_ctx), m_module (_module) {
 		m_builder = std::make_shared<llvm::IRBuilder<>> (*m_ctx);
 	}
 
@@ -54,7 +53,7 @@ public:
 					_type = "int64";
 				}
 			}
-			std::optional<llvm::Type* > _tp = m_etype_map->GetType (_type, _t);
+			std::optional<llvm::Type*> _tp = m_type_map->GetType (_type, _t);
 			if (!_tp.has_value ())
 				return std::nullopt;
 			std::optional<llvm::APInt> _int;
@@ -90,9 +89,8 @@ public:
 	}
 
 private:
-	FaVisitor* m_visitor = nullptr;
 	std::shared_ptr<llvm::LLVMContext> m_ctx = nullptr;
-	std::shared_ptr<TypeMap> m_etype_map;
+	std::shared_ptr<TypeMap> m_type_map;
 	std::shared_ptr<llvm::IRBuilder<>> m_builder;
 	std::shared_ptr<llvm::Module> m_module;
 };
