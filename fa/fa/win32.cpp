@@ -75,3 +75,7 @@ std::string get_process_output (std::string _cmd, LPWCH _env) {
 	::CloseHandle (hWrite);
 	return _ret;
 }
+
+bool check_file_exist (std::string _file) {
+	return ::GetFileAttributesA (_file.data ()) != INVALID_FILE_ATTRIBUTES;
+}

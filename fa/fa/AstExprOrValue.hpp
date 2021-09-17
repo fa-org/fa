@@ -241,17 +241,24 @@ inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token *_t, std::function<std:
 	}
 
 	// 初始化参数列表排序
-	// TODO    m_cls_vars    m_params
-	std::vector<int> _vidx;
+	std::vector<size_t> _vidx;
 	for (size_t i = 0; i < m_cls_vars.size (); ++i) {
 		auto _oidx = m_cls->GetVarIndex (m_cls_vars [i]);
-		_vidx.push_back ();
+		if (!_oidx.has_value ()) {
+			LOG_ERROR (_t, std::format ("成员变量 {} 未定义", m_cls_vars [i]));
+			return false;
+		}
+		_vidx.push_back (_oidx.value ());
 	}
-	//for (size_t i = 0; i < _vidx.size () - 1; ++i) {
-	//	for (size_t j = i; j < _vidx.size (); ++j) {
-
-	//	}
-	//}
+	for (size_t i = 0; i < _vidx.size () - 1; ++i) {
+		for (size_t j = i; j < _vidx.size (); ++j) {
+			if (_vidx[j] < _vidx[i]) {
+				std::tie (_vidx[j], _vidx[i]) = std::make_tuple (_vidx[i], _vidx[j]);
+				std::tie (m_cls_vars[j], m_cls_vars[i]) = std::make_tuple (m_cls_vars[i], m_cls_vars[j]);
+				std::tie (m_params[j], m_params[i]) = std::make_tuple (m_params[i], m_params[j]);
+			}
+		}
+	}
 	return true;
 }
 

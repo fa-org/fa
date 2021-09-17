@@ -264,15 +264,18 @@ public:
 
 	std::string Link () {
 		wchar_t* get_env (std::string _key, std::string _val);
-#if 0
-		// home
+		bool check_file_exist (std::string _file);
 		std::string _link_exe_path = R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x86\link.exe)";
-		wchar_t* _env = get_env ("LIB", R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\ATLMFC\lib\x86;D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
-#else
-		// company
-		std::string _link_exe_path = R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)";
-		wchar_t* _env = get_env ("LIB", R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
-#endif
+		wchar_t* _env;
+		if (check_file_exist (_link_exe_path)) {
+			// home
+			//_link_exe_path = 
+			_env = get_env ("LIB", R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\ATLMFC\lib\x86;D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
+		} else {
+			// company
+			_link_exe_path = R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)";
+			_env = get_env ("LIB", R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
+		}
 		std::string _cmd = std::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:@fa_main /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
 		// 依赖处理差的链接命令
 		// link /subsystem:console /dynamicbase /machine:X86 /debug /entry:@fa_main /out:hello.exe /pdb:hello.pdb hello.obj "libucrt.lib" "libcmt.lib"
@@ -908,6 +911,11 @@ private:
 			return std::nullopt;
 		_AST_ExprOrValue _ev = _oev.value ();
 
+		// 生成代码
+		return _generate_code (_func_ctx, _ev);
+	}
+
+	std::optional<AstValue> _generate_code (FuncContext &_func_ctx, _AST_ExprOrValue _ast_ev) {
 		// 转换类型
 		std::function<AstValue (AstValue, std::string)> _trans_type = [] (AstValue _val, std::string _exp_type) -> AstValue {
 			// TODO
@@ -916,127 +924,120 @@ private:
 			return _val;
 		};
 
-		// 生成代码
-		std::function<std::optional<std::tuple<AstValue, std::string>> (_AST_ExprOrValue _ast_ev)> _generate_code;
-		_generate_code = [&] (_AST_ExprOrValue _ast_ev) -> std::optional<std::tuple<AstValue, std::string>> {
-			std::string _rexp_type = _ast_ev.GetExpectType ();
-			if (_ast_ev.m_val) {
-				auto _left = _trans_type (_ast_ev.m_val->m_val, _rexp_type);
-				return std::make_tuple (_left, _rexp_type);
-			} else if (_ast_ev.m_newval) {
-				auto _oleft = _func_ctx.DefineVariable (_ast_ev.m_newval->m_cls->m_name, _ast_ev.m_newval->m_t);
-				if (!_oleft.has_value ())
+		std::string _rexp_type = _ast_ev.GetExpectType ();
+		if (_ast_ev.m_val) {
+			auto _left = _trans_type (_ast_ev.m_val->m_val, _rexp_type);
+			return _left;
+		} else if (_ast_ev.m_newval) {
+			auto _oleft = _func_ctx.DefineVariable (_ast_ev.m_newval->m_cls->m_name, _ast_ev.m_newval->m_t);
+			if (!_oleft.has_value ())
+				return std::nullopt;
+			auto _left = _oleft.value ();
+			_left.SetTmpVarFlag (true);
+			if (!_func_ctx.InitClass (_left, _ast_ev.m_newval, [&](_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); }))
+				return std::nullopt;
+			return _left;
+		} else if (_ast_ev.m_op1_expr) {
+			auto _oleft = _generate_code (_func_ctx, _ast_ev.m_op1_expr->m_left);
+			if (!_oleft.has_value ())
+				return std::nullopt;
+			auto _left = _oleft.value ();
+			_left = _trans_type (_left, _rexp_type);
+			auto _val = _func_ctx.DoOper1 (_left, _ast_ev.m_op1_expr->m_op.m_op, _ast_ev.m_op1_expr->m_op.m_t);
+			if (!_val.has_value ())
+				return std::nullopt;
+			return _val.value ();
+		} else if (_ast_ev.m_op2_expr) {
+			auto _oleft = _generate_code (_func_ctx, _ast_ev.m_op2_expr->m_left);
+			if (!_oleft.has_value ())
+				return std::nullopt;
+			auto _left = _oleft.value ();
+			_left = _trans_type (_left, _rexp_type);
+			//
+			auto _oright = _generate_code (_func_ctx, _ast_ev.m_op2_expr->m_right);
+			if (!_oright.has_value ())
+				return std::nullopt;
+			auto _right = _oright.value ();
+			_right = _trans_type (_right, _rexp_type);
+			//
+			auto _oval = _func_ctx.DoOper2 (_left, _ast_ev.m_op2_expr->m_op.m_op, _right, _ast_ev.m_op2_expr->m_op.m_t);
+			if (!_oval.has_value ())
+				return std::nullopt;
+			auto _val = _trans_type (_oval.value (), _rexp_type);
+			return _val;
+		} else if (_ast_ev.m_opN_expr) {
+			if (_ast_ev.m_opN_expr->m_op.m_op == "()") {
+				auto _oobj = _generate_code (_func_ctx, _ast_ev.m_opN_expr->m_left);
+				if (!_oobj.has_value ())
 					return std::nullopt;
-				auto _left = _oleft.value ();
-				_left.SetTmpVarFlag (true);
-				// TODO 设置初始值
-				_func_ctx.InitClass (_left);
-				return std::make_tuple (_left, _rexp_type);
-			} else if (_ast_ev.m_op1_expr) {
-				auto _oleft = _generate_code (_ast_ev.m_op1_expr->m_left);
-				if (!_oleft.has_value ())
-					return std::nullopt;
-				auto [_left, _exp_type] = _oleft.value ();
-				_left = _trans_type (_left, _exp_type);
-				auto _val = _func_ctx.DoOper1 (_left, _ast_ev.m_op1_expr->m_op.m_op, _ast_ev.m_op1_expr->m_op.m_t);
-				if (!_val.has_value ())
-					return std::nullopt;
-				return std::make_tuple (_val.value (), _rexp_type);
-			} else if (_ast_ev.m_op2_expr) {
-				auto _oleft = _generate_code (_ast_ev.m_op2_expr->m_left);
-				if (!_oleft.has_value ())
-					return std::nullopt;
-				auto [_left, _exp_type] = _oleft.value ();
-				_left = _trans_type (_left, _exp_type);
-				//
-				auto _oright = _generate_code (_ast_ev.m_op2_expr->m_right);
-				if (!_oright.has_value ())
-					return std::nullopt;
-				auto [_right, _exp_type2] = _oright.value ();
-				_right = _trans_type (_right, _exp_type2);
-				//
-				auto _oval = _func_ctx.DoOper2 (_left, _ast_ev.m_op2_expr->m_op.m_op, _right, _ast_ev.m_op2_expr->m_op.m_t);
-				if (!_oval.has_value ())
-					return std::nullopt;
-				auto _val = _trans_type (_oval.value (), _rexp_type);
-				return std::make_tuple (_val, _rexp_type);
-			} else if (_ast_ev.m_opN_expr) {
-				if (_ast_ev.m_opN_expr->m_op.m_op == "()") {
-					auto _oobj = _generate_code (_ast_ev.m_opN_expr->m_left);
-					if (!_oobj.has_value ())
+				AstValue _obj = _oobj.value ();
+				std::vector<std::string> _arg_types = std::get<1> (_obj.GetFuncType ());
+				std::vector<AstValue> _args;
+				for (size_t i = 0; i < _arg_types.size (); ++i) {
+					auto _oarg = _generate_code (_func_ctx, _ast_ev.m_opN_expr->m_rights [i]);
+					if (!_oarg.has_value ())
 						return std::nullopt;
-					AstValue _obj = std::get<0> (_oobj.value ());
-					std::vector<std::string> _arg_types = std::get<1> (_obj.GetFuncType ());
-					std::vector<AstValue> _args;
-					for (size_t i = 0; i < _arg_types.size (); ++i) {
-						auto _oarg = _generate_code (_ast_ev.m_opN_expr->m_rights [i]);
-						if (!_oarg.has_value ())
-							return std::nullopt;
-						auto _arg = _trans_type (std::get<0> (_oarg.value ()), _arg_types [i]);
-						_args.push_back (_arg);
-					}
-					AstValue _val = _func_ctx.FuncInvoke (_obj, _args);
-					_val = _trans_type (_val, _rexp_type);
-					return std::make_tuple (_val, _rexp_type);
-				} else if (_ast_ev.m_opN_expr->m_op.m_op == "[]") {
-					// TODO
-					LOG_TODO (_ast_ev.m_opN_expr->m_op.m_t);
-					return std::nullopt;
-				} else {
-					LOG_TODO (_ast_ev.m_opN_expr->m_op.m_t);
-					return std::nullopt;
+					auto _arg = _trans_type (_oarg.value (), _arg_types [i]);
+					_args.push_back (_arg);
 				}
-			} else if (_ast_ev.m_if_expr) {
-				auto _ovar_temp = _func_ctx.DefineVariable (_rexp_type, _ast_ev.m_if_expr->m_bodys2 [0]->start);
-				if (!_ovar_temp.has_value ())
-					return std::nullopt;
-				auto _var_temp = _ovar_temp.value ();
-				_var_temp.SetTmpVarFlag (true);
-				//
-				std::function<bool ()> _process_first_block = [&] () {
-					if (!StmtBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys1_raw [0]))
-						return false;
-					_ast_ev.m_if_expr->m_bodys1_raw.erase (_ast_ev.m_if_expr->m_bodys1_raw.begin ());
-					auto _oblock_ret = ExprBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys2 [0], _rexp_type);
-					if (!_oblock_ret.has_value ())
-						return false;
-					auto _ret = _func_ctx.DoOper2 (_var_temp, "=", _oblock_ret.value (), _ast_ev.m_if_expr->m_bodys2 [0]->start);
-					if (!_ret.has_value ())
-						return false;
-					_ast_ev.m_if_expr->m_bodys2.erase (_ast_ev.m_if_expr->m_bodys2.begin ());
-					return true;
-				};
-				//
-				std::function<bool ()> _generate_ifexpr;
-				_generate_ifexpr = [&] () -> bool {
-					if (_ast_ev.m_if_expr->m_conds.size () > 0) {
-						// if {} else
-						auto _ocond = _generate_code (_ast_ev.m_if_expr->m_conds [0]);
-						if (!_ocond.has_value ())
-							return false;
-						_ast_ev.m_if_expr->m_conds.erase (_ast_ev.m_if_expr->m_conds.begin ());
-						auto _cond = std::get<0> (_ocond.value ());
-						return _func_ctx.IfElse (_cond, [&] () -> bool {
-							return _process_first_block ();
-						}, [&] () -> bool {
-							return _generate_ifexpr ();
-						});
-					} else {
-						// else {}
-						return _process_first_block ();
-					}
-				};
-				if (!_generate_ifexpr ())
-					return std::nullopt;
-				return std::make_tuple (_var_temp, _rexp_type);
+				AstValue _val = _func_ctx.FuncInvoke (_obj, _args);
+				_val = _trans_type (_val, _rexp_type);
+				return _val;
+			} else if (_ast_ev.m_opN_expr->m_op.m_op == "[]") {
+				// TODO
+				LOG_TODO (_ast_ev.m_opN_expr->m_op.m_t);
+				return std::nullopt;
+			} else {
+				LOG_TODO (_ast_ev.m_opN_expr->m_op.m_t);
+				return std::nullopt;
 			}
-			LOG_TODO (nullptr);
-			return std::nullopt;
-		};
-		auto _oret = _generate_code (_ev);
-		if (!_oret.has_value ())
-			return std::nullopt;
-		return std::get<0> (_oret.value ());
+		} else if (_ast_ev.m_if_expr) {
+			auto _ovar_temp = _func_ctx.DefineVariable (_rexp_type, _ast_ev.m_if_expr->m_bodys2 [0]->start);
+			if (!_ovar_temp.has_value ())
+				return std::nullopt;
+			auto _var_temp = _ovar_temp.value ();
+			_var_temp.SetTmpVarFlag (true);
+			//
+			std::function<bool ()> _process_first_block = [&] () {
+				if (!StmtBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys1_raw [0]))
+					return false;
+				_ast_ev.m_if_expr->m_bodys1_raw.erase (_ast_ev.m_if_expr->m_bodys1_raw.begin ());
+				auto _oblock_ret = ExprBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys2 [0], _rexp_type);
+				if (!_oblock_ret.has_value ())
+					return false;
+				auto _ret = _func_ctx.DoOper2 (_var_temp, "=", _oblock_ret.value (), _ast_ev.m_if_expr->m_bodys2 [0]->start);
+				if (!_ret.has_value ())
+					return false;
+				_ast_ev.m_if_expr->m_bodys2.erase (_ast_ev.m_if_expr->m_bodys2.begin ());
+				return true;
+			};
+			//
+			std::function<bool ()> _generate_ifexpr;
+			_generate_ifexpr = [&] () -> bool {
+				if (_ast_ev.m_if_expr->m_conds.size () > 0) {
+					// if {} else
+					auto _ocond = _generate_code (_func_ctx, _ast_ev.m_if_expr->m_conds [0]);
+					if (!_ocond.has_value ())
+						return false;
+					_ast_ev.m_if_expr->m_conds.erase (_ast_ev.m_if_expr->m_conds.begin ());
+					auto _cond = _ocond.value ();
+					return _func_ctx.IfElse (_cond, [&] () -> bool {
+						return _process_first_block ();
+					}, [&] () -> bool {
+						return _generate_ifexpr ();
+					});
+				} else {
+					// else {}
+					return _process_first_block ();
+				}
+			};
+			if (!_generate_ifexpr ())
+				return std::nullopt;
+			_var_temp = _trans_type (_var_temp, _rexp_type);
+			return _var_temp;
+		}
+		LOG_TODO (nullptr);
+		return std::nullopt;
 	}
 
 	std::optional<std::shared_ptr<AstClass>> FindAstClass (FuncContext &_func_ctx, std::string _raw_name) {
@@ -1044,9 +1045,10 @@ private:
 	}
 
 	std::optional<AstValue> FindValueType (FuncContext &_func_ctx, std::string _raw_name) {
-		size_t _p = _raw_name.rfind ('.');
+		size_t _p = _raw_name.find ('.');
 		if (_p != std::string::npos) {
-			// 包含 . 运算符，前半段可能是类或对象
+			// 包含 . 运算符，前半段可能是变量类或对象
+			测试变量
 			auto _oct = FindAstClass (_func_ctx, _raw_name.substr (0, _p));
 			if (_oct.has_value ()) {
 				auto _ovar = _oct.value ()->GetVar (_raw_name.substr (_p + 1));
@@ -1058,6 +1060,7 @@ private:
 			// 不包含 . 运算符，可能是变量、类方法或类属性
 			return _func_ctx.GetVariable (_raw_name);
 		}
+		LOG_TODO (nullptr);
 		return std::nullopt;
 	}
 

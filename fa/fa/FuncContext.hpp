@@ -76,13 +76,20 @@ public:
 		return true;
 	}
 
-	bool InitClass (AstValue &_cls, std::shared_ptr<_AST_NewCtx> _newval) {
+	bool InitClass (AstValue &_cls, std::shared_ptr<_AST_NewCtx> _newval, std::function<std::optional<AstValue> (_AST_ExprOrValue)> _cb) {
 		//m_builder->CreateExtractElement
 		//m_builder->CreateGEP ();
 		for (size_t i = 0; i < _newval->m_cls_vars.size (); ++i) {
-			dasdsadsa
+			auto _val_raw = m_builder->CreateStructGEP (_cls.ValueRaw (), 0);
+			AstValue _op1 { (llvm::AllocaInst*) _val_raw, std::format ("${}", _newval->m_cls->m_vars [i]->m_type) };
+			auto _oop2 = _cb (_newval->m_params [i]);
+			if (!_oop2.has_value ())
+				return false;
+			auto _oval = DoOper2 (_op1, "=", _oop2.value (), _newval->m_t);
+			if (!_oval.has_value ())
+				return false;
 		}
-		m_builder->CreateStructGEP (_cls.ValueRaw (), 0);
+		return true;
 	}
 
 	bool Return (antlr4::Token* _t) {

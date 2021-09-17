@@ -49,7 +49,6 @@ public class AAA {
 }
 
 int32 FaMain () {
-	var xx = new AAA { num1 = 3, num2 = 5 };
 	//int32 n = if false {
 	//	10
 	//} else {
@@ -59,12 +58,14 @@ int32 FaMain () {
 	//		30
 	//	}
 	//};
+	var xx = new AAA { num1 = 3, num2 = 5 };
+	var y = xx.num1;
 
-	//if n == 20 {
-	//	::puts ("n == 20\n");
-	//} else {
-	//	::puts ("n != 20\n");
-	//}
+	if y == 3 {
+		::puts ("y == 3\n");
+	} else {
+		::puts ("y != 3\n");
+	}
 	return 0;
 }
 )";
