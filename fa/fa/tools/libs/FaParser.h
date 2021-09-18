@@ -13,16 +13,16 @@ class  FaParser : public antlr4::Parser {
 public:
   enum {
     AImport = 1, ALib = 2, Break = 3, CC__Cdecl = 4, CC__FastCall = 5, CC__StdCall = 6, 
-    Continue = 7, Class = 8, Const = 9, Else = 10, FaMain = 11, If = 12, 
-    Internal = 13, New = 14, Public = 15, Protected = 16, Private = 17, 
-    Return = 18, Signed = 19, Static = 20, Unsigned = 21, Use = 22, While = 23, 
-    Assign = 24, ReverseOp = 25, AddAddOp = 26, SubSubOp = 27, PointOp = 28, 
-    AddOp = 29, SubOp = 30, StarOp = 31, DivOp = 32, ModOp = 33, OrOp = 34, 
-    AndOp = 35, XorOp = 36, Qus = 37, Comma = 38, ColonColon = 39, Colon = 40, 
-    Semi = 41, Exclam = 42, QuotFangL = 43, QuotFangR = 44, QuotJianL = 45, 
-    QuotJianR = 46, QuotHuaL = 47, QuotHuaR = 48, QuotYuanL = 49, QuotYuanR = 50, 
-    BoolLiteral = 51, IntLiteral = 52, FloatLiteral = 53, String1Literal = 54, 
-    Id = 55, Comment1 = 56, Comment2 = 57, WS = 58
+    Continue = 7, Class = 8, Const = 9, Else = 10, FaMain = 11, For = 12, 
+    If = 13, Internal = 14, New = 15, Public = 16, Protected = 17, Private = 18, 
+    Return = 19, Signed = 20, Static = 21, Step = 22, Unsigned = 23, Use = 24, 
+    While = 25, Assign = 26, ReverseOp = 27, AddAddOp = 28, SubSubOp = 29, 
+    PointPoint = 30, PointOp = 31, AddOp = 32, SubOp = 33, StarOp = 34, 
+    DivOp = 35, ModOp = 36, OrOp = 37, AndOp = 38, XorOp = 39, Qus = 40, 
+    Comma = 41, ColonColon = 42, Colon = 43, Semi = 44, Exclam = 45, QuotFangL = 46, 
+    QuotFangR = 47, QuotJianL = 48, QuotJianR = 49, QuotHuaL = 50, QuotHuaR = 51, 
+    QuotYuanL = 52, QuotYuanR = 53, BoolLiteral = 54, IntLiteral = 55, FloatLiteral = 56, 
+    String1Literal = 57, Id = 58, Comment1 = 59, Comment2 = 60, WS = 61
   };
 
   enum {
@@ -34,18 +34,19 @@ public:
     RuleShiftLOp = 19, RuleShiftROp = 20, RuleLtOp = 21, RuleLtEqualOp = 22, 
     RuleGtOp = 23, RuleGtEqualOp = 24, RuleEqualOp = 25, RuleNotEqualOp = 26, 
     RuleExprFuncDef = 27, RuleSelfOp2 = 28, RuleCompareOp2 = 29, RuleChangeOp2 = 30, 
-    RuleAllOp2 = 31, RuleLiteral = 32, RuleIds = 33, RuleTypeAfter = 34, 
-    RuleType = 35, RuleTypeNewable = 36, RuleTypeVar = 37, RuleTypeVarList = 38, 
-    RuleQuotStmtPart = 39, RuleQuotStmtExpr = 40, RuleIfStmt = 41, RuleIfExpr = 42, 
-    RuleWhileStmt = 43, RuleQuotExpr = 44, RuleExprOpt = 45, RuleNewExprItem = 46, 
-    RuleNewExpr = 47, RuleStrongExprBase = 48, RuleStrongExprPrefix = 49, 
-    RuleStrongExprSuffix = 50, RuleStrongExpr = 51, RuleMiddleExpr = 52, 
-    RuleExpr = 53, RuleTmpAssignExpr = 54, RuleDefVarStmt = 55, RuleUseStmt = 56, 
-    RuleNormalStmt = 57, RuleStmt = 58, RulePublicLevel = 59, RuleClassParent = 60, 
-    RuleClassStmt = 61, RuleClassVarExtFunc = 62, RuleClassVarExt = 63, 
-    RuleClassVar = 64, RuleClassFuncName = 65, RuleClassFuncBody = 66, RuleClassFunc = 67, 
-    RuleCallConvention = 68, RuleImportStmt = 69, RuleLibStmt = 70, RuleImportBlock = 71, 
-    RuleFaMainFuncBlock = 72, RuleProgram = 73
+    RuleAllOp2 = 31, RuleIntNum = 32, RuleFloatNum = 33, RuleLiteral = 34, 
+    RuleIds = 35, RuleTypeAfter = 36, RuleType = 37, RuleTypeNewable = 38, 
+    RuleTypeVar = 39, RuleTypeVarList = 40, RuleQuotStmtPart = 41, RuleQuotStmtExpr = 42, 
+    RuleIfStmt = 43, RuleIfExpr = 44, RuleWhileStmt = 45, RuleNumIterStmt = 46, 
+    RuleQuotExpr = 47, RuleExprOpt = 48, RuleNewExprItem = 49, RuleNewExpr = 50, 
+    RuleArrayExpr = 51, RuleStrongExprBase = 52, RuleStrongExprPrefix = 53, 
+    RuleStrongExprSuffix = 54, RuleStrongExpr = 55, RuleMiddleExpr = 56, 
+    RuleExpr = 57, RuleTmpAssignExpr = 58, RuleDefVarStmt = 59, RuleUseStmt = 60, 
+    RuleNormalStmt = 61, RuleStmt = 62, RulePublicLevel = 63, RuleClassParent = 64, 
+    RuleClassStmt = 65, RuleClassVarExtFunc = 66, RuleClassVarExt = 67, 
+    RuleClassVar = 68, RuleClassFuncName = 69, RuleClassFuncBody = 70, RuleClassFunc = 71, 
+    RuleCallConvention = 72, RuleImportStmt = 73, RuleLibStmt = 74, RuleImportBlock = 75, 
+    RuleFaMainFuncBlock = 76, RuleProgram = 77
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -90,6 +91,8 @@ public:
   class CompareOp2Context;
   class ChangeOp2Context;
   class AllOp2Context;
+  class IntNumContext;
+  class FloatNumContext;
   class LiteralContext;
   class IdsContext;
   class TypeAfterContext;
@@ -102,10 +105,12 @@ public:
   class IfStmtContext;
   class IfExprContext;
   class WhileStmtContext;
+  class NumIterStmtContext;
   class QuotExprContext;
   class ExprOptContext;
   class NewExprItemContext;
   class NewExprContext;
+  class ArrayExprContext;
   class StrongExprBaseContext;
   class StrongExprPrefixContext;
   class StrongExprSuffixContext;
@@ -607,13 +612,41 @@ public:
 
   AllOp2Context* allOp2();
 
+  class  IntNumContext : public antlr4::ParserRuleContext {
+  public:
+    IntNumContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *IntLiteral();
+    antlr4::tree::TerminalNode *SubOp();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  IntNumContext* intNum();
+
+  class  FloatNumContext : public antlr4::ParserRuleContext {
+  public:
+    FloatNumContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *FloatLiteral();
+    antlr4::tree::TerminalNode *SubOp();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  FloatNumContext* floatNum();
+
   class  LiteralContext : public antlr4::ParserRuleContext {
   public:
     LiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *BoolLiteral();
-    antlr4::tree::TerminalNode *IntLiteral();
-    antlr4::tree::TerminalNode *FloatLiteral();
+    IntNumContext *intNum();
+    FloatNumContext *floatNum();
     antlr4::tree::TerminalNode *String1Literal();
 
 
@@ -805,9 +838,7 @@ public:
     WhileStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *While();
-    antlr4::tree::TerminalNode *QuotYuanL();
     ExprContext *expr();
-    antlr4::tree::TerminalNode *QuotYuanR();
     antlr4::tree::TerminalNode *QuotHuaL();
     antlr4::tree::TerminalNode *QuotHuaR();
     std::vector<StmtContext *> stmt();
@@ -819,6 +850,28 @@ public:
   };
 
   WhileStmtContext* whileStmt();
+
+  class  NumIterStmtContext : public antlr4::ParserRuleContext {
+  public:
+    NumIterStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *For();
+    antlr4::tree::TerminalNode *Id();
+    std::vector<antlr4::tree::TerminalNode *> Colon();
+    antlr4::tree::TerminalNode* Colon(size_t i);
+    std::vector<ExprOptContext *> exprOpt();
+    ExprOptContext* exprOpt(size_t i);
+    antlr4::tree::TerminalNode *QuotHuaL();
+    antlr4::tree::TerminalNode *QuotHuaR();
+    std::vector<StmtContext *> stmt();
+    StmtContext* stmt(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  NumIterStmtContext* numIterStmt();
 
   class  QuotExprContext : public antlr4::ParserRuleContext {
   public:
@@ -883,6 +936,24 @@ public:
 
   NewExprContext* newExpr();
 
+  class  ArrayExprContext : public antlr4::ParserRuleContext {
+  public:
+    ArrayExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *QuotFangL();
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
+    antlr4::tree::TerminalNode *PointPoint();
+    antlr4::tree::TerminalNode *QuotFangR();
+    antlr4::tree::TerminalNode *Step();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ArrayExprContext* arrayExpr();
+
   class  StrongExprBaseContext : public antlr4::ParserRuleContext {
   public:
     StrongExprBaseContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -894,6 +965,7 @@ public:
     IfExprContext *ifExpr();
     QuotExprContext *quotExpr();
     NewExprContext *newExpr();
+    ArrayExprContext *arrayExpr();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1063,8 +1135,9 @@ public:
     virtual size_t getRuleIndex() const override;
     NormalStmtContext *normalStmt();
     IfStmtContext *ifStmt();
-    WhileStmtContext *whileStmt();
     DefVarStmtContext *defVarStmt();
+    WhileStmtContext *whileStmt();
+    NumIterStmtContext *numIterStmt();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

@@ -24,6 +24,7 @@ Class:						'class';
 Const:						'const';
 Else:						'else';
 FaMain:						'FaMain';
+For:						'for';
 If:							'if';
 Internal:					'internal';
 New:						'new';
@@ -33,6 +34,7 @@ Private:					'private';
 Return:						'return';
 Signed:						'signed';
 Static:						'static';
+Step:						'step';
 Unsigned:					'unsigned';
 Use:						'use';
 While:						'while';
@@ -67,6 +69,7 @@ AddAddOp:					'++';
 SubSubOp:					'--';
 
 // 二元计算
+PointPoint:					'..';
 PointOp:					'.';
 AddOp:						'+';
 SubOp:						'-';
@@ -128,9 +131,11 @@ fragment Schar:				SimpleEscape | HexEscape | UniEscape | ~["\\\r\n];
 //
 BoolLiteral:				'true' | 'false';
 IntLiteral:					NUM+;
+intNum:						SubOp? IntLiteral;
 FloatLiteral:				NUM+ PointOp NUM+;
+floatNum:					SubOp? FloatLiteral;
 String1Literal:				'"' Schar* '"';
-literal:					BoolLiteral | IntLiteral | FloatLiteral | String1Literal;
+literal:					BoolLiteral | intNum | floatNum | String1Literal;
 
 fragment NUM:				[0-9];
 fragment HEX:				NUM | [a-fA-F];
@@ -174,9 +179,10 @@ ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr
 
 
 //
-// while
+// loop
 //
-whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
+whileStmt:					While expr QuotHuaL stmt* QuotHuaR;
+numIterStmt:				For Id Colon exprOpt (Colon exprOpt)+ QuotHuaL stmt* QuotHuaR;
 
 
 
@@ -187,7 +193,8 @@ quotExpr:					QuotYuanL expr QuotYuanR;
 exprOpt:					expr?;
 newExprItem:				Id (Assign middleExpr)?;
 newExpr:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
-strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr | newExpr;
+arrayExpr:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
+strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr | newExpr | arrayExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// 前缀 - ++ -- ~
 strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
 							| (QuotYuanL (exprOpt (Comma exprOpt)*) QuotYuanR)								//     Write ("")
@@ -213,7 +220,7 @@ defVarStmt:					type Id Assign expr Semi;
 //
 useStmt:					Use ids Semi;
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
-stmt:						normalStmt | ifStmt | whileStmt | defVarStmt;
+stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | numIterStmt;
 
 
 

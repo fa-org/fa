@@ -29,7 +29,11 @@
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type): m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module), m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder), m_func (_global_funcs->GetFunc (_func_name)), m_exp_type (_exp_type) {
+	FuncContext (std::shared_ptr<AstClasses> _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace):
+		m_global_classes (_global_classes), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
+		m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder),
+		m_func (_global_funcs->GetFunc (_func_name)), m_exp_type (_exp_type), m_namespace (_namespace)
+	{
 		llvm::BasicBlock* _bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
 		m_builder->SetInsertPoint (_bb);
@@ -80,7 +84,7 @@ public:
 		//m_builder->CreateExtractElement
 		//m_builder->CreateGEP ();
 		for (size_t i = 0; i < _newval->m_cls_vars.size (); ++i) {
-			auto _val_raw = m_builder->CreateStructGEP (_cls.ValueRaw (), 0);
+			auto _val_raw = m_builder->CreateStructGEP (_cls.ValueRaw (), (unsigned int) i);
 			AstValue _op1 { (llvm::AllocaInst*) _val_raw, std::format ("${}", _newval->m_cls->m_vars [i]->m_type) };
 			auto _oop2 = _cb (_newval->m_params [i]);
 			if (!_oop2.has_value ())
@@ -90,6 +94,26 @@ public:
 				return false;
 		}
 		return true;
+	}
+
+	std::optional<AstValue> AccessMember (AstValue& _cls_var, std::string _member, antlr4::Token *_t) {
+		std::string _cls_name = _cls_var.GetType ();
+		if (_cls_name [0] == '$')
+			_cls_name = _cls_name.substr (1);
+		auto _ocls = m_global_classes->GetClass (_cls_name, m_namespace);
+		if (!_ocls.has_value ()) {
+			LOG_ERROR (_t, std::format ("未定义的类 {}", _cls_name));
+			return std::nullopt;
+		}
+		auto _cls = _ocls.value ();
+		auto _oidx = _cls->GetVarIndex (_member);
+		if (!_oidx.has_value ()) {
+			LOG_ERROR (_t, std::format ("类 {} 中未定义成员 {}", _cls_name, _member));
+			return std::nullopt;
+		}
+		size_t _idx = _oidx.value ();
+		auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _idx);
+		return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", _cls->m_vars [_idx]->m_type) };
 	}
 
 	bool Return (antlr4::Token* _t) {
@@ -163,6 +187,34 @@ public:
 		}
 	}
 
+	bool While (_AST_ExprOrValue& _ev_cond, std::function<bool ()> _body_ctx, std::function<std::optional<AstValue> (_AST_ExprOrValue)> _cb) {
+		if (!m_virtual) {
+			llvm::BasicBlock* _cond_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
+			llvm::BasicBlock* _body_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
+			llvm::BasicBlock* _endwhile_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
+			m_builder->CreateBr (_cond_bb);
+			//
+			m_builder->SetInsertPoint (_cond_bb);
+			auto _ocond = _cb (_ev_cond);
+			if (!_ocond.has_value ())
+				return false;
+			m_builder->CreateCondBr (_ocond.value ().Value (*m_builder), _body_bb, _endwhile_bb);
+			//
+			m_builder->SetInsertPoint (_body_bb);
+			m_local_vars.push_back (std::map<std::string, std::tuple<llvm::AllocaInst*, std::string>> {});
+			if (!_body_ctx ())
+				return false;
+			m_local_vars.erase (m_local_vars.begin () + m_local_vars.size () - 1);
+			m_builder->CreateBr (_cond_bb);
+			//
+			m_builder->SetInsertPoint (_endwhile_bb);
+			return true;
+		} else {
+			LOG_TODO (nullptr);
+			return false;
+		}
+	}
+
 	std::optional<std::tuple<std::string, std::vector<std::string>>> GetFuncType (_AST_ExprOrValue &_val) {
 		if (_val.m_val) {
 			AstValue &_val2 = _val.m_val->m_val;
@@ -192,12 +244,14 @@ public:
 	}
 
 private:
+	std::shared_ptr<AstClasses>														m_global_classes;
 	std::shared_ptr<llvm::LLVMContext>												m_ctx;
 	std::shared_ptr<llvm::Module>													m_module;
 	std::shared_ptr<TypeMap>														m_type_map;
 	std::shared_ptr<ValueBuilder>													m_value_builder;
 	std::shared_ptr<FuncType>														m_func;
 	std::string																		m_exp_type;
+	std::string																		m_namespace;
 	//
 	std::shared_ptr<llvm::IRBuilder<>>												m_builder;
 	std::vector<std::map<std::string, std::tuple<llvm::AllocaInst* , std::string>>>	m_local_vars;

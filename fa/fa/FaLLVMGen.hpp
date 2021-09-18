@@ -184,7 +184,7 @@ public:
 				_cls_func->m_name_abi = _cls_func->m_name;
 				if (!m_global_funcs->Make (_cls->m_name, _cls_func->m_name_abi, _cls_func->m_ret_type, _cls_func->m_ret_type_t, _cls_func->m_arg_types, _cls_func->m_arg_type_ts))
 					return false;
-				FuncContext _func_ctx { m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type };
+				FuncContext _func_ctx { m_global_classes, m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type, m_namespace };
 				auto _expr_raw = _cls_func->m_func->expr ();
 				if (_expr_raw) {
 					std::optional<AstValue> _val = ExprBuilder (_func_ctx, _expr_raw, _cls_func->m_ret_type);
@@ -219,7 +219,7 @@ public:
 		std::string _fa_main = "@fa_main";
 		if (!m_global_funcs->Make ("", _fa_main, _ret_type_raw, _arg_type_raws))
 			return false;
-		FuncContext _func_ctx { m_global_funcs, "@fa_main", _ret_type_raw->getText () };
+		FuncContext _func_ctx { m_global_classes, m_global_funcs, "@fa_main", _ret_type_raw->getText (), m_namespace };
 		if (!StmtBuilder (_func_ctx, _stmts_raw))
 			return false;
 
@@ -360,9 +360,6 @@ private:
 					>> ();
 				if (!IfStmtBuilder (_func_ctx, _conds, _bodys))
 					return false;
-			} else if (_stmt_raw->whileStmt ()) {
-				LOG_TODO (_stmt_raw->start);
-				return false;
 			} else if (_stmt_raw->defVarStmt ()) {
 				auto _def_var_stmt_raw = _stmt_raw->defVarStmt ();
 				std::string _exp_type = _def_var_stmt_raw->type ()->getText ();
@@ -388,6 +385,19 @@ private:
 					if (!_oval.has_value ())
 						return false;
 				}
+			} else if (_stmt_raw->whileStmt ()) {
+				auto _oev_cond = _expr_parse (_func_ctx, _stmt_raw->whileStmt ()->expr (), "bool");
+				if (!_oev_cond.has_value ())
+					return false;
+				auto _stmts_raw = _stmt_raw->whileStmt ()->stmt ();
+				_func_ctx.While (
+					_oev_cond.value (),
+					[&] () { return StmtBuilder (_func_ctx, _stmts_raw); },
+					[&] (_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); }
+				);
+			} else if (_stmt_raw->numIterStmt ()) {
+				LOG_ERROR (_stmt_raw->start, "未知的表达式");
+				return false;
 			} else {
 				LOG_ERROR (_stmt_raw->start, "未知的表达式");
 				return false;
@@ -414,7 +424,16 @@ private:
 		});
 	}
 
-	std::optional<AstValue> ExprBuilder (FuncContext &_func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
+	std::optional<AstValue> ExprBuilder (FuncContext& _func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
+		// 解析并生成新语法树
+		std::optional<_AST_ExprOrValue> _oev = _expr_parse (_func_ctx, _expr_raw, _expect_type);
+		if (!_oev.has_value ())
+			return std::nullopt;
+		// 生成代码
+		return _generate_code (_func_ctx, _oev.value ());
+	}
+
+	std::optional<_AST_ExprOrValue> _expr_parse (FuncContext &_func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
 		// 定义解析函数
 		std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext* , std::string)> _parse_expr;
 		std::function<std::optional<_AST_ExprOrValue> (FaParser::MiddleExprContext* , std::string)> _parse_middle_expr;
@@ -759,7 +778,7 @@ private:
 		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext* _expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raw->ids ()) {
-				std::optional<AstValue> _oval = FindValueType (_func_ctx, _expr_raw->ids ()->getText ());
+				std::optional<AstValue> _oval = FindValueType (_func_ctx, _expr_raw->ids ()->getText (), _expr_raw->ids ()->start);
 				if (!_oval.has_value ())
 					return std::nullopt;
 				AstValue _val = _oval.value ();
@@ -858,6 +877,9 @@ private:
 					return std::nullopt;
 
 				return _AST_ExprOrValue { _newval };
+			} else if (_expr_raw->arrayExpr ()) {
+				// TODO
+				实现数组
 			}
 			LOG_TODO (_expr_raw->start);
 			return std::nullopt;
@@ -905,14 +927,7 @@ private:
 			return _if_expr;
 		};
 
-		// 解析并生成新语法树
-		std::optional<_AST_ExprOrValue> _oev = _parse_expr (_expr_raw, _expect_type);
-		if (!_oev.has_value ())
-			return std::nullopt;
-		_AST_ExprOrValue _ev = _oev.value ();
-
-		// 生成代码
-		return _generate_code (_func_ctx, _ev);
+		return _parse_expr (_expr_raw, _expect_type);
 	}
 
 	std::optional<AstValue> _generate_code (FuncContext &_func_ctx, _AST_ExprOrValue _ast_ev) {
@@ -1044,20 +1059,28 @@ private:
 		return m_global_classes->GetClass (_raw_name, m_namespace);
 	}
 
-	std::optional<AstValue> FindValueType (FuncContext &_func_ctx, std::string _raw_name) {
+	std::optional<AstValue> FindValueType (FuncContext &_func_ctx, std::string _raw_name, antlr4::Token* _t) {
 		size_t _p = _raw_name.find ('.');
 		if (_p != std::string::npos) {
-			// 包含 . 运算符，前半段可能是变量类或对象
-			测试变量
-			auto _oct = FindAstClass (_func_ctx, _raw_name.substr (0, _p));
-			if (_oct.has_value ()) {
-				auto _ovar = _oct.value ()->GetVar (_raw_name.substr (_p + 1));
-				if (_ovar.has_value ()) {
-					// TODO
-				}
+			// 包含 . 运算符
+			// 猜测是前半段是变量
+			auto _oval = _func_ctx.GetVariable (_raw_name.substr (0, _p));
+			if (_oval.has_value ()) {
+				AstValue _val = _oval.value ();
+				return _func_ctx.AccessMember (_val, _raw_name.substr (_p + 1), _t);
 			}
+
+			//// TODO猜测前半段可能是类或对象
+			//auto _oct = FindAstClass (_func_ctx, _raw_name.substr (0, _p));
+			//if (_oct.has_value ()) {
+			//	auto _ovar = _oct.value ()->GetVar (_raw_name.substr (_p + 1));
+			//	if (_ovar.has_value ()) {
+			//		// TODO
+			//	}
+			//}
 		} else {
-			// 不包含 . 运算符，可能是变量、类方法或类属性
+			// 不包含 . 运算符
+			// 猜测可能是变量、类方法或类属性
 			return _func_ctx.GetVariable (_raw_name);
 		}
 		LOG_TODO (nullptr);

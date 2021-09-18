@@ -83,6 +83,10 @@ public:
 
     virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *context) = 0;
 
+    virtual antlrcpp::Any visitIntNum(FaParser::IntNumContext *context) = 0;
+
+    virtual antlrcpp::Any visitFloatNum(FaParser::FloatNumContext *context) = 0;
+
     virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *context) = 0;
 
     virtual antlrcpp::Any visitIds(FaParser::IdsContext *context) = 0;
@@ -107,6 +111,8 @@ public:
 
     virtual antlrcpp::Any visitWhileStmt(FaParser::WhileStmtContext *context) = 0;
 
+    virtual antlrcpp::Any visitNumIterStmt(FaParser::NumIterStmtContext *context) = 0;
+
     virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *context) = 0;
 
     virtual antlrcpp::Any visitExprOpt(FaParser::ExprOptContext *context) = 0;
@@ -114,6 +120,8 @@ public:
     virtual antlrcpp::Any visitNewExprItem(FaParser::NewExprItemContext *context) = 0;
 
     virtual antlrcpp::Any visitNewExpr(FaParser::NewExprContext *context) = 0;
+
+    virtual antlrcpp::Any visitArrayExpr(FaParser::ArrayExprContext *context) = 0;
 
     virtual antlrcpp::Any visitStrongExprBase(FaParser::StrongExprBaseContext *context) = 0;
 

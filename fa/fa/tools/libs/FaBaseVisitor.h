@@ -143,6 +143,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitIntNum(FaParser::IntNumContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitFloatNum(FaParser::FloatNumContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -191,6 +199,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitNumIterStmt(FaParser::NumIterStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitQuotExpr(FaParser::QuotExprContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -204,6 +216,10 @@ public:
   }
 
   virtual antlrcpp::Any visitNewExpr(FaParser::NewExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitArrayExpr(FaParser::ArrayExprContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -32,6 +32,8 @@ public:
 	}
 
 	std::optional<std::tuple<llvm::Value* , std::string>> Build (std::string _type, std::string _value, antlr4::Token* _t) {
+		if (_type != "" && _type [0] == '$')
+			_type = _type.substr (1);
 		if (_type == "bool") {
 			if (_value == "true") {
 				return std::make_tuple<llvm::Value* , std::string> (llvm::ConstantInt::getTrue (*m_ctx), "bool");
