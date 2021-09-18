@@ -219,7 +219,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitArrayExpr(FaParser::ArrayExprContext *ctx) override {
+  virtual antlrcpp::Any visitArrayExpr1(FaParser::ArrayExpr1Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitArrayExpr2(FaParser::ArrayExpr2Context *ctx) override {
     return visitChildren(ctx);
   }
 

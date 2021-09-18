@@ -877,9 +877,20 @@ private:
 					return std::nullopt;
 
 				return _AST_ExprOrValue { _newval };
-			} else if (_expr_raw->arrayExpr ()) {
-				// TODO
-				实现数组
+			} else if (_expr_raw->arrayExpr1 () || _expr_raw->arrayExpr2 ()) {
+				bool _is_arr1 = !!_expr_raw->arrayExpr1 ();
+				auto _expr_raws = (_is_arr1 ? _expr_raw->arrayExpr1 ()->expr () : _expr_raw->arrayExpr2 ()->expr ());
+				if (_is_arr1) {
+					auto _oval1 = ExprBuilder (_func_ctx, _expr_raws [0], "");
+					if (!_oval1.has_value ())
+						return std::nullopt;
+					auto _oval2 = ExprBuilder (_func_ctx, _expr_raws [0], "");
+					if (!_oval2.has_value ())
+						return std::nullopt;
+					// TODO
+				} else {
+					// TODO
+				}
 			}
 			LOG_TODO (_expr_raw->start);
 			return std::nullopt;
