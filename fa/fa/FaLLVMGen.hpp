@@ -881,12 +881,26 @@ private:
 				bool _is_arr1 = !!_expr_raw->arrayExpr1 ();
 				auto _expr_raws = (_is_arr1 ? _expr_raw->arrayExpr1 ()->expr () : _expr_raw->arrayExpr2 ()->expr ());
 				if (_is_arr1) {
-					auto _oval1 = ExprBuilder (_func_ctx, _expr_raws [0], "");
-					if (!_oval1.has_value ())
+					// 基于范围的数组
+					auto _ostart = ExprBuilder (_func_ctx, _expr_raws [0], "");
+					if (!_ostart.has_value ())
 						return std::nullopt;
-					auto _oval2 = ExprBuilder (_func_ctx, _expr_raws [0], "");
-					if (!_oval2.has_value ())
+					AstValue _start = _ostart.value ();
+					//
+					auto _oend = ExprBuilder (_func_ctx, _expr_raws [1], _start.GetType ());
+					if (!_oend.has_value ())
 						return std::nullopt;
+					AstValue _end = _oend.value ();
+					//
+					AstValue _step;
+					if (_expr_raws.size () > 2) {
+						auto _ostep = ExprBuilder (_func_ctx, _expr_raws [2], _start.GetType ());
+						if (!_ostep.has_value ())
+							return std::nullopt;
+						_step = _ostep.value ();
+					} else {
+						_step = AstValue::Fro
+					}
 					// TODO
 				} else {
 					// TODO

@@ -29,15 +29,22 @@ class AstValue {
 
 public:
 	static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
+	static std::optional<AstValue> FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t = nullptr) {
+		std::optional<std::tuple<llvm::Value* , std::string>> _oval = _value_builder->Build (_type, _value, _t);
+		if (_oval.has_value ()) {
+			m_type = AstObjectType::Value;
+			std::tie (m_value, m_value_type) = _oval.value ();
+		}
+	}
 	AstValue () {}
 	//AstValue (std::nullopt_t) {}
 	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext* _literal) {
 		m_value_type = "";
 		if (_literal->BoolLiteral ()) {
 			m_value_type = "bool";
-		} else if (_literal->IntLiteral ()) {
+		} else if (_literal->intNum ()) {
 			m_value_type = "int";
-		} else if (_literal->FloatLiteral ()) {
+		} else if (_literal->floatNum ()) {
 			m_value_type = "float64";
 		} else if (_literal->String1Literal ()) {
 			m_value_type = "cstr";
