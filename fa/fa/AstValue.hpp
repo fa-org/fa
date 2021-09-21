@@ -29,13 +29,7 @@ class AstValue {
 
 public:
 	static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
-	static std::optional<AstValue> FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t = nullptr) {
-		std::optional<std::tuple<llvm::Value* , std::string>> _oval = _value_builder->Build (_type, _value, _t);
-		if (_oval.has_value ()) {
-			m_type = AstObjectType::Value;
-			std::tie (m_value, m_value_type) = _oval.value ();
-		}
-	}
+	static std::optional<AstValue> FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t = nullptr);
 	AstValue () {}
 	//AstValue (std::nullopt_t) {}
 	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext* _literal) {
@@ -238,6 +232,15 @@ private:
 	std::string					m_value_type = "";
 	bool						m_tmp_var_flag = false;
 };
+
+inline std::optional<AstValue> AstValue::FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t = nullptr) {
+	// TODO
+	std::optional<std::tuple<llvm::Value* , std::string>> _oval = _value_builder->Build (_type, _value, _t);
+	if (!_oval.has_value ())
+		return std::nullopt;
+	auto [_val, _value_type] = _oval.value ();
+	return AstValue { _val, _value_type };
+}
 
 
 

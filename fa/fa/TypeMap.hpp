@@ -43,7 +43,7 @@ public:
 		return GetType (_stype, _type_ctx->start);
 	}
 
-	std::optional<llvm::Type*> GetType (std::string _stype, antlr4::Token* _t) {
+	std::optional<llvm::Type*> GetType (std::string _stype, antlr4::Token* _t = nullptr) {
 		if (_stype == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_stype == "bool") {
@@ -75,6 +75,11 @@ public:
 		}
 		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _stype));
 		return std::nullopt;
+	}
+
+	std::optional<llvm::Type*> GetArrayType (std::string _stype, AstValue &_capacity, antlr4::Token* _t = nullptr) {
+		// TODO
+		asdasd
 	}
 
 	std::optional<std::vector<llvm::Type*>> GetTypes (std::vector<FaParser::TypeContext*> _types_raw) {

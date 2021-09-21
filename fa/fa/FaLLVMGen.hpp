@@ -886,21 +886,31 @@ private:
 					if (!_ostart.has_value ())
 						return std::nullopt;
 					AstValue _start = _ostart.value ();
+					std::string _type = _start.GetType ();
 					//
-					auto _oend = ExprBuilder (_func_ctx, _expr_raws [1], _start.GetType ());
+					auto _oend = ExprBuilder (_func_ctx, _expr_raws [1], _type);
 					if (!_oend.has_value ())
 						return std::nullopt;
 					AstValue _end = _oend.value ();
 					//
-					AstValue _step;
-					if (_expr_raws.size () > 2) {
-						auto _ostep = ExprBuilder (_func_ctx, _expr_raws [2], _start.GetType ());
-						if (!_ostep.has_value ())
-							return std::nullopt;
-						_step = _ostep.value ();
-					} else {
-						_step = AstValue::Fro
-					}
+					auto _ostep = _expr_raws.size () > 2
+						? ExprBuilder (_func_ctx, _expr_raws [2], _type)
+						: AstValue::FromValue (m_value_builder, "1", _type, _expr_raw->start);
+					if (!_ostep.has_value ())
+						return std::nullopt;
+					AstValue _step = _ostep.value ();
+
+					// 计算数组大小
+					auto _otmp = _func_ctx.DoOper2 (_end, "-", _start, _expr_raw->start);
+					if (!_otmp.has_value ())
+						return std::nullopt;
+					_otmp = _func_ctx.DoOper2 (_otmp.value (), "/", _step, _expr_raw->start);
+					if (!_otmp.has_value ())
+						return std::nullopt;
+					AstValue _size = _otmp.value ();
+					//
+					auto _2 = AstValue::FromValue (m_value_builder, "2", _type, _expr_raw->start);
+					AstValue _capacity = _func_ctx.DoOper2 (_size, "*", _2.value (), _expr_raw->start).value ();
 					// TODO
 				} else {
 					// TODO
