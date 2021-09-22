@@ -31,9 +31,9 @@ struct _AST_ValueCtx {
 };
 
 struct _AST_Arr1ValueCtx {
-	_AST_Arr1ValueCtx (_AST_ExprOrValue _val_start, _AST_ExprOrValue _val_stop, _AST_ExprOrValue _val_step, std::string _str_capacity, antlr4::Token* _t, std::string _expect_type): m_val_start (_val_start), m_val_stop (_val_stop), m_val_step (_val_step), m_str_capacity (_str_capacity), m_t (_t), m_expect_type (_expect_type) {}
+	_AST_Arr1ValueCtx (std::vector<_AST_ExprOrValue> _vals, std::string _str_capacity, antlr4::Token* _t, std::string _expect_type): m_vals (_vals), m_str_capacity (_str_capacity), m_t (_t), m_expect_type (_expect_type) {}
 
-	_AST_ExprOrValue				m_val_start {}, m_val_stop {}, m_val_step {};
+	std::vector<_AST_ExprOrValue>	m_vals;					// start¡¢stop¡¢step
 	std::string						m_str_capacity = "";
 	antlr4::Token*					m_t = nullptr;
 	std::string						m_expect_type = "";

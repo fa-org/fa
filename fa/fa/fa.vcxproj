@@ -167,6 +167,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="code.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="tools\libs\FaBaseVisitor.cpp" />
     <ClCompile Include="tools\libs\FaLexer.cpp" />

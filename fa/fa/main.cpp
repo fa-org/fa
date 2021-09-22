@@ -28,40 +28,10 @@
 
 int main (int argc, char* argv[]) {
 	std::filesystem::current_path ("D:\\fa_tmp");
-	std::string _code = R"(
-@import int32 __cdecl puts (cstr);
-//// MT
-//@lib "libucrt.lib";
-//@lib "libcmt.lib";
-////@lib "libvcruntime.lib";
-
-// MD
-@lib "ucrt.lib";
-@lib "msvcrt.lib";
-//@lib "vcruntime.lib";
-
-//@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "ole32.lib";
-//@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
-
-public class AAA {
-	public int32 num1;
-	public int32 num2;
-}
-
-int32 FaMain () {
-	int32[] i = [1, 2, 3, 6];
-
-	if i[3] == 6 {
-		::puts ("i[3] == 6\n");
-	} else {
-		::puts ("i[3] != 6\n");
-	}
-	return 0;
-}
-)";
-	Log::SetCurrentFile ("Program.fa", _code);
+	extern std::string CODE;
+	Log::SetCurrentFile ("Program.fa", CODE);
 	std::cout << "----------开始编译----------" << std::endl;
-	antlr4::ANTLRInputStream _s (_code);
+	antlr4::ANTLRInputStream _s (CODE);
 	FaLexer _lexer { &_s };
 	antlr4::CommonTokenStream _cts { &_lexer };
 	_cts.fill ();

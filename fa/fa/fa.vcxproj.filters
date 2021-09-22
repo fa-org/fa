@@ -39,6 +39,9 @@
     <ClCompile Include="win32.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="code.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tools\generate.bat">

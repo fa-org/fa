@@ -64,7 +64,7 @@ public:
 	std::optional<AstValue> DefineArrayVariable (std::string _type, antlr4::Token* _t, AstValue &_capacity, std::string _name = "") {
 		if (_type [0] == '$')
 			_type = _type.substr (1);
-		std::string _var_type = std::format ("${}", _type);
+		std::string _var_type = std::format ("${}[]", _type);
 		if (_name != "" && GetVariable (_name).has_value ()) {
 			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
 			return std::nullopt;

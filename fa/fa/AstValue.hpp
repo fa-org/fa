@@ -60,7 +60,7 @@ public:
 	}
 	AstValue (llvm::AllocaInst* _var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::Void), m_value (_var), m_value_type (_value_type) {}
 	AstValue (llvm::AllocaInst* _arr, llvm::AllocaInst* _arr_size, llvm::AllocaInst* _arr_capacity, std::string _value_type):
-		m_type (AstObjectType::ArrVar), m_value (_arr), m_value_size (_arr_size), m_value_capacity (_arr_capacity), m_value_type (std::format ("{}[]", _value_type)) {}
+		m_type (AstObjectType::ArrVar), m_value (_arr), m_value_size (_arr_size), m_value_capacity (_arr_capacity), m_value_type (_value_type) {}
 	AstValue (llvm::Value* _value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::Void), m_value (_value), m_value_type (_value_type) {}
 	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_name) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
@@ -230,6 +230,9 @@ public:
 
 	bool GetTmpVarFlag () { return m_tmp_var_flag; }
 	void SetTmpVarFlag (bool _tmp_var_flag) { m_tmp_var_flag = _tmp_var_flag; }
+
+	AstValue GetArrSize () { return AstValue { m_value_size, "int32" }; }
+	AstValue GetArrCapacity () { return AstValue { m_value_capacity, "int32" }; }
 
 	std::string GetFuncReturnType () { return m_func->m_ret_type; }
 	std::tuple<std::string, std::vector<std::string>> GetFuncType () { return { m_func->m_ret_type, m_func->m_arg_types }; }
