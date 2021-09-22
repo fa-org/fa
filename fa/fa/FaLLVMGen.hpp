@@ -4,7 +4,9 @@
 
 
 #include <format>
+#include <fstream>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -245,20 +247,22 @@ public:
 
 		std::error_code _ec;
 		llvm::raw_fd_ostream _dest (_out_file, _ec, llvm::sys::fs::F_None);
-
 		if (_ec) {
 			LOG_ERROR (nullptr, "无法打开输出文件");
 			return false;
 		}
-
 		llvm::legacy::PassManager _pass;
 		if (_target_machine->addPassesToEmitFile (_pass, _dest, nullptr, llvm::CGFT_ObjectFile)) {
 			LOG_ERROR (nullptr, "无法输出编译文件");
 			return false;
 		}
-
 		_pass.run (*m_module);
 		_dest.flush ();
+
+		llvm::raw_fd_ostream _dest2 ("hello.ll", _ec, llvm::sys::fs::F_None);
+		m_module->print (_dest2, nullptr);
+		_dest2.flush ();
+
 		return true;
 	}
 

@@ -17,10 +17,10 @@ std::string CODE = R"(
 //@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "ole32.lib";
 //@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
 
-public class AAA {
-	public int32 num1;
-	public int32 num2;
-}
+//public class AAA {
+//	public int32 num1;
+//	public int32 num2;
+//}
 
 int32 FaMain () {
 	var i = 0;
