@@ -877,44 +877,68 @@ private:
 					return std::nullopt;
 
 				return _AST_ExprOrValue { _newval };
-			} else if (_expr_raw->arrayExpr1 () || _expr_raw->arrayExpr2 ()) {
-				bool _is_arr1 = !!_expr_raw->arrayExpr1 ();
-				auto _expr_raws = (_is_arr1 ? _expr_raw->arrayExpr1 ()->expr () : _expr_raw->arrayExpr2 ()->expr ());
-				if (_is_arr1) {
-					// 基于范围的数组
-					auto _ostart = ExprBuilder (_func_ctx, _expr_raws [0], "");
-					if (!_ostart.has_value ())
-						return std::nullopt;
-					AstValue _start = _ostart.value ();
-					std::string _type = _start.GetType ();
-					//
-					auto _oend = ExprBuilder (_func_ctx, _expr_raws [1], _type);
-					if (!_oend.has_value ())
-						return std::nullopt;
-					AstValue _end = _oend.value ();
-					//
-					auto _ostep = _expr_raws.size () > 2
-						? ExprBuilder (_func_ctx, _expr_raws [2], _type)
-						: AstValue::FromValue (m_value_builder, "1", _type, _expr_raw->start);
-					if (!_ostep.has_value ())
-						return std::nullopt;
-					AstValue _step = _ostep.value ();
-
-					// 计算数组大小
-					auto _otmp = _func_ctx.DoOper2 (_end, "-", _start, _expr_raw->start);
-					if (!_otmp.has_value ())
-						return std::nullopt;
-					_otmp = _func_ctx.DoOper2 (_otmp.value (), "/", _step, _expr_raw->start);
-					if (!_otmp.has_value ())
-						return std::nullopt;
-					AstValue _size = _otmp.value ();
-					//
-					auto _2 = AstValue::FromValue (m_value_builder, "2", _type, _expr_raw->start);
-					AstValue _capacity = _func_ctx.DoOper2 (_size, "*", _2.value (), _expr_raw->start).value ();
-					// TODO
-				} else {
-					// TODO
+			} else if (_expr_raw->arrayExpr1 ()) {
+				auto _expr_raws = _expr_raw->arrayExpr1 ()->expr ();
+				std::string _scapacity = "";
+				if (_exp_type != "") {
+					if (_exp_type.substr (_exp_type.size () - 3) == "[?]") {
+						// TODO 待定：此处是否改为内建generator，迭代器迭代生成。此处暂时一次性生成
+						_exp_type = _exp_type.substr (0, _exp_type.size () - 3);
+					} else {
+						_exp_type.erase (_exp_type.size () - 1);
+						size_t _p = _exp_type.rfind ('[');
+						if (_p + 1 < _exp_type.size ())
+							_scapacity = _exp_type.substr (_p + 1);
+						_exp_type = _exp_type.substr (0, _p);
+					}
 				}
+				auto _oval = _parse_expr (_expr_raws [0], _exp_type);
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_AST_ExprOrValue _start = _oval.value ();
+				if (_exp_type == "")
+					_exp_type = _start.GetExpectType ();
+				_oval = _parse_expr (_expr_raws [1], _exp_type);
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_AST_ExprOrValue _stop = _oval.value ();
+				_AST_ExprOrValue _step;
+				if (_expr_raws.size () > 2) {
+					_oval = _parse_expr (_expr_raws [2], _exp_type);
+					if (!_oval.has_value ())
+						return std::nullopt;
+					_step = _oval.value ();
+				} else {
+					auto _oval2 = AstValue::FromValue (m_value_builder, "1", _exp_type, _expr_raw->start);
+					if (!_oval2.has_value ())
+						return std::nullopt;
+					_step = std::make_shared<_AST_ValueCtx> (_oval2.value (), _expr_raw->start, _exp_type);
+				}
+				return _AST_ExprOrValue { std::make_shared<_AST_Arr1ValueCtx> (_start, _stop, _step, _scapacity, _expr_raw->start, std::format ("{}[]", _exp_type))};
+			} else if (_expr_raw->arrayExpr2 ()) {
+				auto _expr_raws = _expr_raw->arrayExpr2 ()->expr ();
+				std::string _scapacity = "";
+				if (_exp_type != "") {
+					if (_exp_type.substr (_exp_type.size () - 3) == "[?]") {
+						_exp_type = _exp_type.substr (0, _exp_type.size () - 3);
+					} else {
+						_exp_type.erase (_exp_type.size () - 1);
+						size_t _p = _exp_type.rfind ('[');
+						if (_p + 1 < _exp_type.size ())
+							_scapacity = _exp_type.substr (_p + 1);
+						_exp_type = _exp_type.substr (0, _p);
+					}
+				}
+				std::vector<_AST_ExprOrValue> _vals;
+				for (auto _expr_raw : _expr_raws) {
+					auto _oexpr = _parse_expr (_expr_raw, _exp_type);
+					if (!_oexpr.has_value ())
+						return std::nullopt;
+					_vals.push_back (_oexpr.value ());
+					if (_exp_type == "")
+						_exp_type = _vals [0].GetExpectType ();
+				}
+				return _AST_ExprOrValue { std::make_shared<_AST_Arr2ValueCtx> (_vals, _scapacity, _expr_raw->start, std::format ("{}[]", _exp_type)) };
 			}
 			LOG_TODO (_expr_raw->start);
 			return std::nullopt;
@@ -978,6 +1002,71 @@ private:
 		if (_ast_ev.m_val) {
 			auto _left = _trans_type (_ast_ev.m_val->m_val, _rexp_type);
 			return _left;
+		} else if (_ast_ev.m_arrval1) {
+			auto _oval = _generate_code (_func_ctx, _ast_ev.m_arrval1->m_val_start);
+			if (!_oval.has_value ())
+				return std::nullopt;
+			AstValue _start = _oval.value ();
+			_oval = _generate_code (_func_ctx, _ast_ev.m_arrval1->m_val_stop);
+			if (!_oval.has_value ())
+				return std::nullopt;
+			AstValue _stop = _oval.value ();
+			_oval = _generate_code (_func_ctx, _ast_ev.m_arrval1->m_val_step);
+			if (!_oval.has_value ())
+				return std::nullopt;
+			AstValue _step = _oval.value ();
+			//
+			AstValue _capacity;
+			auto _t = _ast_ev.m_arrval1->m_t;
+			std::string _type = _start.GetType ();
+			if (_ast_ev.m_arrval1->m_str_capacity != "") {
+				auto _oval2 = AstValue::FromValue (m_value_builder, _ast_ev.m_arrval1->m_str_capacity, _type, _t);
+				if (!_oval2.has_value ())
+					return std::nullopt;
+				_capacity = _oval2.value ();
+			} else {
+				auto _otmp = _func_ctx.DoOper2 (_stop, "-", _start, _t);
+				if (!_otmp.has_value ())
+					return std::nullopt;
+				_otmp = _func_ctx.DoOper2 (_otmp.value (), "/", _step, _t);
+				if (!_otmp.has_value ())
+					return std::nullopt;
+				_capacity = _otmp.value ();
+			}
+			auto _oleft = _func_ctx.DefineArrayVariable (_type, _t, _capacity);
+			if (!_oleft.has_value ())
+				return std::nullopt;
+			auto _left = _oleft.value ();
+			//
+			auto _iter = _func_ctx.DefineVariable (_type, _t).value ();
+			_func_ctx.DoOper2 (_iter, "=", _start, _t);
+			auto _cond_expr = std::make_shared<_AST_Op2ExprTreeCtx> ();
+			_cond_expr->m_left = std::make_shared<_AST_ValueCtx> (_iter, _t, _type);
+			_cond_expr->m_op = _AST_Oper2Ctx {};
+			_cond_expr->m_op.m_op = "==";
+			_cond_expr->m_op.m_t = _t;
+			_cond_expr->m_op.m_type = _Op2Type::Compare;
+			_cond_expr->m_right = std::make_shared<_AST_ValueCtx> (_stop, _t, _type);
+			_cond_expr->m_expect_type = "bool";
+			auto _cond_expr_wrap = _AST_ExprOrValue { _cond_expr };
+			//
+			auto _idx = _func_ctx.DefineVariable (_type, _t).value ();
+			auto _0 = AstValue::FromValue (m_value_builder, "0", _type, _t).value ();
+			_func_ctx.DoOper2 (_idx, "=", _0, _t);
+			//
+			_func_ctx.While (_cond_expr_wrap, [&] () {
+				auto _tmp = _func_ctx.AccessArrayMember (_left, _idx, _t).value ();
+				_func_ctx.DoOper2 (_tmp, "=", _iter, _t);
+				//
+				_tmp = _func_ctx.DoOper2 (_iter, "+", _step, _t).value ();
+				_func_ctx.DoOper2 (_iter, "=", _tmp, _t);
+				_func_ctx.DoOper1 (_idx, "++", _t);
+				return true;
+			}, [&] (_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); });
+			TODO 给size变量赋值
+			return _left;
+		} else if (_ast_ev.m_arrval2) {
+			// TODO
 		} else if (_ast_ev.m_newval) {
 			auto _oleft = _func_ctx.DefineVariable (_ast_ev.m_newval->m_cls->m_name, _ast_ev.m_newval->m_t);
 			if (!_oleft.has_value ())

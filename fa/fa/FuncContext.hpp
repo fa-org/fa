@@ -46,7 +46,6 @@ public:
 		if (_type [0] == '$')
 			_type = _type.substr (1);
 		std::string _var_type = std::format ("${}", _type);
-		// TODO 这儿判断是否virtual
 		if (_name != "" && GetVariable (_name).has_value ()) {
 			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
 			return std::nullopt;
@@ -62,11 +61,39 @@ public:
 			(*m_local_vars.rbegin ()) [_name] = { _inst, _var_type };
 		return AstValue { _inst, _var_type };
 	}
+	std::optional<AstValue> DefineArrayVariable (std::string _type, antlr4::Token* _t, AstValue &_capacity, std::string _name = "") {
+		if (_type [0] == '$')
+			_type = _type.substr (1);
+		std::string _var_type = std::format ("${}", _type);
+		if (_name != "" && GetVariable (_name).has_value ()) {
+			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
+			return std::nullopt;
+		}
+		std::optional<llvm::Type*> _ret_type = m_type_map->GetType (_type, _t);
+		if (!_ret_type.has_value ())
+			return std::nullopt;
+		if (m_virtual)
+			return AstValue { (llvm::AllocaInst*) nullptr, _var_type };
+
+		auto _arr = m_builder->CreateAlloca (_ret_type.value (), _capacity.Value (*m_builder));
+		if (_name != "")
+			(*m_local_vars.rbegin ()) [_name] = { _arr, _var_type };
+		auto _int_type = m_type_map->GetType ("int32").value ();
+		auto _asize = m_builder->CreateAlloca (_int_type);
+		auto _acapacity = m_builder->CreateAlloca (_int_type);
+		m_array_attaches [_arr] = std::make_tuple (_asize, _acapacity);
+		return AstValue { _arr, _asize, _acapacity, _var_type };
+	}
 	std::optional<AstValue> GetVariable (std::string _name) {
 		for (auto _i = m_local_vars.rbegin (); _i != m_local_vars.rend (); ++_i) {
 			if (_i->contains (_name)) {
 				auto &[_var, _type] = (*_i)[_name];
-				return AstValue { _var, _type };
+				if (m_array_attaches.contains (_var)) {
+					auto [_asize, _acapacity] = m_array_attaches [_var];
+					return AstValue { _var, _asize, _acapacity, _type };
+				} else {
+					return AstValue { _var, _type };
+				}
 			}
 		}
 		return std::nullopt;
@@ -114,6 +141,12 @@ public:
 		size_t _idx = _oidx.value ();
 		auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _idx);
 		return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", _cls->m_vars [_idx]->m_type) };
+	}
+
+	std::optional<AstValue> AccessArrayMember (AstValue& _arr_var, AstValue &_index, antlr4::Token* _t) {
+		auto _val_raw = m_builder->CreateGEP (_arr_var.ValueRaw (), _index.Value (*m_builder));
+		std::string _type = _arr_var.GetType ();
+		return AstValue { (llvm::AllocaInst*) _val_raw, _type.substr (0, _type.size () - 2) };
 	}
 
 	bool Return (antlr4::Token* _t) {
@@ -255,6 +288,7 @@ private:
 	//
 	std::shared_ptr<llvm::IRBuilder<>>												m_builder;
 	std::vector<std::map<std::string, std::tuple<llvm::AllocaInst* , std::string>>>	m_local_vars;
+	std::map<llvm::AllocaInst*, std::tuple<llvm::AllocaInst*, llvm::AllocaInst*>>	m_array_attaches;
 	//
 	bool m_virtual = false;
 };

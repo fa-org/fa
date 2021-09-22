@@ -77,11 +77,6 @@ public:
 		return std::nullopt;
 	}
 
-	std::optional<llvm::Type*> GetArrayType (std::string _stype, AstValue &_capacity, antlr4::Token* _t = nullptr) {
-		// TODO
-		asdasd
-	}
-
 	std::optional<std::vector<llvm::Type*>> GetTypes (std::vector<FaParser::TypeContext*> _types_raw) {
 		std::vector<llvm::Type*> _types;
 		for (FaParser::TypeContext* _type_raw : _types_raw) {

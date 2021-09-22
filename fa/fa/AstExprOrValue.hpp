@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -27,6 +28,24 @@ struct _AST_ValueCtx {
 	AstValue					m_val {};
 	antlr4::Token*				m_t = nullptr;
 	std::string					m_expect_type = "";
+};
+
+struct _AST_Arr1ValueCtx {
+	_AST_Arr1ValueCtx (_AST_ExprOrValue _val_start, _AST_ExprOrValue _val_stop, _AST_ExprOrValue _val_step, std::string _str_capacity, antlr4::Token* _t, std::string _expect_type): m_val_start (_val_start), m_val_stop (_val_stop), m_val_step (_val_step), m_str_capacity (_str_capacity), m_t (_t), m_expect_type (_expect_type) {}
+
+	_AST_ExprOrValue				m_val_start {}, m_val_stop {}, m_val_step {};
+	std::string						m_str_capacity = "";
+	antlr4::Token*					m_t = nullptr;
+	std::string						m_expect_type = "";
+};
+
+struct _AST_Arr2ValueCtx {
+	_AST_Arr2ValueCtx (std::vector<_AST_ExprOrValue> _vals, std::string _str_capacity, antlr4::Token* _t, std::string _expect_type): m_vals (_vals), m_str_capacity (_str_capacity), m_t (_t), m_expect_type (_expect_type) {}
+
+	std::vector<_AST_ExprOrValue>	m_vals;
+	std::string						m_str_capacity = "";
+	antlr4::Token*					m_t = nullptr;
+	std::string						m_expect_type = "";
 };
 
 struct _AST_NewCtx {
@@ -122,6 +141,8 @@ struct _AST_IfExprTreeCtx;
 struct _AST_ExprOrValue {
 	_AST_ExprOrValue () {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_ValueCtx> val): m_val (val) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_Arr1ValueCtx> val): m_arrval1 (val) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_Arr2ValueCtx> val): m_arrval2 (val) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_NewCtx> newval): m_newval (newval) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_Op1ExprTreeCtx> op1_expr): m_op1_expr (op1_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_Op2ExprTreeCtx> op2_expr): m_op2_expr (op2_expr) {}
@@ -129,6 +150,8 @@ struct _AST_ExprOrValue {
 	_AST_ExprOrValue (std::shared_ptr<_AST_IfExprTreeCtx> if_expr): m_if_expr (if_expr) {}
 	_AST_ExprOrValue &operator= (const _AST_ExprOrValue &_o) {
 		m_val = _o.m_val;
+		m_arrval1 = _o.m_arrval1;
+		m_arrval2 = _o.m_arrval2;
 		m_newval = _o.m_newval;
 		m_op1_expr = _o.m_op1_expr;
 		m_op2_expr = _o.m_op2_expr;
@@ -138,6 +161,8 @@ struct _AST_ExprOrValue {
 	}
 
 	std::shared_ptr<_AST_ValueCtx>						m_val;
+	std::shared_ptr<_AST_Arr1ValueCtx>					m_arrval1;
+	std::shared_ptr<_AST_Arr2ValueCtx>					m_arrval2;
 	std::shared_ptr<_AST_NewCtx>						m_newval;
 	std::shared_ptr<_AST_Op1ExprTreeCtx>				m_op1_expr;
 	std::shared_ptr<_AST_Op2ExprTreeCtx>				m_op2_expr;
@@ -195,13 +220,17 @@ struct _AST_OpNExprTreeCtx {
 struct _AST_IfExprTreeCtx {
 	std::vector<_AST_ExprOrValue>						m_conds;
 	std::vector<std::vector<FaParser::StmtContext*>>	m_bodys1_raw;
-	std::vector<FaParser::ExprContext*>				m_bodys2;
+	std::vector<FaParser::ExprContext*>					m_bodys2;
 	std::string											m_expect_type;
 };
 
 inline std::string _AST_ExprOrValue::GetExpectType () {
 	if (m_val)
 		return m_val->m_expect_type;
+	if (m_arrval1)
+		return m_arrval1->m_expect_type;
+	if (m_arrval2)
+		return m_arrval2->m_expect_type;
 	if (m_newval)
 		return m_newval->m_expect_type;
 	if (m_op1_expr)

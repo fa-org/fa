@@ -25,11 +25,17 @@
 
 
 class AstValue {
-	enum class AstObjectType { /*None,*/ Void, Value, Var, Func, TypeStr, MemberStr };
+	enum class AstObjectType { /*None,*/ Void, Value, Var, Func, TypeStr, MemberStr, ArrVar };
 
 public:
 	static AstValue FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
-	static std::optional<AstValue> FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t = nullptr);
+	static std::optional<AstValue> FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t = nullptr) {
+		std::optional<std::tuple<llvm::Value*, std::string>> _oval = _value_builder->Build (_type, _value, _t);
+		if (!_oval.has_value ())
+			return std::nullopt;
+		auto [_val, _value_type] = _oval.value ();
+		return AstValue { _val, _value_type };
+	}
 	AstValue () {}
 	//AstValue (std::nullopt_t) {}
 	AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::LiteralContext* _literal) {
@@ -53,6 +59,8 @@ public:
 		}
 	}
 	AstValue (llvm::AllocaInst* _var, std::string _value_type): m_type (_var ? AstObjectType::Var : AstObjectType::Void), m_value (_var), m_value_type (_value_type) {}
+	AstValue (llvm::AllocaInst* _arr, llvm::AllocaInst* _arr_size, llvm::AllocaInst* _arr_capacity, std::string _value_type):
+		m_type (AstObjectType::ArrVar), m_value (_arr), m_value_size (_arr_size), m_value_capacity (_arr_capacity), m_value_type (std::format ("{}[]", _value_type)) {}
 	AstValue (llvm::Value* _value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::Void), m_value (_value), m_value_type (_value_type) {}
 	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_name) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
@@ -62,6 +70,8 @@ public:
 	AstValue &operator= (const AstValue &_o) {
 		m_type = _o.m_type;
 		m_value = _o.m_value;
+		m_value_size = _o.m_value_size;
+		m_value_capacity = _o.m_value_capacity;
 		m_func = _o.m_func;
 		m_member = _o.m_member;
 		m_value_type = _o.m_value_type;
@@ -226,21 +236,12 @@ public:
 
 private:
 	AstObjectType				m_type = AstObjectType::Void;
-	llvm::Value*				m_value = nullptr;
+	llvm::Value*				m_value = nullptr, * m_value_size = nullptr, * m_value_capacity = nullptr;
 	std::shared_ptr<FuncType>	m_func;
 	std::string					m_member = "";
 	std::string					m_value_type = "";
 	bool						m_tmp_var_flag = false;
 };
-
-inline std::optional<AstValue> AstValue::FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t = nullptr) {
-	// TODO
-	std::optional<std::tuple<llvm::Value* , std::string>> _oval = _value_builder->Build (_type, _value, _t);
-	if (!_oval.has_value ())
-		return std::nullopt;
-	auto [_val, _value_type] = _oval.value ();
-	return AstValue { _val, _value_type };
-}
 
 
 
