@@ -23,13 +23,17 @@ public class AAA {
 }
 
 int32 FaMain () {
-	int32[] i = [1, 2, 3, 6];
-	i[3] += 1;
+	var i = 0;
+	var sum = 0;
+	while i < 10 {
+		i++;
+		sum += i;
+	}
 
-	if i[3] == 7 {
-		::puts ("i[3] == 7\n");
+	if sum == 55 {
+		::puts ("sum == 55\n");
 	} else {
-		::puts ("i[3] != 7\n");
+		::puts ("sum != 55\n");
 	}
 	return 0;
 }

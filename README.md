@@ -87,13 +87,13 @@ if表达式：
 
 类成员访问：
 
-![img](./imgs/screen2.jpg)
+![img](./imgs/screen2.png)
 
 ---
 
 循环：
 
-![img](./imgs/screen3.jpg)
+![img](./imgs/screen3.png)
 
 ---
 
