@@ -95,6 +95,12 @@ if表达式：
 
 ![img](./imgs/screen3.jpg)
 
+---
+
+数组：
+
+![img](./imgs/screen4.png)
+
 <!--
 性能警告：
 
