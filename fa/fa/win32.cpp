@@ -1,8 +1,11 @@
 #define WIN32_MEAN_AND_LEAN
 #include <Windows.h>
 
+#include <format>
+#include <functional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 
 
@@ -78,4 +81,30 @@ std::string get_process_output (std::string _cmd, LPWCH _env) {
 
 bool check_file_exist (std::string _file) {
 	return ::GetFileAttributesA (_file.data ()) != INVALID_FILE_ATTRIBUTES;
+}
+
+// 枚举文件列表
+void _enum_files (std::string _path, std::function<void (std::string)> _cb) {
+	WIN32_FIND_DATAA _wfd {};
+	if (*_path.crbegin () != '\\')
+		_path += '\\';
+	std::string _find = std::format ("{}*", _path);
+	HANDLE hFind = ::FindFirstFileA (_find.data (), &_wfd);
+	if (hFind == INVALID_HANDLE_VALUE)
+		return;
+	do {
+		std::string _fname = _wfd.cFileName;
+		if (_fname == "." || _fname == "..")
+			continue;
+		if (_wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			_enum_files (std::format ("{}{}", _path, _fname), [&] (std::string _s) { _cb (std::format ("{}\\{}", _fname, _s)); });
+		} else {
+			_cb (_fname);
+		}
+	} while (!!::FindNextFileA (hFind, &_wfd));
+}
+std::vector<std::string> enum_files (std::string _path) {
+	std::vector<std::string> _v;
+	_enum_files (_path, [&] (std::string _s) { _v.push_back (_s); });
+	return _v;
 }

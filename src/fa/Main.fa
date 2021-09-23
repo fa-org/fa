@@ -1,0 +1,4 @@
+int32 FaMain () {
+	Program.Main ();
+	return 0;
+}

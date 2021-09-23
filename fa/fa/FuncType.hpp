@@ -36,7 +36,7 @@ public:
 
 class FuncTypes {
 public:
-	FuncTypes (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<llvm::Module> _module, std::shared_ptr<ValueBuilder> _value_builder): m_ctx (_ctx), m_type_map (_type_map), m_module (_module), m_value_builder (_value_builder) {}
+	FuncTypes (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<llvm::Module> _module, std::shared_ptr<ValueBuilder> _value_builder, std::map<std::string, std::shared_ptr<FuncType>>& _global_funcs): m_ctx (_ctx), m_type_map (_type_map), m_module (_module), m_value_builder (_value_builder), m_funcs (_global_funcs) {}
 
 	bool MakeExtern (std::string _func_name, FaParser::TypeContext* _ret_type_raw, std::vector<FaParser::TypeContext*> &_arg_type_raws, llvm::CallingConv::ID _cc) {
 		auto _ret = std::make_shared<FuncType> ();
@@ -122,7 +122,7 @@ public:
 	std::shared_ptr<llvm::LLVMContext>					m_ctx;
 	std::shared_ptr<TypeMap>							m_type_map;
 	std::shared_ptr<llvm::Module>						m_module;
-	std::map<std::string, std::shared_ptr<FuncType>>	m_funcs;
+	std::map<std::string, std::shared_ptr<FuncType>>&	m_funcs;
 	std::shared_ptr<ValueBuilder>						m_value_builder;
 };
 

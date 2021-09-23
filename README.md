@@ -134,8 +134,12 @@ https://zhuanlan.zhihu.com/p/25959684
 
 
 
-编写LLVM Pass模块知识点梳理
+编写LLVM Pass模块知识点梳理√
 https://blog.csdn.net/u010940020/article/details/99721684
+
+
+SIMD简介
+https://zhuanlan.zhihu.com/p/55327037
 
 
 

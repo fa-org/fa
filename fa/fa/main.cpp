@@ -9,11 +9,14 @@
 
 
 
+#include <algorithm>
 #include <conio.h>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "AstExprOrValue.hpp"
 #include "FaParser.h"
@@ -26,28 +29,95 @@
 
 
 
+std::string _read_file (std::string _file) {
+	std::ifstream ifs (_file, std::ios::binary);
+	//m_bytes = std::string ((std::istreambuf_iterator<char> (ifs)), std::istreambuf_iterator<char> ()); // low performance
+	ifs.seekg (0, std::ios::end);
+	size_t _fsz = (size_t) ifs.tellg ();
+	ifs.seekg (0, std::ios::beg);
+	std::string _data;
+	_data.resize (_fsz);
+	ifs.read (&_data [0], (std::streamsize) _fsz);
+	ifs.close ();
+	return _data;
+}
+
+std::string _link (std::string _dest, std::vector<std::string> &_libs) {
+	wchar_t* get_env (std::string _key, std::string _val);
+	bool check_file_exist (std::string _file);
+	std::string _link_exe_path = R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x86\link.exe)";
+	wchar_t* _env;
+	if (check_file_exist (_link_exe_path)) {
+		// home
+		//_link_exe_path = 
+		_env = get_env ("LIB", R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\ATLMFC\lib\x86;D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
+	} else {
+		// company
+		_link_exe_path = R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)";
+		_env = get_env ("LIB", R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
+	}
+	std::string _cmd = std::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:@fa_main /out:{}.exe /pdb:{}.pdb", _link_exe_path, _dest, _dest);
+	// 依赖处理差的链接命令
+	// link /subsystem:console /dynamicbase /machine:X86 /debug /entry:@fa_main /out:hello.exe /pdb:hello.pdb hello.obj "libucrt.lib" "libcmt.lib"
+	// 编译程序无法运行的链接命令
+	// link /OUT:"hello.exe" /MANIFEST /LTCG:incremental /NXCOMPAT /PDB:"hello.pdb" /DYNAMICBASE /entry:@fa_main hello.obj "libucrt.lib" "libcmt.lib" /DEBUG /MACHINE:X86 /OPT:REF /SAFESEH /INCREMENTAL:NO /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ManifestFile:"hello.exe.intermediate.manifest" /LTCGOUT:"hello.iobj" /OPT:ICF /ERRORREPORT:PROMPT /ILK:"hello.ilk" /NOLOGO /TLBID:1
+	for (auto _lib : _libs) {
+		_cmd += " ";
+		_cmd += _lib;
+	}
+	std::string get_process_output (std::string _cmd, wchar_t* _env);
+	return get_process_output (_cmd, _env);
+}
+
 int main (int argc, char* argv[]) {
 	std::filesystem::current_path ("D:\\fa_tmp");
-	extern std::string CODE;
-	Log::SetCurrentFile ("Program.fa", CODE);
-	std::cout << "----------开始编译----------" << std::endl;
-	antlr4::ANTLRInputStream _s (CODE);
-	FaLexer _lexer { &_s };
-	antlr4::CommonTokenStream _cts { &_lexer };
-	_cts.fill ();
-	FaParser _parser { &_cts };
-	CodeVisitor _visitor;
-	FaLLVMGen _gen { &_visitor, "hello", "hello"};
-	auto _success = _gen.Compile (_parser.program (), "hello.obj");
-	if (_success) {
-		std::cout << "compile success." << std::endl;
-		//std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
-		std::string _out = _gen.Link ();
-		std::cout << _out << std::endl;
-	} else {
-		std::cout << "compile failed." << std::endl;
+	//
+	std::vector<std::string>							_libs;				// 全局链接库
+	std::map<std::string, std::shared_ptr<FuncType>>	_global_funcs;		// 全局函数
+	//
+	std::vector<std::string> enum_files (std::string _path);
+	std::string _project_name = "hello";
+	std::string _src_path = R"(E:\GitHub\_\fa\src)";
+	for (std::string _file : enum_files (_src_path)) {
+		// 源码文件路径
+		std::string _full_path = std::format ("{}\\{}", _src_path, _file);
+
+		// 源码
+		std::string _source = _read_file (_full_path);
+
+		// 命名空间
+		size_t _p = _file.rfind ('\\');
+		std::string _child_namespace = _file.substr (0, _p);
+		std::replace_if (_child_namespace.begin (), _child_namespace.end (), [] (char ch) { return ch == '\\'; }, '.');
+		std::string _namespace = (_p == std::string::npos ? _project_name : std::format ("{}.{}", _project_name, _child_namespace));
+
+		// 模块名称
+		std::string _module = std::format ("{}.{}", _namespace, _file.substr (_p + 1));
+		_p = _file.rfind ('.');
+		_module = _module.substr (0, _p);
+
+		// 开始编译
+		Log::SetCurrentFile (_file, _source);
+		antlr4::ANTLRInputStream _s (_source);
+		FaLexer _lexer { &_s };
+		antlr4::CommonTokenStream _cts { &_lexer };
+		_cts.fill ();
+		FaParser _parser { &_cts };
+		CodeVisitor _visitor;
+		FaLLVMGen _gen { &_visitor, _module, _namespace, _libs, _global_funcs };
+		auto _success = _gen.Compile (_parser.program (), std::format ("{}.obj", _module));
+		if (!_success) {
+			std::cout << "compile failed." << std::endl;
+			std::cout << "press any key to exit." << std::endl;
+			::_getch ();
+			return 0;
+		}
 	}
+	//
 	// link /out:hello.exe /subsystem:console /entry:fa_entry_main hello.obj
+	//std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
+	std::string _out = _link (_project_name, _libs);
+	std::cout << _out << std::endl;
 
 	std::cout << "press any key to exit." << std::endl;
 	::_getch ();

@@ -51,13 +51,13 @@
 
 class FaLLVMGen {
 public:
-	FaLLVMGen (CodeVisitor* _visitor, std::string _module_name, std::string _namespace): m_visitor (_visitor), m_module_name (_module_name), m_namespace (_namespace) {
+	FaLLVMGen (CodeVisitor* _visitor, std::string _module_name, std::string _namespace, std::vector<std::string> &_libs, std::map<std::string, std::shared_ptr<FuncType>> &_global_funcs): m_visitor (_visitor), m_module_name (_module_name), m_namespace (_namespace), m_libs (_libs) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (m_module_name,* m_ctx);
 		m_global_classes = std::make_shared<AstClasses> ();
 		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx, m_global_classes, m_namespace);
 		m_value_builder = std::make_shared<ValueBuilder> (m_type_map, m_ctx, m_module);
-		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder);
+		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder, _global_funcs);
 	}
 
 	bool Compile (FaParser::ProgramContext* _program_ctx, std::string _out_file) {
@@ -264,33 +264,6 @@ public:
 		_dest2.flush ();
 
 		return true;
-	}
-
-	std::string Link () {
-		wchar_t* get_env (std::string _key, std::string _val);
-		bool check_file_exist (std::string _file);
-		std::string _link_exe_path = R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x86\link.exe)";
-		wchar_t* _env;
-		if (check_file_exist (_link_exe_path)) {
-			// home
-			//_link_exe_path = 
-			_env = get_env ("LIB", R"(D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\ATLMFC\lib\x86;D:\Software\Editor\vs2019\Community\VC\Tools\MSVC\14.29.30133\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
-		} else {
-			// company
-			_link_exe_path = R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x86\link.exe)";
-			_env = get_env ("LIB", R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\lib\x86;E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;D:\Windows Kits\10\lib\10.0.19041.0\ucrt\x86;D:\Windows Kits\10\lib\10.0.19041.0\um\x86)");
-		}
-		std::string _cmd = std::format ("\"{}\" /subsystem:console /dynamicbase /machine:X86 /debug /entry:@fa_main /out:{}.exe /pdb:{}.pdb {}.obj", _link_exe_path, m_module_name, m_module_name, m_module_name);
-		// 依赖处理差的链接命令
-		// link /subsystem:console /dynamicbase /machine:X86 /debug /entry:@fa_main /out:hello.exe /pdb:hello.pdb hello.obj "libucrt.lib" "libcmt.lib"
-		// 编译程序无法运行的链接命令
-		// link /OUT:"hello.exe" /MANIFEST /LTCG:incremental /NXCOMPAT /PDB:"hello.pdb" /DYNAMICBASE /entry:@fa_main hello.obj "libucrt.lib" "libcmt.lib" /DEBUG /MACHINE:X86 /OPT:REF /SAFESEH /INCREMENTAL:NO /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ManifestFile:"hello.exe.intermediate.manifest" /LTCGOUT:"hello.iobj" /OPT:ICF /ERRORREPORT:PROMPT /ILK:"hello.ilk" /NOLOGO /TLBID:1
-		for (auto _lib : m_libs) {
-			_cmd += " ";
-			_cmd += _lib;
-		}
-		std::string get_process_output (std::string _cmd, wchar_t* _env);
-		return get_process_output (_cmd, _env);
 	}
 
 private:
@@ -1302,7 +1275,8 @@ private:
 	std::shared_ptr<AstClasses> m_global_classes;
 
 	std::vector<std::string> m_uses;
-	std::vector<std::string> m_libs;
+public:
+	std::vector<std::string> &m_libs;
 };
 
 
