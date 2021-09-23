@@ -74,11 +74,19 @@ int main (int argc, char* argv[]) {
 	//
 	std::vector<std::string>							_libs;				// 全局链接库
 	std::map<std::string, std::shared_ptr<FuncType>>	_global_funcs;		// 全局函数
+	AstClasses											_global_classes {};	// 全局类
 	//
 	std::vector<std::string> enum_files (std::string _path);
 	std::string _project_name = "hello";
+	std::vector<std::shared_ptr<FaLLVMGen>> _gens;
 	std::string _src_path = R"(E:\GitHub\_\fa\src)";
-	for (std::string _file : enum_files (_src_path)) {
+	auto _files = enum_files (_src_path);
+	if (_files.size () == 0) {
+		_src_path = R"(D:\GitHub\_\fa\src)";
+		_files = enum_files (_src_path);
+	}
+	std::cout << "----------开始解析项目结构----------" << std::endl;
+	for (std::string _file : _files) {
 		// 源码文件路径
 		std::string _full_path = std::format ("{}\\{}", _src_path, _file);
 
@@ -92,20 +100,29 @@ int main (int argc, char* argv[]) {
 		std::string _namespace = (_p == std::string::npos ? _project_name : std::format ("{}.{}", _project_name, _child_namespace));
 
 		// 模块名称
-		std::string _module = std::format ("{}.{}", _namespace, _file.substr (_p + 1));
-		_p = _file.rfind ('.');
-		_module = _module.substr (0, _p);
+		std::string _module_name = std::format ("{}.{}", _namespace, _file.substr (_p + 1));
+		_p = _module_name.rfind ('.');
+		_module_name = _module_name.substr (0, _p);
 
 		// 开始编译
+		auto _stream = std::make_shared<antlr4::ANTLRInputStream> (_source);
+		auto _lexer = std::make_shared<FaLexer> (_stream.get ());
+		auto _cts = std::make_shared<antlr4::CommonTokenStream> (_lexer.get ());
+		_cts->fill ();
+		auto _gen = std::make_shared<FaLLVMGen> (_module_name, _namespace, _libs, _global_funcs, _global_classes);
 		Log::SetCurrentFile (_file, _source);
-		antlr4::ANTLRInputStream _s (_source);
-		FaLexer _lexer { &_s };
-		antlr4::CommonTokenStream _cts { &_lexer };
-		_cts.fill ();
-		FaParser _parser { &_cts };
-		CodeVisitor _visitor;
-		FaLLVMGen _gen { &_visitor, _module, _namespace, _libs, _global_funcs };
-		auto _success = _gen.Compile (_parser.program (), std::format ("{}.obj", _module));
+		if (!_gen->Init (_file, _source, _stream, _lexer, _cts)) {
+			std::cout << "compile failed." << std::endl;
+			std::cout << "press any key to exit." << std::endl;
+			::_getch ();
+			return 0;
+		}
+		_gens.push_back (_gen);
+	}
+	for (auto _gen : _gens) {
+		std::cout << std::format ("----------正在编译 {}----------", _gen->m_file) << std::endl;
+		Log::SetCurrentFile (_gen->m_file, _gen->m_source);
+		auto _success = _gen->Compile ();
 		if (!_success) {
 			std::cout << "compile failed." << std::endl;
 			std::cout << "press any key to exit." << std::endl;

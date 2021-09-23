@@ -57,7 +57,6 @@ public:
 	static void SetCurrentFile (std::string _file, std::string_view _code) {
 		s_file = _process_file (_file);
 		s_code = _code;
-		std::cout << "----------¿ªÊ¼±àÒë " << _file << "----------";
 	}
 	static void Info (const char* _file, int _line, antlr4::Token* _t, std::string _data) {
 		std::string _prefix = std::format ("[{}:{}] ", _process_file (_file), _line);

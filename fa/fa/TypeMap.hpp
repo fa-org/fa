@@ -26,7 +26,7 @@
 //template<int bitsize>
 class TypeMap {
 public:
-	TypeMap (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<AstClasses> _global_classes, std::string _namespace): m_visitor (_visitor), m_ctx (_ctx), m_global_classes (_global_classes), m_namespace (_namespace) {}
+	TypeMap (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, AstClasses& _global_classes, std::string _namespace): m_visitor (_visitor), m_ctx (_ctx), m_global_classes (_global_classes), m_namespace (_namespace) {}
 
 	std::optional<std::tuple<llvm::Type* , std::string>> GetTypeT (FaParser::TypeContext* _type_ctx) {
 		auto _stype = _type_ctx->getText ();
@@ -69,7 +69,7 @@ public:
 		} else if (_stype == "cstr") {
 			return llvm::Type::getInt8PtrTy (*m_ctx);
 		} else {
-			auto _ocls = m_global_classes->GetClass (_stype, m_namespace);
+			auto _ocls = m_global_classes.GetClass (_stype, m_namespace);
 			if (_ocls.has_value ())
 				return _ocls.value ()->GetType ([&] (std::string _stype, antlr4::Token* _t) { return GetType (_stype, _t); });
 		}
@@ -322,10 +322,10 @@ public:
 	//}
 
 private:
-	FaVisitor* m_visitor = nullptr;
-	std::shared_ptr<llvm::LLVMContext> m_ctx = nullptr;
-	std::shared_ptr<AstClasses> m_global_classes;
-	std::string m_namespace;
+	FaVisitor*							m_visitor = nullptr;
+	std::shared_ptr<llvm::LLVMContext>	m_ctx = nullptr;
+	AstClasses&							m_global_classes;
+	std::string							m_namespace;
 };
 
 

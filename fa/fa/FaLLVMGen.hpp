@@ -51,60 +51,69 @@
 
 class FaLLVMGen {
 public:
-	FaLLVMGen (CodeVisitor* _visitor, std::string _module_name, std::string _namespace, std::vector<std::string> &_libs, std::map<std::string, std::shared_ptr<FuncType>> &_global_funcs): m_visitor (_visitor), m_module_name (_module_name), m_namespace (_namespace), m_libs (_libs) {
+	FaLLVMGen (std::string _module_name, std::string _namespace, std::vector<std::string> &_libs, std::map<std::string, std::shared_ptr<FuncType>>& _global_funcs, AstClasses &_global_classes): m_module_name (_module_name), m_namespace (_namespace), m_libs (_libs), m_global_classes (_global_classes) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (m_module_name,* m_ctx);
-		m_global_classes = std::make_shared<AstClasses> ();
-		m_type_map = std::make_shared<TypeMap> (m_visitor, m_ctx, m_global_classes, m_namespace);
+		m_type_map = std::make_shared<TypeMap> (&m_visitor, m_ctx, _global_classes, m_namespace);
 		m_value_builder = std::make_shared<ValueBuilder> (m_type_map, m_ctx, m_module);
 		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder, _global_funcs);
+		_libs.push_back (std::format ("{}.obj", _module_name));
 	}
 
-	bool Compile (FaParser::ProgramContext* _program_ctx, std::string _out_file) {
-		auto [_uses, _imports, _classes, _entry] = m_visitor->visit (_program_ctx).as<std::tuple<
+	bool Init (std::string _file, std::string _source, std::shared_ptr<antlr4::ANTLRInputStream> _stream, std::shared_ptr<FaLexer> _lexer, std::shared_ptr<antlr4::CommonTokenStream> _cts) {
+		m_file = _file;
+		m_source = _source;
+		m_stream = _stream;
+		m_lexer = _lexer;
+		m_cts = _cts;
+		m_parser = std::make_shared<FaParser> (m_cts.get ());
+		auto [_uses, _imports, _classes, _entry] = m_visitor.visit (m_parser->program ()).as<std::tuple<
 			std::vector<std::string>,
 			FaParser::ImportBlockContext* ,
 			std::vector<FaParser::ClassStmtContext*>,
 			FaParser::FaMainFuncBlockContext* 
 		>> ();
 		m_uses = _uses;
+		m_entry = _entry;
 
 		// 引用外部模块
-		std::vector<FaParser::ImportStmtContext*> _imports_raw;
-		std::tie (_imports_raw, m_libs) = m_visitor->visit (_imports).as<std::tuple<
-			std::vector<FaParser::ImportStmtContext*>,
-			std::vector<std::string>
-		>> ();
-		//m_imports.push_back ("puts");
-		//m_libs.push_back ("libcmt.lib");
-		if (!ProcessImports (_imports_raw))
-			return false;
+		if (_imports) {
+			std::vector<FaParser::ImportStmtContext*> _imports_raw;
+			std::tie (_imports_raw, m_libs) = m_visitor.visit (_imports).as<std::tuple<
+				std::vector<FaParser::ImportStmtContext*>,
+				std::vector<std::string>
+			>> ();
+			//m_imports.push_back ("puts");
+			//m_libs.push_back ("libcmt.lib");
+			if (!ProcessImports (_imports_raw))
+				return false;
+		}
 
 		// 获取访问级别
 		std::function<PublicLevel (FaParser::PublicLevelContext* , PublicLevel)> _public_level = [&] (FaParser::PublicLevelContext* _public_raw, PublicLevel _default) {
 			if (_public_raw == nullptr)
 				return _default;
-			PublicLevel _ret = m_visitor->visit (_public_raw).as<PublicLevel> ();
+			PublicLevel _ret = m_visitor.visit (_public_raw).as<PublicLevel> ();
 			return _ret == PublicLevel::Unknown ? _default : _ret;
 		};
 
 		// 设置类结构
-		for (auto _class_raw : _program_ctx->classStmt ()) {
+		for (auto _class_raw : _classes) {
 			// 访问级别
 			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
 
 			// 类名
 			std::string _name = std::format ("{}.{}", m_namespace, _class_raw->Id ()->getText ());
-			auto _oclass = m_global_classes->GetClass (_name, "");
+			auto _oclass = m_global_classes.GetClass (_name, "");
 			if (_oclass.has_value ()) {
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
 				return false;
 			}
-			std::shared_ptr<AstClass> _class = m_global_classes->CreateNewClass (_pl, _name);
+			std::shared_ptr<AstClass> _class = m_global_classes.CreateNewClass (_pl, m_module_name, _name);
 
 			// 父类型
 			if (_class_raw->classParent ()) {
-				std::vector<std::string> _parents = m_visitor->visit (_class_raw->classParent ()).as<std::vector<std::string>> ();
+				std::vector<std::string> _parents = m_visitor.visit (_class_raw->classParent ()).as<std::vector<std::string>> ();
 				_class->AddParents (_parents);
 			}
 
@@ -179,9 +188,12 @@ public:
 				_func->SetFuncBody (_func_raw->classFuncBody ());
 			}
 		}
+		return true;
+	}
 
+	bool Compile () {
 		// 编译类
-		m_global_classes->EnumClasses ([&] (std::shared_ptr<AstClass> _cls) -> bool {
+		m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<AstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
 				_cls_func->m_name_abi = _cls_func->m_name;
 				if (!m_global_funcs->Make (_cls->m_name, _cls_func->m_name_abi, _cls_func->m_ret_type, _cls_func->m_ret_type_t, _cls_func->m_arg_types, _cls_func->m_arg_type_ts))
@@ -209,11 +221,11 @@ public:
 		});
 
 		// 编译主函数
-		if (!_entry) {
+		if (!m_entry) {
 			LOG_ERROR (nullptr, "未定义入口函数：FaEntryMain");
 			return false;
 		}
-		auto [_ret_type_raw, _stmts_raw] = m_visitor->visit (_entry).as<std::tuple<
+		auto [_ret_type_raw, _stmts_raw] = m_visitor.visit (m_entry).as<std::tuple<
 			FaParser::TypeContext* ,
 			std::vector<FaParser::StmtContext*>
 		>> ();
@@ -246,7 +258,7 @@ public:
 		m_module->setDataLayout (_target_machine->createDataLayout ());
 
 		std::error_code _ec;
-		llvm::raw_fd_ostream _dest (_out_file, _ec, llvm::sys::fs::F_None);
+		llvm::raw_fd_ostream _dest (std::format ("{}.obj", m_module_name), _ec, llvm::sys::fs::F_None);
 		if (_ec) {
 			LOG_ERROR (nullptr, "无法打开输出文件");
 			return false;
@@ -259,7 +271,7 @@ public:
 		_pass.run (*m_module);
 		_dest.flush ();
 
-		llvm::raw_fd_ostream _dest2 ("hello.ll", _ec, llvm::sys::fs::F_None);
+		llvm::raw_fd_ostream _dest2 (std::format ("{}.ll", m_module_name), _ec, llvm::sys::fs::F_None);
 		m_module->print (_dest2, nullptr);
 		_dest2.flush ();
 
@@ -270,7 +282,7 @@ private:
 	bool ProcessImports (std::vector<FaParser::ImportStmtContext*> _imports_raw) {
 		// https://blog.csdn.net/adream307/article/details/83820543
 		for (FaParser::ImportStmtContext* _import_func_raw : _imports_raw) {
-			auto [_name, _ret_type_raw, _arg_types_raw, _cc_str] = m_visitor->visit (_import_func_raw).as<std::tuple<
+			auto [_name, _ret_type_raw, _arg_types_raw, _cc_str] = m_visitor.visit (_import_func_raw).as<std::tuple<
 				std::string,
 				FaParser::TypeContext* ,
 				std::vector<FaParser::TypeContext*>,
@@ -331,7 +343,7 @@ private:
 			} else if (_stmt_raw->ifStmt ()) {
 				std::vector<FaParser::ExprContext*> _conds;
 				std::vector<std::vector<FaParser::StmtContext*>> _bodys;
-				std::tie (_conds, _bodys) = m_visitor->visit (_stmt_raw->ifStmt ()).as<std::tuple<
+				std::tie (_conds, _bodys) = m_visitor.visit (_stmt_raw->ifStmt ()).as<std::tuple<
 					std::vector<FaParser::ExprContext*>,
 					std::vector<std::vector<FaParser::StmtContext*>>
 					>> ();
@@ -1233,28 +1245,44 @@ private:
 	}
 
 	std::optional<std::shared_ptr<AstClass>> FindAstClass (FuncContext &_func_ctx, std::string _raw_name) {
-		return m_global_classes->GetClass (_raw_name, m_namespace);
+		return m_global_classes.GetClass (_raw_name, m_namespace);
 	}
 
 	std::optional<AstValue> FindValueType (FuncContext &_func_ctx, std::string _raw_name, antlr4::Token* _t) {
 		size_t _p = _raw_name.find ('.');
 		if (_p != std::string::npos) {
 			// 包含 . 运算符
+			std::string _prefix = _raw_name.substr (0, _p);
+			std::string _suffix = _raw_name.substr (_p + 1);
+
 			// 猜测是前半段是变量
-			auto _oval = _func_ctx.GetVariable (_raw_name.substr (0, _p));
+			auto _oval = _func_ctx.GetVariable (_prefix);
 			if (_oval.has_value ()) {
 				AstValue _val = _oval.value ();
-				return _func_ctx.AccessMember (_val, _raw_name.substr (_p + 1), _t);
+				return _func_ctx.AccessMember (_val, _suffix, _t);
 			}
 
-			//// TODO猜测前半段可能是类或对象
-			//auto _oct = FindAstClass (_func_ctx, _raw_name.substr (0, _p));
-			//if (_oct.has_value ()) {
-			//	auto _ovar = _oct.value ()->GetVar (_raw_name.substr (_p + 1));
-			//	if (_ovar.has_value ()) {
-			//		// TODO
-			//	}
-			//}
+			// 猜测前半段可能是类
+			auto _oct = FindAstClass (_func_ctx, _prefix);
+			if (_oct.has_value ()) {
+				auto& _ct = _oct.value ();
+				// 猜测后半段是静态属性
+				auto _ovar = _ct->GetVar (_suffix);
+				if (_ovar.has_value ()) {
+					auto& _val = _ovar.value ();
+					if (_val->m_is_static) {
+						// TODO 定义全局变量，此处返回全局变量
+					}
+				}
+
+				// 猜测后半段是静态方法
+				auto _ofunc = _ct->GetFunc (_suffix);
+				if (_ofunc.has_value ()) {
+					auto& _func = _ofunc.value ();
+					// TODO 类方法需要像 m_global_funcs 一样定义FuncType
+					//_func->m_func
+				}
+			}
 		} else {
 			// 不包含 . 运算符
 			// 猜测可能是变量、类方法或类属性
@@ -1264,19 +1292,28 @@ private:
 		return std::nullopt;
 	}
 
-	CodeVisitor* m_visitor = nullptr;
-	std::string m_module_name;
-	std::string m_namespace;
-	std::shared_ptr<llvm::LLVMContext> m_ctx;
-	std::shared_ptr<llvm::Module> m_module;
-	std::shared_ptr<TypeMap> m_type_map;
-	std::shared_ptr<ValueBuilder> m_value_builder;
-	std::shared_ptr<FuncTypes> m_global_funcs;
-	std::shared_ptr<AstClasses> m_global_classes;
+	CodeVisitor									m_visitor {};
+	std::string									m_module_name;
+	std::string									m_namespace;
+	std::shared_ptr<llvm::LLVMContext>			m_ctx;
+	std::shared_ptr<llvm::Module>				m_module;
+	std::shared_ptr<TypeMap>					m_type_map;
+	std::shared_ptr<ValueBuilder>				m_value_builder;
+	std::shared_ptr<FuncTypes>					m_global_funcs;
+	AstClasses&									m_global_classes;
 
-	std::vector<std::string> m_uses;
+	std::vector<std::string>					m_uses;
+	FaParser::FaMainFuncBlockContext*			m_entry = nullptr;
+
 public:
-	std::vector<std::string> &m_libs;
+	std::vector<std::string>&					m_libs;
+	std::string									m_file, m_source;
+
+private:
+	std::shared_ptr<antlr4::ANTLRInputStream>	m_stream;
+	std::shared_ptr<FaLexer>					m_lexer;
+	std::shared_ptr<antlr4::CommonTokenStream>	m_cts;
+	std::shared_ptr<FaParser>					m_parser;
 };
 
 

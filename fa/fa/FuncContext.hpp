@@ -29,7 +29,7 @@
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<AstClasses> _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace):
+	FuncContext (AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace):
 		m_global_classes (_global_classes), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
 		m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder),
 		m_func (_global_funcs->GetFunc (_func_name)), m_exp_type (_exp_type), m_namespace (_namespace)
@@ -127,7 +127,7 @@ public:
 		std::string _cls_name = _cls_var.GetType ();
 		if (_cls_name [0] == '$')
 			_cls_name = _cls_name.substr (1);
-		auto _ocls = m_global_classes->GetClass (_cls_name, m_namespace);
+		auto _ocls = m_global_classes.GetClass (_cls_name, m_namespace);
 		if (!_ocls.has_value ()) {
 			LOG_ERROR (_t, std::format ("未定义的类 {}", _cls_name));
 			return std::nullopt;
@@ -277,7 +277,7 @@ public:
 	}
 
 private:
-	std::shared_ptr<AstClasses>														m_global_classes;
+	AstClasses&																		m_global_classes;
 	std::shared_ptr<llvm::LLVMContext>												m_ctx;
 	std::shared_ptr<llvm::Module>													m_module;
 	std::shared_ptr<TypeMap>														m_type_map;

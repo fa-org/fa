@@ -82,7 +82,7 @@ public:
 			_uses.push_back (visitUseStmt (_use_expr));
 		FaParser::ImportBlockContext* _imports = ctx->importBlock ();
 		std::vector<FaParser::ClassStmtContext*> _classes = ctx->classStmt ();
-		auto _entry = dynamic_cast<FaParser::FaMainFuncBlockContext*> (ctx->faMainFuncBlock ());
+		auto _entry = ctx->faMainFuncBlock ();
 		return std::make_tuple (_uses, _imports, _classes, _entry);
 	}
 

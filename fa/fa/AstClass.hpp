@@ -110,13 +110,14 @@ public:
 class AstClass {
 public:
 	PublicLevel									m_level;
+	std::string									m_module_name;
 	std::string									m_name;
 	std::vector<std::string>					m_parents;
 	std::vector<std::shared_ptr<AstClassVar>>	m_vars;
 	std::vector<std::shared_ptr<AstClassFunc>>	m_funcs;
 	llvm::StructType*							m_type = nullptr;
 
-	AstClass (PublicLevel _level, std::string _name): m_level (_level), m_name (_name) {}
+	AstClass (PublicLevel _level, std::string _module_name, std::string _name): m_level (_level), m_module_name (_module_name), m_name (_name) {}
 	void AddParents (std::vector<std::string> &_parents) {
 		m_parents.assign (_parents.cbegin (), _parents.cend ());
 	}
@@ -144,6 +145,14 @@ public:
 		for (size_t i = 0; i < m_vars.size (); ++i) {
 			if (m_vars [i]->m_name == _name)
 				return i;
+		}
+		return std::nullopt;
+	}
+
+	std::optional<std::shared_ptr<AstClassFunc>> GetFunc (std::string _name) {
+		for (auto _func : m_funcs) {
+			if (_func->m_name == _name)
+				return _func;
 		}
 		return std::nullopt;
 	}
@@ -186,14 +195,16 @@ public:
 		return std::nullopt;
 	}
 
-	std::shared_ptr<AstClass> CreateNewClass (PublicLevel _level, std::string _name) {
-		auto _cls = std::make_shared<AstClass> (_level, _name);
+	std::shared_ptr<AstClass> CreateNewClass (PublicLevel _level, std::string _module_name, std::string _name) {
+		auto _cls = std::make_shared<AstClass> (_level, _module_name, _name);
 		m_classes [_name] = _cls;
 		return _cls;
 	}
 
-	bool EnumClasses (std::function<bool (std::shared_ptr<AstClass>)> _cb) {
+	bool EnumClasses (std::string _module_name, std::function<bool (std::shared_ptr<AstClass>)> _cb) {
 		for (auto &[_key, _val] : m_classes) {
+			if (_val->m_module_name != _module_name)
+				continue;
 			if (!_cb (_val))
 				return false;
 		}
