@@ -41,8 +41,11 @@ public:
 	FuncTypes (std::shared_ptr<llvm::LLVMContext> _ctx, std::shared_ptr<TypeMap> _type_map, std::shared_ptr<llvm::Module> _module, std::shared_ptr<ValueBuilder> _value_builder, std::map<std::string, std::shared_ptr<FuncType>>& _global_funcs): m_ctx (_ctx), m_type_map (_type_map), m_module (_module), m_value_builder (_value_builder), m_funcs (_global_funcs) {}
 
 	bool MakeExtern (std::string _func_name, FaParser::TypeContext* _ret_type_raw, std::vector<FaParser::TypeContext*>& _arg_type_raws, llvm::CallingConv::ID _cc);
-	llvm::Function* RemakeExtern (std::shared_ptr<FuncType> _func, llvm::CallingConv::ID _cc = llvm::CallingConv::C) {
-		asdasd
+	void RemakeExtern (std::string _func_name, llvm::CallingConv::ID _cc = llvm::CallingConv::C) {
+		auto _func = m_funcs [_func_name];
+		auto _fp = llvm::Function::Create (_func->m_fp_type, llvm::Function::ExternalLinkage, _func_name, *m_module);
+		_fp->setCallingConv (_cc);
+		m_func_ptrs [_func_name] = _fp;
 	}
 
 	bool Make (std::string _class_name, std::string _func_name, std::string _ret_type, antlr4::Token* _ret_type_t, std::vector<std::string>& _arg_types, std::vector<antlr4::Token*>& _arg_type_ts, llvm::CallingConv::ID _cc = llvm::CallingConv::C);
@@ -62,10 +65,8 @@ public:
 
 	std::shared_ptr<FuncType> GetFunc (std::string _func_name) { return m_funcs [_func_name]; }
 	llvm::Function* GetFuncPtr (std::string _func_name) {
-		if (!m_func_ptrs.contains (_func_name)) {
-			auto _func = m_funcs [_func_name];
-			m_func_ptrs [_func_name] = RemakeExtern (_func);
-		}
+		if (!m_func_ptrs.contains (_func_name))
+			RemakeExtern (_func_name);
 		return m_func_ptrs [_func_name];
 	}
 

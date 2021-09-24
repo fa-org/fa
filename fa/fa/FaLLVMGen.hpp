@@ -216,6 +216,7 @@ public:
 					auto _stmt = _cls_func->m_func->stmt ();
 					if (!StmtBuilder (_func_ctx, _stmt))
 						return false;
+					看情况是否加return
 				}
 			}
 			return true;
@@ -233,6 +234,7 @@ public:
 			FuncContext _func_ctx { m_global_classes, m_global_funcs, "@fa_main", _ret_type_raw->getText (), m_namespace };
 			if (!StmtBuilder (_func_ctx, _stmts_raw))
 				return false;
+			看情况是否加return
 		}
 
 		llvm::InitializeAllTargetInfos ();
