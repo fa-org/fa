@@ -62,7 +62,7 @@ public:
 	AstValue (llvm::AllocaInst* _arr, llvm::AllocaInst* _arr_size, llvm::AllocaInst* _arr_capacity, std::string _value_type):
 		m_type (AstObjectType::ArrVar), m_value (_arr), m_value_size (_arr_size), m_value_capacity (_arr_capacity), m_value_type (_value_type) {}
 	AstValue (llvm::Value* _value, std::string _value_type): m_type (_value ? AstObjectType::Value : AstObjectType::Void), m_value (_value), m_value_type (_value_type) {}
-	AstValue (std::shared_ptr<FuncType> _func): m_type (AstObjectType::Func), m_func (_func), m_value_type (_func->m_name) {}
+	AstValue (std::shared_ptr<FuncType> _func, llvm::Function* _fp): m_type (AstObjectType::Func), m_func (_func), m_fp (_fp), m_value_type (_func->m_name) {}
 	AstValue (std::string _member): m_member (_member), m_type (AstObjectType::MemberStr) {}
 	//AstValue &operator= (const llvm::AllocaInst* _val) { AstValue _o { const_cast<llvm::AllocaInst*> (_val) }; return operator= (_o); }
 	//AstValue &operator= (const llvm::Value* _val) { AstValue _o { const_cast<llvm::Value*> (_val) }; return operator= (_o); }
@@ -99,7 +99,7 @@ public:
 	llvm::CallInst* FuncInvoke (llvm::IRBuilder<> &_builder, std::vector<llvm::Value*> &_args) {
 		if (m_type != AstObjectType::Func || m_func == nullptr)
 			return nullptr;
-		return _builder.CreateCall (m_func->m_fp, _args);
+		return _builder.CreateCall (m_fp, _args);
 	}
 	std::optional<AstValue> DoOper1 (llvm::IRBuilder<> &_builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token* _t) {
 		if (!IsValue ())
@@ -241,6 +241,7 @@ private:
 	AstObjectType				m_type = AstObjectType::Void;
 	llvm::Value*				m_value = nullptr, * m_value_size = nullptr, * m_value_capacity = nullptr;
 	std::shared_ptr<FuncType>	m_func;
+	llvm::Function*				m_fp = nullptr;
 	std::string					m_member = "";
 	std::string					m_value_type = "";
 	bool						m_tmp_var_flag = false;

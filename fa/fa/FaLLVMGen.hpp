@@ -78,13 +78,12 @@ public:
 
 		// 引用外部模块
 		if (_imports) {
-			std::vector<FaParser::ImportStmtContext*> _imports_raw;
-			std::tie (_imports_raw, m_libs) = m_visitor.visit (_imports).as<std::tuple<
+			auto [_imports_raw, _libs] = m_visitor.visit (_imports).as<std::tuple<
 				std::vector<FaParser::ImportStmtContext*>,
 				std::vector<std::string>
 			>> ();
-			//m_imports.push_back ("puts");
-			//m_libs.push_back ("libcmt.lib");
+			for (std::string _lib : _libs)
+				m_libs.push_back (_lib);
 			if (!ProcessImports (_imports_raw))
 				return false;
 		}
@@ -186,6 +185,11 @@ public:
 
 				// 函数体
 				_func->SetFuncBody (_func_raw->classFuncBody ());
+
+				// 函数定义
+				_func->m_name_abi = std::format ("{}.{}", _class->m_name, _func->m_name);
+				if (!m_global_funcs->Make (_class->m_name, _func->m_name_abi, _func->m_ret_type, _func->m_ret_type_t, _func->m_arg_types, _func->m_arg_type_ts))
+					return false;
 			}
 		}
 		return true;
@@ -195,9 +199,6 @@ public:
 		// 编译类
 		m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<AstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
-				_cls_func->m_name_abi = _cls_func->m_name;
-				if (!m_global_funcs->Make (_cls->m_name, _cls_func->m_name_abi, _cls_func->m_ret_type, _cls_func->m_ret_type_t, _cls_func->m_arg_types, _cls_func->m_arg_type_ts))
-					return false;
 				FuncContext _func_ctx { m_global_classes, m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type, m_namespace };
 				auto _expr_raw = _cls_func->m_func->expr ();
 				if (_expr_raw) {
@@ -221,21 +222,18 @@ public:
 		});
 
 		// 编译主函数
-		if (!m_entry) {
-			LOG_ERROR (nullptr, "未定义入口函数：FaEntryMain");
-			return false;
+		if (m_entry) {
+			auto [_ret_type_raw, _stmts_raw] = m_visitor.visit (m_entry).as<std::tuple<
+				FaParser::TypeContext*,
+				std::vector<FaParser::StmtContext*>
+			>> ();
+			std::vector<FaParser::TypeContext*> _arg_type_raws;
+			if (!m_global_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws))
+				return false;
+			FuncContext _func_ctx { m_global_classes, m_global_funcs, "@fa_main", _ret_type_raw->getText (), m_namespace };
+			if (!StmtBuilder (_func_ctx, _stmts_raw))
+				return false;
 		}
-		auto [_ret_type_raw, _stmts_raw] = m_visitor.visit (m_entry).as<std::tuple<
-			FaParser::TypeContext* ,
-			std::vector<FaParser::StmtContext*>
-		>> ();
-		std::vector<FaParser::TypeContext*> _arg_type_raws;
-		std::string _fa_main = "@fa_main";
-		if (!m_global_funcs->Make ("", _fa_main, _ret_type_raw, _arg_type_raws))
-			return false;
-		FuncContext _func_ctx { m_global_classes, m_global_funcs, "@fa_main", _ret_type_raw->getText (), m_namespace };
-		if (!StmtBuilder (_func_ctx, _stmts_raw))
-			return false;
 
 		llvm::InitializeAllTargetInfos ();
 		llvm::InitializeAllTargets ();
@@ -803,7 +801,8 @@ private:
 				auto _f = m_global_funcs->GetFunc (_name);
 				if (!TypeMap::CanImplicitConvTo (_f->m_type, _exp_type))
 					return std::nullopt;
-				return std::make_shared<_AST_ValueCtx> (AstValue { _f }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
+				auto _fp = m_global_funcs->GetFuncPtr (_name);
+				return std::make_shared<_AST_ValueCtx> (AstValue { _f, _fp }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->literal ()) {
 				AstValue _val { m_value_builder, _expr_raw->literal () };
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
@@ -1279,8 +1278,9 @@ private:
 				auto _ofunc = _ct->GetFunc (_suffix);
 				if (_ofunc.has_value ()) {
 					auto& _func = _ofunc.value ();
-					// TODO 类方法需要像 m_global_funcs 一样定义FuncType
-					//_func->m_func
+					auto _f = m_global_funcs->GetFunc (_func->m_name_abi);
+					auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
+					return AstValue { _f, _fp };
 				}
 			}
 		} else {

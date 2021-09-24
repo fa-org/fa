@@ -32,9 +32,9 @@ public:
 	FuncContext (AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace):
 		m_global_classes (_global_classes), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
 		m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder),
-		m_func (_global_funcs->GetFunc (_func_name)), m_exp_type (_exp_type), m_namespace (_namespace)
+		m_func (_global_funcs->GetFunc (_func_name)), m_fp (_global_funcs->GetFuncPtr (_func_name)), m_exp_type (_exp_type), m_namespace (_namespace)
 	{
-		llvm::BasicBlock* _bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
+		llvm::BasicBlock* _bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
 		m_builder->SetInsertPoint (_bb);
 		////
@@ -78,7 +78,10 @@ public:
 		auto _arr = m_builder->CreateAlloca (_ret_type.value (), _capacity.Value (*m_builder));
 		if (_name != "")
 			(*m_local_vars.rbegin ()) [_name] = { _arr, _var_type };
-		auto _int_type = m_type_map->GetType ("int32").value ();
+		auto _oint_type = m_type_map->GetType ("int32");
+		if (!_oint_type.has_value ())
+			return std::nullopt;
+		auto _int_type = _oint_type.value ();
 		auto _asize = m_builder->CreateAlloca (_int_type);
 		auto _acapacity = m_builder->CreateAlloca (_int_type);
 		m_array_attaches [_arr] = std::make_tuple (_asize, _acapacity);
@@ -193,9 +196,9 @@ public:
 
 	bool IfElse (AstValue &_cond, std::function<bool ()> _true_ctx, std::function<bool ()> _false_ctx) {
 		if (!m_virtual) {
-			llvm::BasicBlock* _true_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
-			llvm::BasicBlock* _false_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
-			llvm::BasicBlock* _endif_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
+			llvm::BasicBlock* _true_bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
+			llvm::BasicBlock* _false_bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
+			llvm::BasicBlock* _endif_bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
 			m_builder->CreateCondBr (_cond.Value (*m_builder), _true_bb, _false_bb);
 			//
 			m_builder->SetInsertPoint (_true_bb);
@@ -222,9 +225,9 @@ public:
 
 	bool While (_AST_ExprOrValue& _ev_cond, std::function<bool ()> _body_ctx, std::function<std::optional<AstValue> (_AST_ExprOrValue)> _cb) {
 		if (!m_virtual) {
-			llvm::BasicBlock* _cond_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
-			llvm::BasicBlock* _body_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
-			llvm::BasicBlock* _endwhile_bb = llvm::BasicBlock::Create (*m_ctx, "", m_func->m_fp);
+			llvm::BasicBlock* _cond_bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
+			llvm::BasicBlock* _body_bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
+			llvm::BasicBlock* _endwhile_bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
 			m_builder->CreateBr (_cond_bb);
 			//
 			m_builder->SetInsertPoint (_cond_bb);
@@ -283,6 +286,7 @@ private:
 	std::shared_ptr<TypeMap>														m_type_map;
 	std::shared_ptr<ValueBuilder>													m_value_builder;
 	std::shared_ptr<FuncType>														m_func;
+	llvm::Function*																	m_fp = nullptr;
 	std::string																		m_exp_type;
 	std::string																		m_namespace;
 	//

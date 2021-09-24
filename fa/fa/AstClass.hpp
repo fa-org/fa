@@ -19,6 +19,7 @@
 #include <llvm/IR/Type.h>
 
 #include <FaParser.h>
+#include "FuncType.hpp"
 
 
 
