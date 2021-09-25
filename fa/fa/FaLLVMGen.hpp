@@ -214,9 +214,17 @@ public:
 					}
 				} else {
 					auto _stmt = _cls_func->m_func->stmt ();
-					if (!StmtBuilder (_func_ctx, _stmt))
+					bool _a = false;
+					if (!StmtBuilder (_func_ctx, _stmt, _a))
 						return false;
-					看情况是否加return
+					if (!_a) {
+						if (_cls_func->m_ret_type != "void") {
+							LOG_ERROR (_cls_func->m_ret_type_t, "方法需返回指定类型数据");
+							return false;
+						}
+						if (!_func_ctx.Return (_cls_func->m_ret_type_t))
+							return false;
+					}
 				}
 			}
 			return true;
@@ -231,10 +239,20 @@ public:
 			std::vector<FaParser::TypeContext*> _arg_type_raws;
 			if (!m_global_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws))
 				return false;
-			FuncContext _func_ctx { m_global_classes, m_global_funcs, "@fa_main", _ret_type_raw->getText (), m_namespace };
-			if (!StmtBuilder (_func_ctx, _stmts_raw))
+			std::string _ret_type = _ret_type_raw->getText ();
+			FuncContext _func_ctx { m_global_classes, m_global_funcs, "@fa_main", _ret_type, m_namespace };
+			bool _a = false;
+			if (!StmtBuilder (_func_ctx, _stmts_raw, _a))
 				return false;
-			看情况是否加return
+			if (!_a) {
+				auto _t = m_entry->QuotHuaR ()->getSymbol ();
+				if (_ret_type != "void") {
+					LOG_ERROR (_t, "主函数需返回指定类型数据");
+					return false;
+				}
+				if (!_func_ctx.Return (_t))
+					return false;
+			}
 		}
 
 		llvm::InitializeAllTargetInfos ();
@@ -305,7 +323,8 @@ private:
 		return true;
 	}
 
-	bool StmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::StmtContext*> &_stmts_raw) {
+	bool StmtBuilder (FuncContext& _func_ctx, std::vector<FaParser::StmtContext*>& _stmts_raw, bool& _all_path_return) {
+		_all_path_return = false;
 		for (FaParser::StmtContext* _stmt_raw : _stmts_raw) {
 			if (_stmt_raw->normalStmt ()) {
 				FaParser::NormalStmtContext* _normal_stmt_raw = _stmt_raw->normalStmt ();
@@ -323,11 +342,13 @@ private:
 							}
 							if (!_func_ctx.Return (_val, _normal_stmt_raw->start))
 								return false;
+							_all_path_return = true;
 						}
 					} else {
 						if (_normal_stmt_raw->Return ()) {
 							if (!_func_ctx.Return (_normal_stmt_raw->start))
 								return false;
+							_all_path_return = true;
 						}
 					}
 				} else if (_normal_stmt_raw->Break ()) {
@@ -346,9 +367,11 @@ private:
 				std::tie (_conds, _bodys) = m_visitor.visit (_stmt_raw->ifStmt ()).as<std::tuple<
 					std::vector<FaParser::ExprContext*>,
 					std::vector<std::vector<FaParser::StmtContext*>>
-					>> ();
-				if (!IfStmtBuilder (_func_ctx, _conds, _bodys))
+				>> ();
+				bool _a = false;
+				if (!IfStmtBuilder (_func_ctx, _conds, _bodys, _a))
 					return false;
+				_all_path_return |= _a;
 			} else if (_stmt_raw->defVarStmt ()) {
 				auto _def_var_stmt_raw = _stmt_raw->defVarStmt ();
 				std::string _exp_type = _def_var_stmt_raw->type ()->getText ();
@@ -379,9 +402,10 @@ private:
 				if (!_oev_cond.has_value ())
 					return false;
 				auto _stmts_raw = _stmt_raw->whileStmt ()->stmt ();
+				bool _a = false;
 				_func_ctx.While (
 					_oev_cond.value (),
-					[&] () { return StmtBuilder (_func_ctx, _stmts_raw); },
+					[&] () { return StmtBuilder (_func_ctx, _stmts_raw, _a); },
 					[&] (_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); }
 				);
 			} else if (_stmt_raw->numIterStmt ()) {
@@ -395,22 +419,25 @@ private:
 		return true;
 	}
 
-	bool IfStmtBuilder (FuncContext &_func_ctx, std::vector<FaParser::ExprContext*> &_conds_raw, std::vector<std::vector<FaParser::StmtContext*>> &_bodys_raw) {
+	bool IfStmtBuilder (FuncContext& _func_ctx, std::vector<FaParser::ExprContext*>& _conds_raw, std::vector<std::vector<FaParser::StmtContext*>>& _bodys_raw, bool& _all_path_return) {
 		if (_conds_raw.size () == 0)
-			return StmtBuilder (_func_ctx, _bodys_raw [0]);
+			return StmtBuilder (_func_ctx, _bodys_raw [0], _all_path_return);
 		//
 		std::optional<AstValue> _ocond = ExprBuilder (_func_ctx, _conds_raw [0], "bool");
 		if (!_ocond.has_value ())
 			return false;
 		_conds_raw.erase (_conds_raw.begin ());
-		return _func_ctx.IfElse (_ocond.value (), [&] () {
-			if (!StmtBuilder (_func_ctx, _bodys_raw [0]))
+		bool _a = false, _b = false;
+		bool _ret = _func_ctx.IfElse (_ocond.value (), [&] () {
+			if (!StmtBuilder (_func_ctx, _bodys_raw [0], _a))
 				return false;
 			_bodys_raw.erase (_bodys_raw.begin ());
 			return true;
 		}, [&] () {
-			return IfStmtBuilder (_func_ctx, _conds_raw, _bodys_raw);
+			return IfStmtBuilder (_func_ctx, _conds_raw, _bodys_raw, _b);
 		});
+		_all_path_return = _a && _b;
+		return _ret;
 	}
 
 	std::optional<AstValue> ExprBuilder (FuncContext& _func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
@@ -971,7 +998,8 @@ private:
 				if (!_func_ctx.CreateVirtualEnv<bool> ([&] () {
 					// 遍历代码，寻找所有新定义变量，在计算最后表达式类型时可能需要用到
 					auto _stmts = _body_raw->stmt ();
-					if (!StmtBuilder (_func_ctx, _stmts))
+					bool _a = false;
+					if (!StmtBuilder (_func_ctx, _stmts, _a))
 						return false;
 
 					// 获取表达式类型
@@ -1204,7 +1232,8 @@ private:
 			_var_temp.SetTmpVarFlag (true);
 			//
 			std::function<bool ()> _process_first_block = [&] () {
-				if (!StmtBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys1_raw [0]))
+				bool _a = false;
+				if (!StmtBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys1_raw [0], _a))
 					return false;
 				_ast_ev.m_if_expr->m_bodys1_raw.erase (_ast_ev.m_if_expr->m_bodys1_raw.begin ());
 				auto _oblock_ret = ExprBuilder (_func_ctx, _ast_ev.m_if_expr->m_bodys2 [0], _rexp_type);

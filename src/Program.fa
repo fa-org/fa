@@ -5,12 +5,5 @@
 class Program {
 	public static void Main () {
 		::puts ("hello world\n");
-		return;
-		// TODO 设置活动目录
-		// TODO 获取文件列表
-		// TODO 遍历文件
-		// TODO 解析AST
-		// TODO 生成LLVM IR
-		// TODO 调用命令行编译
 	}
 }
