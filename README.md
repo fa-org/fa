@@ -176,4 +176,23 @@ https://vimsky.com/examples/detail/cpp-ex---IRBuilder-CreateStructGEP-method.htm
 LLVM Language Reference Manual
 https://llvm.org/docs/LangRef.html
 
+
+
+
+
+
+
+//// MT
+//@lib "libucrt.lib";
+//@lib "libcmt.lib";
+////@lib "libvcruntime.lib";
+
+// MD
+@lib "ucrt.lib";
+@lib "msvcrt.lib";
+//@lib "vcruntime.lib";
+
+//@lib "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "ole32.lib";
+//@lib "advapi32.lib" "shell32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib";
+
 -->
