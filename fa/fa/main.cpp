@@ -111,7 +111,7 @@ int main (int argc, char* argv[]) {
 		_cts->fill ();
 		auto _gen = std::make_shared<FaLLVMGen> (_module_name, _namespace, _libs, _global_funcs, _global_classes);
 		Log::SetCurrentFile (_file, _source);
-		if (!_gen->Init (_file, _source, _stream, _lexer, _cts)) {
+		if (!_gen->InitClassVar (_file, _source, _stream, _lexer, _cts)) {
 			std::cout << "compile failed." << std::endl;
 			std::cout << "press any key to exit." << std::endl;
 			::_getch ();
@@ -120,9 +120,18 @@ int main (int argc, char* argv[]) {
 		_gens.push_back (_gen);
 	}
 	for (auto _gen : _gens) {
+		bool _success = _gen->InitClassFunc ();
+		if (!_success) {
+			std::cout << "compile failed." << std::endl;
+			std::cout << "press any key to exit." << std::endl;
+			::_getch ();
+			return 0;
+		}
+	}
+	for (auto _gen : _gens) {
 		std::cout << std::format ("----------正在编译 {}----------", _gen->m_file) << std::endl;
 		Log::SetCurrentFile (_gen->m_file, _gen->m_source);
-		auto _success = _gen->Compile ();
+		bool _success = _gen->Compile ();
 		if (!_success) {
 			std::cout << "compile failed." << std::endl;
 			std::cout << "press any key to exit." << std::endl;

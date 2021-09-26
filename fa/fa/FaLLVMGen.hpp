@@ -50,54 +50,53 @@
 
 
 class FaLLVMGen {
+	PublicLevel _public_level (FaParser::PublicLevelContext * _public_raw, PublicLevel _default) {
+		if (_public_raw == nullptr)
+			return _default;
+		PublicLevel _ret = m_visitor.visit (_public_raw).as<PublicLevel> ();
+		return _ret == PublicLevel::Unknown ? _default : _ret;
+	}
+
 public:
-	FaLLVMGen (std::string _module_name, std::string _namespace, std::vector<std::string> &_libs, std::map<std::string, std::shared_ptr<FuncType>>& _global_funcs, AstClasses &_global_classes): m_module_name (_module_name), m_namespace (_namespace), m_libs (_libs), m_global_classes (_global_classes) {
+	FaLLVMGen (std::string _module_name, std::string _namespace, std::vector<std::string>& _libs, std::map<std::string, std::shared_ptr<FuncType>>& _global_funcs, AstClasses& _global_classes): m_module_name (_module_name), m_namespace (_namespace), m_libs (_libs), m_global_classes (_global_classes) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
-		m_module = std::make_shared<llvm::Module> (m_module_name,* m_ctx);
+		m_module = std::make_shared<llvm::Module> (m_module_name, *m_ctx);
 		m_type_map = std::make_shared<TypeMap> (&m_visitor, m_ctx, _global_classes, m_namespace);
 		m_value_builder = std::make_shared<ValueBuilder> (m_type_map, m_ctx, m_module);
+		m_local_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder, m_local_funcs_data);
 		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder, _global_funcs);
 		_libs.push_back (std::format ("{}.obj", _module_name));
 	}
 
-	bool Init (std::string _file, std::string _source, std::shared_ptr<antlr4::ANTLRInputStream> _stream, std::shared_ptr<FaLexer> _lexer, std::shared_ptr<antlr4::CommonTokenStream> _cts) {
+	bool InitClassVar (std::string _file, std::string _source, std::shared_ptr<antlr4::ANTLRInputStream> _stream, std::shared_ptr<FaLexer> _lexer, std::shared_ptr<antlr4::CommonTokenStream> _cts) {
 		m_file = _file;
 		m_source = _source;
 		m_stream = _stream;
 		m_lexer = _lexer;
 		m_cts = _cts;
 		m_parser = std::make_shared<FaParser> (m_cts.get ());
-		auto [_uses, _imports, _classes, _entry] = m_visitor.visit (m_parser->program ()).as<std::tuple<
+		FaParser::ImportBlockContext* _imports;
+		std::tie (m_uses, _imports, m_classes, m_entry) = m_visitor.visit (m_parser->program ()).as<std::tuple<
 			std::vector<std::string>,
-			FaParser::ImportBlockContext* ,
+			FaParser::ImportBlockContext*,
 			std::vector<FaParser::ClassStmtContext*>,
-			FaParser::FaMainFuncBlockContext* 
-		>> ();
-		m_uses = _uses;
-		m_entry = _entry;
+			FaParser::FaMainFuncBlockContext*
+			>> ();
 
 		// 引用外部模块
 		if (_imports) {
 			auto [_imports_raw, _libs] = m_visitor.visit (_imports).as<std::tuple<
 				std::vector<FaParser::ImportStmtContext*>,
 				std::vector<std::string>
-			>> ();
+				>> ();
 			for (std::string _lib : _libs)
 				m_libs.push_back (_lib);
 			if (!ProcessImports (_imports_raw))
 				return false;
 		}
 
-		// 获取访问级别
-		std::function<PublicLevel (FaParser::PublicLevelContext* , PublicLevel)> _public_level = [&] (FaParser::PublicLevelContext* _public_raw, PublicLevel _default) {
-			if (_public_raw == nullptr)
-				return _default;
-			PublicLevel _ret = m_visitor.visit (_public_raw).as<PublicLevel> ();
-			return _ret == PublicLevel::Unknown ? _default : _ret;
-		};
-
 		// 设置类结构
-		for (auto _class_raw : _classes) {
+		for (auto _class_raw : m_classes) {
 			// 访问级别
 			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
 
@@ -155,17 +154,25 @@ public:
 						_var->SetInitValue (_var_raw->tmpAssignExpr ()->expr ());
 				}
 			}
+		}
+		return true;
+	}
+
+	bool InitClassFunc () {
+		for (auto _class_raw : m_classes) {
+			std::string _name = std::format ("{}.{}", m_namespace, _class_raw->Id ()->getText ());
+			std::shared_ptr<AstClass> _class = m_global_classes.GetClass (_name, m_namespace).value ();
 
 			// 成员函数
 			for (auto _func_raw : _class_raw->classFunc ()) {
 				// 访问级别
-				_pl = _public_level (_func_raw->publicLevel (), PublicLevel::Private);
+				auto _pl = _public_level (_func_raw->publicLevel (), PublicLevel::Private);
 
 				// 是否静态
 				bool _is_static = !!_func_raw->Static ();
 
 				// 名称
-				_name = _func_raw->classFuncName ()->getText ();
+				std::string _name = _func_raw->classFuncName ()->getText ();
 				auto _func = _class->AddFunc (_pl, _is_static, _name);
 
 				// 返回类型
@@ -178,8 +185,10 @@ public:
 				std::vector<std::string> _arg_types;
 				if (_func_raw->typeVarList ()) {
 					for (auto _type_var_raw : _func_raw->typeVarList ()->typeVar ()) {
+						std::string _arg_type = _type_var_raw->type ()->getText ();
+						_arg_type = GetTypeFullName (_arg_type); // todo 此处由于还没解析完所有的类，可能类型不存在
 						std::string _arg_name = _type_var_raw->Id () ? _type_var_raw->Id ()->getText () : "";
-						_func->SetArgumentTypeName (_type_var_raw->type (), _arg_name);
+						_func->SetArgumentTypeName (_arg_type, _type_var_raw->type ()->start, _arg_name);
 					}
 				}
 
@@ -197,7 +206,7 @@ public:
 
 	bool Compile () {
 		// 编译类
-		m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<AstClass> _cls) -> bool {
+		if (!m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<AstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
 				FuncContext _func_ctx { m_global_classes, m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type, m_namespace };
 				auto _expr_raw = _cls_func->m_func->expr ();
@@ -228,19 +237,20 @@ public:
 				}
 			}
 			return true;
-		});
+		}))
+			return false;
 
 		// 编译主函数
 		if (m_entry) {
 			auto [_ret_type_raw, _stmts_raw] = m_visitor.visit (m_entry).as<std::tuple<
 				FaParser::TypeContext*,
 				std::vector<FaParser::StmtContext*>
-			>> ();
+				>> ();
 			std::vector<FaParser::TypeContext*> _arg_type_raws;
-			if (!m_global_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws))
+			if (!m_local_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws))
 				return false;
 			std::string _ret_type = _ret_type_raw->getText ();
-			FuncContext _func_ctx { m_global_classes, m_global_funcs, "@fa_main", _ret_type, m_namespace };
+			FuncContext _func_ctx { m_global_classes, m_local_funcs, "@fa_main", _ret_type, m_namespace };
 			bool _a = false;
 			if (!StmtBuilder (_func_ctx, _stmts_raw, _a))
 				return false;
@@ -302,12 +312,12 @@ private:
 		for (FaParser::ImportStmtContext* _import_func_raw : _imports_raw) {
 			auto [_name, _ret_type_raw, _arg_types_raw, _cc_str] = m_visitor.visit (_import_func_raw).as<std::tuple<
 				std::string,
-				FaParser::TypeContext* ,
+				FaParser::TypeContext*,
 				std::vector<FaParser::TypeContext*>,
 				std::string
-			>> ();
+				>> ();
 			std::string _func_name = std::format ("::{}", _name);
-			if (!m_global_funcs->Contains (_func_name)) {
+			if (!m_local_funcs->Contains (_func_name)) {
 				llvm::CallingConv::ID _cc = llvm::CallingConv::C;
 				if (_cc_str == "__cdecl") {
 					_cc = llvm::CallingConv::C;
@@ -316,7 +326,7 @@ private:
 				} else if (_cc_str == "__fastcall") {
 					_cc = llvm::CallingConv::X86_FastCall;
 				}
-				if (!m_global_funcs->MakeExtern (_func_name, _ret_type_raw, _arg_types_raw, _cc))
+				if (!m_local_funcs->MakeExtern (_func_name, _ret_type_raw, _arg_types_raw, _cc))
 					return false;
 			}
 		}
@@ -367,7 +377,7 @@ private:
 				std::tie (_conds, _bodys) = m_visitor.visit (_stmt_raw->ifStmt ()).as<std::tuple<
 					std::vector<FaParser::ExprContext*>,
 					std::vector<std::vector<FaParser::StmtContext*>>
-				>> ();
+					>> ();
 				bool _a = false;
 				if (!IfStmtBuilder (_func_ctx, _conds, _bodys, _a))
 					return false;
@@ -449,14 +459,14 @@ private:
 		return _generate_code (_func_ctx, _oev.value ());
 	}
 
-	std::optional<_AST_ExprOrValue> _expr_parse (FuncContext &_func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
+	std::optional<_AST_ExprOrValue> _expr_parse (FuncContext& _func_ctx, FaParser::ExprContext* _expr_raw, std::string _expect_type) {
 		// 定义解析函数
-		std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext* , std::string)> _parse_expr;
-		std::function<std::optional<_AST_ExprOrValue> (FaParser::MiddleExprContext* , std::string)> _parse_middle_expr;
-		std::function<std::optional<_AST_ExprOrValue> (std::vector<FaParser::StrongExprContext*> &_expr_raws, std::vector<FaParser::AllOp2Context*> &_op_raws, std::vector<size_t> &_op_levels, std::string)> _parse_middle_expr2;
-		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprContext* , std::string)> _parse_strong_expr;
-		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprBaseContext* , std::string)> _parse_strong_expr_base;
-		std::function<std::optional<_AST_ExprOrValue> (FaParser::IfExprContext* , std::string)> _parse_if_expr;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _parse_expr;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::MiddleExprContext*, std::string)> _parse_middle_expr;
+		std::function<std::optional<_AST_ExprOrValue> (std::vector<FaParser::StrongExprContext*>& _expr_raws, std::vector<FaParser::AllOp2Context*>& _op_raws, std::vector<size_t>& _op_levels, std::string)> _parse_middle_expr2;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprContext*, std::string)> _parse_strong_expr;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::StrongExprBaseContext*, std::string)> _parse_strong_expr_base;
+		std::function<std::optional<_AST_ExprOrValue> (FaParser::IfExprContext*, std::string)> _parse_if_expr;
 		_parse_expr = [&] (FaParser::ExprContext* _expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			auto _exprs = _expr_raw->middleExpr ();
 			auto _ops = _expr_raw->allAssign ();
@@ -516,7 +526,7 @@ private:
 			}
 			return _parse_middle_expr2 (std::ref (_exprs), std::ref (_ops), std::ref (_op_levels), _exp_type);
 		};
-		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext*> &_expr_raws, std::vector<FaParser::AllOp2Context*> &_op_raws, std::vector<size_t> &_op_levels, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
+		_parse_middle_expr2 = [&] (std::vector<FaParser::StrongExprContext*>& _expr_raws, std::vector<FaParser::AllOp2Context*>& _op_raws, std::vector<size_t>& _op_levels, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
 			if (_expr_raws.size () == 1)
 				return _parse_strong_expr (_expr_raws [0], _exp_type);
 			size_t _pos = 0, _pos_level = _op_levels [0];
@@ -665,7 +675,7 @@ private:
 				//
 				auto _suffix_raws = _expr_raw->strongExprSuffix ();
 				for (auto _suffix_praw = _suffix_raws.rbegin (); _suffix_praw != _suffix_raws.rend (); ++_suffix_praw) {
-					auto _suffix_raw =* _suffix_praw;
+					auto _suffix_raw = *_suffix_praw;
 					if (_suffix_raw->AddAddOp () || _suffix_raw->SubSubOp ()) {
 						auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
 						_ptr->m_op = _AST_Oper1Ctx { _suffix_raw };
@@ -678,7 +688,15 @@ private:
 					} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
 						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
 						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
-						auto _func = m_global_funcs->GetFunc (_exp_type);
+						auto _ofunc = m_local_funcs->GetFunc (_exp_type);
+						if (!_ofunc.has_value ()) {
+							_ofunc = m_global_funcs->GetFunc (_exp_type);
+							if (!_ofunc.has_value ()) {
+								LOG_ERROR (_suffix_raw->start, std::format ("未定义的方法 {}", _exp_type));
+								return std::nullopt;
+							}
+						}
+						auto _func = _ofunc.value ();
 						auto _expr_opt_raws = _suffix_raw->exprOpt ();
 						if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
 							_expr_opt_raws.clear ();
@@ -742,8 +760,16 @@ private:
 						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
 						_ptr->m_left = _val;
 						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
-						if (m_global_funcs->Contains (_val.GetFuncName ())) {
-							auto _func = m_global_funcs->GetFunc (_val.GetFuncName ());
+						if (_suffix_raw->QuotYuanL ()) {
+							auto _ofunc = m_local_funcs->GetFunc (_val.GetFuncName ());
+							if (!_ofunc.has_value ()) {
+								_ofunc = m_global_funcs->GetFunc (_val.GetFuncName ());
+								if (!_ofunc.has_value ()) {
+									LOG_ERROR (_suffix_raw->start, std::format ("未定义的方法 {}", _val.GetFuncName ()));
+									return std::nullopt;
+								}
+							}
+							auto _func = _ofunc.value ();
 							auto _expr_opt_raws = _suffix_raw->exprOpt ();
 							if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
 								_expr_opt_raws.clear ();
@@ -804,7 +830,7 @@ private:
 				auto _prefix_raws = _expr_raw->strongExprPrefix ();
 				for (auto _prefix_praw = _prefix_raws.rbegin (); _prefix_praw != _prefix_raws.rend (); ++_prefix_praw) {
 					auto _ptr = std::make_shared<_AST_Op1ExprTreeCtx> ();
-					_ptr->m_op = _AST_Oper1Ctx {* _prefix_praw };
+					_ptr->m_op = _AST_Oper1Ctx { *_prefix_praw };
 					_ptr->m_left = _val;
 					_ptr->m_expect_type = _val.GetExpectType ();
 					_val = _ptr;
@@ -825,12 +851,15 @@ private:
 				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
-				if (!m_global_funcs->Contains (_name))
+				auto _of = m_local_funcs->GetFunc (_name);
+				if (!_of.has_value ()) {
+					LOG_ERROR (_expr_raw->start, std::format ("未定义的方法 {}", _name));
 					return std::nullopt;
-				auto _f = m_global_funcs->GetFunc (_name);
+				}
+				auto _f = _of.value ();
 				if (!TypeMap::CanImplicitConvTo (_f->m_type, _exp_type))
 					return std::nullopt;
-				auto _fp = m_global_funcs->GetFuncPtr (_name);
+				auto _fp = m_local_funcs->GetFuncPtr (_name);
 				return std::make_shared<_AST_ValueCtx> (AstValue { _f, _fp }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->literal ()) {
 				AstValue _val { m_value_builder, _expr_raw->literal () };
@@ -867,7 +896,7 @@ private:
 				// 检测类型
 				std::shared_ptr<AstClass> _cls;
 				if (_cur_type != "") {
-					auto _ocls = FindAstClass (_func_ctx, _cur_type);
+					auto _ocls = FindAstClass (_cur_type);
 					if (!_ocls.has_value ()) {
 						LOG_ERROR (_new_raw->start, std::format ("未定义的标识符 {}", _cur_type));
 						return std::nullopt;
@@ -876,7 +905,7 @@ private:
 					_cur_type = _cls->m_name;
 				}
 				if (_exp_type != "") {
-					auto _ocls = FindAstClass (_func_ctx, _exp_type);
+					auto _ocls = FindAstClass (_exp_type);
 					if (!_ocls.has_value ()) {
 						LOG_ERROR (_new_raw->start, std::format ("未定义的标识符 {}", _exp_type));
 						return std::nullopt;
@@ -953,7 +982,7 @@ private:
 						return std::nullopt;
 					_vals.push_back (std::make_shared<_AST_ValueCtx> (_oval2.value (), _expr_raw->start, _exp_type));
 				}
-				return _AST_ExprOrValue { std::make_shared<_AST_Arr1ValueCtx> (_vals, _scapacity, _expr_raw->start, std::format ("{}[]", _exp_type))};
+				return _AST_ExprOrValue { std::make_shared<_AST_Arr1ValueCtx> (_vals, _scapacity, _expr_raw->start, std::format ("{}[]", _exp_type)) };
 			} else if (_expr_raw->arrayExpr2 ()) {
 				auto _expr_raws = _expr_raw->arrayExpr2 ()->expr ();
 				std::string _scapacity = "";
@@ -1029,7 +1058,7 @@ private:
 		return _parse_expr (_expr_raw, _expect_type);
 	}
 
-	std::optional<AstValue> _generate_code (FuncContext &_func_ctx, _AST_ExprOrValue _ast_ev) {
+	std::optional<AstValue> _generate_code (FuncContext& _func_ctx, _AST_ExprOrValue _ast_ev) {
 		// 转换类型
 		std::function<AstValue (AstValue, std::string)> _trans_type = [] (AstValue _val, std::string _exp_type) -> AstValue {
 			// TODO
@@ -1134,10 +1163,10 @@ private:
 			_idx.SetTmpVarFlag (true);
 			auto _0 = AstValue::FromValue (m_value_builder, "0", _type, _t).value ();
 			_func_ctx.DoOper2 (_idx, "=", _0, _t);
-			for (auto &_val_expr : _ast_ev.m_arrval2->m_vals) {
+			for (auto& _val_expr : _ast_ev.m_arrval2->m_vals) {
 				auto _oval = _generate_code (_func_ctx, _val_expr);
 				if (!_oval.has_value ())
-				return std::nullopt;
+					return std::nullopt;
 
 				auto _tmp = _func_ctx.AccessArrayMember (_left, _idx, _t).value ();
 				_func_ctx.DoOper2 (_tmp, "=", _oval.value (), _t);
@@ -1153,7 +1182,7 @@ private:
 			auto _left = _oleft.value ();
 			_left.SetTmpVarFlag (true);
 			//
-			if (!_func_ctx.InitClass (_left, _ast_ev.m_newval, [&](_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); }))
+			if (!_func_ctx.InitClass (_left, _ast_ev.m_newval, [&] (_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); }))
 				return std::nullopt;
 			return _left;
 		} else if (_ast_ev.m_op1_expr) {
@@ -1274,26 +1303,28 @@ private:
 		return std::nullopt;
 	}
 
-	std::optional<std::shared_ptr<AstClass>> FindAstClass (FuncContext &_func_ctx, std::string _raw_name) {
+	std::optional<std::shared_ptr<AstClass>> FindAstClass (std::string _raw_name) {
 		return m_global_classes.GetClass (_raw_name, m_namespace);
 	}
 
-	std::optional<AstValue> FindValueType (FuncContext &_func_ctx, std::string _raw_name, antlr4::Token* _t) {
+	std::optional<AstValue> FindValueType (FuncContext& _func_ctx, std::string _raw_name, antlr4::Token* _t) {
 		size_t _p = _raw_name.find ('.');
 		if (_p != std::string::npos) {
 			// 包含 . 运算符
 			std::string _prefix = _raw_name.substr (0, _p);
 			std::string _suffix = _raw_name.substr (_p + 1);
 
-			// 猜测是前半段是变量
+			// 猜测前半段是变量
 			auto _oval = _func_ctx.GetVariable (_prefix);
 			if (_oval.has_value ()) {
 				AstValue _val = _oval.value ();
 				return _func_ctx.AccessMember (_val, _suffix, _t);
 			}
 
+			TODO 猜测前半段是参数
+
 			// 猜测前半段可能是类
-			auto _oct = FindAstClass (_func_ctx, _prefix);
+			auto _oct = FindAstClass (_prefix);
 			if (_oct.has_value ()) {
 				auto& _ct = _oct.value ();
 				// 猜测后半段是静态属性
@@ -1309,7 +1340,7 @@ private:
 				auto _ofunc = _ct->GetFunc (_suffix);
 				if (_ofunc.has_value ()) {
 					auto& _func = _ofunc.value ();
-					auto _f = m_global_funcs->GetFunc (_func->m_name_abi);
+					auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
 					auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
 					return AstValue { _f, _fp };
 				}
@@ -1323,28 +1354,38 @@ private:
 		return std::nullopt;
 	}
 
-	CodeVisitor									m_visitor {};
-	std::string									m_module_name;
-	std::string									m_namespace;
-	std::shared_ptr<llvm::LLVMContext>			m_ctx;
-	std::shared_ptr<llvm::Module>				m_module;
-	std::shared_ptr<TypeMap>					m_type_map;
-	std::shared_ptr<ValueBuilder>				m_value_builder;
-	std::shared_ptr<FuncTypes>					m_global_funcs;
-	AstClasses&									m_global_classes;
+	std::string GetTypeFullName (std::string _type) {
+		auto _oct = FindAstClass (_type);
+		if (_oct.has_value ())
+			return _oct.value ()->m_name;
+		return _type;
+	}
 
-	std::vector<std::string>					m_uses;
-	FaParser::FaMainFuncBlockContext*			m_entry = nullptr;
+	CodeVisitor											m_visitor {};
+	std::string											m_module_name;
+	std::string											m_namespace;
+	std::shared_ptr<llvm::LLVMContext>					m_ctx;
+	std::shared_ptr<llvm::Module>						m_module;
+	std::shared_ptr<TypeMap>							m_type_map;
+	std::shared_ptr<ValueBuilder>						m_value_builder;
+	std::map<std::string, std::shared_ptr<FuncType>>	m_local_funcs_data;
+	std::shared_ptr<FuncTypes>							m_local_funcs;
+	std::shared_ptr<FuncTypes>							m_global_funcs;
+	AstClasses& m_global_classes;
+
+	std::vector<std::string>							m_uses;
+	std::vector<FaParser::ClassStmtContext*>			m_classes;
+	FaParser::FaMainFuncBlockContext*					m_entry = nullptr;
 
 public:
-	std::vector<std::string>&					m_libs;
-	std::string									m_file, m_source;
+	std::vector<std::string>& m_libs;
+	std::string											m_file, m_source;
 
 private:
-	std::shared_ptr<antlr4::ANTLRInputStream>	m_stream;
-	std::shared_ptr<FaLexer>					m_lexer;
-	std::shared_ptr<antlr4::CommonTokenStream>	m_cts;
-	std::shared_ptr<FaParser>					m_parser;
+	std::shared_ptr<antlr4::ANTLRInputStream>			m_stream;
+	std::shared_ptr<FaLexer>							m_lexer;
+	std::shared_ptr<antlr4::CommonTokenStream>			m_cts;
+	std::shared_ptr<FaParser>							m_parser;
 };
 
 

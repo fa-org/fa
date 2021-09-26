@@ -1,0 +1,8 @@
+@import int32 __cdecl puts (cstr);
+
+
+
+public class Console {
+	void Write (string s) { ::puts (s.Data); }
+	//void WriteLine (string s) {}
+}

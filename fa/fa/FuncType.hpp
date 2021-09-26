@@ -63,7 +63,7 @@ public:
 		return m_funcs.contains (_func_name);
 	}
 
-	std::shared_ptr<FuncType> GetFunc (std::string _func_name) { return m_funcs [_func_name]; }
+	std::optional<std::shared_ptr<FuncType>> GetFunc (std::string _func_name) { return m_funcs.contains (_func_name) ? (std::optional<std::shared_ptr<FuncType>>) m_funcs [_func_name] : std::nullopt; }
 	llvm::Function* GetFuncPtr (std::string _func_name) {
 		if (!m_func_ptrs.contains (_func_name))
 			RemakeExtern (_func_name);

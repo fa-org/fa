@@ -1,9 +1,9 @@
-@import int32 __cdecl puts (cstr);
+use fa;
 
 
 
 class Program {
 	public static void Main () {
-		::puts ("hello world\n");
+		Console.Write ("hello world\n");
 	}
 }

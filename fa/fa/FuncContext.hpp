@@ -32,7 +32,7 @@ public:
 	FuncContext (AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace):
 		m_global_classes (_global_classes), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
 		m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder),
-		m_func (_global_funcs->GetFunc (_func_name)), m_fp (_global_funcs->GetFuncPtr (_func_name)), m_exp_type (_exp_type), m_namespace (_namespace)
+		m_func (_global_funcs->GetFunc (_func_name).value ()), m_fp (_global_funcs->GetFuncPtr (_func_name)), m_exp_type (_exp_type), m_namespace (_namespace)
 	{
 		llvm::BasicBlock* _bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);

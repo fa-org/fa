@@ -167,6 +167,12 @@ public:
 					return std::nullopt;
 				_v.push_back (_otype.value ());
 			}
+			if (m_vars.size () == 0) {
+				auto _otype = _cb ("int8", nullptr);
+				if (!_otype.has_value ())
+					return std::nullopt;
+				_v.push_back (_otype.value ());
+			}
 			m_type = llvm::StructType::create (_v);
 		}
 		return (llvm::Type*) m_type;
