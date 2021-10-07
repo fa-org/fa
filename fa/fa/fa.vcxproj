@@ -175,11 +175,6 @@
     <ClCompile Include="win32.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\README.md" />
-    <None Include="tools\Fa.g4" />
-    <None Include="tools\generate.bat" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="AstValue.hpp">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>

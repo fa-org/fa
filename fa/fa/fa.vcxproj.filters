@@ -41,13 +41,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="tools\generate.bat">
-      <Filter>源文件</Filter>
-    </None>
-    <None Include="tools\Fa.g4" />
-    <None Include="..\..\README.md" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="tools\libs\FaVisitor.h">
       <Filter>头文件\antlr</Filter>
     </ClInclude>

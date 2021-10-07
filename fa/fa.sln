@@ -5,6 +5,14 @@ VisualStudioVersion = 16.0.31313.79
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fa", "fa\fa.vcxproj", "{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{73DA93B9-FC90-489B-8687-3634CCB69AFB}"
+	ProjectSection(SolutionItems) = preProject
+		..\draft.md = ..\draft.md
+		fa\tools\Fa.g4 = fa\tools\Fa.g4
+		fa\tools\generate.bat = fa\tools\generate.bat
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
