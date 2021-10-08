@@ -139,6 +139,7 @@ public:
 		return true;
 	}
 
+	// 访问类成员变量
 	std::optional<AstValue> AccessMember (AstValue& _cls_var, std::string _member, antlr4::Token *_t) {
 		std::string _cls_name = _cls_var.GetType ();
 		if (_cls_name [0] == '$')

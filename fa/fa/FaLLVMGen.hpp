@@ -1326,7 +1326,12 @@ private:
 				return _func_ctx.AccessMember (_val, _suffix, _t);
 			}
 
-			TODO 猜测前半段是参数
+			// 猜测前半段是参数
+			_oval = _func_ctx.GetArgument (_prefix);
+			if (_oval.has_value ()) {
+				AstValue _val = _oval.value ();
+				return _func_ctx.AccessMember (_val, _suffix, _t);
+			}
 
 			// 猜测前半段可能是类
 			auto _oct = FindAstClass (_prefix);
@@ -1352,8 +1357,17 @@ private:
 			}
 		} else {
 			// 不包含 . 运算符
-			// 猜测可能是变量、类方法或类属性
-			return _func_ctx.GetVariable (_raw_name);
+			// 猜测可能是变量
+			auto _oval = _func_ctx.GetVariable (_raw_name);
+			if (_oval.has_value ())
+				return _oval;
+
+			// 猜测可能是参数
+			_oval = _func_ctx.GetArgument (_raw_name);
+			if (_oval.has_value ())
+				return _oval;
+
+			// TODO 猜测可能是类方法或类属性
 		}
 		LOG_TODO (nullptr);
 		return std::nullopt;

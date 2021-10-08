@@ -151,6 +151,8 @@ public:
 
     virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *context) = 0;
 
+    virtual antlrcpp::Any visitClassType(FaParser::ClassTypeContext *context) = 0;
+
     virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitClassVarExtFunc(FaParser::ClassVarExtFuncContext *context) = 0;

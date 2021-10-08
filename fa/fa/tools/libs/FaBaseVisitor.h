@@ -279,6 +279,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitClassType(FaParser::ClassTypeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *ctx) override {
     return visitChildren(ctx);
   }
