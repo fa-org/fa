@@ -208,7 +208,11 @@ public:
 		// ±‡“Î¿‡
 		if (!m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<AstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
-				FuncContext _func_ctx { m_global_classes, m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type, m_namespace };
+				std::vector<std::tuple<std::string, std::string>> _args;
+				for (size_t i = 0; i < _cls_func->m_arg_names.size (); ++i)
+					_args.push_back ({ _cls_func->m_arg_names [i], _cls_func->m_arg_types [i] });
+				FuncContext _func_ctx { m_global_classes, m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type, m_namespace, _args };
+				//
 				auto _expr_raw = _cls_func->m_func->expr ();
 				if (_expr_raw) {
 					std::optional<AstValue> _val = ExprBuilder (_func_ctx, _expr_raw, _cls_func->m_ret_type);
@@ -250,7 +254,8 @@ public:
 			if (!m_local_funcs->Make ("", "@fa_main", _ret_type_raw, _arg_type_raws))
 				return false;
 			std::string _ret_type = _ret_type_raw->getText ();
-			FuncContext _func_ctx { m_global_classes, m_local_funcs, "@fa_main", _ret_type, m_namespace };
+			std::vector<std::tuple<std::string, std::string>> _args;
+			FuncContext _func_ctx { m_global_classes, m_local_funcs, "@fa_main", _ret_type, m_namespace, _args };
 			bool _a = false;
 			if (!StmtBuilder (_func_ctx, _stmts_raw, _a))
 				return false;

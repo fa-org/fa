@@ -29,10 +29,11 @@
 
 class FuncContext {
 public:
-	FuncContext (AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace):
+	FuncContext (AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace, std::vector<std::tuple<std::string, std::string>> &_args):
 		m_global_classes (_global_classes), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
 		m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder),
-		m_func (_global_funcs->GetFunc (_func_name).value ()), m_fp (_global_funcs->GetFuncPtr (_func_name)), m_exp_type (_exp_type), m_namespace (_namespace)
+		m_func (_global_funcs->GetFunc (_func_name).value ()), m_fp (_global_funcs->GetFuncPtr (_func_name)),
+		m_exp_type (_exp_type), m_namespace (_namespace)
 	{
 		llvm::BasicBlock* _bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
@@ -40,6 +41,12 @@ public:
 		////
 		m_local_vars.reserve (32);
 		m_local_vars.emplace_back (std::map<std::string, std::tuple<llvm::AllocaInst* , std::string>> {});
+		//
+		auto _arg_iter = m_fp->arg_begin ();
+		for (size_t i = 0; i < _args.size (); i++, _arg_iter++) {
+			auto [_arg_name, _arg_type] = _args [i];
+			m_args [_arg_name] = { _arg_iter, _arg_type };
+		}
 	}
 
 	std::optional<AstValue> DefineVariable (std::string _type, antlr4::Token* _t, std::string _name = "") {
@@ -100,6 +107,12 @@ public:
 			}
 		}
 		return std::nullopt;
+	}
+	std::optional<AstValue> GetArgument (std::string _name) {
+		if (!m_args.contains (_name))
+			return std::nullopt;
+		auto [_arg_val, _arg_type] = m_args [_name];
+		return AstValue { _arg_val, _arg_type };
 	}
 	bool BindTempVariable (antlr4::Token *_t, AstValue &_val, std::string _name) {
 		if (GetVariable (_name).has_value ()) {
@@ -289,6 +302,7 @@ private:
 	llvm::Function*																	m_fp = nullptr;
 	std::string																		m_exp_type;
 	std::string																		m_namespace;
+	std::map<std::string, std::tuple<llvm::Value*, std::string>>					m_args;
 	//
 	std::shared_ptr<llvm::IRBuilder<>>												m_builder;
 	std::vector<std::map<std::string, std::tuple<llvm::AllocaInst* , std::string>>>	m_local_vars;

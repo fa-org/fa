@@ -14,17 +14,69 @@
 		* AppServices.fa    -- 命名空间：FaProject.Services
 		* UserServices.fa   -- 命名空间：FaProject.Services
 
+## 模块文件架构
+
+```fa
+// 引用fa库
+use xxx;
+
+// 引入库文件
+@lib "ucrt.lib";
+
+// 定义外部函数
+@import int32 __cdecl puts (cstr);
+
+// 定义类或结构体
+public class Xxx {
+	//...
+}
+```
+
 ## 类和结构体
 
-| | 类 | 结构体/字符串/数字 |
-| :---: | :---: | :---: |
-| 关键字 | class | struct |
-| 构造/析构函数 | 有 | 无 |
-| 数据类型 | 引用类型 | 值类型 |
-| 默认参数传递方式 | 引用 | 常量 |
-| 不可变引用传参声明 | `const TypeName val` | `(const) TypeName val` |
-| 可变引用传参声明 | `(ref) TypeName val` | `ref TypeName val`  |
-| 拷贝传参声明 | `dup TypeName val` | `dup TypeName val` |
-|  |  |  |
+类和结构体相似，都能定义包含0个或多个子元素的新类型。
 
+相同点：
 
+- 定义成员变量
+	+ 定义普通成员变量
+		* `public string name1;`
+		* 成员变量在构造时必须指定初值，比如 `var a = new MyObj { name1 = "Alice" };`
+	+ 定义成员变量带默认值
+		* `public string name2 = "Bob";`
+		* 成员变量在构造时可指定初值可不指定
+	+ 定义自定权限成员变量
+		* `public string name3 { get; private set; }`
+		* 成员变量在构造时必须指定初值，另外无法在外部赋值
+	+ 定义自定权限成员变量带默认值
+		* `public string name4 { get; private set; } = "Carol";`
+	+ 定义静态成员变量
+		* `public static string name5 = "Dave";`
+- 定义成员方法
+	+ 普通成员方法
+		* `public void func () {}`
+		* 默认所有方法均为虚方法，可继承后重写
+	+ getter/setter
+		* `public string name3 { get => "Eve"; }`
+
+不同点：
+
+- 类使用class关键字定义，结构体使用struct关键字定义
+- 类可以继承自类、结构体或接口；结构体只能继承自结构体
+- 类允许定义构造函数与析构函数，结构体不允许
+	```fa
+	public class MyObj {
+		public MyObj {}
+		public ~MyObj {}
+	}
+	```
+- 不同方法参数的声明下，传值方式区别
+	| | 类 | 结构体/字符串/数字 |
+	| :---: | :---: | :---: |
+	| 不可变引用传参 | `const TypeName val` | `TypeName val` |
+	| 可变引用传参 | `TypeName val` | `ref TypeName val`  |
+	| 拷贝传参 | `TypeName val` (调用位置：`val.dup`) | `dup TypeName val` |
+
+## 接口
+
+接口类
