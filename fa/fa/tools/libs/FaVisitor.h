@@ -167,6 +167,8 @@ public:
 
     virtual antlrcpp::Any visitClassFunc(FaParser::ClassFuncContext *context) = 0;
 
+    virtual antlrcpp::Any visitEnumAtom(FaParser::EnumAtomContext *context) = 0;
+
     virtual antlrcpp::Any visitCallConvention(FaParser::CallConventionContext *context) = 0;
 
     virtual antlrcpp::Any visitImportStmt(FaParser::ImportStmtContext *context) = 0;

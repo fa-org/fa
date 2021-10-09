@@ -46,8 +46,8 @@ public:
     RuleNormalStmt = 62, RuleStmt = 63, RulePublicLevel = 64, RuleClassParent = 65, 
     RuleClassType = 66, RuleClassStmt = 67, RuleClassVarExtFunc = 68, RuleClassVarExt = 69, 
     RuleClassVar = 70, RuleClassFuncName = 71, RuleClassFuncBody = 72, RuleClassFunc = 73, 
-    RuleCallConvention = 74, RuleImportStmt = 75, RuleLibStmt = 76, RuleImportBlock = 77, 
-    RuleFaMainFuncBlock = 78, RuleProgram = 79
+    RuleEnumAtom = 74, RuleCallConvention = 75, RuleImportStmt = 76, RuleLibStmt = 77, 
+    RuleImportBlock = 78, RuleFaMainFuncBlock = 79, RuleProgram = 80
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -134,6 +134,7 @@ public:
   class ClassFuncNameContext;
   class ClassFuncBodyContext;
   class ClassFuncContext;
+  class EnumAtomContext;
   class CallConventionContext;
   class ImportStmtContext;
   class LibStmtContext;
@@ -689,6 +690,7 @@ public:
     antlr4::tree::TerminalNode *QuotJianR();
     std::vector<antlr4::tree::TerminalNode *> Comma();
     antlr4::tree::TerminalNode* Comma(size_t i);
+    antlr4::tree::TerminalNode *StarOp();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1227,6 +1229,8 @@ public:
     antlr4::tree::TerminalNode *QuotHuaR();
     PublicLevelContext *publicLevel();
     ClassParentContext *classParent();
+    std::vector<EnumAtomContext *> enumAtom();
+    EnumAtomContext* enumAtom(size_t i);
     std::vector<ClassVarContext *> classVar();
     ClassVarContext* classVar(size_t i);
     std::vector<ClassFuncContext *> classFunc();
@@ -1346,6 +1350,21 @@ public:
   };
 
   ClassFuncContext* classFunc();
+
+  class  EnumAtomContext : public antlr4::ParserRuleContext {
+  public:
+    EnumAtomContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Id();
+    antlr4::tree::TerminalNode *Comma();
+    TypeContext *type();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  EnumAtomContext* enumAtom();
 
   class  CallConventionContext : public antlr4::ParserRuleContext {
   public:

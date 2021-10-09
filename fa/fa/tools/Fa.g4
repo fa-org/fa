@@ -152,8 +152,8 @@ ids:						Id (PointOp Id)*;
 //
 // type
 //
-typeAfter:					(QuotFangL QuotFangR) | AndOp | Qus | (QuotJianL type (Comma type)* QuotJianR);
-type:						(Id typeAfter*) | (QuotYuanL type (Comma type)+ QuotYuanR);
+typeAfter:					(QuotFangL QuotFangR) | AndOp | Qus | (QuotJianL type (Comma type)* QuotJianR) | StarOp;
+type:						(Id | (QuotYuanL type (Comma type)+ QuotYuanR)) typeAfter*;
 typeNewable:				Id typeAfter*;
 //eTypeAfter:					(QuotFangL QuotFangR) | AndOp | StarOp;
 //eSign:						Signed | Unsigned;
@@ -234,7 +234,10 @@ stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | numIterStmt;
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
 classType:					Class | Struct | Interface | Enum;
-classStmt:					publicLevel? classType Id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
+classStmt:					publicLevel? classType Id classParent? QuotHuaL enumAtom* (classVar | classFunc)* QuotHuaR;
+							// classParent 由 class 和 struct 专属使用
+							// enumItems 由 enum 专属使用
+							// enum 的 classVar 不允许使用
 //
 classVarExtFunc:			publicLevel? Id (Semi | classFuncBody);
 classVarExt:				QuotHuaL classVarExtFunc+ QuotHuaR tmpAssignExpr?;
@@ -243,6 +246,8 @@ classVar:					publicLevel? Static? type Id (Semi | tmpAssignExpr | classVarExt);
 classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
+//
+enumAtom:					type? Id Comma;
 
 
 

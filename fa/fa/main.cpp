@@ -160,8 +160,9 @@ bool FuncTypes::MakeExtern (std::string _func_name, FaParser::TypeContext* _ret_
 		return false;
 	llvm::Type* _tmp_ret_type = nullptr;
 	std::tie (_tmp_ret_type, _ret->m_ret_type) = _otype.value ();
+	llvm::FunctionType* _fp_type;
 	if (_arg_type_raws.size () == 0) {
-		_ret->m_fp_type = llvm::FunctionType::get (_tmp_ret_type, false);
+		_fp_type = llvm::FunctionType::get (_tmp_ret_type, false);
 		_ret->m_type = std::format ("Func<{} ()>", _ret->m_ret_type);
 	} else {
 		auto _otypes = m_type_map->GetTypesT (_arg_type_raws);
@@ -169,7 +170,7 @@ bool FuncTypes::MakeExtern (std::string _func_name, FaParser::TypeContext* _ret_
 			return false;
 		std::vector<llvm::Type*> m_arg_types;
 		std::tie (m_arg_types, _ret->m_arg_types) = _otypes.value ();
-		_ret->m_fp_type = llvm::FunctionType::get (_tmp_ret_type, m_arg_types, false);
+		_fp_type = llvm::FunctionType::get (_tmp_ret_type, m_arg_types, false);
 		std::stringstream _ss;
 		_ss << "Func<" << _ret->m_ret_type << "(";
 		for (size_t i = 0; i < m_arg_types.size (); ++i)
@@ -177,11 +178,29 @@ bool FuncTypes::MakeExtern (std::string _func_name, FaParser::TypeContext* _ret_
 		_ss << ")>";
 		_ret->m_type = _ss.str ();
 	}
-	auto _fp = llvm::Function::Create (_ret->m_fp_type, llvm::Function::ExternalLinkage, _func_name.substr (2), *m_module);
+	auto _fp = llvm::Function::Create (_fp_type, llvm::Function::ExternalLinkage, _func_name.substr (2), *m_module);
 	_fp->setCallingConv (_cc);
 	m_func_ptrs [_func_name] = _fp;
 	m_funcs [_func_name] = _ret;
 	return true;
+}
+
+void FuncTypes::RemakeExtern (std::string _func_name, llvm::CallingConv::ID _cc) {
+	auto _func = m_funcs [_func_name];
+	llvm::FunctionType* _fp_type;
+	llvm::Type* _ret_type_ = m_type_map->GetType (_func->m_ret_type, nullptr).value ();
+	if (_func->m_arg_types.size () == 0) {
+		_fp_type = llvm::FunctionType::get (_ret_type_, false);
+	} else {
+		std::vector<llvm::Type*> _arg_types_;
+		for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
+			_arg_types_.push_back (m_type_map->GetType (_func->m_arg_types [i], nullptr).value ());
+		}
+		_fp_type = llvm::FunctionType::get (_ret_type_, _arg_types_, false);
+	}
+	auto _fp = llvm::Function::Create (_fp_type, llvm::Function::ExternalLinkage, _func_name, *m_module);
+	_fp->setCallingConv (_cc);
+	m_func_ptrs [_func_name] = _fp;
 }
 
 bool FuncTypes::Make (std::string _class_name, std::string _func_name, std::string _ret_type, antlr4::Token* _ret_type_t, std::vector<std::string>& _arg_types, std::vector<antlr4::Token*>& _arg_type_ts, llvm::CallingConv::ID _cc) {
@@ -193,8 +212,9 @@ bool FuncTypes::Make (std::string _class_name, std::string _func_name, std::stri
 	if (!_otype.has_value ())
 		return false;
 	llvm::Type* _ret_type_ = _otype.value ();
+	llvm::FunctionType* _fp_type;
 	if (_arg_types.size () == 0) {
-		_ret->m_fp_type = llvm::FunctionType::get (_ret_type_, false);
+		_fp_type = llvm::FunctionType::get (_ret_type_, false);
 		_ret->m_type = std::format ("Func<{} ()>", _ret->m_ret_type);
 	} else {
 		std::vector<llvm::Type*> _arg_types_;
@@ -204,15 +224,16 @@ bool FuncTypes::Make (std::string _class_name, std::string _func_name, std::stri
 				return false;
 			_arg_types_.push_back (_otype.value ());
 		}
-		_ret->m_fp_type = llvm::FunctionType::get (_ret_type_, _arg_types_, false);
+		_ret->m_arg_types = _arg_types;
+		_fp_type = llvm::FunctionType::get (_ret_type_, _arg_types_, false);
 		std::stringstream _ss;
 		_ss << "Func<" << _ret->m_ret_type << "(";
-		for (size_t i = 0; i < _arg_types_.size (); ++i)
-			_ss << (i > 0 ? ", " : "") << _arg_types_ [i];
+		for (size_t i = 0; i < _arg_types.size (); ++i)
+			_ss << (i > 0 ? ", " : "") << _arg_types [i];
 		_ss << ")>";
 		_ret->m_type = _ss.str ();
 	}
-	auto _fp = llvm::Function::Create (_ret->m_fp_type, llvm::Function::ExternalLinkage, _func_name, *m_module);
+	auto _fp = llvm::Function::Create (_fp_type, llvm::Function::ExternalLinkage, _func_name, *m_module);
 	_fp->setCallingConv (_cc);
 	m_func_ptrs [_func_name] = _fp;
 	m_funcs [_func_name] = _ret;

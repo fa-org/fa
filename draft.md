@@ -80,7 +80,7 @@ public class Xxx {
 	| 不可变引用传参 | `const TypeName val` | `TypeName val` |
 	| 可变引用传参 | `TypeName val` | `ref TypeName val`  |
 	| 拷贝传参 | `TypeName val` (调用位置：`val.dup`) | `dup TypeName val` |
-- 当拷贝时，成员变量中的类对象成员复制指针；结构体成员复制
+- 当拷贝时，成员变量中的类对象成员复制指针；成员变量中的结构体成员复制所有子成员变量
 
 ## 接口
 
@@ -114,8 +114,9 @@ public interface ISchool {
 
 ```fa
 private enum StringData {
-	public string Name;
-	public int32 Age;
+	string Name,
+	int32 Age,
+	Animal,
 }
 
 // StringData _data;
@@ -123,6 +124,7 @@ private enum StringData {
 switch _data {
 	Name (_name): Console.WriteLine (_name);
 	Age (_age): Console.WriteLine ($"{_age}");
+	Animal: Console.WriteLine ("animal");
 }
 // 访问方式2
 string _name = _data.Name ?? "kangkang";

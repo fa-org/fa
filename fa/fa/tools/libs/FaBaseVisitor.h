@@ -311,6 +311,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitEnumAtom(FaParser::EnumAtomContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitCallConvention(FaParser::CallConventionContext *ctx) override {
     return visitChildren(ctx);
   }

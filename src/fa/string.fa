@@ -1,16 +1,11 @@
-private enum StringData {
-	public cstr CPtr;
-	public int8[] Array;
+public enum string {
+	cstr CPtr,
+	int8[]* Array,
 
-	public cstr Data {
-		get => switch m_data {
-			CPtr (_ptr): _ptr;
-			Array (_arr): _arr;
-		}
-	}
-}
-
-public class string {
-	private StringData m_data;
-	public cstr Data { get => m_data.Data; }
+	//public cstr Data {
+	//	get => switch m_data {
+	//		CPtr (_ptr): _ptr;
+	//		Array (_arr): _arr;
+	//	}
+	//}
 }

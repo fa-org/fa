@@ -100,12 +100,18 @@ public:
 			// 访问级别
 			PublicLevel _pl = _public_level (_class_raw->publicLevel (), PublicLevel::Internal);
 
-			// 类名
+			// 类型名称
 			std::string _name = std::format ("{}.{}", m_namespace, _class_raw->Id ()->getText ());
 			auto _oclass = m_global_classes.GetClass (_name, "");
 			if (_oclass.has_value ()) {
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
 				return false;
+			}
+
+			// 识别类型
+			std::string _class_type = _class_raw->classType ()->getText ();
+			if (_class_type == "class") {
+
 			}
 			std::shared_ptr<AstClass> _class = m_global_classes.CreateNewClass (_pl, m_module_name, _name);
 
@@ -901,7 +907,11 @@ private:
 				// 检测类型
 				std::shared_ptr<AstClass> _cls;
 				if (_cur_type != "") {
-					auto _ocls = FindAstClass (_cur_type);
+					auto [_ocls, _multi] = FindAstClass (_cur_type);
+					if (_multi) {
+						LOG_ERROR (_new_raw->start, std::format ("无法准确识别的标识符 {}", _cur_type));
+						return std::nullopt;
+					}
 					if (!_ocls.has_value ()) {
 						LOG_ERROR (_new_raw->start, std::format ("未定义的标识符 {}", _cur_type));
 						return std::nullopt;
@@ -910,7 +920,11 @@ private:
 					_cur_type = _cls->m_name;
 				}
 				if (_exp_type != "") {
-					auto _ocls = FindAstClass (_exp_type);
+					auto [_ocls, _multi] = FindAstClass (_exp_type);
+					if (_multi) {
+						LOG_ERROR (_new_raw->start, std::format ("无法准确识别的标识符 {}", _cur_type));
+						return std::nullopt;
+					}
 					if (!_ocls.has_value ()) {
 						LOG_ERROR (_new_raw->start, std::format ("未定义的标识符 {}", _exp_type));
 						return std::nullopt;
@@ -1308,8 +1322,18 @@ private:
 		return std::nullopt;
 	}
 
-	std::optional<std::shared_ptr<AstClass>> FindAstClass (std::string _raw_name) {
-		return m_global_classes.GetClass (_raw_name, m_namespace);
+	std::tuple<std::optional<std::shared_ptr<AstClass>>, bool/*是否重复*/> FindAstClass (std::string _raw_name) {
+		auto _pcls = m_global_classes.GetClass (_raw_name, m_namespace);
+		for (std::string _use : m_uses) {
+			std::string _raw_name2 = std::format ("{}.{}", _use, _raw_name);
+			auto _pcls2 = m_global_classes.GetClass (_raw_name2, m_namespace);
+			if (_pcls.has_value () && _pcls2.has_value ()) {
+				return { _pcls, true };
+			} else if (!_pcls.has_value ()) {
+				_pcls = _pcls2;
+			}
+		}
+		return { _pcls, false };
 	}
 
 	std::optional<AstValue> FindValueType (FuncContext& _func_ctx, std::string _raw_name, antlr4::Token* _t) {
@@ -1334,7 +1358,11 @@ private:
 			}
 
 			// 猜测前半段可能是类
-			auto _oct = FindAstClass (_prefix);
+			auto [_oct, _multi] = FindAstClass (_prefix);
+			if (_multi) {
+				LOG_ERROR (_t, std::format ("无法准确识别的标识符 {}", _prefix));
+				return std::nullopt;
+			}
 			if (_oct.has_value ()) {
 				auto& _ct = _oct.value ();
 				// 猜测后半段是静态属性
@@ -1374,7 +1402,11 @@ private:
 	}
 
 	std::string GetTypeFullName (std::string _type) {
-		auto _oct = FindAstClass (_type);
+		auto [_oct, _multi] = FindAstClass (_type);
+		if (_multi) {
+			LOG_ERROR (nullptr, std::format ("无法准确识别的标识符 {}", _type));
+			return _type;
+		}
 		if (_oct.has_value ())
 			return _oct.value ()->m_name;
 		return _type;
