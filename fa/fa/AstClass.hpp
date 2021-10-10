@@ -123,8 +123,7 @@ public:
 		m_parents.assign (_parents.cbegin (), _parents.cend ());
 	}
 
-	std::shared_ptr<AstClassVar> AddVar (antlr4::Token* _t, PublicLevel _pv, bool _is_static, std::string _type, std::string _name) {
-		auto _var = std::make_shared<AstClassVar> (_t, _pv, _is_static, _type, _name);
+	std::shared_ptr<AstClassVar> AddVar (std::shared_ptr<AstClassVar> _var) {
 		m_vars.push_back (_var);
 		return _var;
 	}

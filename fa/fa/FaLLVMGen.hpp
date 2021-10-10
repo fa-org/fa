@@ -108,23 +108,10 @@ public:
 				return false;
 			}
 
-			// 识别类型
-			std::string _class_type = _class_raw->classType ()->getText ();
-			if (_class_type == "class") {
-
-			}
-			std::shared_ptr<AstClass> _class = m_global_classes.CreateNewClass (_pl, m_module_name, _name);
-
-			// 父类型
-			if (_class_raw->classParent ()) {
-				std::vector<std::string> _parents = m_visitor.visit (_class_raw->classParent ()).as<std::vector<std::string>> ();
-				_class->AddParents (_parents);
-			}
-
-			// 成员变量
-			for (auto _var_raw : _class_raw->classVar ()) {
+			// 生成类变量
+			auto _get_class_var = [&](FaParser::ClassVarContext *_var_raw) -> std::optional<std::shared_ptr<AstClassVar>> {
 				// 访问级别
-				_pl = _public_level (_var_raw->publicLevel (), PublicLevel::Private);
+				auto _pl = _public_level (_var_raw->publicLevel (), PublicLevel::Private);
 
 				// 是否静态
 				bool _is_static = !!_var_raw->Static ();
@@ -133,8 +120,8 @@ public:
 				std::string _type = _var_raw->type ()->getText ();
 
 				// 名称
-				_name = _var_raw->Id ()->getText ();
-				auto _var = _class->AddVar (_var_raw->start, _pl, _is_static, _type, _name);
+				std::string _name = _var_raw->Id ()->getText ();
+				auto _var = std::make_shared<AstClassVar> (_var_raw->start, _pl, _is_static, _type, _name);
 
 				// 初始值和 getter setter
 				auto _var_ext_raw = _var_raw->classVarExt ();
@@ -150,7 +137,7 @@ public:
 						auto [_suc, _err] = _var->AddVarFunc (_pl, _ext_func_raw->Id ()->getText (), _ext_func_raw->classFuncBody ());
 						if (!_suc) {
 							LOG_ERROR (_ext_func_raw->start, _err);
-							return false;
+							return std::nullopt;
 						}
 					}
 				} else {
@@ -159,6 +146,38 @@ public:
 					if (_var_raw->tmpAssignExpr ())
 						_var->SetInitValue (_var_raw->tmpAssignExpr ()->expr ());
 				}
+				return _var;
+			};
+
+			// 识别类型
+			std::string _class_type = _class_raw->classType ()->getText ();
+
+			// 成员方法后续处理，此处不做处理
+			if (_class_type == "class") {
+				std::shared_ptr<AstClass> _class = m_global_classes.CreateNewClass (_pl, m_module_name, _name);
+				// 父类型
+				if (_class_raw->classParent ()) {
+					std::vector<std::string> _parents = m_visitor.visit (_class_raw->classParent ()).as<std::vector<std::string>> ();
+					_class->AddParents (_parents);
+				}
+
+				// 不允许带有枚举类型
+				if (_class_raw->enumAtom ().size () > 0) {
+					LOG_ERROR (_class_raw->enumAtom (0)->start, std::format ("{} 类型的结构不允许包含枚举类型变量", _class_type));
+					return false;
+				}
+
+				// 成员变量
+				for (auto _var_raw : _class_raw->classVar ()) {
+					auto _var = _get_class_var (_var_raw);
+					if (!_var.has_value ())
+						return false;
+					_class->AddVar (_var.value ());
+				}
+			} else if () {
+			} else {
+				LOG_TODO (_class_raw->classType ()->start);
+				return false;
 			}
 		}
 		return true;
