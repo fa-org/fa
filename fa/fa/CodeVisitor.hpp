@@ -102,9 +102,12 @@ public:
 
 	antlrcpp::Any visitClassParent (FaParser::ClassParentContext* context) override {
 		std::vector<std::string> _ids;
-		for (auto _parent_name_raw : context->ids ())
+		std::vector<antlr4::Token*> _tokens;
+		for (auto _parent_name_raw : context->ids ()) {
 			_ids.push_back (_parent_name_raw->getText ());
-		return _ids;
+			_tokens.push_back (_parent_name_raw->start);
+		}
+		return std::make_tuple (_ids, _tokens);
 	}
 };
 

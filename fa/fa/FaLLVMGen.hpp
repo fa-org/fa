@@ -157,7 +157,25 @@ public:
 				std::shared_ptr<AstClass> _class = m_global_classes.CreateNewClass (_pl, m_module_name, _name);
 				// 父类型
 				if (_class_raw->classParent ()) {
-					std::vector<std::string> _parents = m_visitor.visit (_class_raw->classParent ()).as<std::vector<std::string>> ();
+					std::string _struct_parent = "";
+					auto [_parents, _parent_ts] = m_visitor.visit (_class_raw->classParent ()).as<std::tuple<
+						std::vector<std::string>,
+						std::vector<antlr4::Token*>
+						>> ();
+					for (size_t i = 0; i < _parents.size (); ++i) {
+						auto [_ocls, _multi] = FindAstClass (_parents [i]);
+						if (_multi) {
+							LOG_ERROR (_parent_ts [i], std::format ("无法准确识别的标识符 {}", _parents [i]));
+							return false;
+						}
+						if (!_ocls.has_value ()) {
+							LOG_ERROR (_parent_ts [i], std::format ("未定义的标识符 {}", _parents [i]));
+							return false;
+						}
+						auto _cls = _ocls.value ();
+						_parents [i] = _cls->m_name;
+						if (_cls->)
+					}
 					_class->AddParents (_parents);
 				}
 
@@ -186,7 +204,7 @@ public:
 	bool InitClassFunc () {
 		for (auto _class_raw : m_classes) {
 			std::string _name = std::format ("{}.{}", m_namespace, _class_raw->Id ()->getText ());
-			std::shared_ptr<AstClass> _class = m_global_classes.GetClass (_name, m_namespace).value ();
+			std::shared_ptr<IAstClass> _class = m_global_classes.GetClass (_name, m_namespace).value ();
 
 			// 成员函数
 			for (auto _func_raw : _class_raw->classFunc ()) {
@@ -231,7 +249,7 @@ public:
 
 	bool Compile () {
 		// 编译类
-		if (!m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<AstClass> _cls) -> bool {
+		if (!m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<IAstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
 				std::vector<std::tuple<std::string, std::string>> _args;
 				for (size_t i = 0; i < _cls_func->m_arg_names.size (); ++i)
@@ -1341,7 +1359,7 @@ private:
 		return std::nullopt;
 	}
 
-	std::tuple<std::optional<std::shared_ptr<AstClass>>, bool/*是否重复*/> FindAstClass (std::string _raw_name) {
+	std::tuple<std::optional<std::shared_ptr<IAstClass>>, bool/*是否重复*/> FindAstClass (std::string _raw_name) {
 		auto _pcls = m_global_classes.GetClass (_raw_name, m_namespace);
 		for (std::string _use : m_uses) {
 			std::string _raw_name2 = std::format ("{}.{}", _use, _raw_name);

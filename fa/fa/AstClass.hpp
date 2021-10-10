@@ -25,6 +25,9 @@
 
 enum class PublicLevel { Unknown, Public, Internal, Protected, Private };
 
+enum class AstClassType { Class, Struct, Interface, Enum };
+enum class AstClassItemType { Var, GetterSetter, Func, Constructor, EnumItem };
+
 
 
 // 类变量的 getter setter 函数
@@ -108,17 +111,45 @@ public:
 
 
 
-class AstClass {
+// 抽象结构体类型
+class IAstClass {
 public:
 	PublicLevel									m_level;
 	std::string									m_module_name;
 	std::string									m_name;
+	std::vector<std::shared_ptr<AstClassFunc>>	m_funcs;
+
+	IAstClass (PublicLevel _level, std::string _module_name, std::string _name):
+		m_level (_level), m_module_name (_module_name), m_name (_name) {}
+
+	virtual AstClassType GetType () = 0;
+
+	std::shared_ptr<AstClassFunc> AddFunc (PublicLevel _pv, bool _is_static, std::string _name) {
+		auto _func = std::make_shared<AstClassFunc> (_pv, _is_static, _name);
+		m_funcs.push_back (_func);
+		return _func;
+	}
+
+	std::optional<std::shared_ptr<AstClassFunc>> GetFunc (std::string _name) {
+		for (auto _func : m_funcs) {
+			if (_func->m_name == _name)
+				return _func;
+		}
+		return std::nullopt;
+	}
+};
+
+
+
+// 类
+class AstClass: public IAstClass {
+public:
 	std::vector<std::string>					m_parents;
 	std::vector<std::shared_ptr<AstClassVar>>	m_vars;
-	std::vector<std::shared_ptr<AstClassFunc>>	m_funcs;
 	llvm::StructType*							m_type = nullptr;
 
-	AstClass (PublicLevel _level, std::string _module_name, std::string _name): m_level (_level), m_module_name (_module_name), m_name (_name) {}
+	AstClassType GetType () override { return AstClassType::Class; }
+
 	void AddParents (std::vector<std::string> &_parents) {
 		m_parents.assign (_parents.cbegin (), _parents.cend ());
 	}
@@ -126,12 +157,6 @@ public:
 	std::shared_ptr<AstClassVar> AddVar (std::shared_ptr<AstClassVar> _var) {
 		m_vars.push_back (_var);
 		return _var;
-	}
-
-	std::shared_ptr<AstClassFunc> AddFunc (PublicLevel _pv, bool _is_static, std::string _name) {
-		auto _func = std::make_shared<AstClassFunc> (_pv, _is_static, _name);
-		m_funcs.push_back (_func);
-		return _func;
 	}
 
 	std::optional<std::shared_ptr<AstClassVar>> GetVar (std::string _name) {
@@ -145,14 +170,6 @@ public:
 		for (size_t i = 0; i < m_vars.size (); ++i) {
 			if (m_vars [i]->m_name == _name)
 				return i;
-		}
-		return std::nullopt;
-	}
-
-	std::optional<std::shared_ptr<AstClassFunc>> GetFunc (std::string _name) {
-		for (auto _func : m_funcs) {
-			if (_func->m_name == _name)
-				return _func;
 		}
 		return std::nullopt;
 	}
@@ -180,9 +197,10 @@ public:
 
 
 
+// 类集合
 class AstClasses {
 public:
-	std::optional<std::shared_ptr<AstClass>> GetClass (std::string _name, std::string _namesapce) {
+	std::optional<std::shared_ptr<IAstClass>> GetClass (std::string _name, std::string _namesapce) {
 		if (m_classes.contains (_name))
 			return m_classes [_name];
 		size_t _p = _namesapce.find ('.');
@@ -207,7 +225,7 @@ public:
 		return _cls;
 	}
 
-	bool EnumClasses (std::string _module_name, std::function<bool (std::shared_ptr<AstClass>)> _cb) {
+	bool EnumClasses (std::string _module_name, std::function<bool (std::shared_ptr<IAstClass>)> _cb) {
 		for (auto &[_key, _val] : m_classes) {
 			if (_val->m_module_name != _module_name)
 				continue;
@@ -218,7 +236,7 @@ public:
 	}
 
 private:
-	std::map<std::string, std::shared_ptr<AstClass>> m_classes;
+	std::map<std::string, std::shared_ptr<IAstClass>> m_classes;
 };
 
 
