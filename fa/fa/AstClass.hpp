@@ -30,6 +30,14 @@ enum class AstClassItemType { Var, GetterSetter, Func, Constructor, EnumItem };
 
 
 
+// 抽象类成员类型
+class IAstClassItem {
+public:
+	virtual AstClassItemType GetType () = 0;
+};
+
+
+
 // 类变量的 getter setter 函数
 class AstClassVarFunc {
 public:
@@ -44,7 +52,7 @@ public:
 
 
 // 类变量
-class AstClassVar {
+class AstClassVar: public IAstClassItem {
 public:
 	antlr4::Token*					m_t = nullptr;			//
 	PublicLevel						m_pv;					// 公开级别
@@ -53,6 +61,8 @@ public:
 	std::string						m_name;					// 变量名称
 	FaParser::ExprContext*			m_init_value = nullptr;	// 初始值
 	std::vector<AstClassVarFunc>	m_var_funcs;			// 变量 getter setter 函数
+
+	AstClassItemType GetType () override { return m_var_funcs.size () > 0 ? AstClassItemType::GetterSetter : AstClassItemType::Var; }
 
 	AstClassVar (antlr4::Token* _t, PublicLevel _pv, bool _is_static, std::string _type, std::string _name)
 		: m_t (_t), m_pv (_pv), m_is_static (_is_static), m_type (_type), m_name (_name) {}
@@ -76,7 +86,7 @@ public:
 
 
 // 类方法
-class AstClassFunc {
+class AstClassFunc: public IAstClassItem {
 public:
 	PublicLevel								m_pv;						// 公开级别
 	bool									m_is_static;				// 是否静态
@@ -88,6 +98,8 @@ public:
 	std::vector<antlr4::Token*>				m_arg_type_ts;				// 参数类型列表
 	std::vector<std::string>				m_arg_names;				// 参数名称列表
 	FaParser::ClassFuncBodyContext*			m_func = nullptr;			// 函数体
+
+	AstClassItemType GetType () override { return AstClassItemType::Func; }
 
 	AstClassFunc (PublicLevel _pv, bool _is_static, std::string _name)
 		: m_pv (_pv), m_is_static (_is_static), m_name (_name) {}
