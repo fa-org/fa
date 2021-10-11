@@ -62,6 +62,36 @@ public class Xxx {
 		* 默认所有方法均为虚方法，可继承后重写
 	+ getter/setter
 		* `public string name3 { get => "Eve"; }`
+- 实现接口方式
+	+ 实现代码
+		```fa
+		class A {
+			public int i = 55;
+		}
+
+		interface IFunc {
+			public int func ();
+		}
+
+		class B: IFunc {
+			public int func () { return 5; }
+		}
+
+		class MyCls: A, IFunc (b) {
+			public B b;
+		}
+		```
+	+ MyCls类对象实际内存布局
+		```
+		类型ID
+		IFunc实现地址     ->      B::func（或低性能实现：forward: B）
+		A a:
+			类型ID（可选）
+			i存储地址
+		B b:
+			类型ID（可选）
+			IFunc实现地址     ->      B::func
+		```
 
 不同点：
 

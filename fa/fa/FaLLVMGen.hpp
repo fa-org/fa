@@ -174,7 +174,8 @@ public:
 						}
 						auto _cls = _ocls.value ();
 						_parents [i] = _cls->m_name;
-						if (_cls->)
+						auto _clstype = _cls->GetType ();
+						if (_clstype == AstClassType::Class)
 					}
 					_class->AddParents (_parents);
 				}

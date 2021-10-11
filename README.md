@@ -115,6 +115,11 @@ if表达式：
 
 
 
+intel的SPMD优化方案
+https://github.com/ispc/ispc
+
+
+
 https://zhuanlan.zhihu.com/p/25959684
 前言（就是本篇）
 考不上三本也能给自己心爱的语言加上Coroutine（一） - 知乎专栏
