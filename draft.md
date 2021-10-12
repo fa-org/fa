@@ -77,20 +77,33 @@ public class Xxx {
 			public int func () { return 5; }
 		}
 
-		class MyCls: A, IFunc (b) {
-			public B b;
+		class MyCls: A a, B b {
+			public void test_calc () {
+				a.i = 43;
+				this.a.i = 34;
+			}
 		}
 		```
+	+ 代码描述
+		* B类直接实现IFunc接口
+		* MyCls类继承至A、B类，并且分别定义别名a、b
+		* MyCls类内部通过a、b像访问变量一样访问MyCls的父类
+		* MyCls类外部直接访问MyCls的父类，就像继承一样
 	+ MyCls类对象实际内存布局
 		```
 		类型ID
-		IFunc实现地址     ->      B::func（或低性能实现：forward: B）
 		A a:
-			类型ID（可选）
+			类型ID
 			i存储地址
 		B b:
-			类型ID（可选）
-			IFunc实现地址     ->      B::func
+			类型ID
+		```
+	+ MyCls类静态结构描述内存布局
+		```
+		// 能访问到这个结构体，就意味着知道对象是什么类型了，因此不需要描述符
+		A 类型起始地址偏移
+		B 类型起始地址偏移
+		IFunc实现地址     ->      B::func
 		```
 
 不同点：

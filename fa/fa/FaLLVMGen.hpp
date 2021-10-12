@@ -157,7 +157,6 @@ public:
 				std::shared_ptr<AstClass> _class = m_global_classes.CreateNewClass (_pl, m_module_name, _name);
 				// ¸¸ÀàĞÍ
 				if (_class_raw->classParent ()) {
-					std::string _struct_parent = "";
 					auto [_parents, _parent_ts] = m_visitor.visit (_class_raw->classParent ()).as<std::tuple<
 						std::vector<std::string>,
 						std::vector<antlr4::Token*>
@@ -175,7 +174,9 @@ public:
 						auto _cls = _ocls.value ();
 						_parents [i] = _cls->m_name;
 						auto _clstype = _cls->GetType ();
-						if (_clstype == AstClassType::Class)
+						if (_clstype == AstClassType::Class || _clstype == AstClassType::Struct) {
+							
+						}
 					}
 					_class->AddParents (_parents);
 				}
