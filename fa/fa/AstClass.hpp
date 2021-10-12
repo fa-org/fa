@@ -51,7 +51,7 @@ public:
 
 
 
-// 类变量
+// 类成员变量
 class AstClassVar: public IAstClassItem {
 public:
 	antlr4::Token*					m_t = nullptr;			//
@@ -85,7 +85,7 @@ public:
 
 
 
-// 类方法
+// 类成员方法
 class AstClassFunc: public IAstClassItem {
 public:
 	PublicLevel								m_pv;						// 公开级别
@@ -119,6 +119,16 @@ public:
 	}
 
 	void SetFuncBody (FaParser::ClassFuncBodyContext* _func) { m_func = _func; }
+};
+
+
+
+// 枚举类型成员
+class AstClassEnumItem: public IAstClassItem {
+public:
+	AstClassItemType GetType () override { return AstClassItemType::EnumItem; }
+
+	// TODO
 };
 
 
