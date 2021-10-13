@@ -145,19 +145,19 @@ public:
 		m_level (_level), m_module_name (_module_name), m_name (_name) {}
 
 	virtual AstClassType GetType () = 0;
-
-	std::shared_ptr<AstClassFunc> AddFunc (PublicLevel _pv, bool _is_static, std::string _name) {
-		auto _func = std::make_shared<AstClassFunc> (_pv, _is_static, _name);
-		m_funcs.push_back (_func);
-		return _func;
-	}
-
-	std::optional<std::shared_ptr<AstClassFunc>> GetFunc (std::string _name) {
+	virtual std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
+	virtual std::optional<std::shared_ptr<IAstClassItem>> GetMember (std::string _name) {
 		for (auto _func : m_funcs) {
 			if (_func->m_name == _name)
 				return _func;
 		}
 		return std::nullopt;
+	}
+
+	std::shared_ptr<AstClassFunc> AddFunc (PublicLevel _pv, bool _is_static, std::string _name) {
+		auto _func = std::make_shared<AstClassFunc> (_pv, _is_static, _name);
+		m_funcs.push_back (_func);
+		return _func;
 	}
 };
 
@@ -172,31 +172,7 @@ public:
 
 	AstClassType GetType () override { return AstClassType::Class; }
 
-	void AddParents (std::vector<std::string> &_parents) {
-		m_parents.assign (_parents.cbegin (), _parents.cend ());
-	}
-
-	std::shared_ptr<AstClassVar> AddVar (std::shared_ptr<AstClassVar> _var) {
-		m_vars.push_back (_var);
-		return _var;
-	}
-
-	std::optional<std::shared_ptr<AstClassVar>> GetVar (std::string _name) {
-		for (auto _var : m_vars) {
-			if (_var->m_name == _name)
-				return _var;
-		}
-		return std::nullopt;
-	}
-	std::optional<size_t> GetVarIndex (std::string _name) {
-		for (size_t i = 0; i < m_vars.size (); ++i) {
-			if (m_vars [i]->m_name == _name)
-				return i;
-		}
-		return std::nullopt;
-	}
-
-	std::optional<llvm::Type*> GetType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) {
+	std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) override {
 		if (!m_type) {
 			std::vector<llvm::Type*> _v;
 			for (auto _var : m_vars) {
@@ -214,6 +190,33 @@ public:
 			m_type = llvm::StructType::create (_v);
 		}
 		return (llvm::Type*) m_type;
+	}
+
+	std::optional<std::shared_ptr<IAstClassItem>> GetMember (std::string _name) override {
+		for (auto _var : m_vars) {
+			if (_var->m_name == _name)
+				return _var;
+		}
+		return IAstClass::GetMember (_name);
+	}
+
+
+
+	void AddParents (std::vector<std::string> &_parents) {
+		m_parents.assign (_parents.cbegin (), _parents.cend ());
+	}
+
+	std::shared_ptr<AstClassVar> AddVar (std::shared_ptr<AstClassVar> _var) {
+		m_vars.push_back (_var);
+		return _var;
+	}
+
+	std::optional<size_t> GetVarIndex (std::string _name) {
+		for (size_t i = 0; i < m_vars.size (); ++i) {
+			if (m_vars [i]->m_name == _name)
+				return i;
+		}
+		return std::nullopt;
 	}
 };
 

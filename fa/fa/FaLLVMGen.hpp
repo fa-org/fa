@@ -1403,24 +1403,28 @@ private:
 				return std::nullopt;
 			}
 			if (_oct.has_value ()) {
-				auto& _ct = _oct.value ();
-				// 猜测后半段是静态属性
-				auto _ovar = _ct->GetVar (_suffix);
-				if (_ovar.has_value ()) {
-					auto& _val = _ovar.value ();
-					if (_val->m_is_static) {
-						// TODO 定义全局变量，此处返回全局变量
-					}
+				auto _oitem = _oct.value ()->GetMember (_suffix);
+				if (_oitem.has_value ()) {
+					auto _item = _oitem.value ();
+					TODO
 				}
+				//// 猜测后半段是静态属性
+				//auto _ovar = _ct->GetVar (_suffix);
+				//if (_ovar.has_value ()) {
+				//	auto& _val = _ovar.value ();
+				//	if (_val->m_is_static) {
+				//		// TODO 定义全局变量，此处返回全局变量
+				//	}
+				//}
 
-				// 猜测后半段是静态方法
-				auto _ofunc = _ct->GetFunc (_suffix);
-				if (_ofunc.has_value ()) {
-					auto& _func = _ofunc.value ();
-					auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
-					auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
-					return AstValue { _f, _fp };
-				}
+				//// 猜测后半段是静态方法
+				//auto _ofunc = _ct->GetFunc (_suffix);
+				//if (_ofunc.has_value ()) {
+				//	auto& _func = _ofunc.value ();
+				//	auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
+				//	auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
+				//	return AstValue { _f, _fp };
+				//}
 			}
 		} else {
 			// 不包含 . 运算符

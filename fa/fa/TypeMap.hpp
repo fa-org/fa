@@ -71,7 +71,7 @@ public:
 		} else {
 			auto _ocls = m_global_classes.GetClass (_stype, m_namespace);
 			if (_ocls.has_value ())
-				return _ocls.value ()->GetType ([&] (std::string _stype, antlr4::Token* _t) { return GetType (_stype, _t); });
+				return _ocls.value ()->GetLlvmType ([&] (std::string _stype, antlr4::Token* _t) { return GetType (_stype, _t); });
 		}
 		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _stype));
 		return std::nullopt;
