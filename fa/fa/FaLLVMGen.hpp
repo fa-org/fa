@@ -943,7 +943,7 @@ private:
 				}
 
 				// ºÏ≤‚¿‡–Õ
-				std::shared_ptr<AstClass> _cls;
+				std::shared_ptr<IAstClass> _cls;
 				if (_cur_type != "") {
 					auto [_ocls, _multi] = FindAstClass (_cur_type);
 					if (_multi) {
