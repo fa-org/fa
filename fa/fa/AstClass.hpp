@@ -28,12 +28,17 @@ enum class PublicLevel { Unknown, Public, Internal, Protected, Private };
 enum class AstClassType { Class, Struct, Interface, Enum };
 enum class AstClassItemType { Var, GetterSetter, Func, Constructor, EnumItem };
 
+class AstValue;
+
 
 
 // 抽象类成员类型
 class IAstClassItem {
 public:
 	virtual AstClassItemType GetType () = 0;
+	virtual std::optional<AstValue> GetAstValue () = 0; // 获取静态变量或函数等
+	virtual bool IsStatic () = 0;
+	virtual std::string GetStringType () = 0;
 };
 
 
@@ -63,6 +68,15 @@ public:
 	std::vector<AstClassVarFunc>	m_var_funcs;			// 变量 getter setter 函数
 
 	AstClassItemType GetType () override { return m_var_funcs.size () > 0 ? AstClassItemType::GetterSetter : AstClassItemType::Var; }
+	std::optional<AstValue> GetAstValue () override {
+		// TODO 移动实现到cpp里
+		if (!m_is_static)
+			return std::nullopt;
+		// TODO 此处扔全局静态变量
+		return std::nullopt;
+	}
+	bool IsStatic () override { return m_is_static; }
+	std::string GetStringType () override { return m_type; }
 
 	AstClassVar (antlr4::Token* _t, PublicLevel _pv, bool _is_static, std::string _type, std::string _name)
 		: m_t (_t), m_pv (_pv), m_is_static (_is_static), m_type (_type), m_name (_name) {}
@@ -100,6 +114,12 @@ public:
 	FaParser::ClassFuncBodyContext*			m_func = nullptr;			// 函数体
 
 	AstClassItemType GetType () override { return AstClassItemType::Func; }
+	std::optional<AstValue> GetAstValue () override {
+		// TODO 实现
+		std::nullopt;
+	}
+	bool IsStatic () override { return m_is_static; }
+	std::string GetStringType () override { return m_name_abi; }
 
 	AstClassFunc (PublicLevel _pv, bool _is_static, std::string _name)
 		: m_pv (_pv), m_is_static (_is_static), m_name (_name) {}
@@ -127,7 +147,12 @@ public:
 class AstClassEnumItem: public IAstClassItem {
 public:
 	AstClassItemType GetType () override { return AstClassItemType::EnumItem; }
-
+	std::optional<AstValue> GetAstValue () override {
+		// TODO 返回常量值
+		return std::nullopt;
+	}
+	bool IsStatic () override { return true; }
+	std::string GetStringType () override { return "TODO???????????"; }
 	// TODO
 };
 
@@ -146,10 +171,11 @@ public:
 
 	virtual AstClassType GetType () = 0;
 	virtual std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
+	virtual std::optional<size_t> GetVarIndex (std::string _name) { return std::nullopt; }
 	virtual std::optional<std::shared_ptr<IAstClassItem>> GetMember (std::string _name) {
 		for (auto _func : m_funcs) {
 			if (_func->m_name == _name)
-				return _func;
+				return std::shared_ptr<IAstClassItem> ((IAstClassItem*) _func.get ());
 		}
 		return std::nullopt;
 	}
@@ -195,7 +221,7 @@ public:
 	std::optional<std::shared_ptr<IAstClassItem>> GetMember (std::string _name) override {
 		for (auto _var : m_vars) {
 			if (_var->m_name == _name)
-				return _var;
+				return std::shared_ptr<IAstClassItem> ((IAstClassItem*) _var.get ());
 		}
 		return IAstClass::GetMember (_name);
 	}
@@ -206,12 +232,19 @@ public:
 		m_parents.assign (_parents.cbegin (), _parents.cend ());
 	}
 
-	std::shared_ptr<AstClassVar> AddVar (std::shared_ptr<AstClassVar> _var) {
+	void AddVar (std::shared_ptr<AstClassVar> _var) {
 		m_vars.push_back (_var);
-		return _var;
 	}
 
-	std::optional<size_t> GetVarIndex (std::string _name) {
+	std::optional<std::shared_ptr<AstClassVar>> GetVar (std::string _name) { // 此方法功能与 GetMember 重复
+		for (auto _var : m_vars) {
+			if (_var->m_name == _name)
+				return _var;
+		}
+		return std::nullopt;
+	}
+
+	std::optional<size_t> GetVarIndex (std::string _name) override {
 		for (size_t i = 0; i < m_vars.size (); ++i) {
 			if (m_vars [i]->m_name == _name)
 				return i;

@@ -194,7 +194,6 @@ public:
 						return false;
 					_class->AddVar (_var.value ());
 				}
-			} else if () {
 			} else {
 				LOG_TODO (_class_raw->classType ()->start);
 				return false;
@@ -1403,10 +1402,12 @@ private:
 				return std::nullopt;
 			}
 			if (_oct.has_value ()) {
+				// 静态属性/静态方法或枚举值
 				auto _oitem = _oct.value ()->GetMember (_suffix);
 				if (_oitem.has_value ()) {
 					auto _item = _oitem.value ();
-					TODO
+					if (_item->IsStatic ())
+						return _item->GetAstValue ();
 				}
 				//// 猜测后半段是静态属性
 				//auto _ovar = _ct->GetVar (_suffix);

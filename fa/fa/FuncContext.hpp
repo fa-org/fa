@@ -152,12 +152,12 @@ public:
 		auto _cls = _ocls.value ();
 		auto _oidx = _cls->GetVarIndex (_member);
 		if (!_oidx.has_value ()) {
-			LOG_ERROR (_t, std::format ("类 {} 中未定义成员 {}", _cls_name, _member));
+			LOG_ERROR (_t, std::format ("类 {} 中未定义变量成员 {}", _cls_name, _member));
 			return std::nullopt;
 		}
 		size_t _idx = _oidx.value ();
 		auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _idx);
-		return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", _cls->m_vars [_idx]->m_type) };
+		return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", _cls->GetMember (_member).value ()->GetStringType ()) };
 	}
 
 	std::optional<AstValue> AccessArrayMember (AstValue& _arr_var, AstValue &_index, antlr4::Token* _t) {
