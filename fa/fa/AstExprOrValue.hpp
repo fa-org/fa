@@ -49,15 +49,16 @@ struct _AST_Arr2ValueCtx {
 };
 
 struct _AST_NewCtx {
-	_AST_NewCtx (antlr4::Token* _t, std::shared_ptr<AstClass> _cls, std::string _expect_type): m_t (_t), m_cls (_cls), m_expect_type (_expect_type) {
-		for (auto _cls_var : m_cls->m_vars) {
+	_AST_NewCtx (antlr4::Token* _t, IAstClass *_cls, std::string _expect_type): m_t (_t), m_cls (_cls), m_expect_type (_expect_type) {
+		m_cls->GetVars ([&] (AstClassVar* _cls_var) {
 			if (_cls_var->m_is_static)
-				continue;
+				return true;
 			m_tvar_all.emplace (_cls_var->m_name);
 			m_tvar_all_tmp.emplace (_cls_var->m_name);
 			if (!_cls_var->m_init_value)
 				m_tvar_init.emplace (_cls_var->m_name);
-		}
+			return true;
+		});
 	}
 
 	// 设置初始化参数
@@ -82,7 +83,7 @@ struct _AST_NewCtx {
 	bool CheckVarsAllInit (antlr4::Token *_t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext *, std::string)> _cb);
 
 	antlr4::Token*					m_t = nullptr;
-	std::shared_ptr<AstClass>		m_cls;
+	IAstClass*						m_cls = nullptr;
 	std::string						m_expect_type = "";
 	std::vector<std::string>		m_cls_vars;
 	std::vector<_AST_ExprOrValue>	m_params;
@@ -261,7 +262,7 @@ inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token *_t, std::function<std:
 
 	// new 表达式未指定，但带有默认参数的值，拷贝进去
 	for (auto _tvar : m_tvar_all) {
-		auto _var = m_cls->GetVar (_tvar).value ();
+		auto _var = dynamic_cast<AstClassVar*> (m_cls->GetMember (_tvar).value ());
 		m_cls_vars.push_back (_tvar);
 		auto _oparam = _cb (_var->m_init_value, _var->m_type);
 		if (!_oparam.has_value ())

@@ -1,14 +1,12 @@
-#ifndef __AST_CLASS_HPP__
-#define __AST_CLASS_HPP__
+#ifndef __AST_CLASS_H__
+#define __AST_CLASS_H__
 
 
 
-#include <format>
 #include <functional>
 #include <map>
 #include <memory>
 #include <optional>
-#include <set>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -135,7 +133,8 @@ public:
 	virtual AstClassType GetType () = 0;
 	virtual std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
 	virtual std::optional<size_t> GetVarIndex (std::string _name);
-	virtual std::optional<std::shared_ptr<IAstClassItem>> GetMember (std::string _name);
+	virtual std::optional<IAstClassItem*> GetMember (std::string _name);
+	virtual bool GetVars (std::function<bool (AstClassVar*)> _cb) = 0;
 
 	std::shared_ptr<AstClassFunc> AddFunc (PublicLevel _pv, bool _is_static, std::string _name);
 };
@@ -155,7 +154,9 @@ public:
 
 	std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) override;
 
-	std::optional<std::shared_ptr<IAstClassItem>> GetMember (std::string _name) override;
+	std::optional<IAstClassItem*> GetMember (std::string _name) override;
+
+	bool GetVars (std::function<bool (AstClassVar*)> _cb) override;
 
 
 
@@ -183,4 +184,4 @@ private:
 
 
 
-#endif //__AST_CLASS_HPP__
+#endif //__AST_CLASS_H__

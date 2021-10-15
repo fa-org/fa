@@ -22,7 +22,7 @@
 #include "TypeMap.hpp"
 #include "AstValue.hpp"
 #include "AstExprOrValue.hpp"
-#include "FuncType.hpp"
+#include "FuncType.h"
 #include "Log.hpp"
 
 

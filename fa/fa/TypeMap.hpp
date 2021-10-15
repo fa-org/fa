@@ -19,7 +19,7 @@
 #include "FaVisitor.h"
 #include "FaParser.h"
 #include "Log.hpp"
-#include "AstClass.hpp"
+#include "AstClass.h"
 
 
 

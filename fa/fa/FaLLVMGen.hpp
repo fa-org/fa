@@ -44,8 +44,8 @@
 #include "AstValue.hpp"
 #include "FuncContext.hpp"
 #include "AstExprOrValue.hpp"
-#include "FuncType.hpp"
-#include "AstClass.hpp"
+#include "FuncType.h"
+#include "AstClass.h"
 
 
 
@@ -943,7 +943,7 @@ private:
 				}
 
 				// 检测类型
-				std::shared_ptr<IAstClass> _cls;
+				IAstClass *_cls = nullptr;
 				if (_cur_type != "") {
 					auto [_ocls, _multi] = FindAstClass (_cur_type);
 					if (_multi) {
@@ -975,12 +975,13 @@ private:
 				auto _newval = std::make_shared<_AST_NewCtx> (_expr_raw->start, _cls, _exp_type);
 				for (auto _item_raw : _new_raw->newExprItem ()) {
 					std::string _var_name = _item_raw->Id ()->getText ();
-					auto _oclsvar = _cls->GetVar (_var_name);
+					auto _oclsvar = _cls->GetMember (_var_name);
 					if (!_oclsvar.has_value ()) {
 						LOG_ERROR (_new_raw->start, std::format ("类 {} 中未定义的标识符 {}", _cls->m_name, _var_name));
 						return std::nullopt;
 					}
-					std::string _var_exp_type = _oclsvar.value ()->m_type;
+					auto _clsvar = _oclsvar.value ();
+					std::string _var_exp_type = _clsvar->GetStringType ();
 					_AST_ExprOrValue _var_value;
 					if (_item_raw->middleExpr ()) {
 						//new Obj { _var = 3 };
@@ -1360,18 +1361,18 @@ private:
 		return std::nullopt;
 	}
 
-	std::tuple<std::optional<std::shared_ptr<IAstClass>>, bool/*是否重复*/> FindAstClass (std::string _raw_name) {
+	std::tuple<std::optional<IAstClass*>, bool/*是否重复*/> FindAstClass (std::string _raw_name) {
 		auto _pcls = m_global_classes.GetClass (_raw_name, m_namespace);
 		for (std::string _use : m_uses) {
 			std::string _raw_name2 = std::format ("{}.{}", _use, _raw_name);
 			auto _pcls2 = m_global_classes.GetClass (_raw_name2, m_namespace);
 			if (_pcls.has_value () && _pcls2.has_value ()) {
-				return { _pcls, true };
+				return std::make_tuple<std::optional<IAstClass*>, bool> (_pcls.value ().get (), true);
 			} else if (!_pcls.has_value ()) {
 				_pcls = _pcls2;
 			}
 		}
-		return { _pcls, false };
+		return std::make_tuple<std::optional<IAstClass*>, bool> (_pcls.value ().get (), true);
 	}
 
 	std::optional<AstValue> FindValueType (FuncContext& _func_ctx, std::string _raw_name, antlr4::Token* _t) {

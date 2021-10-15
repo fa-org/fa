@@ -1,5 +1,8 @@
 #include "AstValue.hpp"
-#include "AstClass.hpp"
+#include "AstClass.h"
+
+#include <format>
+#include <set>
 
 
 
@@ -96,10 +99,10 @@ IAstClass::IAstClass (PublicLevel _level, std::string _module_name, std::string 
 
 std::optional<size_t> IAstClass::GetVarIndex (std::string _name) { return std::nullopt; }
 
-std::optional<std::shared_ptr<IAstClassItem>> IAstClass::GetMember (std::string _name) {
+std::optional<IAstClassItem*> IAstClass::GetMember (std::string _name) {
 	for (auto _func : m_funcs) {
 		if (_func->m_name == _name)
-			return std::shared_ptr<IAstClassItem> ((IAstClassItem*) _func.get ());
+			return (IAstClassItem*) _func.get ();
 	}
 	return std::nullopt;
 }
@@ -137,12 +140,20 @@ std::optional<llvm::Type*> AstClass::GetLlvmType (std::function<std::optional<ll
 	return (llvm::Type*) m_type;
 }
 
-std::optional<std::shared_ptr<IAstClassItem>> AstClass::GetMember (std::string _name) {
+std::optional<IAstClassItem*> AstClass::GetMember (std::string _name) {
 	for (auto _var : m_vars) {
 		if (_var->m_name == _name)
-			return std::shared_ptr<IAstClassItem> ((IAstClassItem*) _var.get ());
+			return (IAstClassItem*) _var.get ();
 	}
 	return IAstClass::GetMember (_name);
+}
+
+bool AstClass::GetVars (std::function<bool (AstClassVar*)> _cb) {
+	for (auto& _var : m_vars) {
+		if (!_cb (_var.get ()))
+			return false;
+	}
+	return true;
 }
 
 

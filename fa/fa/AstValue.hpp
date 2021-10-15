@@ -20,7 +20,7 @@
 #include "ValueBuilder.hpp"
 #include "TypeMap.hpp"
 #include "Log.hpp"
-#include "FuncType.hpp"
+#include "FuncType.h"
 
 
 
