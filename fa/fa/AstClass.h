@@ -133,6 +133,7 @@ public:
 	virtual AstClassType GetType () = 0;
 	virtual std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
 	virtual std::optional<size_t> GetVarIndex (std::string _name);
+	virtual std::optional<AstClassVar*> GetVar (size_t _idx) = 0;
 	virtual std::optional<IAstClassItem*> GetMember (std::string _name);
 	virtual bool GetVars (std::function<bool (AstClassVar*)> _cb) = 0;
 
@@ -165,6 +166,8 @@ public:
 	void AddVar (std::shared_ptr<AstClassVar> _var);
 
 	std::optional<size_t> GetVarIndex (std::string _name) override;
+
+	std::optional<AstClassVar*> GetVar (size_t _idx) override;
 };
 
 

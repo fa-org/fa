@@ -174,6 +174,12 @@ std::optional<size_t> AstClass::GetVarIndex (std::string _name) {
 	return std::nullopt;
 }
 
+std::optional<AstClassVar*> AstClass::GetVar (size_t _idx) {
+	if (_idx >= m_vars.size ())
+		return std::nullopt;
+	return m_vars [_idx].get ();
+}
+
 
 
 // ¿‡ºØ∫œ

@@ -1,6 +1,6 @@
 public enum string {
 	cstr CPtr,
-	int8[]* Array,
+	int8[] Array,
 
 	//public cstr Data {
 	//	get => switch m_data {

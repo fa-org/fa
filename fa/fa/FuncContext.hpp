@@ -128,7 +128,7 @@ public:
 		//m_builder->CreateGEP ();
 		for (size_t i = 0; i < _newval->m_cls_vars.size (); ++i) {
 			auto _val_raw = m_builder->CreateStructGEP (_cls.ValueRaw (), (unsigned int) i);
-			AstValue _op1 { (llvm::AllocaInst*) _val_raw, std::format ("${}", _newval->m_cls->m_vars [i]->m_type) };
+			AstValue _op1 { (llvm::AllocaInst*) _val_raw, std::format ("${}", _newval->m_cls->GetVar (i).value ()->m_type) };
 			auto _oop2 = _cb (_newval->m_params [i]);
 			if (!_oop2.has_value ())
 				return false;
