@@ -1372,7 +1372,7 @@ private:
 				_pcls = _pcls2;
 			}
 		}
-		return std::make_tuple<std::optional<IAstClass*>, bool> (_pcls.value ().get (), true);
+		return std::make_tuple<std::optional<IAstClass*>, bool> (_pcls.value ().get (), false);
 	}
 
 	std::optional<AstValue> FindValueType (FuncContext& _func_ctx, std::string _raw_name, antlr4::Token* _t) {
@@ -1407,8 +1407,18 @@ private:
 				auto _oitem = _oct.value ()->GetMember (_suffix);
 				if (_oitem.has_value ()) {
 					auto _item = _oitem.value ();
-					if (_item->IsStatic ())
-						return _item->GetAstValue ();
+					if (_item->IsStatic ()) {
+						//return _item->GetAstValue ();
+						if (_item->GetType () == AstClassItemType::Var) {
+							// 全局静态属性，此处返回全局变量
+						} else if (_item->GetType () == AstClassItemType::Func) {
+							// 静态方法
+							auto _func = dynamic_cast<AstClassFunc*> (_item);
+							auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
+							auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
+							return AstValue { _f, _fp };
+						}
+					}
 				}
 				//// 猜测后半段是静态属性
 				//auto _ovar = _ct->GetVar (_suffix);
@@ -1447,6 +1457,10 @@ private:
 	}
 
 	std::string GetTypeFullName (std::string _type) {
+		static std::set<std::string> s_basic_types { "cstr", "int8", "int16", "int32", "int64", "int128", "uint8", "uint16", "uint32", "uint64", "uint128", "void", "bool", "float16", "float32", "float64", "float128" };
+		if (s_basic_types.contains (_type))
+			return _type;
+
 		auto [_oct, _multi] = FindAstClass (_type);
 		if (_multi) {
 			LOG_ERROR (nullptr, std::format ("无法准确识别的标识符 {}", _type));

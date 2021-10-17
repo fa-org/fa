@@ -36,11 +36,27 @@ public class Xxx {
 }
 ```
 
-## 类、结构体
+## 类
 
-类和结构体相似，都能定义包含0个或多个子元素的新类型。
+类能定义包含0个或多个子元素的新类型。
 
-相同点：
+```fa
+public class ClassA {
+	public int MemberA = 0;
+	public int MemberA0;
+	public int MemberA1 { get; set; }
+	public int MemberA2 { get; set; } = 2;
+}
+public class ClassB {
+	public int MemberB = 0;
+}
+public class C: ClassA pa, ClassB pb {
+	void test () {
+		pa.MemberA = 10;
+		pb.MemberB = 20;
+	}
+}
+```
 
 - 定义成员变量
 	+ 定义普通成员变量
@@ -105,25 +121,24 @@ public class Xxx {
 		B 类型起始地址偏移
 		IFunc实现地址     ->      B::func
 		```
-
-不同点：
-
-- 类使用class关键字定义，结构体使用struct关键字定义
-- 类可以继承自类、结构体或接口；结构体只能继承自结构体
-- 类允许定义构造函数与析构函数，结构体不允许
+- 可以继承自类或接口
+- 允许定义构造函数与析构函数
 	```fa
 	public class MyObj {
 		public MyObj {}
 		public ~MyObj {}
 	}
 	```
-- 不同方法参数的声明下，传值方式区别
-	| | 类 | 结构体/字符串/数字 |
-	| :---: | :---: | :---: |
-	| 不可变引用传参 | `const TypeName val` | `TypeName val` |
-	| 可变引用传参 | `TypeName val` | `ref TypeName val`  |
-	| 拷贝传参 | `TypeName val` (调用位置：`val.dup`) | `dup TypeName val` |
-- 当拷贝时，成员变量中的类对象成员复制指针；成员变量中的结构体成员复制所有子成员变量
+
+参数传递声明方式：
+
+| | 类/字符串/数字 |
+| :---: | :---: |
+| 不可变引用传参 | `TypeName val` |
+| 可变引用传参 | `mut TypeName val`  |
+| 拷贝传参 | `dup TypeName val` |
+
+备注：不区分值类型与引用类型，统一按值类型方式确定
 
 ## 接口
 
