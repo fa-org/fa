@@ -1,11 +1,8 @@
 public class string {
 	//cstr CPtr;
-	public int8[] m_array;
+	private int8[] m_array;
 
-	//public cstr Data {
-	//	get => switch m_data {
-	//		CPtr (_ptr): _ptr;
-	//		Array (_arr): _arr;
-	//	}
-	//}
+	public cstr Data {
+		get => m_array.Data;
+	}
 }
