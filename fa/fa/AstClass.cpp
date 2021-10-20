@@ -124,7 +124,8 @@ std::optional<llvm::Type*> AstClass::GetLlvmType (std::function<std::optional<ll
 	if (!m_type) {
 		std::vector<llvm::Type*> _v;
 		for (auto _var : m_vars) {
-			auto _otype = _cb (_var->m_type, _var->m_t);
+			std::string _tmp_type = _var->m_type.substr (_var->m_type.size () - 2) == "[]" ? "cptr" : _var->m_type;
+			auto _otype = _cb (_tmp_type, _var->m_t);
 			if (!_otype.has_value ())
 				return std::nullopt;
 			_v.push_back (_otype.value ());

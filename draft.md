@@ -28,7 +28,7 @@ use xxx;
 @lib "ucrt.lib";
 
 // 定义外部函数
-@import int32 __cdecl puts (cstr);
+@import int32 __cdecl puts (cptr);
 
 // 定义类或结构体
 public class Xxx {

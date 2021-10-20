@@ -41,11 +41,11 @@ public:
 			} else if (_value == "false") {
 				return std::make_tuple<llvm::Value* , std::string> (llvm::ConstantInt::getFalse (*m_ctx), "bool");
 			}
-		} else if (_type == "cstr") {
+		} else if (_type == "cptr") {
 			_value = _value.substr (1, _value.size () - 2);
 			std::optional<std::string> _tmp_value = StringProcessor::TransformMean (_value, _t);
 			if (_tmp_value.has_value ()) {
-				return std::make_tuple<llvm::Value* , std::string> (m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ()), "cstr");
+				return std::make_tuple<llvm::Value* , std::string> (m_builder->CreateGlobalStringPtr (_tmp_value.value (), "", 0, m_module.get ()), "cptr");
 			}
 		} else if (_type.find ("int") != std::string::npos) {
 			if (_type == "int") {

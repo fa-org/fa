@@ -47,7 +47,7 @@ public:
 		} else if (_literal->floatNum ()) {
 			m_value_type = "float64";
 		} else if (_literal->String1Literal ()) {
-			m_value_type = "cstr";
+			m_value_type = "cptr";
 		} else {
 			LOG_ERROR (_literal->start, "未知数据类型");
 			return;

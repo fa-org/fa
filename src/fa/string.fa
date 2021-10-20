@@ -1,8 +1,8 @@
 public class string {
-	//cstr CPtr;
+	//cptr CPtr;
 	private int8[] m_array;
 
-	public cstr Data {
+	public cptr Data {
 		get => m_array.Data;
 	}
 }

@@ -66,7 +66,7 @@ public:
 			return llvm::Type::getDoubleTy (*m_ctx);
 		} else if (_stype == "float128") {
 			return llvm::Type::getFP128Ty (*m_ctx);
-		} else if (_stype == "cstr") {
+		} else if (_stype == "cptr") {
 			return llvm::Type::getInt8PtrTy (*m_ctx);
 		} else {
 			auto _ocls = m_global_classes.GetClass (_stype, m_namespace);
