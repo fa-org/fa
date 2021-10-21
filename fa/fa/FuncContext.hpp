@@ -139,7 +139,7 @@ public:
 		return true;
 	}
 
-	// 访问类成员变量
+	// 访问类成员
 	std::optional<AstValue> AccessMember (AstValue& _cls_var, std::string _member, antlr4::Token *_t) {
 		std::string _cls_name = _cls_var.GetType ();
 		if (_cls_name [0] == '$')
@@ -150,14 +150,21 @@ public:
 			return std::nullopt;
 		}
 		auto _cls = _ocls.value ();
+
+		// 成员变量
 		auto _oidx = _cls->GetVarIndex (_member);
-		if (!_oidx.has_value ()) {
-			LOG_ERROR (_t, std::format ("类 {} 中未定义变量成员 {}", _cls_name, _member));
-			return std::nullopt;
+		if (_oidx.has_value ()) {
+			size_t _idx = _oidx.value ();
+			auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _idx);
+			return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", _cls->GetMember (_member).value ()->GetStringType ()) };
 		}
-		size_t _idx = _oidx.value ();
-		auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _idx);
-		return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", _cls->GetMember (_member).value ()->GetStringType ()) };
+
+		// 成员方法
+		auto _oitem = _cls->GetMember (_member);
+		if (_oitem.has_value ()) {
+			auto _item = _oitem.value ();
+			TODO 提取方法
+		}
 	}
 
 	std::optional<AstValue> AccessArrayMember (AstValue& _arr_var, AstValue &_index, antlr4::Token* _t) {

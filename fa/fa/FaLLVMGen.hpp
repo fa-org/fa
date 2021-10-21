@@ -691,6 +691,14 @@ private:
 			return _ptr;
 		};
 		_parse_strong_expr = [&] (FaParser::StrongExprContext* _expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
+			if (_exp_type != "" && _expr_raw->strongExprSuffix ().size () > 0) {
+				auto _oeov = _parse_strong_expr (_expr_raw, "");
+				if (!_oeov.has_value ())
+					return std::nullopt;
+				auto _oev = _oeov.value ();
+				_oev.SetExpectType (_exp_type);
+				return _oev;
+			}
 			if (_exp_type != "" && _exp_type != "$") {
 				// 外到内层层解析类型
 				// prefix 0->x
@@ -734,48 +742,48 @@ private:
 							return std::nullopt;
 						}
 						_update_next (_ptr);
-					} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
-						auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
-						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
-						auto _ofunc = m_local_funcs->GetFunc (_exp_type);
-						if (!_ofunc.has_value ()) {
-							_ofunc = m_global_funcs->GetFunc (_exp_type);
-							if (!_ofunc.has_value ()) {
-								LOG_ERROR (_suffix_raw->start, std::format ("未定义的方法 {}", _exp_type));
-								return std::nullopt;
-							}
-						}
-						auto _func = _ofunc.value ();
-						auto _expr_opt_raws = _suffix_raw->exprOpt ();
-						if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
-							_expr_opt_raws.clear ();
-						if (_expr_opt_raws.size () != _func->m_arg_types.size ()) {
-							LOG_ERROR (_suffix_raw->start, "参数数量不匹配");
-							return std::nullopt;
-						}
-						for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
-							if (_expr_opt_raws [i]->expr ()) {
-								auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
-								if (!_right_oval.has_value ())
-									return std::nullopt;
-								_ptr->m_rights.push_back (_right_oval.value ());
-							} else {
-								//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
-								LOG_TODO (_expr_opt_raws [i]->start);
-								return std::nullopt;
-							}
-						}
-						_exp_type = _ptr->m_expect_type = _func->m_ret_type;
-						_update_next (_ptr);
-					} else if (_suffix_raw->PointOp ()) {
-						auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
-						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
-						_ptr->m_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
-						if (!_ptr->CalcExpectType ()) {
-							LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
-							return std::nullopt;
-						}
-						_update_next (_ptr);
+					//} else if (_suffix_raw->QuotYuanL () || _suffix_raw->QuotFangL ()) {
+					//	auto _ptr = std::make_shared<_AST_OpNExprTreeCtx> ();
+					//	_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
+					//	auto _ofunc = m_local_funcs->GetFunc (_exp_type);
+					//	if (!_ofunc.has_value ()) {
+					//		_ofunc = m_global_funcs->GetFunc (_exp_type);
+					//		if (!_ofunc.has_value ()) {
+					//			LOG_ERROR (_suffix_raw->start, std::format ("未定义的方法 {}", _exp_type));
+					//			return std::nullopt;
+					//		}
+					//	}
+					//	auto _func = _ofunc.value ();
+					//	auto _expr_opt_raws = _suffix_raw->exprOpt ();
+					//	if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
+					//		_expr_opt_raws.clear ();
+					//	if (_expr_opt_raws.size () != _func->m_arg_types.size ()) {
+					//		LOG_ERROR (_suffix_raw->start, "参数数量不匹配");
+					//		return std::nullopt;
+					//	}
+					//	for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
+					//		if (_expr_opt_raws [i]->expr ()) {
+					//			auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
+					//			if (!_right_oval.has_value ())
+					//				return std::nullopt;
+					//			_ptr->m_rights.push_back (_right_oval.value ());
+					//		} else {
+					//			//_ptr->_rights.push_back (_AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (std::nullopt, _expr_opt_raws [i]->start, "?") });
+					//			LOG_TODO (_expr_opt_raws [i]->start);
+					//			return std::nullopt;
+					//		}
+					//	}
+					//	_exp_type = _ptr->m_expect_type = _func->m_ret_type;
+					//	_update_next (_ptr);
+					//} else if (_suffix_raw->PointOp ()) {
+					//	auto _ptr = std::make_shared<_AST_Op2ExprTreeCtx> ();
+					//	_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
+					//	_ptr->m_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
+					//	if (!_ptr->CalcExpectType ()) {
+					//		LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
+					//		return std::nullopt;
+					//	}
+					//	_update_next (_ptr);
 					} else {
 						LOG_TODO (_expr_raw->start);
 						return std::nullopt;

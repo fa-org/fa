@@ -171,6 +171,7 @@ struct _AST_ExprOrValue {
 	std::shared_ptr<_AST_IfExprTreeCtx>					m_if_expr;
 
 	std::string GetExpectType ();
+	void SetExpectType (std::string _type);
 	std::string GetFuncName ();
 };
 
@@ -243,6 +244,26 @@ inline std::string _AST_ExprOrValue::GetExpectType () {
 	if (m_if_expr)
 		return m_if_expr->m_expect_type;
 	return "";
+}
+
+inline void _AST_ExprOrValue::SetExpectType (std::string _type) {
+	if (m_val) {
+		m_val->m_expect_type = _type;
+	} else if (m_arrval1) {
+		m_arrval1->m_expect_type = _type;
+	} else if (m_arrval2) {
+		m_arrval2->m_expect_type = _type;
+	} else if (m_newval) {
+		m_newval->m_expect_type = _type;
+	} else if (m_op1_expr) {
+		m_op1_expr->m_expect_type = _type;
+	} else if (m_op2_expr) {
+		m_op2_expr->m_expect_type = _type;
+	} else if (m_opN_expr) {
+		m_opN_expr->m_expect_type = _type;
+	} else if (m_if_expr) {
+		m_if_expr->m_expect_type = _type;
+	}
 }
 
 inline std::string _AST_ExprOrValue::GetFuncName () {

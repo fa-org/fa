@@ -3,5 +3,5 @@
 
 
 public class Console {
-	static void Write (string s) { ::puts (s.Data); }
+	static void Write (string s) { ::puts (s.Data ()); }
 }
