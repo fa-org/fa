@@ -168,6 +168,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AstClass.cpp" />
+    <ClCompile Include="AstValue.cpp" />
     <ClCompile Include="FuncTypes.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="tools\libs\FaBaseVisitor.cpp" />
@@ -177,7 +178,7 @@
     <ClCompile Include="win32.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AstValue.hpp">
+    <ClInclude Include="AstValue.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>

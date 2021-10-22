@@ -13,7 +13,7 @@
 #include <antlr4-runtime/Token.h>
 
 #include <FaParser.h>
-#include "AstValue.hpp"
+#include "AstValue.h"
 
 
 
@@ -194,7 +194,7 @@ struct _AST_Op2ExprTreeCtx {
 	_AST_ExprOrValue									m_right;
 	std::string											m_expect_type;
 
-	bool CalcExpectType () {
+	bool CalcExpectType (AstClasses &_classes) {
 		const static std::set<std::string> s_compare_ops { ">", ">=", "<", "<=", "==", "!=" };
 		std::string _op_str = m_op.m_op;
 		if (s_compare_ops.contains (_op_str)) {
@@ -202,8 +202,26 @@ struct _AST_Op2ExprTreeCtx {
 			return true;
 		}
 
-		if (_op_str == "??" || _op_str == ".") {
-			// TODO
+		if (_op_str == ".") {
+			auto _ocls = _classes.GetClass (m_left.GetExpectType (), "");
+			if (!_ocls.has_value ()) {
+				LOG_ERROR (m_op.m_t, "仅支持结构体对象访问成员1");
+				return false;
+			}
+			if (m_right.GetExpectType () != "[member]") {
+				LOG_ERROR (m_op.m_t, "仅支持结构体对象访问成员2");
+				return false;
+			}
+			auto _oitem = _ocls.value ()->GetMember (m_right.m_val->m_val.m_member);
+			if (!_oitem.has_value ()) {
+				LOG_ERROR (m_op.m_t, "仅支持结构体对象访问成员3");
+				return false;
+			}
+			m_expect_type = _oitem.value ()->GetStringType ();
+			return true;
+		}
+
+		if (_op_str == "??") {
 			return false;
 		}
 
@@ -269,6 +287,8 @@ inline void _AST_ExprOrValue::SetExpectType (std::string _type) {
 inline std::string _AST_ExprOrValue::GetFuncName () {
 	if (m_val) {
 		return m_val->m_val.GetType ();
+	} else if (m_op2_expr) {
+		return m_op2_expr->m_expect_type;
 	} else {
 		return "";
 	}

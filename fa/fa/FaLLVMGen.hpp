@@ -41,7 +41,7 @@
 #include "CodeVisitor.hpp"
 #include "TypeMap.hpp"
 #include "ValueBuilder.hpp"
-#include "AstValue.hpp"
+#include "AstValue.h"
 #include "FuncContext.hpp"
 #include "AstExprOrValue.hpp"
 #include "FuncType.h"
@@ -818,23 +818,32 @@ private:
 						_ptr->m_left = _val;
 						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
 						if (_suffix_raw->QuotYuanL ()) {
-							auto _ofunc = m_local_funcs->GetFunc (_val.GetFuncName ());
+							auto _func_name_str = _val.GetFuncName ();
+							auto _ofunc = m_local_funcs->GetFunc (_func_name_str);
 							if (!_ofunc.has_value ()) {
-								_ofunc = m_global_funcs->GetFunc (_val.GetFuncName ());
+								_ofunc = m_global_funcs->GetFunc (_func_name_str);
 								if (!_ofunc.has_value ()) {
-									LOG_ERROR (_suffix_raw->start, std::format ("未定义的方法 {}", _val.GetFuncName ()));
+									LOG_ERROR (_suffix_raw->start, std::format ("未定义的方法 {}", _func_name_str));
 									return std::nullopt;
 								}
 							}
 							auto _func = _ofunc.value ();
 							auto _expr_opt_raws = _suffix_raw->exprOpt ();
+
+							// 不传参的形式，将默认匹配上一个空的参数，此处移除
 							if (_expr_opt_raws.size () == 1 && (!_expr_opt_raws [0]->expr ()))
 								_expr_opt_raws.clear ();
-							if (_expr_opt_raws.size () != _func->m_arg_types.size ()) {
+
+							// TODO 校验方法为非静态方法，不过不校验貌似也没问题
+							bool _this_call = _val.m_op2_expr && _val.m_op2_expr->m_right.GetExpectType () == "[member]" && _expr_opt_raws.size () == _func->m_arg_types.size () - 1;
+							if (_expr_opt_raws.size () != _func->m_arg_types.size () && !_this_call) {
 								LOG_ERROR (_suffix_raw->start, "参数数量不匹配");
 								return std::nullopt;
 							}
-							for (size_t i = 0; i < _func->m_arg_types.size (); ++i) {
+
+							if (_this_call)
+								_ptr->m_rights.push_back (_AST_ExprOrValue { _val.m_op2_expr->m_left });
+							for (size_t i = 0; i < _expr_opt_raws.size (); ++i) {
 								if (_expr_opt_raws [i]->expr ()) {
 									auto _right_oval = _parse_expr (_expr_opt_raws [i]->expr (), _func->m_arg_types [i]);
 									if (!_right_oval.has_value ())
@@ -874,7 +883,7 @@ private:
 						_ptr->m_left = _val;
 						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
 						_ptr->m_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
-						if (!_ptr->CalcExpectType ()) {
+						if (!_ptr->CalcExpectType (m_global_classes)) {
 							LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
 							return std::nullopt;
 						}
@@ -898,15 +907,7 @@ private:
 			}
 		};
 		_parse_strong_expr_base = [&] (FaParser::StrongExprBaseContext* _expr_raw, std::string _exp_type) -> std::optional<_AST_ExprOrValue> {
-			if (_expr_raw->ids ()) {
-				std::optional<AstValue> _oval = FindValueType (_func_ctx, _expr_raw->ids ()->getText (), _expr_raw->ids ()->start);
-				if (!_oval.has_value ())
-					return std::nullopt;
-				AstValue _val = _oval.value ();
-				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
-					return std::nullopt;
-				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
-			} else if (_expr_raw->ColonColon ()) {
+			if (_expr_raw->ColonColon ()) {
 				std::string _name = _expr_raw->getText ();
 				auto _of = m_local_funcs->GetFunc (_name);
 				if (!_of.has_value ()) {
@@ -918,6 +919,14 @@ private:
 					return std::nullopt;
 				auto _fp = m_local_funcs->GetFuncPtr (_name);
 				return std::make_shared<_AST_ValueCtx> (AstValue { _f, _fp }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
+			} else if (_expr_raw->Id ()) {
+				std::optional<AstValue> _oval = FindValueType (_func_ctx, _expr_raw->Id ()->getText (), _expr_raw->Id ()->getSymbol ());
+				if (!_oval.has_value ())
+					return std::nullopt;
+				AstValue _val = _oval.value ();
+				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
+					return std::nullopt;
+				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->literal ()) {
 				AstValue _val { m_value_builder, _expr_raw->literal () };
 				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
@@ -1397,55 +1406,55 @@ private:
 				return _func_ctx.AccessMember (_val, _suffix, _t);
 			}
 
-			// 猜测前半段是参数
-			_oval = _func_ctx.GetArgument (_prefix);
-			if (_oval.has_value ()) {
-				AstValue _val = _oval.value ();
-				return _func_ctx.AccessMember (_val, _suffix, _t);
-			}
+			//// 猜测前半段是参数
+			//_oval = _func_ctx.GetArgument (_prefix);
+			//if (_oval.has_value ()) {
+			//	AstValue _val = _oval.value ();
+			//	return _func_ctx.AccessMember (_val, _suffix, _t);
+			//}
 
-			// 猜测前半段可能是类
-			auto [_oct, _multi] = FindAstClass (_prefix);
-			if (_multi) {
-				LOG_ERROR (_t, std::format ("无法准确识别的标识符 {}", _prefix));
-				return std::nullopt;
-			}
-			if (_oct.has_value ()) {
-				// 静态属性/静态方法或枚举值
-				auto _oitem = _oct.value ()->GetMember (_suffix);
-				if (_oitem.has_value ()) {
-					auto _item = _oitem.value ();
-					if (_item->IsStatic ()) {
-						//return _item->GetAstValue ();
-						if (_item->GetType () == AstClassItemType::Var) {
-							// 全局静态属性，此处返回全局变量
-						} else if (_item->GetType () == AstClassItemType::Func) {
-							// 静态方法
-							auto _func = dynamic_cast<AstClassFunc*> (_item);
-							auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
-							auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
-							return AstValue { _f, _fp };
-						}
-					}
-				}
-				//// 猜测后半段是静态属性
-				//auto _ovar = _ct->GetVar (_suffix);
-				//if (_ovar.has_value ()) {
-				//	auto& _val = _ovar.value ();
-				//	if (_val->m_is_static) {
-				//		// TODO 定义全局变量，此处返回全局变量
-				//	}
-				//}
+			//// 猜测前半段可能是类
+			//auto [_oct, _multi] = FindAstClass (_prefix);
+			//if (_multi) {
+			//	LOG_ERROR (_t, std::format ("无法准确识别的标识符 {}", _prefix));
+			//	return std::nullopt;
+			//}
+			//if (_oct.has_value ()) {
+			//	// 静态属性/静态方法或枚举值
+			//	auto _oitem = _oct.value ()->GetMember (_suffix);
+			//	if (_oitem.has_value ()) {
+			//		auto _item = _oitem.value ();
+			//		if (_item->IsStatic ()) {
+			//			//return _item->GetAstValue ();
+			//			if (_item->GetType () == AstClassItemType::Var) {
+			//				// 全局静态属性，此处返回全局变量
+			//			} else if (_item->GetType () == AstClassItemType::Func) {
+			//				// 静态方法
+			//				auto _func = dynamic_cast<AstClassFunc*> (_item);
+			//				auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
+			//				auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
+			//				return AstValue { _f, _fp };
+			//			}
+			//		}
+			//	}
+			//	//// 猜测后半段是静态属性
+			//	//auto _ovar = _ct->GetVar (_suffix);
+			//	//if (_ovar.has_value ()) {
+			//	//	auto& _val = _ovar.value ();
+			//	//	if (_val->m_is_static) {
+			//	//		// TODO 定义全局变量，此处返回全局变量
+			//	//	}
+			//	//}
 
-				//// 猜测后半段是静态方法
-				//auto _ofunc = _ct->GetFunc (_suffix);
-				//if (_ofunc.has_value ()) {
-				//	auto& _func = _ofunc.value ();
-				//	auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
-				//	auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
-				//	return AstValue { _f, _fp };
-				//}
-			}
+			//	//// 猜测后半段是静态方法
+			//	//auto _ofunc = _ct->GetFunc (_suffix);
+			//	//if (_ofunc.has_value ()) {
+			//	//	auto& _func = _ofunc.value ();
+			//	//	auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
+			//	//	auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
+			//	//	return AstValue { _f, _fp };
+			//	//}
+			//}
 		} else {
 			// 不包含 . 运算符
 			// 猜测可能是变量

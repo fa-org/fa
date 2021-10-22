@@ -45,6 +45,9 @@
     <ClCompile Include="FuncTypes.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="AstValue.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tools\libs\FaVisitor.h">
@@ -77,7 +80,7 @@
     <ClInclude Include="Log.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="AstValue.hpp">
+    <ClInclude Include="AstValue.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="FuncContext.hpp">

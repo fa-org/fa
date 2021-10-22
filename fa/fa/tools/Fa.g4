@@ -198,7 +198,7 @@ newExprItem:				Id (Assign middleExpr)?;
 newExpr:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
-strongExprBase:				ids | (ColonColon Id) | literal | ifExpr | quotExpr | newExpr | arrayExpr1 | arrayExpr2;
+strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr | arrayExpr1 | arrayExpr2;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// Ç°×º - ++ -- ~
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (QuotYuanL (exprOpt (Comma exprOpt)*) QuotYuanR)								//     Write ("")

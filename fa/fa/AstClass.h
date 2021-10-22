@@ -11,7 +11,7 @@
 #include <tuple>
 #include <vector>
 
-//#include "AstValue.hpp"
+//#include "AstValue.h"
 
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Type.h>
@@ -26,6 +26,7 @@ enum class AstClassType { Class, Struct, Interface, Enum };
 enum class AstClassItemType { Var, GetterSetter, Func, Constructor, EnumItem };
 
 class AstValue;
+class FuncTypes;
 
 
 
@@ -33,7 +34,6 @@ class AstValue;
 class IAstClassItem {
 public:
 	virtual AstClassItemType GetType () = 0;
-	virtual std::optional<AstValue> GetAstValue () = 0; // 获取静态变量或函数等
 	virtual bool IsStatic () = 0;
 	virtual std::string GetStringType () = 0;
 };
@@ -64,7 +64,7 @@ public:
 	std::vector<AstClassVarFunc>	m_var_funcs;			// 变量 getter setter 函数
 
 	AstClassItemType GetType () override;
-	std::optional<AstValue> GetAstValue () override;
+	std::optional<AstValue> GetAstValue ();
 	bool IsStatic () override;
 	std::string GetStringType () override;
 
@@ -92,7 +92,7 @@ public:
 	FaParser::ClassFuncBodyContext*			m_func = nullptr;			// 函数体
 
 	AstClassItemType GetType () override;
-	std::optional<AstValue> GetAstValue () override;
+	std::optional<AstValue> GetAstValue (FuncTypes* _fts);
 	bool IsStatic () override;
 	std::string GetStringType () override;
 
@@ -112,7 +112,7 @@ public:
 class AstClassEnumItem: public IAstClassItem {
 public:
 	AstClassItemType GetType () override;
-	std::optional<AstValue> GetAstValue () override;
+	std::optional<AstValue> GetAstValue ();
 	bool IsStatic () override;
 	std::string GetStringType () override;
 	// TODO

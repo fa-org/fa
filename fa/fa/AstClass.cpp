@@ -1,5 +1,6 @@
-#include "AstValue.hpp"
+#include "AstValue.h"
 #include "AstClass.h"
+#include "FuncType.h"
 
 #include <format>
 #include <set>
@@ -14,7 +15,7 @@ AstClassVarFunc::AstClassVarFunc (PublicLevel _pv, std::string _name, FaParser::
 // 类成员变量
 AstClassItemType AstClassVar::GetType () { return m_var_funcs.size () > 0 ? AstClassItemType::GetterSetter : AstClassItemType::Var; }
 std::optional<AstValue> AstClassVar::GetAstValue () {
-	// TODO 移动实现到cpp里
+	LOG_TODO (nullptr);
 	if (!m_is_static)
 		return std::nullopt;
 	// TODO 此处扔全局静态变量
@@ -48,9 +49,14 @@ std::tuple<bool, std::string> AstClassVar::AddVarFunc (PublicLevel _pv, std::str
 // 类成员方法
 AstClassItemType AstClassFunc::GetType () { return AstClassItemType::Func; }
 
-std::optional<AstValue> AstClassFunc::GetAstValue () {
-	// TODO 实现
-	return std::nullopt;
+std::optional<AstValue> AstClassFunc::GetAstValue (FuncTypes* _fts) {
+	auto _of = _fts->GetFunc (m_name_abi);
+	if (!_of.has_value ()) {
+		LOG_ERROR (nullptr, "方法对应符号不存在");
+		return std::nullopt;
+	}
+	auto _fp = _fts->GetFuncPtr (m_name_abi);
+	return AstValue { _of.value (), _fp };
 }
 
 bool AstClassFunc::IsStatic () { return m_is_static; }

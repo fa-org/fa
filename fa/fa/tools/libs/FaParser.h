@@ -981,9 +981,8 @@ public:
   public:
     StrongExprBaseContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    IdsContext *ids();
-    antlr4::tree::TerminalNode *ColonColon();
     antlr4::tree::TerminalNode *Id();
+    antlr4::tree::TerminalNode *ColonColon();
     LiteralContext *literal();
     IfExprContext *ifExpr();
     QuotExprContext *quotExpr();

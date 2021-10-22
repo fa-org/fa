@@ -20,7 +20,7 @@
 #include <llvm/IR/Type.h>
 
 #include "TypeMap.hpp"
-#include "AstValue.hpp"
+#include "AstValue.h"
 #include "AstExprOrValue.hpp"
 #include "FuncType.h"
 #include "Log.hpp"
@@ -30,7 +30,7 @@
 class FuncContext {
 public:
 	FuncContext (AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace, std::vector<std::tuple<std::string, std::string>> &_args):
-		m_global_classes (_global_classes), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
+		m_global_classes (_global_classes), m_global_funcs (_global_funcs), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
 		m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder),
 		m_func (_global_funcs->GetFunc (_func_name).value ()), m_fp (_global_funcs->GetFuncPtr (_func_name)),
 		m_exp_type (_exp_type), m_namespace (_namespace)
@@ -163,8 +163,18 @@ public:
 		auto _oitem = _cls->GetMember (_member);
 		if (_oitem.has_value ()) {
 			auto _item = _oitem.value ();
-			TODO 提取方法
+			if (_item->IsStatic ()) {
+				LOG_ERROR (_t, std::format ("成员 {} 为静态类型，无需通过对象访问", _member));
+				return std::nullopt;
+			}
+			if (_item->GetType () == AstClassItemType::Func) {
+				auto _func_p = dynamic_cast<AstClassFunc*> (_item);
+				return _func_p->GetAstValue (m_global_funcs.get ());
+			}
 		}
+
+		LOG_TODO (_t);
+		return std::nullopt;
 	}
 
 	std::optional<AstValue> AccessArrayMember (AstValue& _arr_var, AstValue &_index, antlr4::Token* _t) {
@@ -302,6 +312,7 @@ public:
 
 private:
 	AstClasses&																		m_global_classes;
+	std::shared_ptr<FuncTypes>														m_global_funcs;
 	std::shared_ptr<llvm::LLVMContext>												m_ctx;
 	std::shared_ptr<llvm::Module>													m_module;
 	std::shared_ptr<TypeMap>														m_type_map;
