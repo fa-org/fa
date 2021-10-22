@@ -1,9 +1,0 @@
-@import cptr __cdecl malloc (int32);
-@import void __cdecl free (cptr);
-
-
-
-public class Memory {
-    public static cptr Malloc (int32 size) => malloc (size);
-    public static void Free (cptr p) => free (p);
-}

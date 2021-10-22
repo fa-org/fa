@@ -92,7 +92,7 @@ public:
 	FaParser::ClassFuncBodyContext*			m_func = nullptr;			// єЇКэМе
 
 	AstClassItemType GetType () override;
-	std::optional<AstValue> GetAstValue (FuncTypes* _fts);
+	std::optional<AstValue> GetAstValue (std::shared_ptr<FuncTypes> _global_funcs);
 	bool IsStatic () override;
 	std::string GetStringType () override;
 

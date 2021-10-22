@@ -141,7 +141,7 @@ std::optional<AstValue> AstValue::DoOper1 (llvm::IRBuilder<>& _builder, std::sha
 	return std::nullopt;
 }
 
-std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue& _other, antlr4::Token* _t) {
+std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue& _other, antlr4::Token* _t, std::shared_ptr<FuncTypes> _global_funcs, AstClasses& _global_classes, std::string _namespace) {
 	std::optional<AstValue> _tmp;
 	if (_op.size () == 1) {
 		switch (_op [0]) {
@@ -157,9 +157,66 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 		case '>': return AstValue { _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder)), "bool" };
 		case '=':
 			_builder.CreateStore (_other.Value (_builder), m_value);
-			return*this;
+			return *this;
 		case '.':
-			TODO 如果是成员方法那么返回方法地址；如果是成员变量那么给出偏移计算
+			// 如果是临时类型那么拼凑命名空间
+			if (m_type == AstObjectType::MemberStr) {
+				auto _ocls = _global_classes.GetClass (m_member, _namespace);
+				// 未找到类，那么继续拼接
+				if (!_ocls.has_value ()) {
+					if (_other.m_type != AstObjectType::MemberStr) {
+						LOG_ERROR (_t, "未知操作");
+						return std::nullopt;
+					}
+					return AstValue { std::format ("{}.{}", m_member, _other.m_member) };
+				}
+
+				// 找到了类但非访问类型
+				if (_other.m_type != AstObjectType::MemberStr) {
+					LOG_ERROR (_t, std::format ("无法对类 {} 进行其他操作", m_member));
+					return std::nullopt;
+				}
+
+				auto _oitem = _ocls.value ()->GetMember (_other.m_member);
+				// 如果成员不存在
+				if (!_oitem.has_value ()) {
+					LOG_ERROR (_t, std::format ("类 {} 不包括成员 {}", m_member, _other.m_member));
+					return std::nullopt;
+				}
+
+				auto _item = _oitem.value ();
+				// 如果成员非静态
+				if (!_item->IsStatic ()) {
+					LOG_ERROR (_t, std::format ("类成员 {}.{} 不允许静态方式访问", m_member, _other.m_member));
+					return std::nullopt;
+				}
+
+				if (_item->GetType () == AstClassItemType::Var) {
+					// TODO: 访问全局变量
+					LOG_TODO (_t);
+					return std::nullopt;
+				} else if (_item->GetType () == AstClassItemType::Func) {
+					auto _func = dynamic_cast<AstClassFunc*> (_item);
+					auto _of = _global_funcs->GetFunc (_func->m_name_abi);
+					if (_of.has_value ()) {
+						auto _fp = _global_funcs->GetFuncPtr (_func->m_name_abi);
+						return AstValue { _of.value (), _fp };
+					}
+				}
+			}
+
+			//如果是成员方法那么返回方法地址
+			{
+				std::string _func_name = std::format ("{}.{}", m_value_type, _other.m_member);
+				auto _ofunc = _global_funcs->GetFunc (_func_name);
+				if (_ofunc.has_value ()) {
+					auto _fp = _global_funcs->GetFuncPtr (_func_name);
+					return AstValue { _ofunc.value (), _fp };
+				}
+			}
+
+			// TODO 待确认是否加入：如果是成员变量那么给出偏移计算
+			LOG_TODO (_t);
 			return std::nullopt;
 		}
 	} else if (_op.size () == 2) {
@@ -203,19 +260,19 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 			case '|':
 			case '&':
 			case '^':
-				_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 1), _other, _t);
+				_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 1), _other, _t, _global_funcs, _global_classes, _namespace);
 				if (!_tmp.has_value ())
 					return std::nullopt;
-				return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t);
+				return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t, _global_funcs, _global_classes, _namespace);
 			case '!': return AstValue { _builder.CreateICmpNE (Value (_builder), _other.Value (_builder)), "bool" };
 			}
 		}
 	} else if (_op.size () == 3) {
 		if (_op == "<<=" || _op == ">>=") {
-			_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 2), _other, _t);
+			_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 2), _other, _t, _global_funcs, _global_classes, _namespace);
 			if (!_tmp.has_value ())
 				return std::nullopt;
-			return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t);
+			return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t, _global_funcs, _global_classes, _namespace);
 		}
 	}
 

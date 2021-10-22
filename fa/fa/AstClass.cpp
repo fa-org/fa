@@ -49,13 +49,13 @@ std::tuple<bool, std::string> AstClassVar::AddVarFunc (PublicLevel _pv, std::str
 // 类成员方法
 AstClassItemType AstClassFunc::GetType () { return AstClassItemType::Func; }
 
-std::optional<AstValue> AstClassFunc::GetAstValue (FuncTypes* _fts) {
-	auto _of = _fts->GetFunc (m_name_abi);
+std::optional<AstValue> AstClassFunc::GetAstValue (std::shared_ptr<FuncTypes> _global_funcs) {
+	auto _of = _global_funcs->GetFunc (m_name_abi);
 	if (!_of.has_value ()) {
 		LOG_ERROR (nullptr, "方法对应符号不存在");
 		return std::nullopt;
 	}
-	auto _fp = _fts->GetFuncPtr (m_name_abi);
+	auto _fp = _global_funcs->GetFuncPtr (m_name_abi);
 	return AstValue { _of.value (), _fp };
 }
 

@@ -194,7 +194,7 @@ struct _AST_Op2ExprTreeCtx {
 	_AST_ExprOrValue									m_right;
 	std::string											m_expect_type;
 
-	bool CalcExpectType (AstClasses &_classes) {
+	bool CalcExpectType (AstClasses &_classes, std::string _namespace) {
 		const static std::set<std::string> s_compare_ops { ">", ">=", "<", "<=", "==", "!=" };
 		std::string _op_str = m_op.m_op;
 		if (s_compare_ops.contains (_op_str)) {
@@ -203,7 +203,10 @@ struct _AST_Op2ExprTreeCtx {
 		}
 
 		if (_op_str == ".") {
-			auto _ocls = _classes.GetClass (m_left.GetExpectType (), "");
+			std::string _class_name = m_left.GetExpectType ();
+			if (_class_name == "")
+				_class_name = m_left.m_val->m_val.m_member;
+			auto _ocls = _classes.GetClass (_class_name, _namespace);
 			if (!_ocls.has_value ()) {
 				LOG_ERROR (m_op.m_t, "仅支持结构体对象访问成员1");
 				return false;

@@ -29,10 +29,10 @@
 
 class FuncContext {
 public:
-	FuncContext (AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::string _func_name, std::string _exp_type, std::string _namespace, std::vector<std::tuple<std::string, std::string>> &_args):
-		m_global_classes (_global_classes), m_global_funcs (_global_funcs), m_ctx (_global_funcs->m_ctx), m_module (_global_funcs->m_module),
-		m_type_map (_global_funcs->m_type_map), m_value_builder (_global_funcs->m_value_builder),
-		m_func (_global_funcs->GetFunc (_func_name).value ()), m_fp (_global_funcs->GetFuncPtr (_func_name)),
+	FuncContext (std::shared_ptr<IAstClass> _cls, AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::shared_ptr<FuncTypes> _func_in_funcs, std::string _func_name, std::string _exp_type, std::string _namespace, std::vector<std::tuple<std::string, std::string>> &_args):
+		m_cls (_cls), m_global_classes (_global_classes), m_global_funcs (_global_funcs), m_ctx (_func_in_funcs->m_ctx),
+		m_module (_func_in_funcs->m_module), m_type_map (_func_in_funcs->m_type_map), m_value_builder (_func_in_funcs->m_value_builder),
+		m_func (_func_in_funcs->GetFunc (_func_name).value ()), m_fp (_func_in_funcs->GetFuncPtr (_func_name)),
 		m_exp_type (_exp_type), m_namespace (_namespace)
 	{
 		llvm::BasicBlock* _bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
@@ -169,7 +169,7 @@ public:
 			}
 			if (_item->GetType () == AstClassItemType::Func) {
 				auto _func_p = dynamic_cast<AstClassFunc*> (_item);
-				return _func_p->GetAstValue (m_global_funcs.get ());
+				return _func_p->GetAstValue (m_global_funcs);
 			}
 		}
 
@@ -211,7 +211,7 @@ public:
 	}
 	std::optional<AstValue> DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token* _t) {
 		// TODO ’‚∂˘≈–∂œ «∑Òvirtual
-		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t);
+		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t, m_global_funcs, m_global_classes, m_namespace);
 	}
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
 		if (!m_virtual) {
@@ -310,6 +310,7 @@ public:
 		return _ret;
 	}
 
+	std::shared_ptr<IAstClass>														m_cls;
 private:
 	AstClasses&																		m_global_classes;
 	std::shared_ptr<FuncTypes>														m_global_funcs;
