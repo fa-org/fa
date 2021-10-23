@@ -1458,7 +1458,7 @@ private:
 		//} else {
 		//	// 不包含 . 运算符
 
-		// 猜测可能是变量
+		// 猜测可能是局部变量
 		auto _oval = _func_ctx.GetVariable (_raw_name);
 		if (_oval.has_value ())
 			return _oval;
@@ -1475,16 +1475,20 @@ private:
 				auto _item = _oitem.value ();
 				if (_item->GetType () == AstClassItemType::Var) {
 					auto _var = dynamic_cast<AstClassVar*> (_item);
-					TODO 读取this，计算偏移
-					LOG_TODO (_t);
-					return std::nullopt;
+					if (!_var->IsStatic ()) {
+						_oval = _func_ctx.GetArgument ("this");
+						if (_oval.has_value ()) {
+							_oval = _func_ctx.AccessMember (_oval.value (), _raw_name, _t);
+							if (_oval.has_value ())
+								return _oval;
+						}
+					}
 				} else if (_item->GetType () == AstClassItemType::Func) {
 					auto _func = dynamic_cast<AstClassFunc*> (_item);
 					return _func->GetAstValue (m_global_funcs);
-				} else {
-					LOG_TODO (_t);
-					return std::nullopt;
 				}
+				LOG_TODO (_t);
+				return std::nullopt;
 			}
 		}
 

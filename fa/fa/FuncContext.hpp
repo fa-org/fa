@@ -141,26 +141,37 @@ public:
 
 	// 访问类成员
 	std::optional<AstValue> AccessMember (AstValue& _cls_var, std::string _member, antlr4::Token *_t) {
-		std::string _cls_name = _cls_var.GetType ();
-		if (_cls_name [0] == '$')
-			_cls_name = _cls_name.substr (1);
-		auto _ocls = m_global_classes.GetClass (_cls_name, m_namespace);
-		if (!_ocls.has_value ()) {
-			LOG_ERROR (_t, std::format ("未定义的类 {}", _cls_name));
+		//std::string _cls_name = _cls_var.GetType ();
+		//if (_cls_name [0] == '$')
+		//	_cls_name = _cls_name.substr (1);
+		//auto _ocls = m_global_classes.GetClass (_cls_name, m_namespace);
+		//if (!_ocls.has_value ()) {
+		//	LOG_ERROR (_t, std::format ("未定义的类 {}", _cls_name));
+		//	return std::nullopt;
+		//}
+		//auto _cls = _ocls.value ();
+		if (!m_cls) {
+			LOG_TODO (_t);
 			return std::nullopt;
 		}
-		auto _cls = _ocls.value ();
+		auto _otype = m_cls->GetLlvmType ([&] (std::string _stype, antlr4::Token* _t) { return m_type_map->GetType (_stype, _t); });
+		if (!_otype.has_value ()) {
+			LOG_ERROR (_t, std::format ("无法解析对象llvm类型 {}", m_cls->m_name));
+		}
 
 		// 成员变量
-		auto _oidx = _cls->GetVarIndex (_member);
+		auto _oidx = m_cls->GetVarIndex (_member);
 		if (_oidx.has_value ()) {
-			size_t _idx = _oidx.value ();
-			auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _idx);
-			return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", _cls->GetMember (_member).value ()->GetStringType ()) };
+			TODO;
+			auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _oidx.value ());
+			//std::string _idx_str = std::format ("{}", _oidx.value ());
+			//auto _idx = AstValue::FromValue (m_value_builder, _idx_str, "int32", _t).value ();
+			//auto _val_raw = m_builder->CreateInBoundsGEP (_otype.value (), _cls_var.ValueRaw (), _idx.Value (*m_builder));
+			return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", m_cls->GetMember (_member).value ()->GetStringType ()) };
 		}
 
 		// 成员方法
-		auto _oitem = _cls->GetMember (_member);
+		auto _oitem = m_cls->GetMember (_member);
 		if (_oitem.has_value ()) {
 			auto _item = _oitem.value ();
 			if (_item->IsStatic ()) {
