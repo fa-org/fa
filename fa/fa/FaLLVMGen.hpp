@@ -1139,7 +1139,9 @@ private:
 			// TODO
 			if (_exp_type == "void")
 				return AstValue::FromVoid ();
-			if (_val.GetType () == _exp_type)
+
+			std::string _cur_type = _val.GetType ();
+			if (_cur_type == _exp_type)
 				return _val;
 
 			LOG_TODO (nullptr);
