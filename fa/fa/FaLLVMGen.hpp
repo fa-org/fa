@@ -1139,6 +1139,10 @@ private:
 			// TODO
 			if (_exp_type == "void")
 				return AstValue::FromVoid ();
+			if (_val.GetType () == _exp_type)
+				return _val;
+
+			LOG_TODO (nullptr);
 			return _val;
 		};
 

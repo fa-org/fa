@@ -162,7 +162,6 @@ public:
 		// 成员变量
 		auto _oidx = m_cls->GetVarIndex (_member);
 		if (_oidx.has_value ()) {
-			TODO;
 			auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _oidx.value ());
 			//std::string _idx_str = std::format ("{}", _oidx.value ());
 			//auto _idx = AstValue::FromValue (m_value_builder, _idx_str, "int32", _t).value ();
