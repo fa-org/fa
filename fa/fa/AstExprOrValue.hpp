@@ -173,6 +173,7 @@ struct _AST_ExprOrValue {
 	std::string GetExpectType ();
 	void SetExpectType (std::string _type);
 	std::string GetFuncName ();
+	antlr4::Token* GetToken ();
 };
 
 //using _AST_ExprOrValue = std::variant<
@@ -295,6 +296,26 @@ inline std::string _AST_ExprOrValue::GetFuncName () {
 	} else {
 		return "";
 	}
+}
+
+inline antlr4::Token* _AST_ExprOrValue::GetToken () {
+	if (m_val)
+		return m_val->m_t;
+	if (m_arrval1)
+		return m_arrval1->m_t;
+	if (m_arrval2)
+		return m_arrval2->m_t;
+	if (m_newval)
+		return m_newval->m_t;
+	if (m_op1_expr)
+		return m_op1_expr->m_op.m_t;
+	if (m_op2_expr)
+		return m_op2_expr->m_op.m_t;
+	if (m_opN_expr)
+		return m_opN_expr->m_op.m_t;
+	if (m_if_expr)
+		return m_if_expr->m_conds [0].GetToken ();
+	return nullptr;
 }
 
 inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token *_t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext *, std::string)> _cb) {

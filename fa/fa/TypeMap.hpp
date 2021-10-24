@@ -28,6 +28,17 @@ class TypeMap {
 public:
 	TypeMap (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, AstClasses& _global_classes, std::string _namespace): m_visitor (_visitor), m_ctx (_ctx), m_global_classes (_global_classes), m_namespace (_namespace) {}
 
+	static std::optional<std::tuple<std::string, std::string>> GetOp2OperatorExpectType (std::string _exp_type, std::string _op, antlr4::Token* _t) {
+		if (_op == ".") {
+			return std::make_tuple<std::string, std::string> ("", "");
+		}
+		if (_op.size () == 1) {
+			switch (_op[0]) {
+				TODO;
+			}
+		}
+	}
+
 	std::optional<std::tuple<llvm::Type* , std::string>> GetTypeT (FaParser::TypeContext* _type_ctx) {
 		auto _stype = _type_ctx->getText ();
 		auto _otype = GetType (_stype, _type_ctx->start);

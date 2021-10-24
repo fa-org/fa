@@ -74,12 +74,12 @@ public:
 private:
 	AstObjectType				m_type = AstObjectType::Void;
 	llvm::Value*				m_value = nullptr, * m_value_size = nullptr, * m_value_capacity = nullptr;
-	std::shared_ptr<FuncType>	m_func;
 	llvm::Function*				m_fp = nullptr;
 	std::string					m_value_type = "";
 	bool						m_tmp_var_flag = false;
 
 public:
+	std::shared_ptr<FuncType>	m_func;
 	std::string					m_member = "";
 };
 

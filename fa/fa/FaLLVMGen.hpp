@@ -1135,7 +1135,7 @@ private:
 
 	std::optional<AstValue> _generate_code (FuncContext& _func_ctx, _AST_ExprOrValue _ast_ev) {
 		// 转换类型
-		std::function<AstValue (AstValue, std::string)> _trans_type = [] (AstValue _val, std::string _exp_type) -> AstValue {
+		auto _trans_type = [] (AstValue _val, std::string _exp_type, antlr4::Token* _t) -> std::optional<AstValue> {
 			// TODO
 			if (_exp_type == "void")
 				return AstValue::FromVoid ();
@@ -1143,15 +1143,17 @@ private:
 			std::string _cur_type = _val.GetType ();
 			if (_cur_type == _exp_type)
 				return _val;
+			if (_val.IsFunction () && _val.m_func->m_type == _exp_type)
+				return _val;
 
-			LOG_TODO (nullptr);
-			return _val;
+			LOG_ERROR (_t, std::format ("{} 类型无法转为 {} 类型", _cur_type, _exp_type));
+			return std::nullopt;
 		};
 
 		std::string _rexp_type = _ast_ev.GetExpectType ();
 		if (_ast_ev.m_val) {
-			auto _left = _trans_type (_ast_ev.m_val->m_val, _rexp_type);
-			return _left;
+			auto _oleft = _trans_type (_ast_ev.m_val->m_val, _rexp_type, _ast_ev.GetToken ());
+			return _oleft;
 		} else if (_ast_ev.m_arrval1) {
 			auto _t = _ast_ev.m_arrval1->m_t;
 			std::string _type = _ast_ev.m_arrval2->m_expect_type;
@@ -1272,28 +1274,40 @@ private:
 				return std::nullopt;
 			auto _left = _oleft.value ();
 			//
-			_left = _trans_type (_left, _rexp_type);
+			_oleft = _trans_type (_left, _rexp_type, _ast_ev.GetToken ());
+			if (!_oleft.has_value ())
+				return std::nullopt;
+			_left = _oleft.value ();
+			//
 			auto _val = _func_ctx.DoOper1 (_left, _ast_ev.m_op1_expr->m_op.m_op, _ast_ev.m_op1_expr->m_op.m_t);
 			if (!_val.has_value ())
 				return std::nullopt;
 			return _val.value ();
 		} else if (_ast_ev.m_op2_expr) {
+			auto [_rexp_type_l, _rexp_type_r] = TypeMap::GetOp2OperatorExpectType (_rexp_type, );
+
 			auto _oleft = _generate_code (_func_ctx, _ast_ev.m_op2_expr->m_left);
 			if (!_oleft.has_value ())
 				return std::nullopt;
 			auto _left = _oleft.value ();
-			_left = _trans_type (_left, _rexp_type);
+			_oleft = _trans_type (_left, _rexp_type, _ast_ev.GetToken ());
+			if (!_oleft.has_value ())
+				return std::nullopt;
+			_left = _oleft.value ();
 			//
 			auto _oright = _generate_code (_func_ctx, _ast_ev.m_op2_expr->m_right);
 			if (!_oright.has_value ())
 				return std::nullopt;
 			auto _right = _oright.value ();
-			_right = _trans_type (_right, _rexp_type);
+			_oright = _trans_type (_right, _rexp_type, _ast_ev.GetToken ());
+			if (!_oright.has_value ())
+				return std::nullopt;
+			_right = _oright.value ();
 			//
 			auto _oval = _func_ctx.DoOper2 (_left, _ast_ev.m_op2_expr->m_op.m_op, _right, _ast_ev.m_op2_expr->m_op.m_t);
 			if (!_oval.has_value ())
 				return std::nullopt;
-			auto _val = _trans_type (_oval.value (), _rexp_type);
+			auto _val = _trans_type (_oval.value (), _rexp_type, _ast_ev.GetToken ());
 			return _val;
 		} else if (_ast_ev.m_opN_expr) {
 			if (_ast_ev.m_opN_expr->m_op.m_op == "()") {
@@ -1307,12 +1321,16 @@ private:
 					auto _oarg = _generate_code (_func_ctx, _ast_ev.m_opN_expr->m_rights [i]);
 					if (!_oarg.has_value ())
 						return std::nullopt;
-					auto _arg = _trans_type (_oarg.value (), _arg_types [i]);
-					_args.push_back (_arg);
+					_oarg = _trans_type (_oarg.value (), _arg_types [i], _ast_ev.m_opN_expr->m_rights [i].GetToken ());
+					if (!_oarg.has_value ())
+						return std::nullopt;
+					_args.push_back (_oarg.value ());
 				}
 				AstValue _val = _func_ctx.FuncInvoke (_obj, _args);
-				_val = _trans_type (_val, _rexp_type);
-				return _val;
+				auto _oval = _trans_type (_val, _rexp_type, _ast_ev.GetToken ());
+				if (!_oval.has_value ())
+					return std::nullopt;
+				return _oval.value ();
 			} else if (_ast_ev.m_opN_expr->m_op.m_op == "[]") {
 				auto _oobj = _generate_code (_func_ctx, _ast_ev.m_opN_expr->m_left);
 				if (!_oobj.has_value ())
@@ -1325,11 +1343,13 @@ private:
 				auto _oidx = _generate_code (_func_ctx, _ast_ev.m_opN_expr->m_rights [0]);
 				if (!_oidx.has_value ())
 					return std::nullopt;
-				auto _oval = _func_ctx.AccessArrayMember (_oobj.value (), _oidx.value (), _ast_ev.m_opN_expr->m_op.m_t);
+				auto _oval = _func_ctx.AccessArrayMember (_oobj.value (), _oidx.value (), _ast_ev.GetToken ());
 				if (!_oval.has_value ())
 					return std::nullopt;
-				AstValue _val = _trans_type (_oval.value (), _rexp_type);
-				return _val;
+				_oval = _trans_type (_oval.value (), _rexp_type, _ast_ev.GetToken ());
+				if (!_oval.has_value ())
+					return std::nullopt;
+				return _oval.value ();
 			} else {
 				LOG_TODO (_ast_ev.m_opN_expr->m_op.m_t);
 				return std::nullopt;
@@ -1377,8 +1397,10 @@ private:
 			};
 			if (!_generate_ifexpr ())
 				return std::nullopt;
-			_var_temp = _trans_type (_var_temp, _rexp_type);
-			return _var_temp;
+			_ovar_temp = _trans_type (_var_temp, _rexp_type, _ast_ev.GetToken ());
+			if (!_ovar_temp.has_value ())
+				return std::nullopt;
+			return _ovar_temp.value ();
 		}
 		LOG_TODO (nullptr);
 		return std::nullopt;
