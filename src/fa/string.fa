@@ -2,5 +2,9 @@ public class string {
 	//cptr CPtr;
 	private int8[] m_array;
 
-	public cptr Data () => m_array.Data;
+	//public cptr Data () => m_array.Data;// TODO
+
+	CastFrom () {
+		//
+	}
 }

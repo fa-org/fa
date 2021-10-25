@@ -26,17 +26,64 @@
 //template<int bitsize>
 class TypeMap {
 public:
-	TypeMap (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, AstClasses& _global_classes, std::string _namespace): m_visitor (_visitor), m_ctx (_ctx), m_global_classes (_global_classes), m_namespace (_namespace) {}
+	TypeMap (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, AstClasses& _global_classes, std::string _namespace, std::vector<std::string>& _uses): m_visitor (_visitor), m_ctx (_ctx), m_global_classes (_global_classes), m_namespace (_namespace), m_uses (_uses) {}
 
 	static std::optional<std::tuple<std::string, std::string>> GetOp2OperatorExpectType (std::string _exp_type, std::string _op, antlr4::Token* _t) {
-		if (_op == ".") {
-			return std::make_tuple<std::string, std::string> ("", "");
-		}
 		if (_op.size () == 1) {
 			switch (_op[0]) {
-				TODO;
+			case '+':
+			case '-':
+			case '*':
+			case '/':
+			case '%':
+			case '|':
+			case '&':
+			case '^':
+			case '<':
+			case '>':
+				return std::make_tuple (_exp_type, _exp_type);
+			case '=':
+				return std::make_tuple (std::format ("${}", _exp_type), _exp_type);
+			case '.':
+				return std::make_tuple<std::string, std::string> ("", "");
+			}
+		} else if (_op.size () == 2) {
+			if (_op [0] == _op [1]) {
+				switch (_op [0]) {
+				case '?':
+					return std::make_tuple (std::format ("{}?", _exp_type), _exp_type);
+				case '*':
+					return std::make_tuple (_exp_type, "int");
+				case '&':
+				case '|':
+					return std::make_tuple ("bool", "bool");
+				case '<':
+				case '>':
+					return std::make_tuple (_exp_type, "int");
+				}
+			} else if (_op [1] == '=') {
+				switch (_op [0]) {
+				case '<':
+				case '>':
+				case '+':
+				case '-':
+				case '*':
+				case '/':
+				case '%':
+				case '|':
+				case '&':
+				case '^':
+					return std::make_tuple (std::format ("${}", _exp_type), _exp_type);
+				}
+			}
+		} else if (_op.size () == 3) {
+			if (_op == "<<=" || _op == ">>=") {
+				return std::make_tuple (std::format ("${}", _exp_type), _exp_type);
 			}
 		}
+
+		LOG_ERROR (_t, std::format ("未识别的运算符 {}。（期望类型：{}）", _op, _exp_type));
+		return std::nullopt;
 	}
 
 	std::optional<std::tuple<llvm::Type* , std::string>> GetTypeT (FaParser::TypeContext* _type_ctx) {
@@ -80,7 +127,7 @@ public:
 		} else if (_stype == "cptr") {
 			return llvm::Type::getInt8PtrTy (*m_ctx);
 		} else {
-			auto _ocls = m_global_classes.GetClass (_stype, m_namespace);
+			auto _ocls = m_global_classes.GetClass (_stype, m_namespace, m_uses);
 			if (_ocls.has_value ())
 				return _ocls.value ()->GetLlvmType ([&] (std::string _stype, antlr4::Token* _t) { return GetType (_stype, _t); });
 		}
@@ -262,6 +309,8 @@ public:
 
 		if (_src == _dest)
 			return true;
+		if (_src == "cptr" && _dest == "hello.fa.string")
+			return true;
 	 	// TODO
 		return false;
 	}
@@ -337,6 +386,7 @@ private:
 	std::shared_ptr<llvm::LLVMContext>	m_ctx = nullptr;
 	AstClasses&							m_global_classes;
 	std::string							m_namespace;
+	std::vector<std::string>&			m_uses;
 };
 
 

@@ -141,7 +141,7 @@ std::optional<AstValue> AstValue::DoOper1 (llvm::IRBuilder<>& _builder, std::sha
 	return std::nullopt;
 }
 
-std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue& _other, antlr4::Token* _t, std::shared_ptr<FuncTypes> _global_funcs, AstClasses& _global_classes, std::string _namespace) {
+std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue& _other, antlr4::Token* _t, std::shared_ptr<FuncTypes> _global_funcs, AstClasses& _global_classes, std::string _namespace, std::vector<std::string>& _uses) {
 	std::optional<AstValue> _tmp;
 	if (_op.size () == 1) {
 		switch (_op [0]) {
@@ -161,7 +161,7 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 		case '.':
 			// 如果是临时类型那么拼凑命名空间
 			if (m_type == AstObjectType::MemberStr) {
-				auto _ocls = _global_classes.GetClass (m_member, _namespace);
+				auto _ocls = _global_classes.GetClass (m_member, _namespace, _uses);
 				// 未找到类，那么继续拼接
 				if (!_ocls.has_value ()) {
 					if (_other.m_type != AstObjectType::MemberStr) {
@@ -222,21 +222,21 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 	} else if (_op.size () == 2) {
 		if (_op [0] == _op [1]) {
 			switch (_op [0]) {
-			case '?':
-				{
-					std::string _tmp_value_type = "";
-					if (m_value_type [m_value_type.size () - 1] == '?') {
-						_tmp_value_type = m_value_type.substr (0, m_value_type.size () - 1);
-					} else if (m_value_type [m_value_type.size () - 2] == '?') {
-						_tmp_value_type = m_value_type.substr (0, m_value_type.size () - 1);
-						_tmp_value_type [_tmp_value_type.size () - 1] = m_value_type [m_value_type.size () - 1];
-					} else {
-						LOG_ERROR (_t, "目标类型不可为空，无法使用 ?? 运算符");
-						return std::nullopt;
-					}
-					return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), _tmp_value_type };
-				}
-			case '*': return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), m_value_type };
+			//case '?':
+			//	{
+			//		std::string _tmp_value_type = "";
+			//		if (m_value_type [m_value_type.size () - 1] == '?') {
+			//			_tmp_value_type = m_value_type.substr (0, m_value_type.size () - 1);
+			//		} else if (m_value_type [m_value_type.size () - 2] == '?') {
+			//			_tmp_value_type = m_value_type.substr (0, m_value_type.size () - 1);
+			//			_tmp_value_type [_tmp_value_type.size () - 1] = m_value_type [m_value_type.size () - 1];
+			//		} else {
+			//			LOG_ERROR (_t, "目标类型不可为空，无法使用 ?? 运算符");
+			//			return std::nullopt;
+			//		}
+			//		return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), _tmp_value_type };
+			//	}
+			//case '*': return AstValue { _builder.CreateAdd (Value (_builder), _other.Value (_builder)), m_value_type };
 			case '&': return AstValue { _builder.CreateAnd (Value (_builder), _other.Value (_builder)), m_value_type };
 			case '|': return AstValue { _builder.CreateOr (Value (_builder), _other.Value (_builder)), m_value_type };
 			case '<': return AstValue { _builder.CreateShl (Value (_builder), _other.Value (_builder)), m_value_type };
@@ -260,19 +260,19 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 			case '|':
 			case '&':
 			case '^':
-				_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 1), _other, _t, _global_funcs, _global_classes, _namespace);
+				_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 1), _other, _t, _global_funcs, _global_classes, _namespace, _uses);
 				if (!_tmp.has_value ())
 					return std::nullopt;
-				return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t, _global_funcs, _global_classes, _namespace);
+				return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t, _global_funcs, _global_classes, _namespace, _uses);
 			case '!': return AstValue { _builder.CreateICmpNE (Value (_builder), _other.Value (_builder)), "bool" };
 			}
 		}
 	} else if (_op.size () == 3) {
 		if (_op == "<<=" || _op == ">>=") {
-			_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 2), _other, _t, _global_funcs, _global_classes, _namespace);
+			_tmp = DoOper2 (_builder, _value_builder, _op.substr (0, 2), _other, _t, _global_funcs, _global_classes, _namespace, _uses);
 			if (!_tmp.has_value ())
 				return std::nullopt;
-			return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t, _global_funcs, _global_classes, _namespace);
+			return DoOper2 (_builder, _value_builder, "=", _tmp.value (), _t, _global_funcs, _global_classes, _namespace, _uses);
 		}
 	}
 
@@ -280,7 +280,11 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 	return std::nullopt;
 }
 
-std::string AstValue::GetType () { return m_value_type; }
+std::string AstValue::GetType () {
+	if (m_type == AstObjectType::MemberStr)
+		return "[member]";
+	return m_value_type;
+}
 
 void AstValue::SetType (std::string _value_type) { m_value_type = _value_type; }
 

@@ -29,11 +29,11 @@
 
 class FuncContext {
 public:
-	FuncContext (std::shared_ptr<IAstClass> _cls, AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::shared_ptr<FuncTypes> _func_in_funcs, std::string _func_name, std::string _exp_type, std::string _namespace, std::vector<std::tuple<std::string, std::string>> &_args):
+	FuncContext (std::shared_ptr<IAstClass> _cls, AstClasses& _global_classes, std::shared_ptr<FuncTypes> _global_funcs, std::shared_ptr<FuncTypes> _func_in_funcs, std::string _func_name, std::string _exp_type, std::string _namespace, std::vector<std::string>& _uses, std::vector<std::tuple<std::string, std::string>> &_args):
 		m_cls (_cls), m_global_classes (_global_classes), m_global_funcs (_global_funcs), m_ctx (_func_in_funcs->m_ctx),
 		m_module (_func_in_funcs->m_module), m_type_map (_func_in_funcs->m_type_map), m_value_builder (_func_in_funcs->m_value_builder),
 		m_func (_func_in_funcs->GetFunc (_func_name).value ()), m_fp (_func_in_funcs->GetFuncPtr (_func_name)),
-		m_exp_type (_exp_type), m_namespace (_namespace)
+		m_exp_type (_exp_type), m_namespace (_namespace), m_uses (_uses)
 	{
 		llvm::BasicBlock* _bb = llvm::BasicBlock::Create (*m_ctx, "", m_fp);
 		m_builder = std::make_shared<llvm::IRBuilder<>> (_bb);
@@ -221,7 +221,7 @@ public:
 	}
 	std::optional<AstValue> DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token* _t) {
 		// TODO ’‚∂˘≈–∂œ «∑Òvirtual
-		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t, m_global_funcs, m_global_classes, m_namespace);
+		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t, m_global_funcs, m_global_classes, m_namespace, m_uses);
 	}
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
 		if (!m_virtual) {
@@ -332,6 +332,7 @@ private:
 	llvm::Function*																	m_fp = nullptr;
 	std::string																		m_exp_type;
 	std::string																		m_namespace;
+	std::vector<std::string>&														m_uses;
 	std::map<std::string, std::tuple<llvm::Value*, std::string>>					m_args;
 	//
 	std::shared_ptr<llvm::IRBuilder<>>												m_builder;

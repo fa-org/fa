@@ -57,7 +57,7 @@ public:
 	llvm::Value* ValueRaw ();
 	llvm::CallInst* FuncInvoke (llvm::IRBuilder<>& _builder, std::vector<llvm::Value*>& _args);
 	std::optional<AstValue> DoOper1 (llvm::IRBuilder<>& _builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, antlr4::Token* _t);
-	std::optional<AstValue> DoOper2 (llvm::IRBuilder<>& _builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue& _other, antlr4::Token* _t, std::shared_ptr<FuncTypes> _global_funcs, AstClasses& _global_classes, std::string _namespace);
+	std::optional<AstValue> DoOper2 (llvm::IRBuilder<>& _builder, std::shared_ptr<ValueBuilder> _value_builder, std::string _op, AstValue& _other, antlr4::Token* _t, std::shared_ptr<FuncTypes> _global_funcs, AstClasses& _global_classes, std::string _namespace, std::vector<std::string>& _uses);
 
 	std::string GetType ();
 	void SetType (std::string _value_type);

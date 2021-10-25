@@ -26,7 +26,7 @@ struct _AST_ValueCtx {
 	_AST_ValueCtx (AstValue _val, antlr4::Token* _t, std::string _expect_type): m_val (_val), m_t (_t), m_expect_type (_expect_type) {}
 
 	AstValue					m_val {};
-	antlr4::Token*				m_t = nullptr;
+	antlr4::Token* m_t = nullptr;
 	std::string					m_expect_type = "";
 };
 
@@ -35,7 +35,7 @@ struct _AST_Arr1ValueCtx {
 
 	std::vector<_AST_ExprOrValue>	m_vals;					// start、stop、step
 	std::string						m_str_capacity = "";
-	antlr4::Token*					m_t = nullptr;
+	antlr4::Token* m_t = nullptr;
 	std::string						m_expect_type = "";
 };
 
@@ -44,12 +44,12 @@ struct _AST_Arr2ValueCtx {
 
 	std::vector<_AST_ExprOrValue>	m_vals;
 	std::string						m_str_capacity = "";
-	antlr4::Token*					m_t = nullptr;
+	antlr4::Token* m_t = nullptr;
 	std::string						m_expect_type = "";
 };
 
 struct _AST_NewCtx {
-	_AST_NewCtx (antlr4::Token* _t, IAstClass *_cls, std::string _expect_type): m_t (_t), m_cls (_cls), m_expect_type (_expect_type) {
+	_AST_NewCtx (antlr4::Token* _t, IAstClass* _cls, std::string _expect_type): m_t (_t), m_cls (_cls), m_expect_type (_expect_type) {
 		m_cls->GetVars ([&] (AstClassVar* _cls_var) {
 			if (_cls_var->m_is_static)
 				return true;
@@ -62,7 +62,7 @@ struct _AST_NewCtx {
 	}
 
 	// 设置初始化参数
-	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue &_param, antlr4::Token* _t) {
+	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue& _param, antlr4::Token* _t) {
 		if (!m_tvar_all.contains (_cls_var)) {
 			if (m_tvar_all_tmp.contains (_cls_var)) {
 				LOG_ERROR (_t, std::format ("对象初始化时传递的 {} 参数重复", _cls_var));
@@ -80,10 +80,10 @@ struct _AST_NewCtx {
 	}
 
 	// 检查是否所有参数已初始化
-	bool CheckVarsAllInit (antlr4::Token *_t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext *, std::string)> _cb);
+	bool CheckVarsAllInit (antlr4::Token* _t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _cb);
 
-	antlr4::Token*					m_t = nullptr;
-	IAstClass*						m_cls = nullptr;
+	antlr4::Token* m_t = nullptr;
+	IAstClass* m_cls = nullptr;
 	std::string						m_expect_type = "";
 	std::vector<std::string>		m_cls_vars;
 	std::vector<_AST_ExprOrValue>	m_params;
@@ -104,7 +104,7 @@ struct _AST_Oper1Ctx {
 	}
 
 	std::string					m_op = "";
-	antlr4::Token*				m_t = nullptr;
+	antlr4::Token* m_t = nullptr;
 	_Op1Type					m_type = _Op1Type::Prefix;
 };
 
@@ -131,7 +131,7 @@ struct _AST_Oper2Ctx {
 	}
 
 	std::string					m_op = "";
-	antlr4::Token*				m_t = nullptr;
+	antlr4::Token* m_t = nullptr;
 	_Op2Type					m_type = _Op2Type::Other;
 };
 
@@ -149,7 +149,7 @@ struct _AST_ExprOrValue {
 	_AST_ExprOrValue (std::shared_ptr<_AST_Op2ExprTreeCtx> op2_expr): m_op2_expr (op2_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_OpNExprTreeCtx> opN_expr): m_opN_expr (opN_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_IfExprTreeCtx> if_expr): m_if_expr (if_expr) {}
-	_AST_ExprOrValue &operator= (const _AST_ExprOrValue &_o) {
+	_AST_ExprOrValue& operator= (const _AST_ExprOrValue& _o) {
 		m_val = _o.m_val;
 		m_arrval1 = _o.m_arrval1;
 		m_arrval2 = _o.m_arrval2;
@@ -158,7 +158,7 @@ struct _AST_ExprOrValue {
 		m_op2_expr = _o.m_op2_expr;
 		m_opN_expr = _o.m_opN_expr;
 		m_if_expr = _o.m_if_expr;
-		return* this;
+		return*this;
 	}
 
 	std::shared_ptr<_AST_ValueCtx>						m_val;
@@ -195,7 +195,7 @@ struct _AST_Op2ExprTreeCtx {
 	_AST_ExprOrValue									m_right;
 	std::string											m_expect_type;
 
-	bool CalcExpectType (AstClasses &_classes, std::string _namespace) {
+	bool CalcExpectType (AstClasses& _classes, std::string _namespace, std::vector<std::string>& _uses) {
 		const static std::set<std::string> s_compare_ops { ">", ">=", "<", "<=", "==", "!=" };
 		std::string _op_str = m_op.m_op;
 		if (s_compare_ops.contains (_op_str)) {
@@ -205,9 +205,9 @@ struct _AST_Op2ExprTreeCtx {
 
 		if (_op_str == ".") {
 			std::string _class_name = m_left.GetExpectType ();
-			if (_class_name == "")
+			if (_class_name == "" || _class_name == "[member]")
 				_class_name = m_left.m_val->m_val.m_member;
-			auto _ocls = _classes.GetClass (_class_name, _namespace);
+			auto _ocls = _classes.GetClass (_class_name, _namespace, _uses);
 			if (!_ocls.has_value ()) {
 				LOG_ERROR (m_op.m_t, "仅支持结构体对象访问成员1");
 				return false;
@@ -318,7 +318,7 @@ inline antlr4::Token* _AST_ExprOrValue::GetToken () {
 	return nullptr;
 }
 
-inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token *_t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext *, std::string)> _cb) {
+inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token* _t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _cb) {
 	if (m_tvar_init.size () != 0) {
 		for (auto _tvar_init : m_tvar_init)
 			LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
@@ -347,10 +347,10 @@ inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token *_t, std::function<std:
 	}
 	for (size_t i = 0; i < _vidx.size () - 1; ++i) {
 		for (size_t j = i; j < _vidx.size (); ++j) {
-			if (_vidx[j] < _vidx[i]) {
-				std::tie (_vidx[j], _vidx[i]) = std::make_tuple (_vidx[i], _vidx[j]);
-				std::tie (m_cls_vars[j], m_cls_vars[i]) = std::make_tuple (m_cls_vars[i], m_cls_vars[j]);
-				std::tie (m_params[j], m_params[i]) = std::make_tuple (m_params[i], m_params[j]);
+			if (_vidx [j] < _vidx [i]) {
+				std::tie (_vidx [j], _vidx [i]) = std::make_tuple (_vidx [i], _vidx [j]);
+				std::tie (m_cls_vars [j], m_cls_vars [i]) = std::make_tuple (m_cls_vars [i], m_cls_vars [j]);
+				std::tie (m_params [j], m_params [i]) = std::make_tuple (m_params [i], m_params [j]);
 			}
 		}
 	}

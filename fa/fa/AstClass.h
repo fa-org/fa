@@ -175,7 +175,7 @@ public:
 // ¿‡ºØ∫œ
 class AstClasses {
 public:
-	std::optional<std::shared_ptr<IAstClass>> GetClass (std::string _name, std::string _namesapce);
+	std::optional<std::shared_ptr<IAstClass>> GetClass (std::string _name, std::string _namesapce, std::vector<std::string>& _uses);
 
 	std::shared_ptr<AstClass> CreateNewClass (PublicLevel _level, std::string _module_name, std::string _name);
 

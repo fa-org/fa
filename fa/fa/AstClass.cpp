@@ -190,7 +190,7 @@ std::optional<AstClassVar*> AstClass::GetVar (size_t _idx) {
 
 
 // 类集合
-std::optional<std::shared_ptr<IAstClass>> AstClasses::GetClass (std::string _name, std::string _namesapce) {
+std::optional<std::shared_ptr<IAstClass>> AstClasses::GetClass (std::string _name, std::string _namesapce, std::vector<std::string>& _uses) {
 	if (m_classes.contains (_name))
 		return m_classes [_name];
 	size_t _p = _namesapce.find ('.');
@@ -203,6 +203,12 @@ std::optional<std::shared_ptr<IAstClass>> AstClasses::GetClass (std::string _nam
 	};
 	if (_namesapce != "") {
 		_tmp = std::format ("{}.{}", _namesapce, _name);
+		if (m_classes.contains (_tmp))
+			return m_classes [_tmp];
+	}
+	// TODO 检查use的命名空间
+	for (std::string _use : _uses) {
+		_tmp = std::format ("{}.{}", _use, _name);
 		if (m_classes.contains (_tmp))
 			return m_classes [_tmp];
 	}

@@ -61,7 +61,7 @@ public:
 	FaLLVMGen (std::string _module_name, std::string _namespace, std::vector<std::string>& _libs, std::map<std::string, std::shared_ptr<FuncType>>& _global_funcs, AstClasses& _global_classes): m_module_name (_module_name), m_namespace (_namespace), m_libs (_libs), m_global_classes (_global_classes) {
 		m_ctx = std::make_shared<llvm::LLVMContext> ();
 		m_module = std::make_shared<llvm::Module> (m_module_name, *m_ctx);
-		m_type_map = std::make_shared<TypeMap> (&m_visitor, m_ctx, _global_classes, m_namespace);
+		m_type_map = std::make_shared<TypeMap> (&m_visitor, m_ctx, _global_classes, m_namespace, m_uses);
 		m_value_builder = std::make_shared<ValueBuilder> (m_type_map, m_ctx, m_module);
 		m_local_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder, m_local_funcs_data);
 		m_global_funcs = std::make_shared<FuncTypes> (m_ctx, m_type_map, m_module, m_value_builder, _global_funcs);
@@ -102,7 +102,7 @@ public:
 
 			// 类型名称
 			std::string _name = std::format ("{}.{}", m_namespace, _class_raw->Id ()->getText ());
-			auto _oclass = m_global_classes.GetClass (_name, "");
+			auto _oclass = m_global_classes.GetClass (_name, "", m_uses);
 			if (_oclass.has_value ()) {
 				LOG_ERROR (_class_raw->Id ()->getSymbol (), "类名重复定义");
 				return false;
@@ -205,7 +205,7 @@ public:
 	bool InitClassFunc () {
 		for (auto _class_raw : m_classes) {
 			std::string _name = std::format ("{}.{}", m_namespace, _class_raw->Id ()->getText ());
-			std::shared_ptr<IAstClass> _class = m_global_classes.GetClass (_name, m_namespace).value ();
+			std::shared_ptr<IAstClass> _class = m_global_classes.GetClass (_name, m_namespace, m_uses).value ();
 
 			// 成员函数
 			for (auto _func_raw : _class_raw->classFunc ()) {
@@ -255,7 +255,7 @@ public:
 				std::vector<std::tuple<std::string, std::string>> _args;
 				for (size_t i = 0; i < _cls_func->m_arg_names.size (); ++i)
 					_args.push_back ({ _cls_func->m_arg_names [i], _cls_func->m_arg_types [i] });
-				FuncContext _func_ctx { _cls, m_global_classes, m_global_funcs, m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type, m_namespace, _args };
+				FuncContext _func_ctx { _cls, m_global_classes, m_global_funcs, m_global_funcs, _cls_func->m_name_abi, _cls_func->m_ret_type, m_namespace, m_uses, _args };
 				//
 				auto _expr_raw = _cls_func->m_func->expr ();
 				if (_expr_raw) {
@@ -299,7 +299,7 @@ public:
 				return false;
 			std::string _ret_type = _ret_type_raw->getText ();
 			std::vector<std::tuple<std::string, std::string>> _args;
-			FuncContext _func_ctx { nullptr, m_global_classes, m_global_funcs, m_local_funcs, "@fa_main", _ret_type, m_namespace, _args };
+			FuncContext _func_ctx { nullptr, m_global_classes, m_global_funcs, m_local_funcs, "@fa_main", _ret_type, m_namespace, m_uses, _args };
 			bool _a = false;
 			if (!StmtBuilder (_func_ctx, _stmts_raw, _a))
 				return false;
@@ -883,7 +883,7 @@ private:
 						_ptr->m_left = _val;
 						_ptr->m_op = _AST_Oper2Ctx { _suffix_raw };
 						_ptr->m_right = _AST_ExprOrValue { std::make_shared<_AST_ValueCtx> (AstValue { _suffix_raw->Id ()->getText () }, _suffix_raw->Id ()->getSymbol (), "[member]") };
-						if (!_ptr->CalcExpectType (m_global_classes, m_namespace)) {
+						if (!_ptr->CalcExpectType (m_global_classes, m_namespace, m_uses)) {
 							LOG_ERROR (_suffix_raw->start, "对象不存在目标成员");
 							return std::nullopt;
 						}
@@ -915,8 +915,10 @@ private:
 					return std::nullopt;
 				}
 				auto _f = _of.value ();
-				if (!TypeMap::CanImplicitConvTo (_f->m_type, _exp_type))
+				if (!TypeMap::CanImplicitConvTo (_f->m_type, _exp_type)) {
+					LOG_ERROR (_expr_raw->Id ()->getSymbol (), std::format ("{} 类型无法转为 {} 类型", _f->m_type, _exp_type));
 					return std::nullopt;
+				}
 				auto _fp = m_local_funcs->GetFuncPtr (_name);
 				return std::make_shared<_AST_ValueCtx> (AstValue { _f, _fp }, _expr_raw->start, _exp_type == "" ? _f->m_type : _exp_type);
 			} else if (_expr_raw->Id ()) {
@@ -924,13 +926,17 @@ private:
 				if (!_oval.has_value ())
 					return std::nullopt;
 				AstValue _val = _oval.value ();
-				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
+				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type)) {
+					LOG_ERROR (_expr_raw->Id ()->getSymbol (), std::format ("{} 类型无法转为 {} 类型", _val.GetType (), _exp_type));
 					return std::nullopt;
+				}
 				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->literal ()) {
 				AstValue _val { m_value_builder, _expr_raw->literal () };
-				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type))
+				if (!TypeMap::CanImplicitConvTo (_val.GetType (), _exp_type)) {
+					LOG_ERROR (_expr_raw->literal ()->start, std::format ("{} 类型无法转为 {} 类型", _val.GetType (), _exp_type));
 					return std::nullopt;
+				}
 				return std::make_shared<_AST_ValueCtx> (_val, _expr_raw->start, _exp_type == "" ? _val.GetType () : _exp_type);
 			} else if (_expr_raw->ifExpr ()) {
 				return _parse_if_expr (_expr_raw->ifExpr (), _exp_type);
@@ -1136,7 +1142,8 @@ private:
 	std::optional<AstValue> _generate_code (FuncContext& _func_ctx, _AST_ExprOrValue _ast_ev) {
 		// 转换类型
 		auto _trans_type = [] (AstValue _val, std::string _exp_type, antlr4::Token* _t) -> std::optional<AstValue> {
-			// TODO
+			if (_exp_type == "")
+				return _val;
 			if (_exp_type == "void")
 				return AstValue::FromVoid ();
 
@@ -1284,13 +1291,16 @@ private:
 				return std::nullopt;
 			return _val.value ();
 		} else if (_ast_ev.m_op2_expr) {
-			auto [_rexp_type_l, _rexp_type_r] = TypeMap::GetOp2OperatorExpectType (_rexp_type, );
+			auto _orexp_type_lr = TypeMap::GetOp2OperatorExpectType (_rexp_type, _ast_ev.m_op2_expr->m_op.m_op, _ast_ev.m_op2_expr->m_op.m_t);
+			if (!_orexp_type_lr.has_value ())
+				return std::nullopt;
+			auto [_rexp_type_l, _rexp_type_r] = _orexp_type_lr.value ();
 
 			auto _oleft = _generate_code (_func_ctx, _ast_ev.m_op2_expr->m_left);
 			if (!_oleft.has_value ())
 				return std::nullopt;
 			auto _left = _oleft.value ();
-			_oleft = _trans_type (_left, _rexp_type, _ast_ev.GetToken ());
+			_oleft = _trans_type (_left, _rexp_type_l, _ast_ev.GetToken ());
 			if (!_oleft.has_value ())
 				return std::nullopt;
 			_left = _oleft.value ();
@@ -1299,7 +1309,7 @@ private:
 			if (!_oright.has_value ())
 				return std::nullopt;
 			auto _right = _oright.value ();
-			_oright = _trans_type (_right, _rexp_type, _ast_ev.GetToken ());
+			_oright = _trans_type (_right, _rexp_type_r, _ast_ev.GetToken ());
 			if (!_oright.has_value ())
 				return std::nullopt;
 			_right = _oright.value ();
@@ -1407,16 +1417,7 @@ private:
 	}
 
 	std::tuple<std::optional<IAstClass*>, bool/*是否重复*/> FindAstClass (std::string _raw_name) {
-		auto _pcls = m_global_classes.GetClass (_raw_name, m_namespace);
-		for (std::string _use : m_uses) {
-			std::string _raw_name2 = std::format ("{}.{}", _use, _raw_name);
-			auto _pcls2 = m_global_classes.GetClass (_raw_name2, m_namespace);
-			if (_pcls.has_value () && _pcls2.has_value ()) {
-				return std::make_tuple<std::optional<IAstClass*>, bool> (_pcls.value ().get (), true);
-			} else if (!_pcls.has_value ()) {
-				_pcls = _pcls2;
-			}
-		}
+		auto _pcls = m_global_classes.GetClass (_raw_name, m_namespace, m_uses);
 		return std::make_tuple<std::optional<IAstClass*>, bool> (_pcls.value ().get (), false);
 	}
 
