@@ -63,14 +63,9 @@ public class TestClass {
 	public string Value4 { get; set; } = "hello";
 
 	// 可以被赋予哪些类型的值
-	CastFrom (int32 _n) {}
-	CastFrom (double _n) {}
-	CastFrom (string _s) {}
-
-	// 能够隐式转换为哪些类型
-	int32 CastTo () => 12;
-	double CastTo () => 0.0;
-	string CastTo () => "";
+	public static TestClass From (int32 _n) {}
+	public static TestClass From (double _n) {}
+	public static TestClass From (string _s) {}
 
 	// 定义函数
 	public string func () {}

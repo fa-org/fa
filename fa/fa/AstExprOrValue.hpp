@@ -25,9 +25,9 @@ enum class _Op2Type { None, Assign, NoChange, Compare, Other };
 struct _AST_ValueCtx {
 	_AST_ValueCtx (AstValue _val, antlr4::Token* _t, std::string _expect_type): m_val (_val), m_t (_t), m_expect_type (_expect_type) {}
 
-	AstValue					m_val {};
-	antlr4::Token* m_t = nullptr;
-	std::string					m_expect_type = "";
+	AstValue						m_val {};
+	antlr4::Token*					m_t = nullptr;
+	std::string						m_expect_type = "";
 };
 
 struct _AST_Arr1ValueCtx {
@@ -35,7 +35,7 @@ struct _AST_Arr1ValueCtx {
 
 	std::vector<_AST_ExprOrValue>	m_vals;					// start¡¢stop¡¢step
 	std::string						m_str_capacity = "";
-	antlr4::Token* m_t = nullptr;
+	antlr4::Token*					m_t = nullptr;
 	std::string						m_expect_type = "";
 };
 
@@ -44,7 +44,7 @@ struct _AST_Arr2ValueCtx {
 
 	std::vector<_AST_ExprOrValue>	m_vals;
 	std::string						m_str_capacity = "";
-	antlr4::Token* m_t = nullptr;
+	antlr4::Token*					m_t = nullptr;
 	std::string						m_expect_type = "";
 };
 
@@ -103,9 +103,9 @@ struct _AST_Oper1Ctx {
 		}
 	}
 
-	std::string					m_op = "";
-	antlr4::Token* m_t = nullptr;
-	_Op1Type					m_type = _Op1Type::Prefix;
+	std::string						m_op = "";
+	antlr4::Token*					m_t = nullptr;
+	_Op1Type						m_type = _Op1Type::Prefix;
 };
 
 struct _AST_Oper2Ctx {
@@ -242,6 +242,7 @@ struct _AST_OpNExprTreeCtx {
 };
 
 struct _AST_IfExprTreeCtx {
+	antlr4::Token*										m_t = nullptr;
 	std::vector<_AST_ExprOrValue>						m_conds;
 	std::vector<std::vector<FaParser::StmtContext*>>	m_bodys1_raw;
 	std::vector<FaParser::ExprContext*>					m_bodys2;
@@ -314,7 +315,7 @@ inline antlr4::Token* _AST_ExprOrValue::GetToken () {
 	if (m_opN_expr)
 		return m_opN_expr->m_op.m_t;
 	if (m_if_expr)
-		return m_if_expr->m_conds [0].GetToken ();
+		return m_if_expr->m_t;
 	return nullptr;
 }
 

@@ -3,5 +3,6 @@
 
 
 public class Console {
-	static void Write (string s) { ::puts ("hello world\n"); } // TODO 
+	//public static void Write (string s) { ::puts ("hello world\n"); } // TODO s.Data ()
+	public static void Write (cptr s) { ::puts (s); }
 }

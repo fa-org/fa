@@ -46,6 +46,7 @@
 #include "AstExprOrValue.hpp"
 #include "FuncType.h"
 #include "AstClass.h"
+#include "FaLexer.h"
 
 
 
@@ -1094,6 +1095,7 @@ private:
 		};
 		_parse_if_expr = [&] (FaParser::IfExprContext* _expr_raw, std::string _exp_type)->std::optional<_AST_ExprOrValue> {
 			auto _if_expr = std::make_shared<_AST_IfExprTreeCtx> ();
+			_if_expr->m_t = _expr_raw->start;
 			for (auto _cond_raw : _expr_raw->expr ()) {
 				auto _cond_oval = _parse_expr (_cond_raw, "bool");
 				if (!_cond_oval.has_value ())
@@ -1422,71 +1424,6 @@ private:
 	}
 
 	std::optional<AstValue> FindValueType (FuncContext& _func_ctx, std::string _raw_name, antlr4::Token* _t) {
-		//size_t _p = _raw_name.find ('.');
-		//if (_p != std::string::npos) {
-		//	// 包含 . 运算符
-		//	std::string _prefix = _raw_name.substr (0, _p);
-		//	std::string _suffix = _raw_name.substr (_p + 1);
-		//
-		//	// 猜测前半段是变量
-		//	auto _oval = _func_ctx.GetVariable (_prefix);
-		//	if (_oval.has_value ()) {
-		//		AstValue _val = _oval.value ();
-		//		return _func_ctx.AccessMember (_val, _suffix, _t);
-		//	}
-		//
-		//	//// 猜测前半段是参数
-		//	//_oval = _func_ctx.GetArgument (_prefix);
-		//	//if (_oval.has_value ()) {
-		//	//	AstValue _val = _oval.value ();
-		//	//	return _func_ctx.AccessMember (_val, _suffix, _t);
-		//	//}
-		//
-		//	//// 猜测前半段可能是类
-		//	//auto [_oct, _multi] = FindAstClass (_prefix);
-		//	//if (_multi) {
-		//	//	LOG_ERROR (_t, std::format ("无法准确识别的标识符 {}", _prefix));
-		//	//	return std::nullopt;
-		//	//}
-		//	//if (_oct.has_value ()) {
-		//	//	// 静态属性/静态方法或枚举值
-		//	//	auto _oitem = _oct.value ()->GetMember (_suffix);
-		//	//	if (_oitem.has_value ()) {
-		//	//		auto _item = _oitem.value ();
-		//	//		if (_item->IsStatic ()) {
-		//	//			//return _item->GetAstValue ();
-		//	//			if (_item->GetType () == AstClassItemType::Var) {
-		//	//				// 全局静态属性，此处返回全局变量
-		//	//			} else if (_item->GetType () == AstClassItemType::Func) {
-		//	//				// 静态方法
-		//	//				auto _func = dynamic_cast<AstClassFunc*> (_item);
-		//	//				auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
-		//	//				auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
-		//	//				return AstValue { _f, _fp };
-		//	//			}
-		//	//		}
-		//	//	}
-		//	//	//// 猜测后半段是静态属性
-		//	//	//auto _ovar = _ct->GetVar (_suffix);
-		//	//	//if (_ovar.has_value ()) {
-		//	//	//	auto& _val = _ovar.value ();
-		//	//	//	if (_val->m_is_static) {
-		//	//	//		// TODO 定义全局变量，此处返回全局变量
-		//	//	//	}
-		//	//	//}
-		//
-		//	//	//// 猜测后半段是静态方法
-		//	//	//auto _ofunc = _ct->GetFunc (_suffix);
-		//	//	//if (_ofunc.has_value ()) {
-		//	//	//	auto& _func = _ofunc.value ();
-		//	//	//	auto _f = m_global_funcs->GetFunc (_func->m_name_abi).value ();
-		//	//	//	auto _fp = m_global_funcs->GetFuncPtr (_func->m_name_abi);
-		//	//	//	return AstValue { _f, _fp };
-		//	//	//}
-		//	//}
-		//} else {
-		//	// 不包含 . 运算符
-
 		// 猜测可能是局部变量
 		auto _oval = _func_ctx.GetVariable (_raw_name);
 		if (_oval.has_value ())

@@ -1,10 +1,16 @@
+@import cptr __cdecl memcpy (cptr, cptr, int32);
+
+
+
 public class string {
 	//cptr CPtr;
 	private int8[] m_array;
 
 	//public cptr Data () => m_array.Data;// TODO
 
-	CastFrom () {
-		//
+	public static string From (cptr _src) {
+		string _s = new { m_array = new int8 [_src.Size + 1] };
+		::memcpy (_s.m_array.Data, _src, _src.Size + 1);
+		return _s;
 	}
 }

@@ -5,5 +5,19 @@ use hello.fa;
 class Program {
 	public static void Main () {
 		Console.Write ("hello world\n");
+		////
+		//int32 n = if false {
+		//	10
+		//} else if true {
+		//	20
+		//} else {
+		//	30
+		//};
+		//if n == 20 {
+		//	Console.Write ("n == 20\n");
+		//} else {
+		//	Console.Write ("n != 20\n");
+		//}
+		////
 	}
 }
