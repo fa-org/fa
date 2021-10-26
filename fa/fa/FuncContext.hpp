@@ -69,31 +69,41 @@ public:
 		return AstValue { _inst, _var_type };
 	}
 	std::optional<AstValue> DefineArrayVariable (std::string _type, antlr4::Token* _t, AstValue &_capacity, std::string _name = "") {
-		TODO 合并成一个类型;
-		if (_type [0] == '$')
-			_type = _type.substr (1);
-		std::string _var_type = std::format ("${}[]", _type);
-		if (_name != "" && GetVariable (_name).has_value ()) {
-			LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
-			return std::nullopt;
-		}
-		std::optional<llvm::Type*> _ret_type = m_type_map->GetType (_type, _t);
-		if (!_ret_type.has_value ())
-			return std::nullopt;
-		if (m_virtual)
-			return AstValue { (llvm::AllocaInst*) nullptr, _var_type };
+		std::vector<llvm::Type*> _v;
+		_v.push_back (m_type_map->GetType ("int32", _t).value ());
+		_v.push_back (m_type_map->GetType ("int32", _t).value ());
+		TODO;
+		// 实现方式：
+		//struct {
+		//	int32 Size;
+		//	int32 Capacity;
+		//	T[0] values;
+		//}
+		////////////////////////llvm::AllocaInst::
+		//if (_type [0] == '$')
+		//	_type = _type.substr (1);
+		//std::string _var_type = std::format ("${}[]", _type);
+		//if (_name != "" && GetVariable (_name).has_value ()) {
+		//	LOG_ERROR (_t, std::format ("重复定义的变量：{}", _name));
+		//	return std::nullopt;
+		//}
+		//std::optional<llvm::Type*> _ret_type = m_type_map->GetType (_type, _t);
+		//if (!_ret_type.has_value ())
+		//	return std::nullopt;
+		//if (m_virtual)
+		//	return AstValue { (llvm::AllocaInst*) nullptr, _var_type };
 
-		auto _arr = m_builder->CreateAlloca (_ret_type.value (), _capacity.Value (*m_builder));
-		if (_name != "")
-			(*m_local_vars.rbegin ()) [_name] = { _arr, _var_type };
-		auto _oint_type = m_type_map->GetType ("int32");
-		if (!_oint_type.has_value ())
-			return std::nullopt;
-		auto _int_type = _oint_type.value ();
-		auto _asize = m_builder->CreateAlloca (_int_type);
-		auto _acapacity = m_builder->CreateAlloca (_int_type);
-		m_array_attaches [_arr] = std::make_tuple (_asize, _acapacity);
-		return AstValue { _arr, _asize, _acapacity, _var_type };
+		//auto _arr = m_builder->CreateAlloca (_ret_type.value (), _capacity.Value (*m_builder));
+		//if (_name != "")
+		//	(*m_local_vars.rbegin ()) [_name] = { _arr, _var_type };
+		//auto _oint_type = m_type_map->GetType ("int32");
+		//if (!_oint_type.has_value ())
+		//	return std::nullopt;
+		//auto _int_type = _oint_type.value ();
+		//auto _asize = m_builder->CreateAlloca (_int_type);
+		//auto _acapacity = m_builder->CreateAlloca (_int_type);
+		//m_array_attaches [_arr] = std::make_tuple (_asize, _acapacity);
+		//return AstValue { _arr, _asize, _acapacity, _var_type };
 	}
 	std::optional<AstValue> GetVariable (std::string _name) {
 		for (auto _i = m_local_vars.rbegin (); _i != m_local_vars.rend (); ++_i) {

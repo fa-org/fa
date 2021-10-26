@@ -1290,8 +1290,11 @@ private:
 				return std::nullopt;
 			return _left;
 		} else if (_ast_ev.m_newarrval) {
-			TODO Éú³É´úÂë;
-			auto _l;
+			auto _osize = _generate_code (_func_ctx, _ast_ev.m_newarrval->m_size [0]);
+			if (!_osize.has_value ())
+				return std::nullopt;
+			auto _oleft = _func_ctx.DefineArrayVariable (_ast_ev.m_newarrval->m_item_type, _ast_ev.m_newarrval->m_t, _osize.value ());
+			return _oleft;
 		} else if (_ast_ev.m_op1_expr) {
 			auto _oleft = _generate_code (_func_ctx, _ast_ev.m_op1_expr->m_left);
 			if (!_oleft.has_value ())
