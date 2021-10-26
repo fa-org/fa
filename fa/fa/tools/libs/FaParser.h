@@ -40,14 +40,14 @@ public:
     RuleTypeVar = 39, RuleTypeVarList = 40, RuleQuotStmtPart = 41, RuleQuotStmtExpr = 42, 
     RuleIfStmt = 43, RuleIfExpr = 44, RuleWhileStmt = 45, RuleNumIterStmt = 46, 
     RuleQuotExpr = 47, RuleExprOpt = 48, RuleNewExprItem = 49, RuleNewExpr = 50, 
-    RuleArrayExpr1 = 51, RuleArrayExpr2 = 52, RuleStrongExprBase = 53, RuleStrongExprPrefix = 54, 
-    RuleStrongExprSuffix = 55, RuleStrongExpr = 56, RuleMiddleExpr = 57, 
-    RuleExpr = 58, RuleTmpAssignExpr = 59, RuleDefVarStmt = 60, RuleUseStmt = 61, 
-    RuleNormalStmt = 62, RuleStmt = 63, RulePublicLevel = 64, RuleClassParent = 65, 
-    RuleClassType = 66, RuleClassStmt = 67, RuleClassVarExtFunc = 68, RuleClassVarExt = 69, 
-    RuleClassVar = 70, RuleClassFuncName = 71, RuleClassFuncBody = 72, RuleClassFunc = 73, 
-    RuleEnumAtom = 74, RuleCallConvention = 75, RuleImportStmt = 76, RuleLibStmt = 77, 
-    RuleImportBlock = 78, RuleFaMainFuncBlock = 79, RuleProgram = 80
+    RuleNewArray = 51, RuleArrayExpr1 = 52, RuleArrayExpr2 = 53, RuleStrongExprBase = 54, 
+    RuleStrongExprPrefix = 55, RuleStrongExprSuffix = 56, RuleStrongExpr = 57, 
+    RuleMiddleExpr = 58, RuleExpr = 59, RuleTmpAssignExpr = 60, RuleDefVarStmt = 61, 
+    RuleUseStmt = 62, RuleNormalStmt = 63, RuleStmt = 64, RulePublicLevel = 65, 
+    RuleClassParent = 66, RuleClassType = 67, RuleClassStmt = 68, RuleClassVarExtFunc = 69, 
+    RuleClassVarExt = 70, RuleClassVar = 71, RuleClassFuncName = 72, RuleClassFuncBody = 73, 
+    RuleClassFunc = 74, RuleEnumAtom = 75, RuleCallConvention = 76, RuleImportStmt = 77, 
+    RuleLibStmt = 78, RuleImportBlock = 79, RuleFaMainFuncBlock = 80, RuleProgram = 81
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -111,6 +111,7 @@ public:
   class ExprOptContext;
   class NewExprItemContext;
   class NewExprContext;
+  class NewArrayContext;
   class ArrayExpr1Context;
   class ArrayExpr2Context;
   class StrongExprBaseContext;
@@ -941,6 +942,23 @@ public:
 
   NewExprContext* newExpr();
 
+  class  NewArrayContext : public antlr4::ParserRuleContext {
+  public:
+    NewArrayContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *New();
+    antlr4::tree::TerminalNode *QuotFangL();
+    MiddleExprContext *middleExpr();
+    antlr4::tree::TerminalNode *QuotFangR();
+    IdsContext *ids();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  NewArrayContext* newArray();
+
   class  ArrayExpr1Context : public antlr4::ParserRuleContext {
   public:
     ArrayExpr1Context(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -987,6 +1005,7 @@ public:
     IfExprContext *ifExpr();
     QuotExprContext *quotExpr();
     NewExprContext *newExpr();
+    NewArrayContext *newArray();
     ArrayExpr1Context *arrayExpr1();
     ArrayExpr2Context *arrayExpr2();
 

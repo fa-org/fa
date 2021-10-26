@@ -109,6 +109,12 @@ public:
 		}
 		return std::make_tuple (_ids, _tokens);
 	}
+
+	antlrcpp::Any visitNewArray (FaParser::NewArrayContext* ctx) override {
+		std::optional<std::string> _otype = ctx->ids () ? std::optional<std::string> (ctx->ids ()->getText ()) : std::nullopt;
+		auto _size_raw = ctx->middleExpr ();
+		return std::make_tuple (_otype, _size_raw);
+	}
 };
 
 

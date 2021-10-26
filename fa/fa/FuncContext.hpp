@@ -69,6 +69,7 @@ public:
 		return AstValue { _inst, _var_type };
 	}
 	std::optional<AstValue> DefineArrayVariable (std::string _type, antlr4::Token* _t, AstValue &_capacity, std::string _name = "") {
+		TODO 合并成一个类型;
 		if (_type [0] == '$')
 			_type = _type.substr (1);
 		std::string _var_type = std::format ("${}[]", _type);

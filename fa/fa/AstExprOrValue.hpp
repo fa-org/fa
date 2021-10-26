@@ -82,8 +82,8 @@ struct _AST_NewCtx {
 	// 检查是否所有参数已初始化
 	bool CheckVarsAllInit (antlr4::Token* _t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _cb);
 
-	antlr4::Token* m_t = nullptr;
-	IAstClass* m_cls = nullptr;
+	antlr4::Token*					m_t = nullptr;
+	IAstClass*						m_cls = nullptr;
 	std::string						m_expect_type = "";
 	std::vector<std::string>		m_cls_vars;
 	std::vector<_AST_ExprOrValue>	m_params;
@@ -92,6 +92,20 @@ private:
 	std::set<std::string>			m_tvar_all;
 	std::set<std::string>			m_tvar_all_tmp;
 	std::set<std::string>			m_tvar_init;
+};
+
+struct _AST_NewArrayCtx {
+	_AST_NewArrayCtx (std::string _item_type, antlr4::Token* _t): m_item_type (_item_type), m_expect_type (std::format ("{}[]", _item_type)), m_t (_t) {}
+
+	void SetSize (_AST_ExprOrValue _eov) {
+		m_size.clear ();
+		m_size.push_back (_eov);
+	}
+
+	std::string						m_item_type = "";
+	std::string						m_expect_type = "";
+	antlr4::Token*					m_t = nullptr;
+	std::vector<_AST_ExprOrValue>	m_size; // only use 1 item
 };
 
 struct _AST_Oper1Ctx {
@@ -130,9 +144,9 @@ struct _AST_Oper2Ctx {
 		}
 	}
 
-	std::string					m_op = "";
-	antlr4::Token* m_t = nullptr;
-	_Op2Type					m_type = _Op2Type::Other;
+	std::string						m_op = "";
+	antlr4::Token*					m_t = nullptr;
+	_Op2Type						m_type = _Op2Type::Other;
 };
 
 struct _AST_Op1ExprTreeCtx;
@@ -145,6 +159,7 @@ struct _AST_ExprOrValue {
 	_AST_ExprOrValue (std::shared_ptr<_AST_Arr1ValueCtx> val): m_arrval1 (val) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_Arr2ValueCtx> val): m_arrval2 (val) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_NewCtx> newval): m_newval (newval) {}
+	_AST_ExprOrValue (std::shared_ptr<_AST_NewArrayCtx> newarrval): m_newarrval (newarrval) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_Op1ExprTreeCtx> op1_expr): m_op1_expr (op1_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_Op2ExprTreeCtx> op2_expr): m_op2_expr (op2_expr) {}
 	_AST_ExprOrValue (std::shared_ptr<_AST_OpNExprTreeCtx> opN_expr): m_opN_expr (opN_expr) {}
@@ -154,6 +169,7 @@ struct _AST_ExprOrValue {
 		m_arrval1 = _o.m_arrval1;
 		m_arrval2 = _o.m_arrval2;
 		m_newval = _o.m_newval;
+		m_newarrval = _o.m_newarrval;
 		m_op1_expr = _o.m_op1_expr;
 		m_op2_expr = _o.m_op2_expr;
 		m_opN_expr = _o.m_opN_expr;
@@ -165,6 +181,7 @@ struct _AST_ExprOrValue {
 	std::shared_ptr<_AST_Arr1ValueCtx>					m_arrval1;
 	std::shared_ptr<_AST_Arr2ValueCtx>					m_arrval2;
 	std::shared_ptr<_AST_NewCtx>						m_newval;
+	std::shared_ptr<_AST_NewArrayCtx>					m_newarrval;
 	std::shared_ptr<_AST_Op1ExprTreeCtx>				m_op1_expr;
 	std::shared_ptr<_AST_Op2ExprTreeCtx>				m_op2_expr;
 	std::shared_ptr<_AST_OpNExprTreeCtx>				m_opN_expr;
@@ -258,6 +275,8 @@ inline std::string _AST_ExprOrValue::GetExpectType () {
 		return m_arrval2->m_expect_type;
 	if (m_newval)
 		return m_newval->m_expect_type;
+	if (m_newarrval)
+		return m_newarrval->m_expect_type;
 	if (m_op1_expr)
 		return m_op1_expr->m_expect_type;
 	if (m_op2_expr)
@@ -278,6 +297,8 @@ inline void _AST_ExprOrValue::SetExpectType (std::string _type) {
 		m_arrval2->m_expect_type = _type;
 	} else if (m_newval) {
 		m_newval->m_expect_type = _type;
+	} else if (m_newarrval) {
+		m_newarrval->m_expect_type = _type;
 	} else if (m_op1_expr) {
 		m_op1_expr->m_expect_type = _type;
 	} else if (m_op2_expr) {
@@ -308,6 +329,8 @@ inline antlr4::Token* _AST_ExprOrValue::GetToken () {
 		return m_arrval2->m_t;
 	if (m_newval)
 		return m_newval->m_t;
+	if (m_newarrval)
+		return m_newarrval->m_t;
 	if (m_op1_expr)
 		return m_op1_expr->m_op.m_t;
 	if (m_op2_expr)

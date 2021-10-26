@@ -121,6 +121,8 @@ public:
 
     virtual antlrcpp::Any visitNewExpr(FaParser::NewExprContext *context) = 0;
 
+    virtual antlrcpp::Any visitNewArray(FaParser::NewArrayContext *context) = 0;
+
     virtual antlrcpp::Any visitArrayExpr1(FaParser::ArrayExpr1Context *context) = 0;
 
     virtual antlrcpp::Any visitArrayExpr2(FaParser::ArrayExpr2Context *context) = 0;

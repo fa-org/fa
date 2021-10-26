@@ -1027,6 +1027,18 @@ private:
 					return std::nullopt;
 
 				return _AST_ExprOrValue { _newval };
+			} else if (_expr_raw->newArray ()) {
+				auto [_oitem_type, _size_raw] = m_visitor.visit (_expr_raw->newArray ()).as<std::tuple<
+					std::optional<std::string>,
+					FaParser::MiddleExprContext*
+					>> ();
+				std::string _item_type = _oitem_type.has_value () ? _oitem_type.value () : _exp_type.substr (0, _exp_type.size () - 2);
+				auto _newarrval = std::make_shared<_AST_NewArrayCtx> (_item_type, _expr_raw->start);
+				auto _oval = _parse_middle_expr (_size_raw, "int32");
+				if (!_oval.has_value ())
+					return std::nullopt;
+				_newarrval->SetSize (_oval.value ());
+				return _AST_ExprOrValue { _newarrval };
 			} else if (_expr_raw->arrayExpr1 ()) {
 				auto _expr_raws = _expr_raw->arrayExpr1 ()->expr ();
 				std::string _scapacity = "";
@@ -1277,6 +1289,9 @@ private:
 			if (!_func_ctx.InitClass (_left, _ast_ev.m_newval, [&] (_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); }))
 				return std::nullopt;
 			return _left;
+		} else if (_ast_ev.m_newarrval) {
+			TODO Éú³É´úÂë;
+			auto _l;
 		} else if (_ast_ev.m_op1_expr) {
 			auto _oleft = _generate_code (_func_ctx, _ast_ev.m_op1_expr->m_left);
 			if (!_oleft.has_value ())
