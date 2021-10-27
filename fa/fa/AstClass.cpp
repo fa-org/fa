@@ -103,8 +103,6 @@ std::string AstClassEnumItem::GetStringType () { return "TODO???????????"; }
 IAstClass::IAstClass (PublicLevel _level, std::string _module_name, std::string _name):
 	m_level (_level), m_module_name (_module_name), m_name (_name) {}
 
-std::optional<size_t> IAstClass::GetVarIndex (std::string _name) { return std::nullopt; }
-
 std::optional<IAstClassItem*> IAstClass::GetMember (std::string _name) {
 	for (auto _func : m_funcs) {
 		if (_func->m_name == _name)
@@ -129,14 +127,19 @@ AstClassType AstClass::GetType () { return AstClassType::Class; }
 std::optional<llvm::Type*> AstClass::GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) {
 	if (!m_type) {
 		std::vector<llvm::Type*> _v;
-		for (auto _var : m_vars) {
-			std::string _tmp_type = _var->m_type.substr (_var->m_type.size () - 2) == "[]" ? "cptr" : _var->m_type;
-			auto _otype = _cb (_tmp_type, _var->m_t);
-			if (!_otype.has_value ())
-				return std::nullopt;
-			_v.push_back (_otype.value ());
+		for (auto _var : m_vars1) {
+			if (_var->m_type.substr (_var->m_type.size () - 2) == "[]") {
+				_v.push_back (_cb ("int32", nullptr).value ());
+				_v.push_back (_cb ("int32", nullptr).value ());
+				_v.push_back (_cb ("cptr", nullptr).value ());
+			} else {
+				auto _otype = _cb (_var->m_type, _var->m_t);
+				if (!_otype.has_value ())
+					return std::nullopt;
+				_v.push_back (_otype.value ());
+			}
 		}
-		if (m_vars.size () == 0) {
+		if (m_vars1.size () == 0) {
 			auto _otype = _cb ("int8", nullptr);
 			if (!_otype.has_value ())
 				return std::nullopt;
@@ -148,19 +151,19 @@ std::optional<llvm::Type*> AstClass::GetLlvmType (std::function<std::optional<ll
 }
 
 std::optional<IAstClassItem*> AstClass::GetMember (std::string _name) {
-	for (auto _var : m_vars) {
+	for (auto _var : m_vars1) {
 		if (_var->m_name == _name)
 			return (IAstClassItem*) _var.get ();
 	}
 	return IAstClass::GetMember (_name);
 }
 
-bool AstClass::GetVars (std::function<bool (AstClassVar*)> _cb) {
-	for (auto& _var : m_vars) {
-		if (!_cb (_var.get ()))
-			return false;
+size_t AstClass::GetVars (std::function<EnumCallback (AstClassVar*)> _cb) {
+	for (size_t i = 0; i < m_vars1.size (); ++i) {
+		if (_cb (m_vars1 [i].get ()) == EnumCallback::Break)
+			return i;
 	}
-	return true;
+	return m_vars1.size ();
 }
 
 
@@ -170,21 +173,13 @@ void AstClass::AddParents (std::vector<std::string> &_parents) {
 }
 
 void AstClass::AddVar (std::shared_ptr<AstClassVar> _var) {
-	m_vars.push_back (_var);
-}
-
-std::optional<size_t> AstClass::GetVarIndex (std::string _name) {
-	for (size_t i = 0; i < m_vars.size (); ++i) {
-		if (m_vars [i]->m_name == _name)
-			return i;
+	if (!_var->IsStatic ()) {
+		_var->m_ast_pos = m_ast_pos_cache++;							// AST树变量占位
+		_var->m_llvm_pos = m_llvm_pos_cache++;							// LLVM结构体变量占位
+		if (_var->m_type.substr (_var->m_type.size () - 2) == "[]")
+			m_llvm_pos_cache += 2;										// 数组类型打散后多了Size与Capacity变量
 	}
-	return std::nullopt;
-}
-
-std::optional<AstClassVar*> AstClass::GetVar (size_t _idx) {
-	if (_idx >= m_vars.size ())
-		return std::nullopt;
-	return m_vars [_idx].get ();
+	m_vars1.push_back (_var);
 }
 
 

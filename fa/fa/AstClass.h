@@ -25,6 +25,8 @@ enum class PublicLevel { Unknown, Public, Internal, Protected, Private };
 enum class AstClassType { Class, Struct, Interface, Enum };
 enum class AstClassItemType { Var, GetterSetter, Func, Constructor, EnumItem };
 
+enum class EnumCallback { Continue, Break };
+
 class AstValue;
 class FuncTypes;
 
@@ -62,6 +64,8 @@ public:
 	std::string						m_name;					// 变量名称
 	FaParser::ExprContext*			m_init_value = nullptr;	// 初始值
 	std::vector<AstClassVarFunc>	m_var_funcs;			// 变量 getter setter 函数
+	int								m_ast_pos = 0;			// 变量AST结构体序号
+	int								m_llvm_pos = 0;			// 变量llvm结构体序号
 
 	AstClassItemType GetType () override;
 	std::optional<AstValue> GetAstValue ();
@@ -132,10 +136,8 @@ public:
 
 	virtual AstClassType GetType () = 0;
 	virtual std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
-	virtual std::optional<size_t> GetVarIndex (std::string _name);
-	virtual std::optional<AstClassVar*> GetVar (size_t _idx) = 0;
 	virtual std::optional<IAstClassItem*> GetMember (std::string _name);
-	virtual bool GetVars (std::function<bool (AstClassVar*)> _cb) = 0;
+	virtual size_t GetVars (std::function<EnumCallback (AstClassVar*)> _cb) = 0;
 
 	std::shared_ptr<AstClassFunc> AddFunc (PublicLevel _pv, bool _is_static, std::string _name);
 };
@@ -146,8 +148,10 @@ public:
 class AstClass: public IAstClass {
 public:
 	std::vector<std::string>					m_parents;
-	std::vector<std::shared_ptr<AstClassVar>>	m_vars;
+	std::vector<std::shared_ptr<AstClassVar>>	m_vars1;
 	llvm::StructType*							m_type = nullptr;
+	int											m_ast_pos_cache = 0;
+	int											m_llvm_pos_cache = 0;
 
 	AstClass (PublicLevel _level, std::string _module_name, std::string _name);
 
@@ -157,17 +161,13 @@ public:
 
 	std::optional<IAstClassItem*> GetMember (std::string _name) override;
 
-	bool GetVars (std::function<bool (AstClassVar*)> _cb) override;
+	size_t GetVars (std::function<EnumCallback (AstClassVar*)> _cb) override;
 
 
 
 	void AddParents (std::vector<std::string> &_parents);
 
 	void AddVar (std::shared_ptr<AstClassVar> _var);
-
-	std::optional<size_t> GetVarIndex (std::string _name) override;
-
-	std::optional<AstClassVar*> GetVar (size_t _idx) override;
 };
 
 

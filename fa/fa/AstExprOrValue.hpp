@@ -51,61 +51,60 @@ struct _AST_Arr2ValueCtx {
 struct _AST_NewCtx {
 	_AST_NewCtx (antlr4::Token* _t, IAstClass* _cls, std::string _expect_type): m_t (_t), m_cls (_cls), m_expect_type (_expect_type) {
 		m_cls->GetVars ([&] (AstClassVar* _cls_var) {
-			if (_cls_var->m_is_static)
-				return true;
-			m_tvar_all.emplace (_cls_var->m_name);
-			m_tvar_all_tmp.emplace (_cls_var->m_name);
-			if (!_cls_var->m_init_value)
-				m_tvar_init.emplace (_cls_var->m_name);
-			return true;
+			if (!_cls_var->m_is_static)
+				m_init_params.push_back (std::nullopt);
+			return EnumCallback::Continue;
 		});
 	}
 
 	// 设置初始化参数
-	bool SetInitVar (std::string _cls_var, _AST_ExprOrValue& _param, antlr4::Token* _t) {
-		if (!m_tvar_all.contains (_cls_var)) {
-			if (m_tvar_all_tmp.contains (_cls_var)) {
-				LOG_ERROR (_t, std::format ("对象初始化时传递的 {} 参数重复", _cls_var));
+	bool SetInitVar (std::string _name, _AST_ExprOrValue _param, antlr4::Token* _t) {
+		bool _no_repeat = true;
+		bool _success = false;
+		m_cls->GetVars ([&] (AstClassVar* _cls_var) {
+			if (_cls_var->m_is_static)
+				return EnumCallback::Continue;
+			if (_cls_var->m_name != _name)
+				return EnumCallback::Continue;
+			if (m_init_params [_cls_var->m_ast_pos].has_value ()) {
+				_no_repeat = false;
 			} else {
-				LOG_ERROR (_t, std::format ("对象初始化不需要传递 {} 参数", _cls_var));
+				m_init_params [_cls_var->m_ast_pos] = _param;
+				_success = true;
 			}
+			return EnumCallback::Break;
+		});
+		if (!_no_repeat) {
+			LOG_ERROR (_t, std::format ("成员变量 {} 重复赋值", _name));
 			return false;
 		}
-		m_tvar_all.erase (_cls_var);
-		if (m_tvar_init.contains (_cls_var))
-			m_tvar_init.erase (_cls_var);
-		m_cls_vars.push_back (_cls_var);
-		m_params.push_back (_param);
+		if (!_success) {
+			LOG_ERROR (_t, std::format ("未识别的成员变量 {}", _name));
+			return false;
+		}
 		return true;
 	}
 
 	// 检查是否所有参数已初始化
 	bool CheckVarsAllInit (antlr4::Token* _t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _cb);
 
-	antlr4::Token*					m_t = nullptr;
-	IAstClass*						m_cls = nullptr;
-	std::string						m_expect_type = "";
-	std::vector<std::string>		m_cls_vars;
-	std::vector<_AST_ExprOrValue>	m_params;
-
-private:
-	std::set<std::string>			m_tvar_all;
-	std::set<std::string>			m_tvar_all_tmp;
-	std::set<std::string>			m_tvar_init;
+	antlr4::Token*									m_t = nullptr;
+	IAstClass*										m_cls = nullptr;
+	std::string										m_expect_type = "";
+	std::vector<std::optional<_AST_ExprOrValue>>	m_init_params;
 };
 
 struct _AST_NewArrayCtx {
 	_AST_NewArrayCtx (std::string _item_type, antlr4::Token* _t): m_item_type (_item_type), m_expect_type (std::format ("{}[]", _item_type)), m_t (_t) {}
 
-	void SetSize (_AST_ExprOrValue _eov) {
-		m_size.clear ();
-		m_size.push_back (_eov);
+	void SetSize (std::shared_ptr<_AST_ExprOrValue> _eov) {
+		m_size = _eov;
 	}
 
-	std::string						m_item_type = "";
-	std::string						m_expect_type = "";
-	antlr4::Token*					m_t = nullptr;
-	std::vector<_AST_ExprOrValue>	m_size; // only use 1 item
+	std::string							m_item_type = "";
+	std::string							m_expect_type = "";
+	antlr4::Token*						m_t = nullptr;
+	std::shared_ptr<_AST_ExprOrValue>	m_size; // only use 1 item
 };
 
 struct _AST_Oper1Ctx {
@@ -117,9 +116,9 @@ struct _AST_Oper1Ctx {
 		}
 	}
 
-	std::string						m_op = "";
-	antlr4::Token*					m_t = nullptr;
-	_Op1Type						m_type = _Op1Type::Prefix;
+	std::string							m_op = "";
+	antlr4::Token*						m_t = nullptr;
+	_Op1Type							m_type = _Op1Type::Prefix;
 };
 
 struct _AST_Oper2Ctx {
@@ -144,9 +143,9 @@ struct _AST_Oper2Ctx {
 		}
 	}
 
-	std::string						m_op = "";
-	antlr4::Token*					m_t = nullptr;
-	_Op2Type						m_type = _Op2Type::Other;
+	std::string							m_op = "";
+	antlr4::Token*						m_t = nullptr;
+	_Op2Type							m_type = _Op2Type::Other;
 };
 
 struct _AST_Op1ExprTreeCtx;
@@ -343,42 +342,49 @@ inline antlr4::Token* _AST_ExprOrValue::GetToken () {
 }
 
 inline bool _AST_NewCtx::CheckVarsAllInit (antlr4::Token* _t, std::function<std::optional<_AST_ExprOrValue> (FaParser::ExprContext*, std::string)> _cb) {
-	if (m_tvar_init.size () != 0) {
-		for (auto _tvar_init : m_tvar_init)
-			LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
-		return false;
-	}
+	m_cls->GetVars ([&] (AstClassVar* _cls_var) {
+		if (_cls_var->m_is_static)
+			return EnumCallback::Continue;
+		TODO;
+		return EnumCallback::Continue;
+	});
+	//if (m_tvar_init.size () != 0) {
+	//	for (auto _tvar_init : m_tvar_init)
+	//		LOG_ERROR (_t, std::format ("未初始化的参数 {}", _tvar_init));
+	//	return false;
+	//}
 
-	// new 表达式未指定，但带有默认参数的值，拷贝进去
-	for (auto _tvar : m_tvar_all) {
-		auto _var = dynamic_cast<AstClassVar*> (m_cls->GetMember (_tvar).value ());
-		m_cls_vars.push_back (_tvar);
-		auto _oparam = _cb (_var->m_init_value, _var->m_type);
-		if (!_oparam.has_value ())
-			return false;
-		m_params.push_back (_oparam.value ());
-	}
+	//// new 表达式未指定，但带有默认参数的值，拷贝进去
+	//for (auto _tvar : m_tvar_all) {
+	//	auto _var = dynamic_cast<AstClassVar*> (m_cls->GetMember (_tvar).value ());
+	//	m_cls_vars.push_back (_tvar);
+	//	auto _oparam = _cb (_var->m_init_value, _var->m_type);
+	//	if (!_oparam.has_value ())
+	//		return false;
+	//	m_params.push_back (_oparam.value ());
+	//}
 
-	// 初始化参数列表排序
-	std::vector<size_t> _vidx;
-	for (size_t i = 0; i < m_cls_vars.size (); ++i) {
-		auto _oidx = m_cls->GetVarIndex (m_cls_vars [i]);
-		if (!_oidx.has_value ()) {
-			LOG_ERROR (_t, std::format ("成员变量 {} 未定义", m_cls_vars [i]));
-			return false;
-		}
-		_vidx.push_back (_oidx.value ());
-	}
-	for (size_t i = 0; i < _vidx.size () - 1; ++i) {
-		for (size_t j = i; j < _vidx.size (); ++j) {
-			if (_vidx [j] < _vidx [i]) {
-				std::tie (_vidx [j], _vidx [i]) = std::make_tuple (_vidx [i], _vidx [j]);
-				std::tie (m_cls_vars [j], m_cls_vars [i]) = std::make_tuple (m_cls_vars [i], m_cls_vars [j]);
-				std::tie (m_params [j], m_params [i]) = std::make_tuple (m_params [i], m_params [j]);
-			}
-		}
-	}
-	return true;
+	//// 初始化参数列表排序
+	//std::vector<size_t> _vidx;
+	//for (size_t i = 0; i < m_cls_vars.size (); ++i) {
+	//	_vidx.push_back (m_cls->GetVar (i).value ()->m_index);
+	//	auto _oidx = m_cls->GetVarIndex (m_cls_vars [i]);
+	//	if (!_oidx.has_value ()) {
+	//		LOG_ERROR (_t, std::format ("成员变量 {} 未定义", m_cls_vars [i]));
+	//		return false;
+	//	}
+	//	_vidx.push_back (_oidx.value ());
+	//}
+	//for (size_t i = 0; i < _vidx.size () - 1; ++i) {
+	//	for (size_t j = i; j < _vidx.size (); ++j) {
+	//		if (_vidx [j] < _vidx [i]) {
+	//			std::tie (_vidx [j], _vidx [i]) = std::make_tuple (_vidx [i], _vidx [j]);
+	//			std::tie (m_cls_vars [j], m_cls_vars [i]) = std::make_tuple (m_cls_vars [i], m_cls_vars [j]);
+	//			std::tie (m_params [j], m_params [i]) = std::make_tuple (m_params [i], m_params [j]);
+	//		}
+	//	}
+	//}
+	//return true;
 }
 
 

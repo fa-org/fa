@@ -26,6 +26,40 @@
 //template<int bitsize>
 class TypeMap {
 public:
+	//std::optional<size_t> GetTypeSize (std::string _stype) {
+	//	if (_stype.size () > 2 && _stype.substr (_stype.size () - 2) == "[]") {
+	//		return 4;
+	//	}
+
+	//	if (_stype == "void") {
+	//		return 0;
+	//	} else if (_stype == "bool") {
+	//		return 4;
+	//	} else if (_stype == "int8") {
+	//		return 1;
+	//	} else if (_stype == "int16") {
+	//		return 2;
+	//	} else if (_stype == "int32") {
+	//		return 4;
+	//	} else if (_stype == "int64") {
+	//		return 8;
+	//	} else if (_stype == "int128") {
+	//		return 16;
+	//	} else if (_stype == "float16") {
+	//		return 2;
+	//	} else if (_stype == "float32") {
+	//		return 4;
+	//	} else if (_stype == "float64") {
+	//		return 8;
+	//	} else if (_stype == "float128") {
+	//		return 16;
+	//	} else if (_stype == "cptr") {
+	//		return 4;
+	//	} else {
+	//		return std::nullopt;
+	//	}
+	//}
+
 	TypeMap (FaVisitor* _visitor, std::shared_ptr<llvm::LLVMContext> _ctx, AstClasses& _global_classes, std::string _namespace, std::vector<std::string>& _uses): m_visitor (_visitor), m_ctx (_ctx), m_global_classes (_global_classes), m_namespace (_namespace), m_uses (_uses) {}
 
 	static std::optional<std::tuple<std::string, std::string>> GetOp2OperatorExpectType (std::string _exp_type, std::string _op, antlr4::Token* _t) {
@@ -102,6 +136,14 @@ public:
 	}
 
 	std::optional<llvm::Type*> GetType (std::string _stype, antlr4::Token* _t = nullptr) {
+		//if (_stype.size () > 2 && _stype.substr (_stype.size () - 2) == "[]") {
+		//	std::string _sitem_type = _stype.substr (0, _stype.size () - 2);
+		//	auto _otype = GetType (_sitem_type, _t);
+		//	if (!_otype.has_value ())
+		//		return std::nullopt;
+		//	return llvm::ArrayType::get (_otype.value (), 0);
+		//}
+
 		if (_stype == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_stype == "bool") {
