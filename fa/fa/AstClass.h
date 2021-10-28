@@ -25,7 +25,7 @@ enum class PublicLevel { Unknown, Public, Internal, Protected, Private };
 enum class AstClassType { Class, Struct, Interface, Enum };
 enum class AstClassItemType { Var, GetterSetter, Func, Constructor, EnumItem };
 
-enum class EnumCallback { Continue, Break };
+enum class CallbackFunc { Continue, Break };
 
 class AstValue;
 class FuncTypes;
@@ -137,7 +137,8 @@ public:
 	virtual AstClassType GetType () = 0;
 	virtual std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
 	virtual std::optional<IAstClassItem*> GetMember (std::string _name);
-	virtual size_t GetVars (std::function<EnumCallback (AstClassVar*)> _cb) = 0;
+	virtual size_t GetVars (std::function<CallbackFunc (AstClassVar*)> _cb) = 0;
+	virtual AstClassVar* GetVarFromPos (size_t _pos) = 0;
 
 	std::shared_ptr<AstClassFunc> AddFunc (PublicLevel _pv, bool _is_static, std::string _name);
 };
@@ -156,12 +157,10 @@ public:
 	AstClass (PublicLevel _level, std::string _module_name, std::string _name);
 
 	AstClassType GetType () override;
-
 	std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) override;
-
 	std::optional<IAstClassItem*> GetMember (std::string _name) override;
-
-	size_t GetVars (std::function<EnumCallback (AstClassVar*)> _cb) override;
+	size_t GetVars (std::function<CallbackFunc (AstClassVar*)> _cb) override;
+	AstClassVar* GetVarFromPos (size_t _pos) override;
 
 
 

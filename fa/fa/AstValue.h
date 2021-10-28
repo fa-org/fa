@@ -43,7 +43,7 @@ public:
 	//AstValue &operator= (const llvm::AllocaInst* _val);
 	//AstValue &operator= (const llvm::Value* _val);
 	//AstValue &operator= (const llvm::Function* _val);
-	AstValue& operator= (const AstValue& _o);
+	AstValue& operator= (const AstValue& _o) = default;
 
 	//bool IsValid () const;
 	bool IsVoid () const;

@@ -43,7 +43,7 @@
 #include "ValueBuilder.hpp"
 #include "AstValue.h"
 #include "FuncContext.hpp"
-#include "AstExprOrValue.hpp"
+#include "AstExprOrValue.h"
 #include "FuncType.h"
 #include "AstClass.h"
 #include "FaLexer.h"
@@ -1037,7 +1037,9 @@ private:
 				auto _oval = _parse_middle_expr (_size_raw, "int32");
 				if (!_oval.has_value ())
 					return std::nullopt;
-				_newarrval->SetSize (_oval.value ());
+				auto _pval = std::make_shared<_AST_ExprOrValue> ();
+				*_pval = _oval.value ();
+				_newarrval->SetSize (_pval);
 				return _AST_ExprOrValue { _newarrval };
 			} else if (_expr_raw->arrayExpr1 ()) {
 				auto _expr_raws = _expr_raw->arrayExpr1 ()->expr ();
@@ -1290,7 +1292,7 @@ private:
 				return std::nullopt;
 			return _left;
 		} else if (_ast_ev.m_newarrval) {
-			auto _osize = _generate_code (_func_ctx, _ast_ev.m_newarrval->m_size [0]);
+			auto _osize = _generate_code (_func_ctx, *_ast_ev.m_newarrval->m_size);
 			if (!_osize.has_value ())
 				return std::nullopt;
 			auto _oleft = _func_ctx.DefineArrayVariable (_ast_ev.m_newarrval->m_item_type, _ast_ev.m_newarrval->m_t, _osize.value ());

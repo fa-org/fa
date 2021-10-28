@@ -21,7 +21,7 @@
 
 #include "TypeMap.hpp"
 #include "AstValue.h"
-#include "AstExprOrValue.hpp"
+#include "AstExprOrValue.h"
 #include "FuncType.h"
 #include "Log.hpp"
 
@@ -129,10 +129,19 @@ public:
 	bool InitClass (AstValue &_cls, std::shared_ptr<_AST_NewCtx> _newval, std::function<std::optional<AstValue> (_AST_ExprOrValue)> _cb) {
 		//m_builder->CreateExtractElement
 		//m_builder->CreateGEP ();
-		for (size_t i = 0; i < _newval->m_cls_vars.size (); ++i) {
-			auto _val_raw = m_builder->CreateStructGEP (_cls.ValueRaw (), (unsigned int) i);
-			AstValue _op1 { (llvm::AllocaInst*) _val_raw, std::format ("${}", _newval->m_cls->GetVar (i).value ()->m_type) };
-			auto _oop2 = _cb (_newval->m_params [i]);
+		for (size_t i = 0; i < _newval->m_init_params.size (); ++i) {
+			auto _val_raw = m_builder->CreateStructGEP (_cls.ValueRaw (), i);
+			// TODO array[]
+			AstValue _op1;
+			std::string _cls_var_type = std::format ("${}", _newval->m_cls->GetVarFromPos (i)->m_type);
+			if (_cls_var_type.substr (_cls_var_type.size () - 2) == "[]") {
+				auto _asize = m_builder->CreateStructGEP (_cls.ValueRaw (), i + 1);
+				auto _acapacity = m_builder->CreateStructGEP (_cls.ValueRaw (), i + 2);
+				_op1 = AstValue { (llvm::AllocaInst*) _val_raw, (llvm::AllocaInst*) _asize, (llvm::AllocaInst*) _acapacity, _cls_var_type };
+			} else {
+				_op1 = AstValue { (llvm::AllocaInst*) _val_raw, _cls_var_type };
+			}
+			auto _oop2 = _cb (_newval->m_init_params [i].value ());
 			if (!_oop2.has_value ())
 				return false;
 			auto _oval = DoOper2 (_op1, "=", _oop2.value (), _newval->m_t);
@@ -162,17 +171,6 @@ public:
 			LOG_ERROR (_t, std::format ("无法解析对象llvm类型 {}", m_cls->m_name));
 		}
 
-		// 成员变量
-		auto _oidx = m_cls->GetVarIndex (_member);
-		if (_oidx.has_value ()) {
-			auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), (unsigned int) _oidx.value ());
-			//std::string _idx_str = std::format ("{}", _oidx.value ());
-			//auto _idx = AstValue::FromValue (m_value_builder, _idx_str, "int32", _t).value ();
-			//auto _val_raw = m_builder->CreateInBoundsGEP (_otype.value (), _cls_var.ValueRaw (), _idx.Value (*m_builder));
-			return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", m_cls->GetMember (_member).value ()->GetStringType ()) };
-		}
-
-		// 成员方法
 		auto _oitem = m_cls->GetMember (_member);
 		if (_oitem.has_value ()) {
 			auto _item = _oitem.value ();
@@ -181,8 +179,17 @@ public:
 				return std::nullopt;
 			}
 			if (_item->GetType () == AstClassItemType::Func) {
+				// 成员方法
 				auto _func_p = dynamic_cast<AstClassFunc*> (_item);
 				return _func_p->GetAstValue (m_global_funcs);
+			} else if (_item->GetType () == AstClassItemType::Var) {
+				// 成员变量
+				auto _var_p = dynamic_cast<AstClassVar*> (_item);
+				auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), _var_p->m_llvm_pos);
+				//std::string _idx_str = std::format ("{}", _oidx.value ());
+				//auto _idx = AstValue::FromValue (m_value_builder, _idx_str, "int32", _t).value ();
+				//auto _val_raw = m_builder->CreateInBoundsGEP (_otype.value (), _cls_var.ValueRaw (), _idx.Value (*m_builder));
+				return AstValue { (llvm::AllocaInst*) _val_raw, std::format ("${}", m_cls->GetMember (_member).value ()->GetStringType ()) };
 			}
 		}
 
@@ -224,6 +231,13 @@ public:
 	}
 	std::optional<AstValue> DoOper2 (AstValue &_op1, std::string _op, AstValue &_op2, antlr4::Token* _t) {
 		// TODO 这儿判断是否virtual
+
+		// 开洞：如果是cptr.Size那么计算字符串长度
+		if (_op1.GetType () == "cptr" && _op2.m_member == "Size") {
+			// TODO
+			return AstValue::FromValue (m_value_builder, "256", "int32");
+		}
+
 		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t, m_global_funcs, m_global_classes, m_namespace, m_uses);
 	}
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {

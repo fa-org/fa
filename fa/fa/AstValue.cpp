@@ -52,16 +52,18 @@ AstValue::AstValue (std::string _member) : m_member (_member), m_type (AstObject
 //AstValue &AstValue::operator= (const llvm::Value* _val) { AstValue _o { const_cast<llvm::Value*> (_val) }; return operator= (_o); }
 //AstValue &AstValue::operator= (const llvm::Function* _val) { AstValue _o { const_cast<llvm::Function*> (_val) }; return operator= (_o); }
 
-AstValue& AstValue::operator= (const AstValue& _o) {
-	m_type = _o.m_type;
-	m_value = _o.m_value;
-	m_value_size = _o.m_value_size;
-	m_value_capacity = _o.m_value_capacity;
-	m_func = _o.m_func;
-	m_member = _o.m_member;
-	m_value_type = _o.m_value_type;
-	return*this;
-}
+//AstValue& AstValue::operator= (const AstValue& _o) {
+//	m_type = _o.m_type;
+//	m_value = _o.m_value;
+//	m_value_size = _o.m_value_size;
+//	m_value_capacity = _o.m_value_capacity;
+//	m_func = _o.m_func;
+//	m_member = _o.m_member;
+//	m_value_type = _o.m_value_type;
+//	m_fp = _o.m_fp;
+//	m_tmp_var_flag = _o.m_tmp_var_flag;
+//	return*this;
+//}
 
 //bool AstValue::IsValid () const { return m_type != AstObjectType::None; }
 
@@ -156,7 +158,13 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 		case '<': return AstValue { _builder.CreateICmpSLT (Value (_builder), _other.Value (_builder)), "bool" };
 		case '>': return AstValue { _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder)), "bool" };
 		case '=':
-			_builder.CreateStore (_other.Value (_builder), m_value);
+			if (m_value_type.substr (m_value_type.size () - 2) == "[]") {
+				_builder.CreateStore (_builder.CreateLoad (_other.m_value_size), m_value_size);
+				_builder.CreateStore (_builder.CreateLoad (_other.m_value_capacity), m_value_capacity);
+				// TODO 复制数组
+			} else {
+				_builder.CreateStore (_other.Value (_builder), m_value);
+			}
 			return *this;
 		case '.':
 			// 如果是临时类型那么拼凑命名空间

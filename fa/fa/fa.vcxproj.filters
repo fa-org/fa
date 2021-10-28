@@ -48,6 +48,9 @@
     <ClCompile Include="AstValue.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="AstExprOrValue.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tools\libs\FaVisitor.h">
@@ -92,7 +95,7 @@
     <ClInclude Include="AstClass.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="AstExprOrValue.hpp">
+    <ClInclude Include="AstExprOrValue.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

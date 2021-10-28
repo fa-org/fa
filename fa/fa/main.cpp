@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "AstExprOrValue.hpp"
+#include "AstExprOrValue.h"
 #include "FaParser.h"
 #include "FaLexer.h"
 #include "CodeVisitor.hpp"

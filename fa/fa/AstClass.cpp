@@ -158,12 +158,21 @@ std::optional<IAstClassItem*> AstClass::GetMember (std::string _name) {
 	return IAstClass::GetMember (_name);
 }
 
-size_t AstClass::GetVars (std::function<EnumCallback (AstClassVar*)> _cb) {
+size_t AstClass::GetVars (std::function<CallbackFunc (AstClassVar*)> _cb) {
 	for (size_t i = 0; i < m_vars1.size (); ++i) {
-		if (_cb (m_vars1 [i].get ()) == EnumCallback::Break)
+		if (_cb (m_vars1 [i].get ()) == CallbackFunc::Break)
 			return i;
 	}
 	return m_vars1.size ();
+}
+
+AstClassVar* AstClass::GetVarFromPos (size_t _pos) {
+	for (size_t i = 0; i < m_vars1.size (); ++i) {
+		if (m_vars1 [i]->m_ast_pos == _pos)
+			return m_vars1 [i].get ();
+	}
+	LOG_TODO (nullptr);
+	return nullptr;
 }
 
 
