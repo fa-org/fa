@@ -131,7 +131,6 @@ public:
 		//m_builder->CreateGEP ();
 		for (size_t i = 0; i < _newval->m_init_params.size (); ++i) {
 			auto _val_raw = m_builder->CreateStructGEP (_cls.ValueRaw (), i);
-			// TODO array[]
 			AstValue _op1;
 			std::string _cls_var_type = std::format ("${}", _newval->m_cls->GetVarFromPos (i)->m_type);
 			if (_cls_var_type.substr (_cls_var_type.size () - 2) == "[]") {
@@ -234,8 +233,12 @@ public:
 
 		// 开洞：如果是cptr.Size那么计算字符串长度
 		if (_op1.GetType () == "cptr" && _op2.m_member == "Size") {
-			// TODO
-			return AstValue::FromValue (m_value_builder, "256", "int32");
+			//return AstValue::FromValue (m_value_builder, "256", "int32");
+			auto _f = m_global_funcs->GetFunc ("hello.fa.Memory.GetCStrSize").value ();
+			auto _fp = m_global_funcs->GetFuncPtr ("hello.fa.Memory.GetCStrSize");
+			auto _func = AstValue { _f, _fp };
+			std::vector<AstValue> _args { _op1 };
+			return FuncInvoke (_func, _args);
 		}
 
 		return _op1.DoOper2 (*m_builder, m_value_builder, _op, _op2, _t, m_global_funcs, m_global_classes, m_namespace, m_uses);

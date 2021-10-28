@@ -159,9 +159,17 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 		case '>': return AstValue { _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder)), "bool" };
 		case '=':
 			if (m_value_type.substr (m_value_type.size () - 2) == "[]") {
-				_builder.CreateStore (_builder.CreateLoad (_other.m_value_size), m_value_size);
+				llvm::Value* _size0;
+				_builder.CreateStore (_size0 = _builder.CreateLoad (_other.m_value_size), m_value_size);
 				_builder.CreateStore (_builder.CreateLoad (_other.m_value_capacity), m_value_capacity);
-				// TODO 复制数组
+				// 开洞 复制数组
+				auto _f = _global_funcs->GetFunc ("hello.fa.Memory.CopyArray").value ();
+				auto _fp = _global_funcs->GetFuncPtr ("hello.fa.Memory.CopyArray");
+				auto _func = AstValue { _f, _fp };
+				auto _1 = std::get<0> (_value_builder->Build ("int32", "1", nullptr).value ());
+				_size0 = _builder.CreateAdd (_size0, _1);
+				std::vector<llvm::Value*> _args { m_value, _other.m_value, _size0 };
+				_func.FuncInvoke (_builder, _args);
 			} else {
 				_builder.CreateStore (_other.Value (_builder), m_value);
 			}

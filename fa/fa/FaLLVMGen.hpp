@@ -876,7 +876,16 @@ private:
 							}
 							//
 							_ptr->m_expect_type = _val.GetExpectType ();
-							_ptr->m_expect_type = _ptr->m_expect_type.substr (0, _ptr->m_expect_type.size () - 2);
+							if (_ptr->m_expect_type.substr (_ptr->m_expect_type.size () - 2) == "[]") {
+								_ptr->m_expect_type = _ptr->m_expect_type.substr (0, _ptr->m_expect_type.size () - 2);
+							} else {
+								if (_ptr->m_expect_type == "cptr") {
+									_ptr->m_expect_type = "int8";
+								} else {
+									LOG_ERROR (_suffix_raw->start, "目标类型无法使用下标访问");
+									return std::nullopt;
+								}
+							}
 						}
 						_val = _ptr;
 					} else if (_suffix_raw->PointOp ()) {
