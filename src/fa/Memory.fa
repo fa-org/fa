@@ -6,4 +6,12 @@
 public class Memory {
     public static cptr Malloc (int32 size) => ::malloc (size);
     public static void Free (cptr p) => ::free (p);
+    public static void CopyArray (cptr dest, cptr src, int32 size) {
+        int32 i = 0;
+        while i < size {
+            dest [i] = src [i];
+            i++;
+        }
+        dest [i] = 0;
+    }
 }

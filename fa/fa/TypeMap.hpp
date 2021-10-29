@@ -73,9 +73,10 @@ public:
 			case '|':
 			case '&':
 			case '^':
+				return std::make_tuple (_exp_type, _exp_type);
 			case '<':
 			case '>':
-				return std::make_tuple (_exp_type, _exp_type);
+				return std::make_tuple ("", "");
 			case '=':
 				return std::make_tuple (std::format ("${}", _exp_type), _exp_type);
 			case '.':
@@ -99,6 +100,9 @@ public:
 				switch (_op [0]) {
 				case '<':
 				case '>':
+				case '=':
+				case '!':
+				return std::make_tuple ("", "");
 				case '+':
 				case '-':
 				case '*':

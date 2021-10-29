@@ -391,6 +391,9 @@ private:
 				if (_normal_stmt_raw->Return () || _normal_stmt_raw->expr ()) {
 					if (_normal_stmt_raw->expr ()) {
 						std::string _exp_type = _normal_stmt_raw->Return () ? _func_ctx.GetReturnType () : "";
+						if (_normal_stmt_raw->expr ()->getText () == "dest[i]=src[i]") {
+							int xx = 0;
+						}
 						std::optional<AstValue> _oval = ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), _exp_type);
 						if (!_oval.has_value ())
 							return false;
@@ -463,11 +466,14 @@ private:
 					return false;
 				auto _stmts_raw = _stmt_raw->whileStmt ()->stmt ();
 				bool _a = false;
-				_func_ctx.While (
+				if (!_func_ctx.While (
 					_oev_cond.value (),
 					[&] () { return StmtBuilder (_func_ctx, _stmts_raw, _a); },
-					[&] (_AST_ExprOrValue _ast_ev) { return _generate_code (_func_ctx, _ast_ev); }
-				);
+					[&] (_AST_ExprOrValue _ast_ev) {
+						return _generate_code (_func_ctx, _ast_ev);
+					}
+				))
+					return false;
 			} else if (_stmt_raw->numIterStmt ()) {
 				LOG_ERROR (_stmt_raw->start, "未知的表达式");
 				return false;
@@ -645,8 +651,14 @@ private:
 			if (_ptr->m_op.m_type == _Op2Type::Assign) {
 				LOG_TODO (_ptr->m_op.m_t);
 				return std::nullopt;
-			} else if (_ptr->m_op.m_type == _Op2Type::NoChange || _ptr->m_op.m_type == _Op2Type::Compare) {
-				if ((_ptr->m_op.m_type == _Op2Type::NoChange && _exp_type == "") || _ptr->m_op.m_type == _Op2Type::Compare) {
+			} else if (_ptr->m_op.m_type == _Op2Type::Compare) {
+				if (_exp_type != "" && _exp_type != "bool") {
+					LOG_TODO (_ptr->m_op.m_t);
+					return std::nullopt;
+				}
+				_exp_type = "bool";
+			} else if (_ptr->m_op.m_type == _Op2Type::NoChange) {
+				if (_exp_type == "") {
 					if (_exp_type_L == _exp_type_R) {
 						_exp_type = _exp_type_L;
 					} else {
@@ -799,6 +811,9 @@ private:
 				// 内到外层层叠加类型
 				// suffix 0->x
 				// prefix x->0
+				if (_expr_raw->getText () == "dest[i]") {
+					int xxx = 0;
+				}
 				auto _oval = _parse_strong_expr_base (_expr_raw->strongExprBase (), "");
 				if (!_oval.has_value ())
 					return std::nullopt;
@@ -855,8 +870,8 @@ private:
 									LOG_TODO (_expr_opt_raws [i]->start);
 									return std::nullopt;
 								}
-								_ptr->m_expect_type = _func->m_ret_type;
 							}
+							_ptr->m_expect_type = _func->m_ret_type;
 						} else {
 							// 纯数组形式
 							auto _expr_opt_raws = _suffix_raw->exprOpt ();
@@ -878,6 +893,10 @@ private:
 							_ptr->m_expect_type = _val.GetExpectType ();
 							if (_ptr->m_expect_type.substr (_ptr->m_expect_type.size () - 2) == "[]") {
 								_ptr->m_expect_type = _ptr->m_expect_type.substr (0, _ptr->m_expect_type.size () - 2);
+							} else if (_ptr->m_expect_type == "cptr") {
+								_ptr->m_expect_type = "uint8";
+							} else if (_ptr->m_expect_type == "$cptr") {
+								_ptr->m_expect_type = "$uint8";
 							} else {
 								LOG_ERROR (_suffix_raw->start, "目标类型无法使用下标访问");
 								return std::nullopt;
@@ -1169,6 +1188,8 @@ private:
 				return AstValue::FromVoid ();
 
 			std::string _cur_type = _val.GetType ();
+			if (_cur_type [0] == '$' && _exp_type [0] != '$')
+				_cur_type = _cur_type.substr (1);
 			if (_cur_type == _exp_type)
 				return _val;
 			if (_val.IsFunction () && _val.m_func->m_type == _exp_type)
@@ -1179,6 +1200,9 @@ private:
 		};
 
 		std::string _rexp_type = _ast_ev.GetExpectType ();
+		if (_rexp_type == "$") {
+			_rexp_type = _rexp_type;
+		}
 		if (_ast_ev.m_val) {
 			auto _oleft = _trans_type (_ast_ev.m_val->m_val, _rexp_type, _ast_ev.GetToken ());
 			return _oleft;
@@ -1318,6 +1342,8 @@ private:
 				return std::nullopt;
 			return _val.value ();
 		} else if (_ast_ev.m_op2_expr) {
+			if (_rexp_type != "" && _rexp_type[0] == '$')
+				_rexp_type = _rexp_type.substr (1);
 			auto _orexp_type_lr = TypeMap::GetOp2OperatorExpectType (_rexp_type, _ast_ev.m_op2_expr->m_op.m_op, _ast_ev.m_op2_expr->m_op.m_t);
 			if (!_orexp_type_lr.has_value ())
 				return std::nullopt;

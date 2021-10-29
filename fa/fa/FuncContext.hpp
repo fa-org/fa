@@ -185,9 +185,9 @@ public:
 				// 成员变量
 				auto _var_p = dynamic_cast<AstClassVar*> (_item);
 				auto _val_raw = m_builder->CreateStructGEP (_cls_var.ValueRaw (), _var_p->m_llvm_pos);
-				TODO 支持数组;
-				TODO 修复AstValue构造函数错误;
-				TODO 数组俩参数改为AstValue对象引用;
+				//TODO 支持数组;
+				//TODO 修复AstValue构造函数错误;
+				//TODO 数组俩参数改为AstValue对象引用;
 				//std::string _idx_str = std::format ("{}", _oidx.value ());
 				//auto _idx = AstValue::FromValue (m_value_builder, _idx_str, "int32", _t).value ();
 				//auto _val_raw = m_builder->CreateInBoundsGEP (_otype.value (), _cls_var.ValueRaw (), _idx.Value (*m_builder));
