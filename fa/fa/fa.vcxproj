@@ -176,6 +176,7 @@
     <ClCompile Include="tools\libs\FaLexer.cpp" />
     <ClCompile Include="tools\libs\FaParser.cpp" />
     <ClCompile Include="tools\libs\FaVisitor.cpp" />
+    <ClCompile Include="ValueBuilder.cpp" />
     <ClCompile Include="win32.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -263,7 +264,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="ValueBuilder.hpp">
+    <ClInclude Include="ValueBuilder.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>

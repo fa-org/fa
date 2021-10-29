@@ -17,7 +17,7 @@
 #include <llvm/IR/IRBuilder.h>
 
 #include <FaParser.h>
-#include "ValueBuilder.hpp"
+#include "ValueBuilder.h"
 #include "TypeMap.hpp"
 #include "Log.hpp"
 #include "FuncType.h"

@@ -230,7 +230,7 @@ bool _AST_Op2ExprTreeCtx::CalcExpectType (AstClasses& _classes, std::string _nam
 		std::string _class_name = m_left.GetExpectType ();
 		if (_class_name == "" || _class_name == "[member]")
 			_class_name = m_left.m_val->m_val.m_member;
-		if (_class_name == "cptr" && m_right.m_val->m_val.m_member == "Size") {
+		if (_class_name == "uint8[]" && m_right.m_val->m_val.m_member == "Size") {
 			m_expect_type = "int32";
 			return true;
 		}

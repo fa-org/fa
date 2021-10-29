@@ -148,15 +148,15 @@ public:
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_stype == "bool") {
 			return (llvm::Type* ) llvm::Type::getInt1Ty (*m_ctx);
-		} else if (_stype == "int8") {
+		} else if (_stype == "int8" || _stype == "uint8") {
 			return (llvm::Type* ) llvm::Type::getInt8Ty (*m_ctx);
-		} else if (_stype == "int16") {
+		} else if (_stype == "int16" || _stype == "uint16") {
 			return (llvm::Type* ) llvm::Type::getInt16Ty (*m_ctx);
-		} else if (_stype == "int32") {
+		} else if (_stype == "int32" || _stype == "uint32") {
 			return (llvm::Type* ) llvm::Type::getInt32Ty (*m_ctx);
-		} else if (_stype == "int64") {
+		} else if (_stype == "int64" || _stype == "uint64") {
 			return (llvm::Type* ) llvm::Type::getInt64Ty (*m_ctx);
-		} else if (_stype == "int128") {
+		} else if (_stype == "int128" || _stype == "uint128") {
 			return (llvm::Type* ) llvm::Type::getInt128Ty (*m_ctx);
 		} else if (_stype == "float16") {
 			return llvm::Type::getBFloatTy (*m_ctx);
@@ -219,20 +219,23 @@ public:
 		case llvm::Type::IntegerTyID:
 		{
 			llvm::IntegerType* _itype = (llvm::IntegerType* ) _type;
+			bool _bsign = _itype->getSignBit () > 0;
+			std::string _stype = "";
 			unsigned int _bit_width = _itype->getBitWidth ();
 			if (_bit_width == 1) {
-				return "bool";
+				_stype = "bool";
 			} else if (_bit_width == 8) {
-				return "int8";
+				_stype = "int8";
 			} else if (_bit_width == 16) {
-				return "int16";
+				_stype = "int16";
 			} else if (_bit_width == 32) {
-				return "int32";
+				_stype = "int32";
 			} else if (_bit_width == 64) {
-				return "int64";
+				_stype = "int64";
 			} else if (_bit_width == 128) {
-				return "int128";
+				_stype = "int128";
 			}
+			return _bsign ? _stype : std::format ("u{}", _stype);
 		}
 		break;
 		}

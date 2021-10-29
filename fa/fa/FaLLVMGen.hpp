@@ -40,7 +40,7 @@
 
 #include "CodeVisitor.hpp"
 #include "TypeMap.hpp"
-#include "ValueBuilder.hpp"
+#include "ValueBuilder.h"
 #include "AstValue.h"
 #include "FuncContext.hpp"
 #include "AstExprOrValue.h"
@@ -879,12 +879,8 @@ private:
 							if (_ptr->m_expect_type.substr (_ptr->m_expect_type.size () - 2) == "[]") {
 								_ptr->m_expect_type = _ptr->m_expect_type.substr (0, _ptr->m_expect_type.size () - 2);
 							} else {
-								if (_ptr->m_expect_type == "cptr") {
-									_ptr->m_expect_type = "int8";
-								} else {
-									LOG_ERROR (_suffix_raw->start, "目标类型无法使用下标访问");
-									return std::nullopt;
-								}
+								LOG_ERROR (_suffix_raw->start, "目标类型无法使用下标访问");
+								return std::nullopt;
 							}
 						}
 						_val = _ptr;
@@ -1492,6 +1488,9 @@ private:
 	}
 
 	std::string GetTypeFullName (std::string _type) {
+		if (_type.substr (_type.size () - 2) == "[]")
+			return std::format ("{}[]", GetTypeFullName (_type.substr (0, _type.size () - 2)));
+
 		static std::set<std::string> s_basic_types { "cptr", "int8", "int16", "int32", "int64", "int128", "uint8", "uint16", "uint32", "uint64", "uint128", "void", "bool", "float16", "float32", "float64", "float128" };
 		if (s_basic_types.contains (_type))
 			return _type;

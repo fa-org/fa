@@ -131,7 +131,7 @@ std::optional<llvm::Type*> AstClass::GetLlvmType (std::function<std::optional<ll
 			if (_var->m_type.substr (_var->m_type.size () - 2) == "[]") {
 				_v.push_back (_cb ("int32", nullptr).value ());
 				_v.push_back (_cb ("int32", nullptr).value ());
-				_v.push_back (_cb ("cptr", nullptr).value ());
+				_v.push_back (_cb (_var->m_type.substr (0, _var->m_type.size () - 2), nullptr).value ());
 			} else {
 				auto _otype = _cb (_var->m_type, _var->m_t);
 				if (!_otype.has_value ())

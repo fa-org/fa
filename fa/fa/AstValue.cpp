@@ -5,11 +5,7 @@
 AstValue AstValue::FromVoid () { AstValue _v {}; _v.m_type = AstObjectType::Void; return _v; }
 
 std::optional<AstValue> AstValue::FromValue (std::shared_ptr<ValueBuilder> _value_builder, std::string _value, std::string _type, antlr4::Token* _t) {
-	std::optional<std::tuple<llvm::Value*, std::string>> _oval = _value_builder->Build (_type, _value, _t);
-	if (!_oval.has_value ())
-		return std::nullopt;
-	auto [_val, _value_type] = _oval.value ();
-	return AstValue { _val, _value_type };
+	return _value_builder->Build (_type, _value, _t);
 }
 
 AstValue::AstValue () {}
@@ -25,15 +21,14 @@ AstValue::AstValue (std::shared_ptr<ValueBuilder> _value_builder, FaParser::Lite
 	} else if (_literal->floatNum ()) {
 		m_value_type = "float64";
 	} else if (_literal->String1Literal ()) {
-		m_value_type = "cptr";
+		m_value_type = "uint8[]";
 	} else {
 		LOG_ERROR (_literal->start, "未知数据类型");
 		return;
 	}
-	std::optional<std::tuple<llvm::Value*, std::string>> _oval = _value_builder->Build (m_value_type, _literal->getText (), _literal->start);
+	auto _oval = _value_builder->Build (m_value_type, _literal->getText (), _literal->start);
 	if (_oval.has_value ()) {
-		m_type = AstObjectType::Value;
-		std::tie (m_value, m_value_type) = _oval.value ();
+		*this = _oval.value ();
 	}
 }
 
@@ -106,21 +101,21 @@ std::optional<AstValue> AstValue::DoOper1 (llvm::IRBuilder<>& _builder, std::sha
 	} else {
 		std::string _typestr = TypeMap::GetTypeName (m_value->getType ());
 		if (_op == "-") {
-			auto _tmp2 = _value_builder->Build (m_value_type, "0", _t);
-			if (!_tmp2.has_value ())
+			auto _otmp2 = _value_builder->Build (m_value_type, "0", _t);
+			if (!_otmp2.has_value ())
 				return std::nullopt;
-			auto [_tmp_val, _] = _tmp2.value ();
-			return AstValue { _builder.CreateSub (_tmp_val, _tmp), m_value_type };
+			auto _tmp2 = _otmp2.value ();
+			return AstValue { _builder.CreateSub (_tmp2.Value (_builder), _tmp), m_value_type };
 		} else if (_op == "++" || _op == "--") {
-			auto _tmp2 = _value_builder->Build (m_value_type, "1", _t);
-			if (!_tmp2.has_value ())
+			auto _otmp2 = _value_builder->Build (m_value_type, "1", _t);
+			if (!_otmp2.has_value ())
 				return std::nullopt;
-			auto [_tmp_val, _] = _tmp2.value ();
+			auto _tmp2 = _otmp2.value ();
 			AstValue _v;
 			if (_op == "++") {
-				_v = AstValue { _builder.CreateAdd (Value (_builder), _tmp_val), m_value_type };
+				_v = AstValue { _builder.CreateAdd (Value (_builder), _tmp2.Value (_builder)), m_value_type };
 			} else {
-				_v = AstValue { _builder.CreateSub (Value (_builder), _tmp_val), m_value_type };
+				_v = AstValue { _builder.CreateSub (Value (_builder), _tmp2.Value (_builder)), m_value_type };
 			}
 			if (!m_value)
 				return std::nullopt;
@@ -131,11 +126,11 @@ std::optional<AstValue> AstValue::DoOper1 (llvm::IRBuilder<>& _builder, std::sha
 				LOG_ERROR (_t, "非bool类型数据无法取反");
 				return std::nullopt;
 			}
-			auto _tmp2 = _value_builder->Build (m_value_type, "true", _t);
-			if (!_tmp2.has_value ())
+			auto _otmp2 = _value_builder->Build (m_value_type, "true", _t);
+			if (!_otmp2.has_value ())
 				return std::nullopt;
-			auto [_tmp_val, _] = _tmp2.value ();
-			return AstValue { _builder.CreateSub (_tmp_val, _tmp), m_value_type };
+			auto _tmp2 = _otmp2.value ();
+			return AstValue { _builder.CreateSub (_tmp2.Value (_builder), _tmp), m_value_type };
 		}
 	}
 
@@ -166,8 +161,8 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 				auto _f = _global_funcs->GetFunc ("hello.fa.Memory.CopyArray").value ();
 				auto _fp = _global_funcs->GetFuncPtr ("hello.fa.Memory.CopyArray");
 				auto _func = AstValue { _f, _fp };
-				auto _1 = std::get<0> (_value_builder->Build ("int32", "1", nullptr).value ());
-				_size0 = _builder.CreateAdd (_size0, _1);
+				auto _1 = _value_builder->Build ("int32", "1", nullptr).value ();
+				_size0 = _builder.CreateAdd (_size0, _1.ValueRaw ());
 				std::vector<llvm::Value*> _args { m_value, _other.m_value, _size0 };
 				_func.FuncInvoke (_builder, _args);
 			} else {

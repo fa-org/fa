@@ -51,6 +51,9 @@
     <ClCompile Include="AstExprOrValue.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ValueBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tools\libs\FaVisitor.h">
@@ -74,7 +77,7 @@
     <ClInclude Include="TypeMap.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ValueBuilder.hpp">
+    <ClInclude Include="ValueBuilder.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="StringProcessor.hpp">
