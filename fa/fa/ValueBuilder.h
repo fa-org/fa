@@ -35,9 +35,9 @@ public:
 
 	//std::optional<AstValue> BuildArray (std::string _type, AstValue &_capacity, std::function<std::optional<AstValue> (size_t _index)> _cb) {
 	//	std::vector<llvm::Type*> _v;
-	//	_v.push_back (m_type_map->GetType ("int32").value ());
-	//	_v.push_back (m_type_map->GetType ("int32").value ());
 	//	_v.push_back (m_type_map->GetArrayType (_type, _capacity).value ());
+	//	_v.push_back (m_type_map->GetType ("int32").value ());
+	//	_v.push_back (m_type_map->GetType ("int32").value ());
 	//	auto _stype = llvm::StructType::create (_v);
 	//	llvm::AllocaInst* _inst = m_builder->CreateAlloca (_stype);
 	//	//llvm::Value* _val_size = m_builder->CreateStructGEP (_inst, 0);

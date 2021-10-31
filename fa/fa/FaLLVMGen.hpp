@@ -253,6 +253,9 @@ public:
 		// 编译类
 		if (!m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<IAstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
+				if (_cls_func->m_name_abi == "hello.fa.string.Data") {
+					int xxxxxxxx = 1;
+				}
 				std::vector<std::tuple<std::string, std::string>> _args;
 				for (size_t i = 0; i < _cls_func->m_arg_names.size (); ++i)
 					_args.push_back ({ _cls_func->m_arg_names [i], _cls_func->m_arg_types [i] });
@@ -391,9 +394,6 @@ private:
 				if (_normal_stmt_raw->Return () || _normal_stmt_raw->expr ()) {
 					if (_normal_stmt_raw->expr ()) {
 						std::string _exp_type = _normal_stmt_raw->Return () ? _func_ctx.GetReturnType () : "";
-						if (_normal_stmt_raw->expr ()->getText () == "dest[i]=src[i]") {
-							int xx = 0;
-						}
 						std::optional<AstValue> _oval = ExprBuilder (_func_ctx, _normal_stmt_raw->expr (), _exp_type);
 						if (!_oval.has_value ())
 							return false;
@@ -811,9 +811,6 @@ private:
 				// 内到外层层叠加类型
 				// suffix 0->x
 				// prefix x->0
-				if (_expr_raw->getText () == "dest[i]") {
-					int xxx = 0;
-				}
 				auto _oval = _parse_strong_expr_base (_expr_raw->strongExprBase (), "");
 				if (!_oval.has_value ())
 					return std::nullopt;

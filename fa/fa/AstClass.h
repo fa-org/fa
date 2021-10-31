@@ -135,7 +135,7 @@ public:
 	IAstClass (PublicLevel _level, std::string _module_name, std::string _name);
 
 	virtual AstClassType GetType () = 0;
-	virtual std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
+	virtual std::optional<llvm::Type*> GetLlvmType (llvm::LLVMContext *_ctx, std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) = 0;
 	virtual std::optional<IAstClassItem*> GetMember (std::string _name);
 	virtual size_t GetVars (std::function<CallbackFunc (AstClassVar*)> _cb) = 0;
 	virtual AstClassVar* GetVarFromPos (size_t _pos) = 0;
@@ -157,7 +157,7 @@ public:
 	AstClass (PublicLevel _level, std::string _module_name, std::string _name);
 
 	AstClassType GetType () override;
-	std::optional<llvm::Type*> GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) override;
+	std::optional<llvm::Type*> GetLlvmType (llvm::LLVMContext *_ctx, std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) override;
 	std::optional<IAstClassItem*> GetMember (std::string _name) override;
 	size_t GetVars (std::function<CallbackFunc (AstClassVar*)> _cb) override;
 	AstClassVar* GetVarFromPos (size_t _pos) override;

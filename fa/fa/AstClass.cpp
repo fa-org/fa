@@ -124,14 +124,14 @@ AstClass::AstClass (PublicLevel _level, std::string _module_name, std::string _n
 
 AstClassType AstClass::GetType () { return AstClassType::Class; }
 
-std::optional<llvm::Type*> AstClass::GetLlvmType (std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) {
+std::optional<llvm::Type*> AstClass::GetLlvmType (llvm::LLVMContext *_ctx, std::function<std::optional<llvm::Type*> (std::string, antlr4::Token*)> _cb) {
 	if (!m_type) {
 		std::vector<llvm::Type*> _v;
 		for (auto _var : m_vars1) {
 			if (_var->m_type.substr (_var->m_type.size () - 2) == "[]") {
-				_v.push_back (_cb ("int32", nullptr).value ());
-				_v.push_back (_cb ("int32", nullptr).value ());
 				_v.push_back (_cb (_var->m_type.substr (0, _var->m_type.size () - 2), nullptr).value ());
+				_v.push_back (_cb ("int32", nullptr).value ());
+				_v.push_back (_cb ("int32", nullptr).value ());
 			} else {
 				auto _otype = _cb (_var->m_type, _var->m_t);
 				if (!_otype.has_value ())
@@ -145,7 +145,7 @@ std::optional<llvm::Type*> AstClass::GetLlvmType (std::function<std::optional<ll
 				return std::nullopt;
 			_v.push_back (_otype.value ());
 		}
-		m_type = llvm::StructType::create (_v);
+		m_type = llvm::StructType::create (*_ctx, _v);
 	}
 	return (llvm::Type*) m_type;
 }

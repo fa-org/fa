@@ -106,16 +106,13 @@ if表达式：
 ![img](./imgs/screen4.png)
 
 <!--
-性能警告：
+编写LLVM Pass模块知识点梳理√
+https://blog.csdn.net/u010940020/article/details/99721684
 
-1. 要求不允许循环引用
-	- 警告处理方式：引用路径其中一个引用改为 `Object&?`（弱引用）
-	- 忽略警告：改用RAII+GC实现
-2. 貌似是死循环的代码块，要求循环体内所有路径带异步方法调用（待确认）
-	- 警告处理方式：给while循环加上 `@safe` 标注
-	- 忽略警告后：编译器给所有实时运行路径加上循环一万次yield一下
 
-参考资料：
+
+七妹要奈斯的LLVM专栏√
+https://blog.csdn.net/qq_42570601/category_10200372.html
 
 
 
@@ -141,10 +138,6 @@ https://zhuanlan.zhihu.com/p/25959684
 考不上三本也能懂系列——实现C++类型系统（二）
 考不上三本也能懂系列——什么是C++的argument-dependent lookup
 
-
-
-编写LLVM Pass模块知识点梳理√
-https://blog.csdn.net/u010940020/article/details/99721684
 
 
 SIMD简介

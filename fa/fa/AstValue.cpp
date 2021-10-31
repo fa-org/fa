@@ -154,17 +154,17 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 		case '>': return AstValue { _builder.CreateICmpSGT (Value (_builder), _other.Value (_builder)), "bool" };
 		case '=':
 			if (m_value_type.substr (m_value_type.size () - 2) == "[]") {
-				llvm::Value* _size0;
-				_builder.CreateStore (_size0 = _builder.CreateLoad (_other.m_value_size), m_value_size);
-				_builder.CreateStore (_builder.CreateLoad (_other.m_value_capacity), m_value_capacity);
-				// 开洞 复制数组
-				auto _f = _global_funcs->GetFunc ("hello.fa.Memory.CopyArray").value ();
-				auto _fp = _global_funcs->GetFuncPtr ("hello.fa.Memory.CopyArray");
-				auto _func = AstValue { _f, _fp };
-				auto _1 = _value_builder->Build ("int32", "1", nullptr).value ();
-				_size0 = _builder.CreateAdd (_size0, _1.ValueRaw ());
-				std::vector<llvm::Value*> _args { m_value, _other.m_value, _size0 };
-				_func.FuncInvoke (_builder, _args);
+				//// TODO 开洞 复制数组（现有方式暂不支持参数mut，无法通过调用方法直接实现，考虑这儿整全套复制代码）
+				//llvm::Value* _size0;
+				//_builder.CreateStore (_size0 = _builder.CreateLoad (_other.m_value_size), m_value_size);
+				//_builder.CreateStore (_builder.CreateLoad (_other.m_value_capacity), m_value_capacity);
+				//auto _f = _global_funcs->GetFunc ("hello.fa.Memory.CopyArray").value ();
+				//auto _fp = _global_funcs->GetFuncPtr ("hello.fa.Memory.CopyArray");
+				//auto _func = AstValue { _f, _fp };
+				//auto _1 = _value_builder->Build ("int32", "1", nullptr).value ();
+				//_size0 = _builder.CreateAdd (_size0, _1.ValueRaw ());
+				//std::vector<llvm::Value*> _args { m_value, _other.m_value, _size0 };
+				//_func.FuncInvoke (_builder, _args);
 			} else {
 				_builder.CreateStore (_other.Value (_builder), m_value);
 			}

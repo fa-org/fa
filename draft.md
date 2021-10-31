@@ -188,3 +188,51 @@ switch _data {
 string _name = _data.Name ?? "kangkang";
 _data.Name = "michael";
 ```
+
+## 异常处理
+
+允许空值的返回类型代表支持异常处理，遇到异常时，假如用户没做完整的处理，并且出现UB，那么将返回null并且携带错误信息与异常栈。
+
+如果正常的逻辑需要使用到带空的返回类型，那么不识别错误信息与错误栈即可。
+
+示例代码：
+
+```fa
+int32? calc_div (int32 a) {
+	int32? x = a / 0;                                   // 执行后x的值为null
+	int32 y = a / 0 ? 1;                                // 执行后y的值为1
+	int32 z = a / 0;                                    // 执行后函数直接返回，返回值为null
+	int32 z = (a / 0).unwrap (new DeviceZeroError ());  // 等价上一句
+	int32? zz = new DeviceZeroError ();                 // 赋值一个错误（同时指定值为null）
+	throw new DeviceZeroError ();                       // 抛异常
+}
+
+int32? calc_div_wrap1 (int32 a) {
+	return calc_div (a);
+}
+
+int32? calc_div_wrap2 (int32 a) {
+	int32? b = calc_div_wrap1 (a);
+
+	// 错误处理方式1
+	switch b {
+		int32 (_b) => Console.WriteLine ("{b}");
+		Error (_e) => {
+			Console.WriteLine ("遇到异常：{_e.Message}");
+			Console.WriteLine ("{_e.Stack}");
+		}
+	}
+
+	// 错误处理方式2
+	if b is valid {
+		// 此处b临时升级为int32类型（假如b的值有被修改那么临时升级措施失效）
+		Console.WriteLine ("{b}");
+	} else {
+		// 此处b.error始终不为null（非else环境为可空）
+		Console.WriteLine ("遇到异常：{b.error.Message}");
+		Console.WriteLine ("{b.error.Stack}");
+	}
+}
+```
+
+如果某个函数不希望异常传递，那么可以修改返回类型为不可空类型，那么此函数必须能够处理所有可空的数据（异常），否则将编译报错。

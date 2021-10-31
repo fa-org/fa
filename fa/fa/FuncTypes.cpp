@@ -76,12 +76,12 @@ bool FuncTypes::Make (std::string _class_name, std::string _func_name, std::stri
 		for (size_t i = 0; i < _arg_types.size (); ++i) {
 			std::string _arg_type = _arg_types [i];
 			if (_arg_type.substr (_arg_type.size () - 2) == "[]") {
-				_arg_types_.push_back (m_type_map->GetType ("int32", nullptr).value ());
-				_arg_types_.push_back (m_type_map->GetType ("int32", nullptr).value ());
 				_otype = m_type_map->GetType (_arg_type.substr (0, _arg_type.size () - 2), _arg_type_ts [i]);
 				if (!_otype.has_value ())
 					return false;
 				_arg_types_.push_back (_otype.value ());
+				_arg_types_.push_back (m_type_map->GetType ("int32", nullptr).value ());
+				_arg_types_.push_back (m_type_map->GetType ("int32", nullptr).value ());
 			} else {
 				_otype = m_type_map->GetType (_arg_type, _arg_type_ts [i]);
 				if (!_otype.has_value ())
