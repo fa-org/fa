@@ -165,7 +165,7 @@ public:
 			LOG_TODO (_t);
 			return std::nullopt;
 		}
-		auto _otype = m_cls->GetLlvmType ([&] (std::string _stype, antlr4::Token* _t) { return m_type_map->GetType (_stype, _t); });
+		auto _otype = m_cls->GetLlvmType (m_ctx.get (), [&] (std::string _stype, antlr4::Token* _t) { return m_type_map->GetType (_stype, _t); });
 		if (!_otype.has_value ()) {
 			LOG_ERROR (_t, std::format ("无法解析对象llvm类型 {}", m_cls->m_name));
 		}
@@ -238,8 +238,15 @@ public:
 	AstValue FuncInvoke (AstValue &_func, std::vector<AstValue> &_args) {
 		if (!m_virtual) {
 			std::vector<llvm::Value*> _sargs;
-			for (auto _arg : _args)
-				_sargs.push_back (_arg.Value (*m_builder));
+			for (auto _arg : _args) {
+				std::string _type = _arg.GetType ();
+				if (TypeMap::IsBaseType (_type)) {
+					_sargs.push_back (_arg.Value (*m_builder));
+				} else {
+					// TODO: fix
+					_sargs.push_back (_arg.ValueRaw ());
+				}
+			}
 			llvm::Value* _val = _func.FuncInvoke (*m_builder, _sargs);
 			return AstValue { _val, _func.GetFuncReturnType () };
 		} else {

@@ -86,7 +86,11 @@ bool FuncTypes::Make (std::string _class_name, std::string _func_name, std::stri
 				_otype = m_type_map->GetType (_arg_type, _arg_type_ts [i]);
 				if (!_otype.has_value ())
 					return false;
-				_arg_types_.push_back (_otype.value ());
+				if (TypeMap::IsBaseType (_arg_type)) {
+					_arg_types_.push_back (_otype.value ());
+				} else {
+					_arg_types_.push_back (llvm::PointerType::get (_otype.value (), 0));
+				}
 			}
 		}
 		_ret->m_arg_types = _arg_types;

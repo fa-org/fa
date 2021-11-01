@@ -139,15 +139,12 @@ public:
 		return GetType (_stype, _type_ctx->start);
 	}
 
-	std::optional<llvm::Type*> GetType (std::string _stype, antlr4::Token* _t = nullptr) {
-		//if (_stype.size () > 2 && _stype.substr (_stype.size () - 2) == "[]") {
-		//	std::string _sitem_type = _stype.substr (0, _stype.size () - 2);
-		//	auto _otype = GetType (_sitem_type, _t);
-		//	if (!_otype.has_value ())
-		//		return std::nullopt;
-		//	return llvm::ArrayType::get (_otype.value (), 0);
-		//}
+	static bool IsBaseType (std::string _stype) {
+		static std::set<std::string> s_base { "void", "bool", "int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64", "int128", "uint128", "float16", "float32", "float64", "float128", "cptr" };
+		return s_base.contains (_stype);
+	}
 
+	std::optional<llvm::Type*> GetType (std::string _stype, antlr4::Token* _t = nullptr) {
 		if (_stype == "void") {
 			return llvm::Type::getVoidTy (*m_ctx);
 		} else if (_stype == "bool") {
@@ -175,7 +172,7 @@ public:
 		} else {
 			auto _ocls = m_global_classes.GetClass (_stype, m_namespace, m_uses);
 			if (_ocls.has_value ())
-				return _ocls.value ()->GetLlvmType ([&] (std::string _stype, antlr4::Token* _t) { return GetType (_stype, _t); });
+				return _ocls.value ()->GetLlvmType (m_ctx.get (), [&] (std::string _stype, antlr4::Token* _t) { return GetType (_stype, _t); });
 		}
 		LOG_ERROR (_t, std::format ("无法识别的类型 [{}]", _stype));
 		return std::nullopt;
