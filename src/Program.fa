@@ -4,7 +4,7 @@ use hello.fa;
 
 class Program {
 	public static void Main () {
-		Console.Write ("hello world\n");
+		//Console.Write ("hello world\n");
 		////
 		//int32 n = if false {
 		//	10

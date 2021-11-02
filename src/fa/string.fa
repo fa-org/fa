@@ -1,9 +1,10 @@
 public class string {
-	private uint8[] m_array;
-	public cptr Data () => m_array.Data;
+	public int32 m_i = 0;
+	public uint8[] m_array;
+	//public cptr Data () => m_array.Data;
 
 	// 为AstValue.cpp里，array[].operator= ()开洞
-	public static void From (uint8[] _src) {
+	//public static void From (uint8[] _src) {
 		//string _s = new { m_array = new uint8 [_src.Capacity] };
 		//int32 i = 0;
         //while i < _src.Size {
@@ -12,5 +13,5 @@ public class string {
         //}
         //_s.m_array [i] = 0;
 		//return _s;
-	}
+	//}
 }

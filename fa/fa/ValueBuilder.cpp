@@ -28,7 +28,10 @@ std::optional<AstValue> ValueBuilder::Build (std::string _type, std::string _val
 			llvm::GlobalVariable* _asize = new llvm::GlobalVariable (_int32_type, true, llvm::GlobalValue::PrivateLinkage, nullptr);
 			AstValue _asize_value = Build ("int32", std::format ("{}", _tmp_value.size ()), nullptr).value ();
 			_asize->setInitializer ((llvm::Constant*) _asize_value.ValueRaw ());
-			return AstValue { (llvm::AllocaInst*) _arr, (llvm::AllocaInst*) _asize, (llvm::AllocaInst*) _asize, "uint8[]" };
+			llvm::GlobalVariable* _acapacity = new llvm::GlobalVariable (_int32_type, true, llvm::GlobalValue::PrivateLinkage, nullptr);
+			AstValue _acapacity_value = Build ("int32", std::format ("{}", _tmp_value.size ()), nullptr).value ();
+			_acapacity->setInitializer ((llvm::Constant*) _acapacity_value.ValueRaw ());
+			return AstValue { (llvm::AllocaInst*) _arr, (llvm::AllocaInst*) _asize, (llvm::AllocaInst*) _acapacity, "uint8[]" };
 		}
 	} else if (_type.find ("int") != std::string::npos) {
 		if (_type == "int") {

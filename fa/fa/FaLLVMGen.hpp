@@ -253,9 +253,6 @@ public:
 		// ±‡“Î¿‡
 		if (!m_global_classes.EnumClasses (m_module_name, [&] (std::shared_ptr<IAstClass> _cls) -> bool {
 			for (auto _cls_func : _cls->m_funcs) {
-				if (_cls_func->m_name_abi == "hello.fa.string.Data") {
-					int xxxxxxxx = 1;
-				}
 				std::vector<std::tuple<std::string, std::string>> _args;
 				for (size_t i = 0; i < _cls_func->m_arg_names.size (); ++i)
 					_args.push_back ({ _cls_func->m_arg_names [i], _cls_func->m_arg_types [i] });

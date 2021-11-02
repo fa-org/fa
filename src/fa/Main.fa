@@ -1,9 +1,16 @@
 @lib "ucrt.lib";
 @lib "msvcrt.lib";
+@import int32 __cdecl puts (cptr);
 
 
 
 int32 FaMain () {
-	Program.Main ();
+	//Program.Main ();
+	string s = new { m_array = "hello1" };
+	if (s.m_array [1] == 101) {
+		::puts ("success".Data);
+	} else {
+		::puts ("failed".Data);
+	}
 	return 0;
 }

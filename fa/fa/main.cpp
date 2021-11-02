@@ -116,6 +116,7 @@ int main (int argc, char* argv[]) {
 			std::cout << "compile failed." << std::endl;
 			std::cout << "press any key to exit." << std::endl;
 			::_getch ();
+			exit (0);
 			return 0;
 		}
 		_gens.push_back (_gen);
@@ -126,6 +127,7 @@ int main (int argc, char* argv[]) {
 			std::cout << "compile failed." << std::endl;
 			std::cout << "press any key to exit." << std::endl;
 			::_getch ();
+			exit (0);
 			return 0;
 		}
 	}
@@ -137,16 +139,18 @@ int main (int argc, char* argv[]) {
 			std::cout << "compile failed." << std::endl;
 			std::cout << "press any key to exit." << std::endl;
 			::_getch ();
+			exit (0);
 			return 0;
 		}
 	}
 	//
-	// link /out:hello.exe /subsystem:console /entry:fa_entry_main hello.obj
-	//std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
+	//// link /out:hello.exe /subsystem:console /entry:fa_entry_main hello.obj
+	////std::string _out = _gen.Link (R"(E:\Software\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx86\x86\link.exe)");
 	std::string _out = _link (_project_name, _libs);
 	std::cout << _out << std::endl;
 
 	std::cout << "press any key to exit." << std::endl;
 	::_getch ();
+	exit (0);
 	return 0;
 }
