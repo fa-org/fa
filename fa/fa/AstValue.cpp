@@ -256,7 +256,11 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 				if (_item->GetType () == AstClassItemType::Var) {
 					auto _var = dynamic_cast<AstClassVar*> (_item);
 					if (_var->GetStringType ().substr (_var->GetStringType ().size () - 2) == "[]") {
-
+						auto _array = (llvm::AllocaInst*) _builder.CreateStructGEP (ValueRaw (), _var->m_llvm_pos);
+						auto _asize = (llvm::AllocaInst*) _builder.CreateStructGEP (ValueRaw (), _var->m_llvm_pos + 1);
+						auto _acapacity = (llvm::AllocaInst*) _builder.CreateStructGEP (ValueRaw (), _var->m_llvm_pos + 2);
+						std::string _arr_type = std::format ("{}{}", _prefix, _var->GetStringType ());
+						return AstValue { _array, _asize, _acapacity, _arr_type };
 					} else {
 						if (_prefix == "$") {
 							return AstValue { (llvm::AllocaInst*) _builder.CreateStructGEP (ValueRaw (), _var->m_llvm_pos), std::format ("{}{}", _prefix, _var->GetStringType ()) };

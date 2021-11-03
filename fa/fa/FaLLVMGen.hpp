@@ -1352,6 +1352,12 @@ private:
 				return std::nullopt;
 			_left = _oleft.value ();
 			//
+			if (_rexp_type_r == "" && _ast_ev.m_op2_expr->m_op.m_op != ".") {
+				_rexp_type_r = _left.GetType ();
+				if (_rexp_type_r [0] == '$')
+					_rexp_type_r = _rexp_type_r.substr (1);
+				_ast_ev.m_op2_expr->m_right.SetExpectType (_rexp_type_r);
+			}
 			auto _oright = _generate_code (_func_ctx, _ast_ev.m_op2_expr->m_right);
 			if (!_oright.has_value ())
 				return std::nullopt;
