@@ -95,14 +95,15 @@ public:
 				case '<':
 				case '>':
 					return std::make_tuple (_exp_type, "int");
+				case '=':
+					return std::make_tuple ("", "");
 				}
 			} else if (_op [1] == '=') {
 				switch (_op [0]) {
 				case '<':
 				case '>':
-				case '=':
 				case '!':
-				return std::make_tuple ("", "");
+					return std::make_tuple ("", "");
 				case '+':
 				case '-':
 				case '*':

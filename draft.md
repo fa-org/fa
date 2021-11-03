@@ -228,9 +228,9 @@ int32? calc_div_wrap2 (int32 a) {
 		// 此处b临时升级为int32类型（假如b的值有被修改那么临时升级措施失效）
 		Console.WriteLine ("{b}");
 	} else {
-		// 此处b.error始终不为null（非else环境为可空）
-		Console.WriteLine ("遇到异常：{b.error.Message}");
-		Console.WriteLine ("{b.error.Stack}");
+		// 此处b临时升级为Error类型
+		Console.WriteLine ("遇到异常：{b.Message}");
+		Console.WriteLine ("{b.Stack}");
 	}
 }
 ```

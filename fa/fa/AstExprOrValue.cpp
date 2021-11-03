@@ -230,8 +230,11 @@ bool _AST_Op2ExprTreeCtx::CalcExpectType (AstClasses& _classes, std::string _nam
 		std::string _class_name = m_left.GetExpectType ();
 		if (_class_name == "" || _class_name == "[member]")
 			_class_name = m_left.m_val->m_val.m_member;
+		std::string _prefix = (_class_name [0] == '$' ? "$" : "");
+		if (_prefix != "")
+			_class_name = _class_name.substr (1);
 		if (_class_name == "uint8[]" && m_right.m_val->m_val.m_member == "Size") {
-			m_expect_type = "int32";
+			m_expect_type = std::format ("{}int32", _prefix);
 			return true;
 		}
 		auto _ocls = _classes.GetClass (_class_name, _namespace, _uses);
@@ -248,7 +251,7 @@ bool _AST_Op2ExprTreeCtx::CalcExpectType (AstClasses& _classes, std::string _nam
 			LOG_ERROR (m_op.m_t, "仅支持结构体对象访问成员3");
 			return false;
 		}
-		m_expect_type = _oitem.value ()->GetStringType ();
+		m_expect_type = std::format ("{}{}", _prefix, _oitem.value ()->GetStringType ());
 		return true;
 	}
 

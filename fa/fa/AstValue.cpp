@@ -202,6 +202,7 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 					return std::nullopt;
 				}
 
+				// 访问静态成员
 				if (_item->GetType () == AstClassItemType::Var) {
 					// TODO: 访问全局变量
 					LOG_TODO (_t);
@@ -216,17 +217,65 @@ std::optional<AstValue> AstValue::DoOper2 (llvm::IRBuilder<>& _builder, std::sha
 				}
 			}
 
-			//如果是成员方法那么返回方法地址
-			{
-				std::string _func_name = std::format ("{}.{}", m_value_type, _other.m_member);
-				auto _ofunc = _global_funcs->GetFunc (_func_name);
-				if (_ofunc.has_value ()) {
-					auto _fp = _global_funcs->GetFuncPtr (_func_name);
-					return AstValue { _ofunc.value (), _fp };
+			////如果是成员方法那么返回方法地址
+			//{
+			//	std::string _func_name = std::format ("{}.{}", m_value_type, _other.m_member);
+			//	auto _ofunc = _global_funcs->GetFunc (_func_name);
+			//	if (_ofunc.has_value ()) {
+			//		auto _fp = _global_funcs->GetFuncPtr (_func_name);
+			//		return AstValue { _ofunc.value (), _fp };
+			//	}
+			//}
+
+			// 如果是成员变量那么给出偏移计算
+			std::string _prefix = (m_value_type [0] == '$' ? "$" : "");
+			std::string _value_type = _prefix.empty () ? m_value_type : m_value_type.substr (1);
+			auto _ocls = _global_classes.GetClass (_value_type, _namespace, _uses);
+			if (_ocls.has_value ()) {
+				// 找到了类但非访问类型
+				if (_other.m_type != AstObjectType::MemberStr) {
+					LOG_ERROR (_t, std::format ("无法对类 {} 进行其他操作", _value_type));
+					return std::nullopt;
+				}
+
+				// 如果成员不存在
+				auto _oitem = _ocls.value ()->GetMember (_other.m_member);
+				if (!_oitem.has_value ()) {
+					LOG_ERROR (_t, std::format ("类 {} 不包括成员 {}", _value_type, _other.m_member));
+					return std::nullopt;
+				}
+
+				// 如果成员静态
+				auto _item = _oitem.value ();
+				if (_item->IsStatic ()) {
+					LOG_ERROR (_t, std::format ("类成员 {}.{} 不允许动态方式访问", _value_type, _other.m_member));
+					return std::nullopt;
+				}
+
+				// 访问动态成员
+				if (_item->GetType () == AstClassItemType::Var) {
+					auto _var = dynamic_cast<AstClassVar*> (_item);
+					if (_var->GetStringType ().substr (_var->GetStringType ().size () - 2) == "[]") {
+
+					} else {
+						if (_prefix == "$") {
+							return AstValue { (llvm::AllocaInst*) _builder.CreateStructGEP (ValueRaw (), _var->m_llvm_pos), std::format ("{}{}", _prefix, _var->GetStringType ()) };
+						} else {
+							return AstValue { _builder.CreateStructGEP (ValueRaw (), _var->m_llvm_pos), _var->GetStringType () };
+						}
+					}
+					LOG_TODO (_t);
+					return std::nullopt;
+				} else if (_item->GetType () == AstClassItemType::Func) {
+					auto _func = dynamic_cast<AstClassFunc*> (_item);
+					auto _of = _global_funcs->GetFunc (_func->m_name_abi);
+					if (_of.has_value ()) {
+						auto _fp = _global_funcs->GetFuncPtr (_func->m_name_abi);
+						return AstValue { _of.value (), _fp };
+					}
 				}
 			}
 
-			// TODO 待确认是否加入：如果是成员变量那么给出偏移计算
 			LOG_TODO (_t);
 			return std::nullopt;
 		}

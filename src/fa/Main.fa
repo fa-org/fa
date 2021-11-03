@@ -7,7 +7,7 @@
 int32 FaMain () {
 	//Program.Main ();
 	string s = new { m_array = "hello1" };
-	if (s.m_array [1] == 101) {
+	if s.m_array [1] == 101 {
 		::puts ("success".Data);
 	} else {
 		::puts ("failed".Data);
