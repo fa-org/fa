@@ -20,7 +20,7 @@ namespace fac {
 			var _token_stream = new CommonTokenStream (_lexer);
 			var _parser = new FaParser (_token_stream);
 			//
-			var _visitor = new FaVisitor ();
+			Info.Visitor = new FaVisitor ();
 			var _type = typeof (T);
 			string _name = _type.FullName;
 			if (_name.Contains ('.'))
@@ -30,7 +30,7 @@ namespace fac {
 			if (_methods.Count != 1)
 				throw new Exception ($"Program.ParseCode<T>: 使用到了 {_type.FullName} 类型，但 {_name} 方法{(_methods.Any () ? "数量大于1" : "不存在")}");
 			var _tree = (IParseTree) _methods[0].Invoke (_parser, null);
-			return (T) _visitor.Visit (_tree);
+			return (T) Info.Visitor.Visit (_tree);
 		}
 
 		public static string GetStringLiterialText (ITerminalNode _node) {

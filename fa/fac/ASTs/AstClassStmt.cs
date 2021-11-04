@@ -5,6 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	interface IAstNode {
+	class AstClassStmt: IAstNode {
+		public AstClassStmt (FaParser.ClassStmtContext _ctx) {
+
+		}
+
+		public void Compile () {
+
+		}
 	}
 }

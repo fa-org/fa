@@ -1,4 +1,5 @@
-﻿using fac.Structures;
+﻿using fac.ASTs;
+using fac.Structures;
 using System.Collections.Generic;
 
 namespace fac {
@@ -11,12 +12,17 @@ namespace fac {
 		/// <summary>
 		/// 项目源码路径
 		/// </summary>
-		public static string Path = "";
+		public static string SrcPath = "";
 
 		/// <summary>
 		/// 项目引用的外部库
 		/// </summary>
 		public static HashSet<string> ExternLibs = new HashSet<string> ();
+
+		/// <summary>
+		/// 项目编译输出路径
+		/// </summary>
+		public static string DestPath = "";
 
 
 
@@ -35,12 +41,15 @@ namespace fac {
 		/// </summary>
 		public static string CurrentRelativeFile {
 			get {
-				string _s = CurrentFile.Substring (Path.Length);
-				if (_s[0] == '/' || _s[0] == '\\')
-					_s = _s.Substring (1);
-				return _s;
+				string _s = CurrentFile.Substring (SrcPath.Length);
+				return (_s[0] == '/' || _s[0] == '\\') ? _s.Substring(1) : _s;
 			}
 		}
+
+		/// <summary>
+		/// 当前访问者对象
+		/// </summary>
+		public static FaVisitor Visitor = null;
 
 		/// <summary>
 		/// 当前命名空间
@@ -52,6 +61,9 @@ namespace fac {
 		/// </summary>
 		public static List<string> CurrentUses;
 
+		/// <summary>
+		/// 当前外部API
+		/// </summary>
 		public static List<ExternApi> CurrentExternApis;
 	}
 }

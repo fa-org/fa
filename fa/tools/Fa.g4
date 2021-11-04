@@ -38,7 +38,6 @@ Return:						'return';
 Signed:						'signed';
 Static:						'static';
 Step:						'step';
-Struct:						'struct';
 Unsigned:					'unsigned';
 Use:						'use';
 While:						'while';
@@ -234,7 +233,7 @@ stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | numIterStmt;
 //
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
-classType:					Class | Struct | Interface | Enum;
+classType:					Class | Interface | Enum;
 classStmt:					publicLevel? classType Id classParent? QuotHuaL enumAtom* (classVar | classFunc)* QuotHuaR;
 							// classParent 由 class 和 struct 专属使用
 							// enumItems 由 enum 专属使用
@@ -248,7 +247,7 @@ classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-enumAtom:					type? Id Comma;
+enumAtom:					Id (QuotYuanL typeVar (Comma typeVar)* QuotYuanR)? Comma;
 
 
 
