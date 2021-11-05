@@ -35,5 +35,7 @@ namespace fac.ASTs {
 			_stmt.NormalReturn = _return;
 			return _stmt;
 		}
+
+		public static List<AstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select new AstStmt (p)).ToList ();
 	}
 }

@@ -33,7 +33,7 @@ namespace fac.ASTs {
 				BodyCodes = new List<AstStmt> ();
 				BodyCodes.Add (AstStmt.FromExpr (BodyRaw.expr (), ReturnType != "void"));
 			} else {
-				BodyCodes = (from p in BodyRaw.stmt () select new AstStmt (p)).ToList ();
+				BodyCodes = AstStmt.FromStmts (BodyRaw.stmt ());
 			}
 		}
 	}

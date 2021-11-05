@@ -18,8 +18,8 @@ namespace fac {
 
 		static void Main (string[] args) {
 			Info.ProjectName = "Hello";
-			Info.SrcPath = "E:\\GitHub\\_\\fa\\src";
-			Info.DestPath = "E:\\fa_tmp";
+			Info.SrcPath = "D:\\GitHub\\_\\fa\\src";
+			Info.DestPath = "D:\\fa_tmp";
 			if (!Directory.Exists (Info.SrcPath))
 				Directory.CreateDirectory (Info.SrcPath);
 			if (!Directory.Exists (Info.DestPath))

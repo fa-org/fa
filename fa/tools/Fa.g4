@@ -202,7 +202,7 @@ arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
 strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr | newArray | arrayExpr1 | arrayExpr2;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// Ç°×º - ++ -- ~
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
-							| (QuotYuanL (exprOpt (Comma exprOpt)*) QuotYuanR)								//     Write ("")
+							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
 							| (PointOp Id)																	//     wnd.Name
 							;

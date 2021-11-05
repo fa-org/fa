@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fac.ASTs.Exprs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace fac.ASTs {
 		public string Type { init; get; }
 		public string Name { init; get; }
 		public FaParser.ExprContext DefaultValueRaw { init; get; }
-		public AstExpr_Op2 DefaultValue { get; private set; } = null;
+		public IAstExpr DefaultValue { get; private set; } = null;
 
 
 
@@ -25,8 +26,10 @@ namespace fac.ASTs {
 		}
 
 		public void Compile () {
-			if (DefaultValueRaw != null)
-				DefaultValue = new AstExpr (DefaultValueRaw);
+			if (DefaultValueRaw != null) {
+				DefaultValue = IAstExpr.FromContext (DefaultValueRaw);
+				DefaultValue.CheckType (Type);
+			}
 		}
 	}
 }
