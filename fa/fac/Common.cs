@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using fac.AntlrTools;
 using fac.ASTs;
 using fac.Exceptions;
 using System;
@@ -7,20 +8,41 @@ using System.Linq;
 using System.Text;
 
 namespace fac {
+	enum PublicLevel { Public, Protected, Private }
+
+
+
 	class Common {
+		/// <summary>
+		/// 解析字符串为枚举类型
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="_str"></param>
+		/// <returns></returns>
+		public static T? ParseEnum<T> (string _str) where T : struct {
+			if (string.IsNullOrEmpty (_str))
+				return null;
+			if (System.Enum.TryParse<T> (_str, out var _cc))
+				return _cc;
+			_str = $"{$"{_str[0]}".ToUpper ()}{_str[1..]}";
+			if (System.Enum.TryParse<T> (_str, out var _cc1))
+				return _cc1;
+			return null;
+		}
+
 		/// <summary>
 		/// 编译代码到AST
 		/// </summary>
 		/// <typeparam name="T">AST对象</typeparam>
 		/// <param name="_code">源码</param>
 		/// <returns>AST对象</returns>
-		public static T ParseCode<T> (string _code) where T : IAstNode {
+		public static T ParseCode<T> (string _code) where T : class {
 			var _stream = new AntlrInputStream (_code);
 			var _lexer = new FaLexer (_stream);
 			var _token_stream = new CommonTokenStream (_lexer);
 			var _parser = new FaParser (_token_stream);
 			//
-			Info.Visitor = new FaVisitor ();
+			Info.Visitor = new FaVisitorImpl ();
 			var _type = typeof (T);
 			string _name = _type.FullName;
 			if (_name.Contains ('.'))
@@ -30,7 +52,7 @@ namespace fac {
 			if (_methods.Count != 1)
 				throw new Exception ($"Program.ParseCode<T>: 使用到了 {_type.FullName} 类型，但 {_name} 方法{(_methods.Any () ? "数量大于1" : "不存在")}");
 			var _tree = (IParseTree) _methods[0].Invoke (_parser, null);
-			return (T) Info.Visitor.Visit (_tree);
+			return Info.Visitor.Visit (_tree) as T;
 		}
 
 		public static string GetStringLiterialText (ITerminalNode _node) {

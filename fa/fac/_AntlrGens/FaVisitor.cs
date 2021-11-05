@@ -476,11 +476,11 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitClassFunc([NotNull] FaParser.ClassFuncContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.enumAtom"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.classEnumAtom"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitEnumAtom([NotNull] FaParser.EnumAtomContext context);
+	Result VisitClassEnumAtom([NotNull] FaParser.ClassEnumAtomContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.useStmt"/>.
 	/// </summary>
@@ -511,12 +511,6 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitNamespaceStmt([NotNull] FaParser.NamespaceStmtContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.faMainFuncBlock"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitFaMainFuncBlock([NotNull] FaParser.FaMainFuncBlockContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.program"/>.
 	/// </summary>

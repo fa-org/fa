@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.Outputs.Rust {
-	class OutputCSharp: IOutput {
-		public List<(string _file, string _outcode)> Generate (List<AstProgram> _programs) {
+	class OutputCSharp {
+		public static string Generate () {
 			throw new NotImplementedException ();
 		}
 	}

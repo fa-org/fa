@@ -1,4 +1,6 @@
-﻿using fac.ASTs;
+﻿using Antlr4.Runtime.Tree;
+using fac.AntlrTools;
+using fac.ASTs;
 using fac.Structures;
 using System.Collections.Generic;
 
@@ -23,6 +25,11 @@ namespace fac {
 		/// 项目编译输出路径
 		/// </summary>
 		public static string DestPath = "";
+
+		/// <summary>
+		/// 项目所有源码文件的AST
+		/// </summary>
+		public static List<AstProgram> Programs = new List<AstProgram> ();
 
 
 
@@ -49,7 +56,7 @@ namespace fac {
 		/// <summary>
 		/// 当前访问者对象
 		/// </summary>
-		public static FaVisitor Visitor = null;
+		public static FaVisitorImpl Visitor { set; get; } = null;
 
 		/// <summary>
 		/// 当前命名空间

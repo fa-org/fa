@@ -30,29 +30,21 @@ namespace fac {
 			_src_files = (from p in _src_files where p[^3..].ToLower () == ".fa" select p).ToList ();
 
 			// 读取源码
-			var _programs = new List<AstProgram> ();
 			foreach (var _src_file in _src_files) {
 				Info.CurrentFile = _src_file;
 				Info.CurrentCode = File.ReadAllText (_src_file, Encoding.UTF8);
 				Log.Mark (LogMark.Parse);
-				_programs.Add (Common.ParseCode<AstProgram> (Info.CurrentCode));
+				Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentCode));
 			}
 
 			// 编译
-			foreach (var _program in _programs)
+			foreach (var _program in Info.Programs)
 				_program.Compile ();
 
 			// 输出
-			var _output = new OutputCSharp ();
-			var _gens = _output.Generate (_programs);
-			foreach (var (_file, _outcode) in _gens) {
-				var _file_path = Path.Combine (Info.DestPath, _file);
-				File.WriteAllText (_file_path, _outcode, Encoding.UTF8);
-			}
-
-			// TODO 调用命令编译
-
-			Console.WriteLine ("按任意键退出");
+			string _out = OutputCSharp.Generate ();
+			Console.WriteLine ($"编译成功。输出目标文件 {_out}");
+			Console.WriteLine ("按任意键退出。。。");
 			Console.ReadKey ();
 		}
 	}

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	class AstProgram: IAstNode {
+	class AstProgram: IAst {
 		public string CurrentFile { init; get; }
 		public string CurrentCode { init; get; }
 
@@ -50,7 +50,7 @@ namespace fac.ASTs {
 			Info.CurrentExternApis = (from p in _ctx.importStmt () select new ExternApi (p)).ToList ();
 
 			// 处理类
-			CurrentClasses = (from p in _ctx.classStmt () select (AstClassStmt) Info.Visitor.Visit (p)).ToList ();
+			CurrentClasses = (from p in _ctx.classStmt () select new AstClassStmt (p)).ToList ();
 		}
 
 		public void Compile () {

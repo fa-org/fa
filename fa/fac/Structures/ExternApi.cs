@@ -21,9 +21,12 @@ namespace fac.Structures {
 			ReturnType = _ctx.type ().GetText ();
 			//
 			string _cc_str = _ctx.callConvention ().GetText ();
-			if (!System.Enum.TryParse<ExternApiCC> (_cc_str, out var _cc))
+			var _cc = Common.ParseEnum<ExternApiCC> (_cc_str);
+			if (_cc != null) {
+				CC = _cc.Value;
+			} else {
 				throw new UnimplException (_ctx.callConvention ());
-			CC = _cc;
+			}
 			//
 			Name = _ctx.Id ().GetText ();
 			//

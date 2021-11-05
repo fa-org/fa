@@ -1,8 +1,0 @@
-@import int32 __cdecl puts (cptr);
-
-
-
-public class Console {
-	//public static void Write (string s) { ::puts (s.Data ()); }
-	//public static void Write (cptr s) { ::puts (s); }
-}
