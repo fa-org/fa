@@ -195,11 +195,12 @@ numIterStmt:				For Id Colon exprOpt (Colon exprOpt)+ QuotHuaL stmt* QuotHuaR;
 quotExpr:					QuotYuanL expr QuotYuanR;
 exprOpt:					expr?;
 newExprItem:				Id (Assign middleExpr)?;
-newExpr:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
+newExpr1:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
+newExpr2:					New ids? QuotYuanL (expr (Comma expr)*)? QuotYuanR;
 newArray:					New ids? QuotFangL middleExpr QuotFangR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
-strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr | newArray | arrayExpr1 | arrayExpr2;
+strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | newArray | arrayExpr1 | arrayExpr2;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// Ç°×º - ++ -- ~
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")

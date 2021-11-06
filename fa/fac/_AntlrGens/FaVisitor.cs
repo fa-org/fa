@@ -332,11 +332,17 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitNewExprItem([NotNull] FaParser.NewExprItemContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.newExpr"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.newExpr1"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitNewExpr([NotNull] FaParser.NewExprContext context);
+	Result VisitNewExpr1([NotNull] FaParser.NewExpr1Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.newExpr2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNewExpr2([NotNull] FaParser.NewExpr2Context context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.newArray"/>.
 	/// </summary>

@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Exprs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,12 +29,23 @@ namespace fac.ASTs {
 			BodyRaw = _ctx.classFuncBody ();
 		}
 
-		public void Compile () {
+		public void ToAST () {
+			// 代码转树状结构
 			if (BodyRaw.expr () != null) {
 				BodyCodes = new List<AstStmt> ();
 				BodyCodes.Add (AstStmt.FromExpr (BodyRaw.expr (), ReturnType != "void"));
 			} else {
 				BodyCodes = AstStmt.FromStmts (BodyRaw.stmt ());
+			}
+		}
+
+		public void TraversalWrap (int _index) {
+			for (int i = 0; i < BodyCodes.Count; ++i) {
+				if (Info.TraversalFirst)
+					BodyCodes[i] = ExprTraversals.Traversal (BodyCodes[i], _index) as AstStmt;
+				BodyCodes[i].TraversalWrap ((_expr) => ExprTraversals.Traversal (_expr, _index));
+				if (Info.TraversalLast)
+					BodyCodes[i] = ExprTraversals.Traversal (BodyCodes[i], _index) as AstStmt;
 			}
 		}
 	}

@@ -5,9 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_OpN: IAst, IAstExpr {
+	class AstExpr_OpN: IAstExpr, IAst {
 		public IAstExpr Value { get; set; }
 		public string Operator { get; set; }
 		public List<IAstExpr> Arguments { get; set; }
+
+
+
+		public override void Traversal (Func<IAstExpr, IAstExpr> _cb) {
+			Value = _cb (Value);
+			for (int i = 0; i < Arguments.Count; ++i)
+				Arguments[i] = _cb (Arguments[i]);
+		}
 	}
 }

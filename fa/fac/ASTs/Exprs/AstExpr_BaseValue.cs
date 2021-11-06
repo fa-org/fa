@@ -5,8 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_BaseValue: IAst, IAstExpr {
-		public string Type { get; set; }
+	class AstExpr_BaseValue: IAstExpr, IAst {
+		public string DataType { get; set; }
 		public string Value { get; set; }
+
+
+
+		public override void Traversal (Func<IAstExpr, IAstExpr> _cb) { }
 	}
 }

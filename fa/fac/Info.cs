@@ -72,5 +72,12 @@ namespace fac {
 		/// 当前外部API
 		/// </summary>
 		public static List<ExternApi> CurrentExternApis;
+
+		/// <summary>
+		/// 当前迭代方式
+		/// </summary>
+		public static TraversalType CurrentTraversalType;
+		public static bool TraversalFirst { get => (CurrentTraversalType & TraversalType.Root2Leaf) > 0; }
+		public static bool TraversalLast { get => (CurrentTraversalType & TraversalType.Leaf2Root) > 0; }
 	}
 }

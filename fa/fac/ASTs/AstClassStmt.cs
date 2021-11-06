@@ -1,4 +1,5 @@
-﻿using fac.Exceptions;
+﻿using fac.AntlrTools;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace fac.ASTs {
 	enum AstClassType { Class, Interface, Enum }
 
 	class AstClassStmt: IAst {
+		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public AstClassType ClassType { init; get; }
 		public List<AstClassEnumAtom> ClassEnumAtoms { init; get; }
@@ -18,6 +20,8 @@ namespace fac.ASTs {
 
 
 		public AstClassStmt (FaParser.ClassStmtContext _ctx) {
+			FullName = $"{Info.CurrentNamespace}{_ctx.Id ().GetText ()}";
+			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			//
 			var _cls_type = Common.ParseEnum<AstClassType> (_ctx.classType ().GetText ());
@@ -37,10 +41,26 @@ namespace fac.ASTs {
 		}
 
 		public void Compile () {
+			// Antlr转AST
 			foreach (var _var in ClassVars)
-				_var.Compile ();
+				_var.ToAST ();
 			foreach (var _func in ClassFuncs)
-				_func.Compile ();
+				_func.ToAST ();
+
+			// 处理AST
+			for (int i = 0; i < ExprTraversals.TraversalTypes.Count; ++i) {
+				Info.CurrentTraversalType = ExprTraversals.TraversalTypes [i];
+				for (int j = 0; j < ClassVars.Count; ++j) {
+					if (Info.TraversalFirst)
+						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i);
+					ClassVars[j].DefaultValue.TraversalWrap ((_expr) => ExprTraversals.Traversal (_expr, i));
+					if (Info.TraversalLast)
+						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i);
+				}
+				for (int j = 0; j < ClassFuncs.Count; ++j) {
+					ClassFuncs[j].TraversalWrap (i);
+				}
+			}
 		}
 	}
 }

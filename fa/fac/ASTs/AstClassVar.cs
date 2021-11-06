@@ -11,7 +11,7 @@ namespace fac.ASTs {
 		public string Type { init; get; }
 		public string Name { init; get; }
 		public FaParser.ExprContext DefaultValueRaw { init; get; }
-		public IAstExpr DefaultValue { get; private set; } = null;
+		public IAstExpr DefaultValue { get; set; } = null;
 
 
 
@@ -25,11 +25,9 @@ namespace fac.ASTs {
 			DefaultValueRaw = (_ctx.classVarExt () != null ? _ctx.classVarExt ().tmpAssignExpr () : _ctx.tmpAssignExpr ())?.expr ();
 		}
 
-		public void Compile () {
-			if (DefaultValueRaw != null) {
+		public void ToAST () {
+			if (DefaultValueRaw != null)
 				DefaultValue = IAstExpr.FromContext (DefaultValueRaw);
-				DefaultValue.CheckType (Type);
-			}
 		}
 	}
 }

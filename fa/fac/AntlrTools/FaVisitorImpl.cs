@@ -67,8 +67,11 @@ namespace fac.AntlrTools {
 		public IAst VisitModAssign (FaParser.ModAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNamespaceStmt (FaParser.NamespaceStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNewArray (FaParser.NewArrayContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitNewExpr (FaParser.NewExprContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitNewExpr (FaParser.NewExpr1Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitNewExpr (FaParser.NewExpr2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitNewExprItem (FaParser.NewExprItemContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitNewExpr1 ([NotNull] FaParser.NewExpr1Context context) => throw new NotImplementedException ();
+		public IAst VisitNewExpr2 ([NotNull] FaParser.NewExpr2Context context) => throw new NotImplementedException ();
 		public IAst VisitNormalStmt (FaParser.NormalStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNotEqualOp (FaParser.NotEqualOpContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNumIterStmt (FaParser.NumIterStmtContext _ctx) => throw new NotImplementedException ();

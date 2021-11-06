@@ -17,5 +17,9 @@ namespace fac.Exceptions {
 		public CodeException (ParserRuleContext _ctx, string _msg) : base (_msg) {
 			Token = _ctx.Start;
 		}
+
+		public CodeException (IToken _token, string _msg) : base (_msg) {
+			Token = _token;
+		}
 	}
 }

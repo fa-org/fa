@@ -5,9 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_Op1: IAst, IAstExpr {
-		public IAstExpr Value1 { get; set; }
+	class AstExpr_Op1: IAstExpr, IAst {
+		public IAstExpr Value { get; set; }
 		public string Operator { get; set; }
 		public bool IsPrefix { get; set; }
+
+
+
+		public override void Traversal (Func<IAstExpr, IAstExpr> _cb) {
+			Value = _cb (Value);
+		}
 	}
 }
