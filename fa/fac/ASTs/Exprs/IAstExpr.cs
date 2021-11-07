@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime;
 using fac.AntlrTools;
+using fac.ASTs.Stmts;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -11,19 +12,26 @@ namespace fac.ASTs.Exprs {
 	abstract class IAstExpr {
 		public IToken Token { init; get; }
 
-		public abstract void Traversal (Func<IAstExpr, IAstExpr> _cb);
-		public void TraversalWrap (Func<IAstExpr, IAstExpr> _cb) {
+		public abstract void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb);
+		public void TraversalWrap (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			if (Info.TraversalFirst)
-				Traversal ((_expr) => _cb (_expr));
-			Traversal ((_expr) => { _expr.TraversalWrap (_cb); return _expr; });
+				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
+			Traversal (_deep, _group, (_expr, _deep1, _group1) => {
+				if (_expr == null)
+					return null;
+				_expr.TraversalWrap (_deep1, _group1, _cb);
+				return _expr;
+			});
 			if (Info.TraversalLast)
-				Traversal ((_expr) => _cb (_expr));
+				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
 		}
 
 
 
 
 		public static IAstExpr FromContext (FaParser.ExprContext _ctx) {
+			if (_ctx == null)
+				return null;
 			var _expr_ctxs = _ctx.middleExpr ();
 			var _op2_ctxs = _ctx.allAssign ();
 			if (_expr_ctxs.Length == 0)
@@ -158,13 +166,13 @@ namespace fac.ASTs.Exprs {
 				return new AstExpr_BaseValue { Token = _ctx.Start, DataType = _type, Value = _value };
 			} else if (_ctx.ifExpr () != null) {
 				var _exprs = (from p in _ctx.ifExpr ().expr () select FromContext (p)).ToList ();
-				var _branches = (from p in _ctx.ifExpr ().quotStmtExpr () select (AstStmt.FromStmts (p.stmt ()), FromContext (p.expr ()))).ToList ();
+				var _branches = (from p in _ctx.ifExpr ().quotStmtExpr () select (IAstStmt.FromStmts (p.stmt ()), FromContext (p.expr ()))).ToList ();
 				while (_exprs.Count > 0) {
 					var _expr = new AstExpr_If { Token = _ctx.Start };
 					_expr.Condition = _exprs[_exprs.Count - 1];
 					(_expr.IfTrueCodes, _expr.IfTrue) = _branches[_branches.Count - 2];
 					(_expr.IfFalseCodes, _expr.IfFalse) = _branches[_branches.Count - 1];
-					_branches[_branches.Count - 2] = (new List<AstStmt> (), _expr);
+					_branches[_branches.Count - 2] = (new List<IAstStmt> (), _expr);
 					_exprs.RemoveAt (_exprs.Count - 1);
 					_branches.RemoveAt (_branches.Count - 1);
 				}

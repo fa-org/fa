@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Stmts;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -50,15 +51,34 @@ namespace fac.ASTs {
 			// 处理AST
 			for (int i = 0; i < ExprTraversals.TraversalTypes.Count; ++i) {
 				Info.CurrentTraversalType = ExprTraversals.TraversalTypes [i];
+
+				// 类成员变量默认初始化值
 				for (int j = 0; j < ClassVars.Count; ++j) {
+					if (ClassVars[j].DefaultValue == null)
+						continue;
+					Info.CurrentFunc = null;
+					Info.CurrentFuncVariables = new List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> ();
+					//
 					if (Info.TraversalFirst)
-						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i);
-					ClassVars[j].DefaultValue.TraversalWrap ((_expr) => ExprTraversals.Traversal (_expr, i));
+						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i, 0, 0);
+					ClassVars[j].DefaultValue.TraversalWrap (0, 0, (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group));
 					if (Info.TraversalLast)
-						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i);
+						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i, 0, 0);
 				}
+
+				// 类成员方法
 				for (int j = 0; j < ClassFuncs.Count; ++j) {
-					ClassFuncs[j].TraversalWrap (i);
+					Info.CurrentFunc = ClassFuncs[j];
+					Info.CurrentFuncVariables = new List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> ();
+					Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, AstStmt_DefVariable> (), _group: 0));
+					//
+					for (int k = 0; k < ClassFuncs[j].BodyCodes.Count; ++k) {
+						if (Info.TraversalFirst)
+							ClassFuncs[j].BodyCodes[k] = ExprTraversals.Traversal (ClassFuncs[j].BodyCodes[k], i, 1, 0) as IAstStmt;
+						ClassFuncs[j].BodyCodes[k].TraversalWrap (1, 0, (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group));
+						if (Info.TraversalLast)
+							ClassFuncs[j].BodyCodes[k] = ExprTraversals.Traversal (ClassFuncs[j].BodyCodes[k], i, 1, 0) as IAstStmt;
+					}
 				}
 			}
 		}

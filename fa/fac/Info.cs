@@ -1,8 +1,10 @@
 ﻿using Antlr4.Runtime.Tree;
 using fac.AntlrTools;
 using fac.ASTs;
+using fac.ASTs.Stmts;
 using fac.Structures;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace fac {
 	class Info {
@@ -74,10 +76,25 @@ namespace fac {
 		public static List<ExternApi> CurrentExternApis;
 
 		/// <summary>
-		/// 当前迭代方式
+		/// 当前AST节点迭代方式
 		/// </summary>
 		public static TraversalType CurrentTraversalType;
 		public static bool TraversalFirst { get => (CurrentTraversalType & TraversalType.Root2Leaf) > 0; }
 		public static bool TraversalLast { get => (CurrentTraversalType & TraversalType.Leaf2Root) > 0; }
+
+
+
+		/// <summary>
+		/// 函数内变量递归查找辅助类，List每一项代表一个生命周期，Dictionary存储的是这个生命周期中的所有变量
+		/// </summary>
+		public static List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> CurrentFuncVariables { get; set; } = null;
+		public static AstStmt_DefVariable GetCurrentFuncVariableFromName (string _name) {
+			return (from p in CurrentFuncVariables.Reverse<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> () where p._vars.ContainsKey (_name) select p._vars[_name]).FirstOrDefault ();
+		}
+
+		/// <summary>
+		/// 当前函数
+		/// </summary>
+		public static AstClassFunc CurrentFunc { get; set; } = null;
 	}
 }

@@ -12,11 +12,11 @@ namespace fac.ASTs.Exprs {
 
 
 
-		public override void Traversal (Func<IAstExpr, IAstExpr> _cb) {
+		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			for (int i = 0; i < InitialValues.Count; ++i)
-				InitialValues[i] = (_name: InitialValues[i]._name, _value: _cb (InitialValues[i]._value));
+				InitialValues[i] = (_name: InitialValues[i]._name, _value: _cb (InitialValues[i]._value, _deep, _group));
 			for (int i = 0; i < ConstructorArguments.Count; ++i)
-				ConstructorArguments[i] = _cb (ConstructorArguments[i]);
+				ConstructorArguments[i] = _cb (ConstructorArguments[i], _deep, _group);
 		}
 	}
 }

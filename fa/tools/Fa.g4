@@ -248,7 +248,7 @@ classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnumAtom:				Id (QuotYuanL typeVar (Comma typeVar)* QuotYuanR)? Comma;
+classEnumAtom:				Id (QuotYuanL type QuotYuanR)? Comma;
 
 
 

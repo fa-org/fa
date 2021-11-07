@@ -4,7 +4,6 @@ use hello.fa;
 
 class Program {
 	public static void Main () {
-		a.b.c.d.e;
-		//Console.Write ("hello world\n");
+		Console.Write ("hello world\n");
 	}
 }

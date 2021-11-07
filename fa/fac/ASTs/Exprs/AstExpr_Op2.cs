@@ -13,9 +13,9 @@ namespace fac.ASTs.Exprs {
 
 
 
-		public override void Traversal (Func<IAstExpr, IAstExpr> _cb) {
-			Value1 = _cb (Value1);
-			Value2 = _cb (Value2);
+		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+			Value1 = _cb (Value1, _deep, _group);
+			Value2 = _cb (Value2, _deep, _group);
 		}
 	}
 }

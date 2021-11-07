@@ -10,10 +10,10 @@ namespace fac.ASTs.Exprs {
 		public IAstExpr InitCount { get; set; }
 		public List<IAstExpr> InitValues { get; set; }
 
-		public override void Traversal (Func<IAstExpr, IAstExpr> _cb) {
-			InitCount = _cb (InitCount);
+		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+			InitCount = _cb (InitCount, _deep, _group);
 			for (int i = 0; i < InitValues.Count; ++i)
-				InitValues[i] = _cb (InitValues[i]);
+				InitValues[i] = _cb (InitValues[i], _deep, _group);
 		}
 	}
 }
