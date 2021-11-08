@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Exprs {
 	abstract class IAstExpr {
 		public IToken Token { init; get; }
+		public string ExpectType { get; set; } = "";
 
 		public abstract void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb);
 		public void TraversalWrap (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
@@ -25,6 +26,8 @@ namespace fac.ASTs.Exprs {
 			if (Info.TraversalLast)
 				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
 		}
+		public abstract IAstExpr TraversalCalcType (string _expect_type);
+		public abstract string GuessType ();
 
 
 

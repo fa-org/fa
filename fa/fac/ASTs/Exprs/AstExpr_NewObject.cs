@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fac.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,5 +19,17 @@ namespace fac.ASTs.Exprs {
 			for (int i = 0; i < ConstructorArguments.Count; ++i)
 				ConstructorArguments[i] = _cb (ConstructorArguments[i], _deep, _group);
 		}
+
+		public override IAstExpr TraversalCalcType (string _expect_type) {
+			if (DataType == "") {
+				if (_expect_type == "")
+					throw new CodeException (Token, "无法猜测对象类型");
+				DataType = _expect_type;
+			}
+			ExpectType = DataType;
+			return AstExprTypeCast.Make (this, _expect_type);
+		}
+
+		public override string GuessType () => DataType;
 	}
 }

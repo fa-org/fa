@@ -216,7 +216,7 @@ expr:						middleExpr (allAssign middleExpr)*;
 //
 // define variable
 //
-tmpAssignExpr:				Assign expr Semi;
+tmpAssignExpr:				Assign middleExpr Semi;
 defVarStmt:					type Id Assign expr Semi;
 
 

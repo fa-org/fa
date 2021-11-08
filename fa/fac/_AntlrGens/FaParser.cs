@@ -3981,8 +3981,8 @@ public partial class FaParser : Parser {
 
 	public partial class TmpAssignExprContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Assign() { return GetToken(FaParser.Assign, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
-			return GetRuleContext<ExprContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public MiddleExprContext middleExpr() {
+			return GetRuleContext<MiddleExprContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Semi() { return GetToken(FaParser.Semi, 0); }
 		public TmpAssignExprContext(ParserRuleContext parent, int invokingState)
@@ -4008,7 +4008,7 @@ public partial class FaParser : Parser {
 			State = 604;
 			Match(Assign);
 			State = 605;
-			expr();
+			middleExpr();
 			State = 606;
 			Match(Semi);
 			}
@@ -6024,7 +6024,7 @@ public partial class FaParser : Parser {
 		'\x259', '\x3', '\x2', '\x2', '\x2', '\x25B', '\x25C', '\x3', '\x2', '\x2', 
 		'\x2', '\x25C', '{', '\x3', '\x2', '\x2', '\x2', '\x25D', '\x25B', '\x3', 
 		'\x2', '\x2', '\x2', '\x25E', '\x25F', '\a', '\x1F', '\x2', '\x2', '\x25F', 
-		'\x260', '\x5', 'z', '>', '\x2', '\x260', '\x261', '\a', '\x31', '\x2', 
+		'\x260', '\x5', 'x', '=', '\x2', '\x260', '\x261', '\a', '\x31', '\x2', 
 		'\x2', '\x261', '}', '\x3', '\x2', '\x2', '\x2', '\x262', '\x263', '\x5', 
 		'L', '\'', '\x2', '\x263', '\x264', '\a', '?', '\x2', '\x2', '\x264', 
 		'\x265', '\a', '\x1F', '\x2', '\x2', '\x265', '\x266', '\x5', 'z', '>', 

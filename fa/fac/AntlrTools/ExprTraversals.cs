@@ -50,19 +50,21 @@ namespace fac.AntlrTools {
 				return Traversal0 (_expr);
 			} else if (_index == 1) {
 				return Traversal1 (_expr);
-			} else {
+			} else if (_index == 2) {
 				return Traversal2 (_expr);
+			} else {
+				throw new NotImplementedException ();
 			}
 		}
 
 		// 第一遍遍历
-		public static IAstExpr Traversal0 (IAstExpr _expr) {
+		private static IAstExpr Traversal0 (IAstExpr _expr) {
 			if (_expr is AstStmt_DefVariable _varexpr) {
 				// 生成变量定义组
 				Info.CurrentFuncVariables[^1]._vars.Add (_varexpr.VarName, _varexpr);
 			} else if (_expr is AstExpr_BaseId _idexpr) {
 				// 映射变量名/参数
-				var _nameexpr = IAstExprName.FindFromName (_idexpr.Token, _idexpr.Id);
+				var _nameexpr = IAstExprName.FindVariableOrArgument (_idexpr.Token, _idexpr.Id);
 				if (_nameexpr != null)
 					return _nameexpr;
 			}
@@ -70,11 +72,11 @@ namespace fac.AntlrTools {
 		}
 
 		// 第二遍遍历
-		public static IAstExpr Traversal1 (IAstExpr _expr) {
+		private static IAstExpr Traversal1 (IAstExpr _expr) {
 			if (_expr is AstExpr_Op1 _op1 && (!_op1.IsPrefix) && _op1.Operator[0] == '.') {
 				if (_op1.Value is AstExpr_BaseId _base_id) {
 					string _name = $"{_base_id.Id}{_op1.Operator}";
-					var _nameexpr = IAstExprName.FindFromName (_base_id.Token, _name);
+					var _nameexpr = IAstExprName.FindClass (_base_id.Token, _name);
 					if (_nameexpr != null) {
 						// 映射类名称
 						return _nameexpr;
@@ -88,13 +90,56 @@ namespace fac.AntlrTools {
 		}
 
 		// 第三遍遍历
-		public static IAstExpr Traversal2 (IAstExpr _expr) {
+		private static IAstExpr Traversal2 (IAstExpr _expr) {
 			// 不允许再出现 AstExpr_BaseId 类型
 			if (_expr is AstExpr_BaseId _idexpr)
 				throw new CodeException (_expr.Token, $"未识别的标识符 {_idexpr.Id}");
-
-			// TODO 计算期望类型、插入类型转换AST对象
 			return _expr;
+		}
+
+
+
+		// 第四遍遍历，只需传根节点
+		public static IAstExpr TraversalCalcType (IAstExpr _expr, string _expect_type, bool _force_assign) {
+			if (_expr is AstExprName_Argument _argexpr) {
+
+			}
+			if (_expr is IAstStmt) {
+				_expr.Traversal (0, 0, (_child, _, _) => TraversalCalcType (_child, "", false));
+				return _expr;
+			} else if (_expr is AstExpr_Array _arrexpr) {
+				// 确定列表每一项的类型
+				if (_arrexpr.ItemDataType == "") {
+					if (_expect_type == "") {
+						_arrexpr.ItemDataType = GetCompatibleType ((from p in _arrexpr.InitValues select GuessType (p)).ToList ());
+						if (_arrexpr.ItemDataType == "")
+							throw new CodeException (_expr.Token, "无法计算表达式类型");
+					} else if (_expect_type[^2..] != "[]") {
+						throw new CodeException (_expr.Token, $"期望获得 {_expect_type} 类型，但实际是数组类型");
+					} else {
+						_arrexpr.ItemDataType = _expect_type[..^2];
+					}
+				} else {
+					string _real_type = $"{_arrexpr.ItemDataType}[]";
+					if (_expect_type != _real_type) {
+						if (AllowTypeCast (_real_type, _expect_type)) {
+							return new AstExprTypeCast { ExpectType = _expect_type, Token = _expr.Token, Value = TraversalCalcType (_expr, _real_type, _force_assign) };
+						} else {
+							throw new CodeException (_expr.Token, $"类型 {_real_type} 无法转为类型 {_expect_type}");
+						}
+					}
+				}
+
+				// 处理类型
+				_arrexpr.InitCount = TraversalCalcType (_arrexpr.InitCount, "int", false);
+				for (int i = 0; i < _arrexpr.InitValues.Count; ++i)
+					_arrexpr.InitValues[i] = TraversalCalcType (_arrexpr.InitValues[i], _arrexpr.ItemDataType, false);
+				return _arrexpr;
+			} else if (_expr is AstExpr_Array _arrexpr) {
+
+			}
+
+			throw new UnimplException (_expr.Token);
 		}
 	}
 }

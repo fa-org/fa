@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace fac.ASTs {
 	class AstClassVar: IAst {
 		public PublicLevel Level { init; get; }
-		public string Type { init; get; }
+		public string DataType { init; get; }
 		public string Name { init; get; }
 		public FaParser.ExprContext DefaultValueRaw { init; get; }
 		public IAstExpr DefaultValue { get; set; } = null;
@@ -18,7 +18,7 @@ namespace fac.ASTs {
 		public AstClassVar (FaParser.ClassVarContext _ctx) {
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			//
-			Type = _ctx.type ().GetText ();
+			DataType = _ctx.type ().GetText ();
 			//
 			Name = _ctx.Id ().GetText ();
 			//

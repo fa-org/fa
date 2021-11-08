@@ -81,6 +81,15 @@ namespace fac.ASTs {
 					}
 				}
 			}
+			foreach (var _var in ClassVars) {
+				if (_var.DefaultValue != null)
+					_var.DefaultValue = ExprTraversals.TraversalCalcType (_var.DefaultValue, _var.DataType, false);
+			}
+			foreach (var _func in ClassFuncs) {
+				for (int i = 0; i < _func.BodyCodes.Count; ++i) {
+					_func.BodyCodes[i] = ExprTraversals.TraversalCalcType (_func.BodyCodes[i], "", false) as IAstStmt;
+				}
+			}
 		}
 	}
 }
