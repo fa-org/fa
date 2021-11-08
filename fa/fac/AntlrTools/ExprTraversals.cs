@@ -74,16 +74,28 @@ namespace fac.AntlrTools {
 		// 第二遍遍历
 		private static IAstExpr Traversal1 (IAstExpr _expr) {
 			if (_expr is AstExpr_Op1 _op1 && (!_op1.IsPrefix) && _op1.Operator[0] == '.') {
-				if (_op1.Value is AstExpr_BaseId _base_id) {
-					string _name = $"{_base_id.Id}{_op1.Operator}";
-					var _nameexpr = IAstExprName.FindClass (_base_id.Token, _name);
+				if (_op1.Value is AstExpr_BaseId _idexpr) {
+					string _name = $"{_idexpr.Id}{_op1.Operator}";
+					var _nameexpr = IAstExprName.FindClass (_idexpr.Token, _name);
 					if (_nameexpr != null) {
 						// 映射类名称
 						return _nameexpr;
 					} else {
 						// 合并冗余名称
-						return new AstExpr_BaseId { Token = _base_id.Token, Id = _name };
+						return new AstExpr_BaseId { Token = _idexpr.Token, Id = _name };
 					}
+				} else if (_op1.Value is AstExprName_Class _classexpr) {
+					var _class = _classexpr.Class;
+					string _access_name = _op1.Operator[1..];
+					for (int i = 0; i < _class.ClassVars.Count; ++i) {
+						if (_class.ClassVars[i].Name == _access_name)
+							return new AstExprName_ClassVar { Token = _expr.Token, Class = _class, VariableIndex = i };
+					}
+					for (int i = 0; i < _class.ClassFuncs.Count; ++i) {
+						if (_class.ClassFuncs[i].Name == _access_name)
+							return new AstExprName_ClassFunc { Token = _expr.Token, Class = _class, FunctionIndex = i };
+					}
+					throw new CodeException (_expr.Token, $"类 {_class.FullName} 不存在成员 {_access_name}");
 				}
 			}
 			return _expr;

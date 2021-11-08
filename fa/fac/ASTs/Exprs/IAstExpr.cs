@@ -63,7 +63,7 @@ namespace fac.ASTs.Exprs {
 					// 检查是否有连续比较运算符，如有，那么合并为单独的结构
 					int _start = -1;
 					Action<int> _combine_func = (int _count) => {
-						var _expr = new AstExpr_Op2N { Token = _ctx.Start };
+						var _expr = new AstExpr_Op2s { Token = _ctx.Start };
 						_expr.Values = _exprs.Skip (_start).Take (_count + 1).ToList ();
 						_expr.Operators = _op2s.Skip (_start).Take (_count).ToList ();
 						_exprs.RemoveRange (_start, _count);

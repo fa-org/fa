@@ -14,14 +14,6 @@ namespace fac.ASTs.Exprs {
 
 		private AstExprTypeCast () { }
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Value = _cb (Value, _deep, _group);
-		}
-
-		public override IAstExpr TraversalCalcType (string _expect_type) {
-			throw new NotImplementedException ();
-		}
-
 		public static IAstExpr Make (IAstExpr _dest, string _to_type) {
 			if (_dest.ExpectType == "") {
 				throw new Exception ("应识别类型后做转换处理");
@@ -32,6 +24,14 @@ namespace fac.ASTs.Exprs {
 			} else {
 				throw new CodeException (_dest.Token, $"类型 {_dest.ExpectType} 无法转为类型 {_to_type}");
 			}
+		}
+
+		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+			Value = _cb (Value, _deep, _group);
+		}
+
+		public override IAstExpr TraversalCalcType (string _expect_type) {
+			throw new NotImplementedException ();
 		}
 
 		public override string GuessType () => Value.GuessType ();
