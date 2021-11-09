@@ -30,6 +30,16 @@ namespace fac.ASTs.Exprs {
 
 		public override string GuessType () => "bool";
 
+		public override string GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.Append ("(");
+			for (int i = 0; i < Operators.Count; ++i)
+				_sb.Append ($"({Values[i]} {Operators[i]} {Values[i + 1]}) && ");
+			_sb.Remove (_sb.Length - 4, 4);
+			_sb.Append (")");
+			return _sb.ToString ();
+		}
+
 		private static HashSet<string> sComare = new HashSet<string> { ">", ">=", "<", "<=" };
 	}
 }

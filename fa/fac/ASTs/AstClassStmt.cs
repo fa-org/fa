@@ -95,5 +95,16 @@ namespace fac.ASTs {
 				}
 			}
 		}
+
+		public override string GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]} {{");
+			foreach (var _var in ClassVars)
+				_sb.AppendLine ($"{_var.GenerateCSharp (_indent + 1)}");
+			foreach (var _func in ClassFuncs)
+				_sb.AppendLine (_func.GenerateCSharp (_indent + 1));
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
 	}
 }

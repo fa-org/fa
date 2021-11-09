@@ -12,7 +12,7 @@ namespace fac.ASTs.Exprs.Names {
 
 
 		private static Dictionary<string, AstExprName_BuildIn> sBuildIn = new Dictionary<string, AstExprName_BuildIn> {
-			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Func<string>" },
+			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Action<string>" },
 		};
 
 		public static AstExprName_BuildIn FindFromName (string _name) {

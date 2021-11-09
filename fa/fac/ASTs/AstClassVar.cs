@@ -42,5 +42,9 @@ namespace fac.ASTs {
 				}
 			}
 		}
+
+		public override string GenerateCSharp (int _indent) {
+			return $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name}{(DefaultValue != null? $" = {DefaultValue.GenerateCSharp (_indent)}" : "")};";
+		}
 	}
 }

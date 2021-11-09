@@ -31,5 +31,17 @@ namespace fac.ASTs.Stmts {
 				IfFalseCodes[i] = IfFalseCodes[i].TraversalCalcType ("") as IAstStmt;
 			return this;
 		}
+
+		public override string GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}if ({Condition.GenerateCSharp (_indent)}) {{");
+			foreach (var _code in IfTrueCodes)
+				_sb.Append (_code.GenerateCSharp (_indent + 1));
+			_sb.AppendLine ($"}} else {{");
+			foreach (var _code in IfFalseCodes)
+				_sb.Append (_code.GenerateCSharp (_indent + 1));
+			_sb.AppendLine ($"}}");
+			return _sb.ToString ();
+		}
 	}
 }

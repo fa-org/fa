@@ -72,6 +72,10 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
+		public override string GenerateCSharp (int _indent) {
+			return $"{Value1.GenerateCSharp (_indent)} {Operator} {Value1.GenerateCSharp (_indent)}";
+		}
+
 		private static HashSet<string> sCompareOp2s = new HashSet<string> { ">", "<", ">=", "<=", "==", "!=" };
 		private static HashSet<string> sLogicOp2s = new HashSet<string> { "||", "&&" };
 		private static HashSet<string> sNumOp2s = new HashSet<string> { "+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>" };

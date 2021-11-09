@@ -14,5 +14,7 @@ namespace fac {
 			var _attrs = _info.GetCustomAttributes (typeof (DisplayAttribute), false) as DisplayAttribute [];
 			return _attrs.Length > 0 ? _attrs [0].Name : _def_name;
 		}
+
+		public static string Indent (this int _indent) => new string (' ', _indent * 4);
 	}
 }

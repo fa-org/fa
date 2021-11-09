@@ -19,5 +19,9 @@ namespace fac.ASTs.Stmts {
 			Expr = Expr.TraversalCalcType ("");
 			return this;
 		}
+
+		public override string GenerateCSharp (int _indent) {
+			return $"{_indent.Indent ()}{Expr.GenerateCSharp (_indent)};\n";
+		}
 	}
 }

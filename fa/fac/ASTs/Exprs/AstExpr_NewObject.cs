@@ -27,9 +27,57 @@ namespace fac.ASTs.Exprs {
 				DataType = _expect_type;
 			}
 			ExpectType = DataType;
+			if (InitialValues != null) {
+				var _classes = Info.GetClassFromName (DataType);
+				if (_classes.Count == 0) {
+					throw new CodeException (Token, $"未定义的标识符 {DataType}");
+				} else if (_classes.Count == 1) {
+					var _default_init_vals = new List<(string _name, IAstExpr _value)> ();
+					foreach (var _vars in _classes[0].ClassVars) {
+						int i = 0;
+						for (; i < InitialValues.Count; ++i) {
+							if (InitialValues[i]._name != _vars.Name)
+								continue;
+							InitialValues[i] = (_name: _vars.Name, _value: InitialValues[i]._value.TraversalCalcType (_vars.DataType));
+							break;
+						}
+						if (i == InitialValues.Count) {
+							if (_vars.DefaultValue == null)
+								throw new CodeException (Token, $"未指定成员变量 {_vars.Name} 的初始值");
+							_default_init_vals.Add ((_name: _vars.Name, _value: _vars.DefaultValue.TraversalCalcType (_vars.DataType)));
+						}
+					}
+					InitialValues.AddRange (_default_init_vals);
+				} else {
+					throw new CodeException (Token, $"不明确的符号 {DataType}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
+				}
+			} else {
+				// TODO 检查构造函数参数
+			}
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
 		public override string GuessType () => DataType;
+
+		public override string GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.Append ($"new {DataType} ");
+			if (InitialValues != null) {
+				_sb.Append ($"{{ ");
+				foreach (var _init in InitialValues)
+					_sb.Append ($"{_init._name} = {_init._value.GenerateCSharp (_indent)}, ");
+				if (InitialValues.Any ())
+					_sb.Remove (_sb.Length - 2, 2);
+				_sb.Append ($" }}");
+			} else {
+				_sb.Append ($"(");
+				foreach (var _arg in ConstructorArguments)
+					_sb.Append ($"{_arg.GenerateCSharp (_indent)}, ");
+				if (ConstructorArguments.Any ())
+					_sb.Remove (_sb.Length - 2, 2);
+				_sb.Append ($")");
+			}
+			return _sb.ToString ();
+		}
 	}
 }

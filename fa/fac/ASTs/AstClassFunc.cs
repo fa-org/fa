@@ -69,5 +69,19 @@ namespace fac.ASTs {
 				_stmts.Add (IAstStmt.FromExpr (null, true));
 			}
 		}
+
+		public override string GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.Append ($"{_indent.Indent ()}{Level}{(Static ? " static" : "")} {ReturnType} {Name} (");
+			foreach (var _arg in Arguments)
+				_sb.Append ($"{_arg._type} {_arg._name}, ");
+			if (Arguments.Any ())
+				_sb.Remove (_sb.Length - 2, 2);
+			_sb.AppendLine (") {");
+			foreach (var _code in BodyCodes)
+				_sb.Append (_code.GenerateCSharp (_indent + 1));
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
 	}
 }

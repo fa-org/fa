@@ -58,5 +58,18 @@ namespace fac.ASTs {
 			foreach (var _class in CurrentClasses)
 				_class.Compile ();
 		}
+
+		public override string GenerateCSharp (int _indent) {
+			if (CurrentClasses.Count == 0)
+				return "";
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}using System;");
+			_sb.AppendLine ();
+			_sb.AppendLine ();
+			_sb.AppendLine ();
+			foreach (var _class in CurrentClasses)
+				_sb.Append (_class.GenerateCSharp (_indent));
+			return _sb.ToString ();
+		}
 	}
 }

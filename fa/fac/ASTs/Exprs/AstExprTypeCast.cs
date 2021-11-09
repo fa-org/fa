@@ -26,14 +26,12 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Value = _cb (Value, _deep, _group);
-		}
+		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) => Value = _cb (Value, _deep, _group);
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
-			throw new NotImplementedException ();
-		}
+		public override IAstExpr TraversalCalcType (string _expect_type) => throw new NotImplementedException ();
 
 		public override string GuessType () => Value.GuessType ();
+
+		public override string GenerateCSharp (int _indent) => Value.GenerateCSharp (_indent);
 	}
 }
