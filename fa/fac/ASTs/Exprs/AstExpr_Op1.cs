@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_Op1: IAstExpr, IAst {
+	class AstExpr_Op1: IAstExpr {
 		public IAstExpr Value { get; set; }
 		public string Operator { get; set; }
 		public bool IsPrefix { get; set; }

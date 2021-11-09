@@ -1,9 +1,9 @@
-use hello.fa;
+use fa;
 
 
 
 class Program {
 	public static void Main () {
-		Console.Write ("hello world\n");
+		Console.WriteLine ("hello world\n");
 	}
 }

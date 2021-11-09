@@ -7,10 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	abstract class IAstStmt: IAstExpr, IAst {
+	abstract class IAstStmt: IAstExpr {
+		public override string GuessType () => "";
+
 		public static IAstStmt FromExpr (FaParser.ExprContext _ctx, bool _return) {
 			if (_return) {
-				return new AstStmt_Return { Token = _ctx.Start, Expr = FromContext (_ctx) };
+				return new AstStmt_Return { Token = _ctx?.Start ?? null, Expr = FromContext (_ctx) };
 			} else {
 				return new AstStmt_ExprWrap { Token = _ctx?.Start ?? null, Expr = FromContext (_ctx) };
 			}
@@ -24,13 +26,14 @@ namespace fac.ASTs.Stmts {
 					return new AstStmt_ExprWrap { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) };
 				}
 			} else if (_ctx.ifStmt () != null) {
-
+				//var _stmt = new AstStmt_If { Token = _ctx.Start };
+				//_stmt.Condition = _ctx.ifStmt ().expr ()
 			} else if (_ctx.defVarStmt () != null) {
-				var _expr = new AstStmt_DefVariable { Token = _ctx.Start };
-				_expr.DataType = _ctx.defVarStmt ().type ().GetText ();
-				_expr.VarName = _ctx.defVarStmt ().Id ().GetText ();
-				_expr.Expr = FromContext (_ctx.defVarStmt ().expr ());
-				return _expr;
+				var _stmt = new AstStmt_DefVariable { Token = _ctx.Start };
+				_stmt.DataType = _ctx.defVarStmt ().type ().GetText ();
+				_stmt.VarName = _ctx.defVarStmt ().Id ().GetText ();
+				_stmt.Expr = FromContext (_ctx.defVarStmt ().expr ());
+				return _stmt;
 			} else if (_ctx.whileStmt () != null) {
 
 			} else if (_ctx.numIterStmt () != null) {

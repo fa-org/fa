@@ -1,5 +1,4 @@
 ﻿using fac.ASTs;
-using fac.Outputs.Rust;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,9 +31,9 @@ namespace fac {
 			// 读取源码
 			foreach (var _src_file in _src_files) {
 				Info.CurrentFile = _src_file;
-				Info.CurrentCode = File.ReadAllText (_src_file, Encoding.UTF8);
+				Info.CurrentSourceCode = File.ReadAllText (_src_file, Encoding.UTF8);
 				Log.Mark (LogMark.Parse);
-				Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentCode));
+				Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode));
 			}
 
 			// 编译
@@ -42,8 +41,8 @@ namespace fac {
 				_program.Compile ();
 
 			// 输出
-			string _out = OutputCSharp.Generate ();
-			Console.WriteLine ($"编译成功。输出目标文件 {_out}");
+			//string _out = OutputCSharp.Generate ();
+			//Console.WriteLine ($"编译成功。输出目标文件 {_out}");
 			Console.WriteLine ("按任意键退出。。。");
 			Console.ReadKey ();
 		}

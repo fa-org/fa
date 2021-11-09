@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace fac.ASTs {
 	class AstProgram: IAst {
 		public string CurrentFile { init; get; }
-		public string CurrentCode { init; get; }
+		public string CurrentSourceCode { init; get; }
 
 		/// <summary>
 		/// 当前模块名
@@ -24,8 +24,9 @@ namespace fac.ASTs {
 
 
 		public AstProgram (FaParser.ProgramContext _ctx) {
+			Token = _ctx.Start;
 			CurrentFile = Info.CurrentFile;
-			CurrentCode = Info.CurrentCode;
+			CurrentSourceCode = Info.CurrentSourceCode;
 
 			// 生成模块名
 			CurrentModule = $"{Info.ProjectName}.{Info.CurrentRelativeFile.Replace ('/', '.').Replace ('\\', '.')}"[..^3];

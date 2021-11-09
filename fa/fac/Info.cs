@@ -32,6 +32,47 @@ namespace fac {
 		/// 项目所有源码文件的AST
 		/// </summary>
 		public static List<AstProgram> Programs = new List<AstProgram> ();
+		public static List<AstClassStmt> GetClassFromName (string _name) {
+			var _classes = new List<AstClassStmt> (); // 非绝对路径，收集起来，避免重复名称
+			foreach (var _program in Info.Programs) {
+				foreach (var _class in _program.CurrentClasses) {
+					if (_class.FullName.Length >= _name.Length) {
+						// 如果类名完全一致，那么直接返回
+						if (_class.FullName == _name) {
+							_classes.Add (_class);
+							return _classes;
+						}
+
+						// 迭代当前命名空间
+						var _tmp_namespace = Info.CurrentNamespace;
+						while (_tmp_namespace != "") {
+							if (_class.FullName == $"{_tmp_namespace}.{_name}") {
+								_classes.Add (_class);
+								break;
+							}
+							int p = _tmp_namespace.LastIndexOf ('.');
+							if (p == -1) {
+								_tmp_namespace = "";
+							} else {
+								_tmp_namespace = _tmp_namespace.Substring (0, p);
+							}
+						}
+						if (_classes.Count > 0 && _classes[^1] == _class)
+							continue;
+
+						// 迭代use的命名空间
+						foreach (var _namespace in Info.CurrentUses) {
+							if (_class.FullName == $"{_namespace}.{_name}") {
+								_classes.Add (_class);
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			return _classes;
+		}
 
 
 
@@ -43,7 +84,7 @@ namespace fac {
 		/// <summary>
 		/// 当前源码
 		/// </summary>
-		public static string CurrentCode = "";
+		public static string CurrentSourceCode = "";
 
 		/// <summary>
 		/// 当前相对路径

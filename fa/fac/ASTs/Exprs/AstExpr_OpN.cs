@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_OpN: IAstExpr, IAst {
+	class AstExpr_OpN: IAstExpr {
 		public IAstExpr Value { get; set; }
 		public string Operator { get; set; }
 		public List<IAstExpr> Arguments { get; set; }
@@ -20,11 +20,20 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstExpr TraversalCalcType (string _expect_type) {
 			if (Value is AstExprName_ClassFunc _funcexpr) {
-				// 静态方法调用
 				var _func_args = _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].Arguments;
-			} else if () {
-				// TODO: 参数对象、变量对象、全局对象
+				if (_funcexpr.ThisObject != null)
+					Arguments.Insert (0, _funcexpr.ThisObject);
+				if (_func_args.Count != Arguments.Count)
+					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
+				for (int i = 0; i < _func_args.Count; ++i)
+					Arguments[i] = Arguments[i].TraversalCalcType (_func_args[i]._type);
+				if (_funcexpr.ThisObject != null)
+					Arguments.RemoveAt (0);
+				return AstExprTypeCast.Make (this, _expect_type);
 			} else {
+				Value = Value.TraversalCalcType (_expect_type);
+				if (_expect_type == "")
+					return this;
 				throw new UnimplException (Token);
 			}
 		}
@@ -32,9 +41,11 @@ namespace fac.ASTs.Exprs {
 		public override string GuessType () {
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				return _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;
-			} else if () {
-				// TODO: 参数对象、变量对象、全局对象
 			} else {
+				string _type = Value.GuessType ();
+				if (_type [..5] == "Func<") {
+					TODO;
+				}
 				throw new UnimplException (Token);
 			}
 		}

@@ -21,6 +21,8 @@ namespace fac.ASTs {
 
 
 		public AstClassStmt (FaParser.ClassStmtContext _ctx) {
+			Token = _ctx.Start;
+			//
 			FullName = $"{Info.CurrentNamespace}{_ctx.Id ().GetText ()}";
 			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
@@ -82,12 +84,14 @@ namespace fac.ASTs {
 				}
 			}
 			foreach (var _var in ClassVars) {
+				Info.CurrentFunc = null;
 				if (_var.DefaultValue != null)
-					_var.DefaultValue = ExprTraversals.TraversalCalcType (_var.DefaultValue, _var.DataType, false);
+					_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType);
 			}
 			foreach (var _func in ClassFuncs) {
+				Info.CurrentFunc = _func;
 				for (int i = 0; i < _func.BodyCodes.Count; ++i) {
-					_func.BodyCodes[i] = ExprTraversals.TraversalCalcType (_func.BodyCodes[i], "", false) as IAstStmt;
+					_func.BodyCodes[i] = _func.BodyCodes[i].TraversalCalcType ("") as IAstStmt;
 				}
 			}
 		}

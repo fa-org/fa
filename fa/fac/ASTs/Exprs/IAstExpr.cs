@@ -9,8 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	abstract class IAstExpr {
-		public IToken Token { init; get; }
+	abstract class IAstExpr: IAst {
 		public string ExpectType { get; set; } = "";
 
 		public abstract void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb);

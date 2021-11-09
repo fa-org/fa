@@ -13,7 +13,10 @@ namespace fac.ASTs {
 
 
 		public AstClassEnumAtom (FaParser.ClassEnumAtomContext _ctx) {
+			Token = _ctx.Start;
+			//
 			Name = _ctx.Id ().GetText ();
+			//
 			AttachType = _ctx.type () != null ? _ctx.type ().GetText () : "";
 		}
 	}

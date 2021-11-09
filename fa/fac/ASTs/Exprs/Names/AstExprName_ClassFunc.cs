@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fac.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,20 @@ namespace fac.ASTs.Exprs.Names {
 	class AstExprName_ClassFunc: IAstExprName {
 		public AstClassStmt Class { init; get; }
 		public int FunctionIndex { init; get; }
+		public IAstExpr ThisObject { get; set; }
 
 
+
+		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+			bool _static = Class.ClassFuncs[FunctionIndex].Static;
+			if (_static && (ThisObject != null))
+				throw new CodeException (Token, "类静态方法无法通过对象访问");
+			if ((!_static) && (ThisObject == null))
+				throw new CodeException (Token, "类动态态方法无法通过类名访问");
+			//
+			if (ThisObject != null)
+				ThisObject = _cb (ThisObject, _deep, _group);
+		}
 
 		public override IAstExpr TraversalCalcType (string _expect_type) {
 			ExpectType = GuessType ();

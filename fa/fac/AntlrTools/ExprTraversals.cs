@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Exprs;
+﻿using fac.ASTs;
+using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.Exceptions;
@@ -74,28 +75,62 @@ namespace fac.AntlrTools {
 		// 第二遍遍历
 		private static IAstExpr Traversal1 (IAstExpr _expr) {
 			if (_expr is AstExpr_Op1 _op1 && (!_op1.IsPrefix) && _op1.Operator[0] == '.') {
+				string _access_name = _op1.Operator[1..];
 				if (_op1.Value is AstExpr_BaseId _idexpr) {
-					string _name = $"{_idexpr.Id}{_op1.Operator}";
+					string _name = $"{_idexpr.Id}.{_access_name}";
+
+					// 查找类名称
 					var _nameexpr = IAstExprName.FindClass (_idexpr.Token, _name);
-					if (_nameexpr != null) {
-						// 映射类名称
+					if (_nameexpr != null)
 						return _nameexpr;
-					} else {
-						// 合并冗余名称
-						return new AstExpr_BaseId { Token = _idexpr.Token, Id = _name };
+
+					// 查找预定义名称
+					var _buildinexpr = AstExprName_BuildIn.FindFromName (_name);
+					if (_buildinexpr != null)
+						return _buildinexpr;
+
+					// 合并冗余名称
+					return new AstExpr_BaseId { Token = _idexpr.Token, Id = _name };
+				} else {
+					// 访问类成员
+					// 参数0为对象，当访问静态成员时传null
+					// 参数1为类对象
+					Func<IAstExpr, AstClassStmt, IAstExpr> _access_func = (_obj, _class) => {
+						for (int i = 0; i < _class.ClassVars.Count; ++i) {
+							if (_class.ClassVars[i].Name == _access_name)
+								return new AstExprName_ClassVar { Token = _expr.Token, Class = _class, VariableIndex = i, ThisObject = _obj };
+						}
+						for (int i = 0; i < _class.ClassFuncs.Count; ++i) {
+							if (_class.ClassFuncs[i].Name == _access_name)
+								return new AstExprName_ClassFunc { Token = _expr.Token, Class = _class, FunctionIndex = i, ThisObject = _obj };
+						}
+						throw new CodeException (_expr.Token, $"类 {_class.FullName} 不存在成员 {_access_name}");
+					};
+
+					// 访问类成员
+					// 参数0为对象，当访问静态成员时传null
+					// 参数1为类名
+					Func<IAstExpr, string, IAstExpr> _access_func2 = (_obj, _str_class) => {
+						var _classes = Info.GetClassFromName (_str_class);
+						if (_classes.Count == 0) {
+							throw new CodeException (_obj.Token, $"未定义的标识符 {_str_class}");
+						} else if (_classes.Count == 1) {
+							return _access_func (_obj, _classes[0]);
+						} else {
+							throw new CodeException (_obj.Token, $"不明确的符号 {_str_class}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
+						}
+					};
+
+					if (_op1.Value is AstExprName_Class _classexpr) {
+						return _access_func (null, _classexpr.Class);
+					} else if (_op1.Value is AstExprName_Argument _argexpr) {
+						string _str_class = _argexpr.Func.Arguments[_argexpr.ArgumentIndex]._type;
+						return _access_func2 (_argexpr, _str_class);
+					} else if (_op1.Value is AstExprName_ClassVar _cvarexpr) {
+						return _access_func (_cvarexpr, _cvarexpr.Class);
+					} else if (_op1.Value is AstExprName_Variable _varexpr) {
+						return _access_func2 (_varexpr, _varexpr.Var.DataType);
 					}
-				} else if (_op1.Value is AstExprName_Class _classexpr) {
-					var _class = _classexpr.Class;
-					string _access_name = _op1.Operator[1..];
-					for (int i = 0; i < _class.ClassVars.Count; ++i) {
-						if (_class.ClassVars[i].Name == _access_name)
-							return new AstExprName_ClassVar { Token = _expr.Token, Class = _class, VariableIndex = i };
-					}
-					for (int i = 0; i < _class.ClassFuncs.Count; ++i) {
-						if (_class.ClassFuncs[i].Name == _access_name)
-							return new AstExprName_ClassFunc { Token = _expr.Token, Class = _class, FunctionIndex = i };
-					}
-					throw new CodeException (_expr.Token, $"类 {_class.FullName} 不存在成员 {_access_name}");
 				}
 			}
 			return _expr;
@@ -107,51 +142,6 @@ namespace fac.AntlrTools {
 			if (_expr is AstExpr_BaseId _idexpr)
 				throw new CodeException (_expr.Token, $"未识别的标识符 {_idexpr.Id}");
 			return _expr;
-		}
-
-
-
-		// 第四遍遍历，只需传根节点
-		public static IAstExpr TraversalCalcType (IAstExpr _expr, string _expect_type, bool _force_assign) {
-			if (_expr is AstExprName_Argument _argexpr) {
-
-			}
-			if (_expr is IAstStmt) {
-				_expr.Traversal (0, 0, (_child, _, _) => TraversalCalcType (_child, "", false));
-				return _expr;
-			} else if (_expr is AstExpr_Array _arrexpr) {
-				// 确定列表每一项的类型
-				if (_arrexpr.ItemDataType == "") {
-					if (_expect_type == "") {
-						_arrexpr.ItemDataType = GetCompatibleType ((from p in _arrexpr.InitValues select GuessType (p)).ToList ());
-						if (_arrexpr.ItemDataType == "")
-							throw new CodeException (_expr.Token, "无法计算表达式类型");
-					} else if (_expect_type[^2..] != "[]") {
-						throw new CodeException (_expr.Token, $"期望获得 {_expect_type} 类型，但实际是数组类型");
-					} else {
-						_arrexpr.ItemDataType = _expect_type[..^2];
-					}
-				} else {
-					string _real_type = $"{_arrexpr.ItemDataType}[]";
-					if (_expect_type != _real_type) {
-						if (AllowTypeCast (_real_type, _expect_type)) {
-							return new AstExprTypeCast { ExpectType = _expect_type, Token = _expr.Token, Value = TraversalCalcType (_expr, _real_type, _force_assign) };
-						} else {
-							throw new CodeException (_expr.Token, $"类型 {_real_type} 无法转为类型 {_expect_type}");
-						}
-					}
-				}
-
-				// 处理类型
-				_arrexpr.InitCount = TraversalCalcType (_arrexpr.InitCount, "int", false);
-				for (int i = 0; i < _arrexpr.InitValues.Count; ++i)
-					_arrexpr.InitValues[i] = TraversalCalcType (_arrexpr.InitValues[i], _arrexpr.ItemDataType, false);
-				return _arrexpr;
-			} else if (_expr is AstExpr_Array _arrexpr) {
-
-			}
-
-			throw new UnimplException (_expr.Token);
 		}
 	}
 }
