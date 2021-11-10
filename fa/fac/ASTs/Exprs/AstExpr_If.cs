@@ -45,7 +45,7 @@ namespace fac.ASTs.Exprs {
 		public override (string, string) GenerateCSharp (int _indent) {
 			StringBuilder _psb = new StringBuilder ();
 			var (_a, _b) = Condition.GenerateCSharp (_indent);
-			var _tmp_var_name = $"_{Guid.NewGuid ().ToString ("N")[..8]}";
+			var _tmp_var_name = Common.GetTempId ();
 			_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{ExpectType} {_tmp_var_name};");
 			_psb.AppendLine ($"{_indent.Indent ()}if ({_b}) {{");
 			_psb.AppendStmts (IfTrueCodes, _indent + 1);

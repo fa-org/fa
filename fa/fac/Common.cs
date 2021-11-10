@@ -76,6 +76,8 @@ namespace fac {
 			throw new UnimplException (_node);
 		}
 
+		public static string GetTempId () => $"_{Guid.NewGuid ().ToString ("N")[..8]}";
+
 		//public static string GetStringLiterialText (ParserRuleContext _ctx) {}
 		//public static string GetStringLiterialText (string _text, IToken _pos) {}
 	}

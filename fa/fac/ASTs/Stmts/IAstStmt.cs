@@ -61,11 +61,25 @@ namespace fac.ASTs.Stmts {
 				_whilestmt.Condition = FromContext (_ctx.whileStmt ().expr ());
 				_whilestmt.Contents = FromStmts (_ctx.whileStmt ().stmt ());
 				return _whilestmt;
-			} else if (_ctx.numIterStmt () != null) {
+			} else if (_ctx.whileStmt2 () != null) {
+				var _whilestmt = new AstStmt_While { Token = _ctx.Start, IsDoWhile = true };
+				_whilestmt.Condition = FromContext (_ctx.whileStmt2 ().expr ());
+				_whilestmt.Contents = FromStmts (_ctx.whileStmt2 ().stmt ());
+				return _whilestmt;
+			} else if (_ctx.forStmt () != null) {
+				var _forstmt = new AstStmt_For { Token = _ctx.Start };
+				_forstmt.Initialize = FromContext (_ctx.forStmt ().stmt ()[0]);
+				_forstmt.Condition = FromContext (_ctx.forStmt ().expr ()[0]);
+				_forstmt.Increment = FromExprs (_ctx.forStmt ().expr ()[1..]);
+				_forstmt.BodyCodes = FromStmts (_ctx.forStmt ().stmt ()[1..]);
+				return _forstmt;
+			} else if (_ctx.forStmt () != null) {
 
 			}
 			throw new UnimplException (_ctx.Start);
 		}
+
+		public static List<IAstExpr> FromExprs (FaParser.ExprContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
 
 		public static List<IAstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
 

@@ -22,6 +22,7 @@ CC__StdCall:				'__stdcall';
 Continue:					'continue';
 Class:						'class';
 Const:						'const';
+Do:							'do';
 Else:						'else';
 Enum:						'enum';
 FaMain:						'FaMain';
@@ -185,7 +186,9 @@ ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr
 // loop
 //
 whileStmt:					While expr QuotHuaL stmt* QuotHuaR;
-numIterStmt:				For type Id Colon expr QuotHuaL stmt* QuotHuaR;
+whileStmt2:					Do QuotHuaL stmt* QuotHuaR While expr;
+forStmt:					For stmt expr Semi (expr (Comma expr)*)? QuotHuaL stmt* QuotHuaR;
+forStmt2:					For type Id Colon expr QuotHuaL stmt* QuotHuaR;
 
 
 
@@ -225,7 +228,7 @@ defVarStmt:					type Id Assign expr Semi;
 // stmt
 //
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
-stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | numIterStmt;
+stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | whileStmt2 | forStmt | forStmt2;
 
 
 

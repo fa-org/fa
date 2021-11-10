@@ -308,11 +308,23 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitWhileStmt([NotNull] FaParser.WhileStmtContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.numIterStmt"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.whileStmt2"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitNumIterStmt([NotNull] FaParser.NumIterStmtContext context);
+	Result VisitWhileStmt2([NotNull] FaParser.WhileStmt2Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.forStmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitForStmt([NotNull] FaParser.ForStmtContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.forStmt2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitForStmt2([NotNull] FaParser.ForStmt2Context context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.quotExpr"/>.
 	/// </summary>

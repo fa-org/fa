@@ -44,7 +44,7 @@ namespace fac.ASTs.Exprs {
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			var _psb = new StringBuilder ();
-			var _tmp_var_name = $"_{Guid.NewGuid ().ToString ("N")[..8]}";
+			var _tmp_var_name = Common.GetTempId ();
 			_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{ItemDataType}> ();");
 			foreach (var _init_val in InitValues) {
 				var (_a, _b) = _init_val.GenerateCSharp (_indent);

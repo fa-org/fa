@@ -74,7 +74,10 @@ namespace fac.AntlrTools {
 		public IAst VisitNewExpr2 ([NotNull] FaParser.NewExpr2Context context) => throw new NotImplementedException ();
 		public IAst VisitNormalStmt (FaParser.NormalStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNotEqualOp (FaParser.NotEqualOpContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitNumIterStmt (FaParser.NumIterStmtContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitWhileStmt (FaParser.WhileStmtContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitWhileStmt2 ([NotNull] FaParser.WhileStmt2Context context) => throw new NotImplementedException ();
+		public IAst VisitForStmt ([NotNull] FaParser.ForStmtContext context) => throw new NotImplementedException ();
+		public IAst VisitForStmt2 ([NotNull] FaParser.ForStmt2Context context) => throw new NotImplementedException ();
 		public IAst VisitOrAssign (FaParser.OrAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitOrOrAssign (FaParser.OrOrAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitOrOrOp (FaParser.OrOrOpContext _ctx) => throw new NotImplementedException ();
@@ -106,7 +109,6 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeVar (FaParser.TypeVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitWhileStmt (FaParser.WhileStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitXorAssign (FaParser.XorAssignContext _ctx) => throw new NotImplementedException ();
 	}
 }
