@@ -27,6 +27,7 @@ namespace fac.ASTs.Exprs {
 		}
 		public abstract IAstExpr TraversalCalcType (string _expect_type);
 		public abstract string GuessType ();
+		public abstract bool AllowAssign ();
 
 
 
@@ -161,7 +162,8 @@ namespace fac.ASTs.Exprs {
 				} else if (_ctx.literal ().floatNum () != null) {
 					_type = "float";
 				} else if (_ctx.literal ().String1Literal () != null) {
-					_type = "string";
+					//_type = "string";
+					return AstExpr_BaseValue.FromCodeString (_ctx.Start, _value);
 				} else {
 					throw new UnimplException (_ctx);
 				}

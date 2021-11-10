@@ -4,6 +4,19 @@ use fa;
 
 class Program {
 	public static void Main () {
-		Console.WriteLine ("hello world\n");
+		int i = 1;
+		int count = 0;
+		while i <= 10 {
+			count += i;
+			i++;
+			if i == 9 {
+				break;
+			}
+		}
+		if (count == 45) {
+			Console.WriteLine ("is 45");
+		} else {
+			Console.WriteLine ("not 45");
+		}
 	}
 }

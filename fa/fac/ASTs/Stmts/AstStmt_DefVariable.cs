@@ -24,8 +24,9 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			return $"{_indent.Indent ()}{DataType} {VarName} = {Expr.GenerateCSharp (_indent)};\n";
+		public override (string, string) GenerateCSharp (int _indent) {
+			var (_a, _b) = Expr.GenerateCSharp (_indent);
+			return ("", $"{_a}{_indent.Indent ()}{DataType} {VarName} = {_b};\n");
 		}
 	}
 }

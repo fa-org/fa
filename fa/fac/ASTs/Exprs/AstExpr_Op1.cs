@@ -41,8 +41,11 @@ namespace fac.ASTs.Exprs {
 			throw new UnimplException (Token);
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			return IsPrefix ? $"{Operator}{Value.GenerateCSharp (_indent)}" : $"{Value.GenerateCSharp (_indent)}{Operator}";
+		public override (string, string) GenerateCSharp (int _indent) {
+			var (_a, _b) = Value.GenerateCSharp (_indent);
+			return (_a, (IsPrefix ? $"{Operator}{_b}" : $"{_b}{Operator}"));
 		}
+
+		public override bool AllowAssign () => false;
 	}
 }

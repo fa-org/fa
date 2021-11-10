@@ -17,5 +17,9 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override string GuessType () => Var.DataType;
+
+		public override (string, string) GenerateCSharp (int _indent) => ("", Var.VarName);
+
+		public override bool AllowAssign () => true;
 	}
 }

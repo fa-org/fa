@@ -53,15 +53,22 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			var _sb = new StringBuilder ();
-			_sb.Append ($"{Value.GenerateCSharp (_indent)} {Operator[0]}");
-			foreach (var _arg in Arguments)
-				_sb.Append ($"{_arg.GenerateCSharp (_indent)}, ");
+		public override (string, string) GenerateCSharp (int _indent) {
+			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
+			var (_a, _b) = Value.GenerateCSharp (_indent);
+			_psb.Append (_a);
+			_sb.Append ($"{_b} {Operator[0]}");
+			foreach (var _arg in Arguments) {
+				(_a, _b) = _arg.GenerateCSharp (_indent);
+				_psb.Append (_a);
+				_sb.Append ($"{_b}, ");
+			}
 			if (Arguments.Any ())
 				_sb.Remove (_sb.Length - 2, 2);
 			_sb.Append (Operator[1]);
-			return _sb.ToString ();
+			return (_psb.ToString (), _sb.ToString ());
 		}
+
+		public override bool AllowAssign () => false;
 	}
 }

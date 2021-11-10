@@ -9,6 +9,6 @@ namespace fac.ASTs {
 	abstract class IAst {
 		public IToken Token { init; get; }
 
-		public abstract string GenerateCSharp (int _indent);
+		public abstract (string, string) GenerateCSharp (int _indent);
 	}
 }

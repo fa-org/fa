@@ -19,11 +19,9 @@ namespace fac.ASTs.Exprs {
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			Condition = _cb (Condition, _deep, _group);
-			for (int i = 0; i < IfTrueCodes.Count; ++i)
-				IfTrueCodes[i] = _cb (IfTrueCodes[i], _deep + 1, 0) as IAstStmt;
+			IfTrueCodes.Traversal (_deep + 1, 0, _cb);
 			IfTrue = _cb (IfTrue, _deep + 1, 0);
-			for (int i = 0; i < IfFalseCodes.Count; ++i)
-				IfFalseCodes[i] = _cb (IfFalseCodes[i], _deep + 1, 1) as IAstStmt;
+			IfFalseCodes.Traversal (_deep + 1, 1, _cb);
 			IfFalse = _cb (IfFalse, _deep + 1, 1);
 		}
 
@@ -32,11 +30,9 @@ namespace fac.ASTs.Exprs {
 				_expect_type = GuessType ();
 			//
 			Condition = Condition.TraversalCalcType ("bool");
-			for (int i = 0; i < IfTrueCodes.Count; ++i)
-				IfTrueCodes[i] = IfTrueCodes[i].TraversalCalcType ("") as IAstStmt;
+			IfTrueCodes.TraversalCalcType ();
 			IfTrue = IfTrue.TraversalCalcType (_expect_type);
-			for (int i = 0; i < IfFalseCodes.Count; ++i)
-				IfFalseCodes[i] = IfFalseCodes[i].TraversalCalcType ("") as IAstStmt;
+			IfFalseCodes.TraversalCalcType ();
 			IfFalse = IfFalse.TraversalCalcType (_expect_type);
 			ExpectType = _expect_type;
 			return AstExprTypeCast.Make (this, _expect_type);
@@ -45,5 +41,24 @@ namespace fac.ASTs.Exprs {
 		public override string GuessType () {
 			return TypeFuncs.GetCompatibleType (IfTrue.GuessType (), IfFalse.GuessType ());
 		}
+
+		public override (string, string) GenerateCSharp (int _indent) {
+			StringBuilder _psb = new StringBuilder ();
+			var (_a, _b) = Condition.GenerateCSharp (_indent);
+			var _tmp_var_name = $"_{Guid.NewGuid ().ToString ("N")[..8]}";
+			_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{ExpectType} {_tmp_var_name};");
+			_psb.AppendLine ($"{_indent.Indent ()}if ({_b}) {{");
+			_psb.AppendStmts (IfTrueCodes, _indent + 1);
+			(_a, _b) = IfTrue.GenerateCSharp (_indent + 1);
+			_psb.Append (_a).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_b};");
+			_psb.AppendLine ($"{_indent.Indent ()}}} else {{");
+			_psb.AppendStmts (IfFalseCodes, _indent + 1);
+			(_a, _b) = IfFalse.GenerateCSharp (_indent + 1);
+			_psb.Append (_a).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_b};");
+			_psb.AppendLine ($"{_indent.Indent ()}}}");
+			return (_psb.ToString (), _tmp_var_name);
+		}
+
+		public override bool AllowAssign () => false;
 	}
 }

@@ -30,5 +30,16 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override string GuessType () => $"{Class.FullName}{Class.ClassFuncs[FunctionIndex].Name}";
+
+		public override (string, string) GenerateCSharp (int _indent) {
+			if (ThisObject != null) {
+				var (_a, _b) = ThisObject.GenerateCSharp (_indent);
+				return (_a, $"{_b}.{Class.ClassFuncs[FunctionIndex].Name}");
+			} else {
+				return ("", $"{Class.FullName}.{Class.ClassFuncs[FunctionIndex].Name}");
+			}
+		}
+
+		public override bool AllowAssign () => false;
 	}
 }

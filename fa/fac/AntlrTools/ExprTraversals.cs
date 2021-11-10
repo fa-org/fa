@@ -68,6 +68,31 @@ namespace fac.AntlrTools {
 				var _nameexpr = IAstExprName.FindVariableOrArgument (_idexpr.Token, _idexpr.Id);
 				if (_nameexpr != null)
 					return _nameexpr;
+
+				// 查找当前类的成员变量
+				var _is_static = Info.CurrentFunc.Static;
+				for (int i = 0; i < Info.CurrentClass.ClassVars.Count; ++i) {
+					if (Info.CurrentClass.ClassVars[i].Name != _idexpr.Id)
+						continue;
+					if (_is_static != Info.CurrentClass.ClassVars[i].Static)
+						throw new CodeException (_idexpr.Token, $"{(_is_static ? "静态" : "动态")}方法内无法访问{(!_is_static ? "静态" : "动态")}成员变量");
+					var _cvarexpr = new AstExprName_ClassVar { Token = _idexpr.Token, Class = Info.CurrentClass, VariableIndex = i };
+					if (!_is_static)
+						_cvarexpr.ThisObject = new AstExprName_This { Token = _idexpr.Token, Class = Info.CurrentClass };
+					return _cvarexpr;
+				}
+
+				// 查找当前类的成员方法
+				for (int i = 0; i < Info.CurrentClass.ClassFuncs.Count; ++i) {
+					if (Info.CurrentClass.ClassFuncs[i].Name != _idexpr.Id)
+						continue;
+					if (_is_static != Info.CurrentClass.ClassFuncs[i].Static)
+						throw new CodeException (_idexpr.Token, $"{(_is_static ? "静态" : "动态")}方法内无法访问{(!_is_static ? "静态" : "动态")}成员方法");
+					var _cvarexpr = new AstExprName_ClassFunc { Token = _idexpr.Token, Class = Info.CurrentClass, FunctionIndex = i };
+					if (!_is_static)
+						_cvarexpr.ThisObject = new AstExprName_This { Token = _idexpr.Token, Class = Info.CurrentClass };
+					return _cvarexpr;
+				}
 			}
 			return _expr;
 		}
@@ -139,8 +164,14 @@ namespace fac.AntlrTools {
 		// 第三遍遍历
 		private static IAstExpr Traversal2 (IAstExpr _expr) {
 			// 不允许再出现 AstExpr_BaseId 类型
-			if (_expr is AstExpr_BaseId _idexpr)
+			if (_expr is AstExpr_BaseId _idexpr) {
 				throw new CodeException (_expr.Token, $"未识别的标识符 {_idexpr.Id}");
+			} else if (_expr is AstExpr_Op1 _op1expr && (!_op1expr.IsPrefix) && _op1expr.Operator[0]=='.') {
+				throw new CodeException (_expr.Token, $"未识别的成员方法或属性 {_op1expr.Operator[1..]}");
+			} else if (_expr is AstExpr_Op2 _op2expr && AstExpr_Op2.sAssignOp2s.Contains (_op2expr.Operator)) {
+				if (!_op2expr.Value1.AllowAssign ())
+					throw new CodeException (_op2expr.Value1.Token, "目标不可被赋值");
+			}
 			return _expr;
 		}
 	}

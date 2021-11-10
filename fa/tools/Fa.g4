@@ -185,7 +185,7 @@ ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr
 // loop
 //
 whileStmt:					While expr QuotHuaL stmt* QuotHuaR;
-numIterStmt:				For Id Colon exprOpt (Colon exprOpt)+ QuotHuaL stmt* QuotHuaR;
+numIterStmt:				For type Id Colon expr QuotHuaL stmt* QuotHuaR;
 
 
 

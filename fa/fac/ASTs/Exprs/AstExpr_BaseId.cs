@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fac.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,5 +18,9 @@ namespace fac.ASTs.Exprs {
 		public override string GuessType () {
 			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
 		}
+
+		public override (string, string) GenerateCSharp (int _indent) => throw new UnimplException (Token);
+
+		public override bool AllowAssign () => throw new UnimplException (Token);
 	}
 }

@@ -20,8 +20,6 @@ namespace fac.ASTs {
 			AttachType = _ctx.type () != null ? _ctx.type ().GetText () : "";
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			throw new NotImplementedException ();
-		}
+		public override (string, string) GenerateCSharp (int _indent) => throw new NotImplementedException ();
 	}
 }

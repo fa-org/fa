@@ -59,25 +59,33 @@ namespace fac.ASTs.Exprs {
 
 		public override string GuessType () => DataType;
 
-		public override string GenerateCSharp (int _indent) {
-			var _sb = new StringBuilder ();
+		public override (string, string) GenerateCSharp (int _indent) {
+			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
 			_sb.Append ($"new {DataType} ");
 			if (InitialValues != null) {
 				_sb.Append ($"{{ ");
-				foreach (var _init in InitialValues)
-					_sb.Append ($"{_init._name} = {_init._value.GenerateCSharp (_indent)}, ");
+				foreach (var _init in InitialValues) {
+					var (_a, _b) = _init._value.GenerateCSharp (_indent);
+					_psb.Append (_a);
+					_sb.Append ($"{_init._name} = {_b}, ");
+				}
 				if (InitialValues.Any ())
 					_sb.Remove (_sb.Length - 2, 2);
 				_sb.Append ($" }}");
 			} else {
 				_sb.Append ($"(");
-				foreach (var _arg in ConstructorArguments)
-					_sb.Append ($"{_arg.GenerateCSharp (_indent)}, ");
+				foreach (var _arg in ConstructorArguments) {
+					var (_a, _b) = _arg.GenerateCSharp (_indent);
+					_psb.Append (_a);
+					_sb.Append ($"{_b}, ");
+				}
 				if (ConstructorArguments.Any ())
 					_sb.Remove (_sb.Length - 2, 2);
 				_sb.Append ($")");
 			}
-			return _sb.ToString ();
+			return (_psb.ToString (), _sb.ToString ());
 		}
+
+		public override bool AllowAssign () => false;
 	}
 }

@@ -5,6 +5,7 @@ using fac.ASTs.Stmts;
 using fac.Structures;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace fac {
 	class Info {
@@ -134,8 +135,40 @@ namespace fac {
 		}
 
 		/// <summary>
-		/// 当前函数
+		/// 当前类
+		/// </summary>
+		public static AstClassStmt CurrentClass { get; set; } = null;
+
+		/// <summary>
+		/// 当前类方法
 		/// </summary>
 		public static AstClassFunc CurrentFunc { get; set; } = null;
+
+		//
+		public static string GenerateCSharp () {
+			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
+			foreach (var _program in Programs) {
+				var (_a, _b) = _program.GenerateCSharp (0);
+				_psb.Append (_a);
+				_sb.Append (_b);
+			}
+			_psb.AppendLine ();
+			_psb.AppendLine ();
+			_psb.AppendLine ();
+			//_psb.AppendLine ("namespace fa {");
+			//_psb.AppendLine ("class Optional<T> {");
+			//_psb.AppendLine ("	public T t = default;");
+			//_psb.AppendLine ("	public string err = \"\";");
+			//_psb.AppendLine ("	public bool HasValue () => err == \"\";");
+			//_psb.AppendLine ("	public T GetValue () => t;");
+			//_psb.AppendLine ("	public string GetError () => err;");
+			//_psb.AppendLine ("	public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
+			//_psb.AppendLine ("	public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
+			//_psb.AppendLine ("}");
+			//_psb.AppendLine ("}");
+			_psb.AppendLine ($"namespace {Info.CurrentNamespace} {{");
+			_sb.AppendLine ($"}}");
+			return $"{_psb}{_sb}";
+		}
 	}
 }

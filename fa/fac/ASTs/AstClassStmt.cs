@@ -23,7 +23,7 @@ namespace fac.ASTs {
 		public AstClassStmt (FaParser.ClassStmtContext _ctx) {
 			Token = _ctx.Start;
 			//
-			FullName = $"{Info.CurrentNamespace}{_ctx.Id ().GetText ()}";
+			FullName = $"{Info.CurrentNamespace}.{_ctx.Id ().GetText ()}";
 			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			//
@@ -44,6 +44,8 @@ namespace fac.ASTs {
 		}
 
 		public void Compile () {
+			Info.CurrentClass = this;
+
 			// Antlr转AST
 			foreach (var _var in ClassVars)
 				_var.ToAST ();
@@ -90,21 +92,23 @@ namespace fac.ASTs {
 			}
 			foreach (var _func in ClassFuncs) {
 				Info.CurrentFunc = _func;
-				for (int i = 0; i < _func.BodyCodes.Count; ++i) {
-					_func.BodyCodes[i] = _func.BodyCodes[i].TraversalCalcType ("") as IAstStmt;
-				}
+				_func.BodyCodes.TraversalCalcType ();
 			}
 		}
 
-		public override string GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]} {{");
-			foreach (var _var in ClassVars)
-				_sb.AppendLine ($"{_var.GenerateCSharp (_indent + 1)}");
-			foreach (var _func in ClassFuncs)
-				_sb.AppendLine (_func.GenerateCSharp (_indent + 1));
+			foreach (var _var in ClassVars) {
+				var (_a, _b) = _var.GenerateCSharp (_indent + 1);
+				_sb.Append (_a).Append (_b);
+			}
+			foreach (var _func in ClassFuncs) {
+				var (_a, _b) = _func.GenerateCSharp (_indent + 1);
+				_sb.Append (_a).Append (_b);
+			}
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return _sb.ToString ();
+			return ("", _sb.ToString ());
 		}
 	}
 }

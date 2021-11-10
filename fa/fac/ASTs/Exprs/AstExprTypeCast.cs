@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Exprs.Names;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace fac.ASTs.Exprs {
 
 		public static IAstExpr Make (IAstExpr _dest, string _to_type) {
 			if (_dest.ExpectType == "") {
+				if (_dest is AstExprName_BuildIn)
+					return _dest;
 				throw new Exception ("应识别类型后做转换处理");
 			} else if (_dest.ExpectType == _to_type || _to_type == "") {
 				return _dest;
@@ -32,6 +35,11 @@ namespace fac.ASTs.Exprs {
 
 		public override string GuessType () => Value.GuessType ();
 
-		public override string GenerateCSharp (int _indent) => Value.GenerateCSharp (_indent);
+		public override (string, string) GenerateCSharp (int _indent) {
+			var (_a, _b) = Value.GenerateCSharp (_indent);
+			return (_a, $"({ExpectType}) {_b}");
+		}
+
+		public override bool AllowAssign () => false;
 	}
 }

@@ -19,5 +19,9 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override string GuessType () => Func.Arguments[ArgumentIndex]._type;
+
+		public override (string, string) GenerateCSharp (int _indent) => ("", Func.Arguments[ArgumentIndex]._name);
+
+		public override bool AllowAssign () => false;
 	}
 }

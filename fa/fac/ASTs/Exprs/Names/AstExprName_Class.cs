@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fac.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,5 +17,9 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override string GuessType () => Class.FullName;
+
+		public override (string, string) GenerateCSharp (int _indent) => ("", Class.FullName);
+
+		public override bool AllowAssign () => false;
 	}
 }

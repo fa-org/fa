@@ -12,6 +12,8 @@ namespace fac.ASTs.Exprs.Names {
 
 
 		private static Dictionary<string, AstExprName_BuildIn> sBuildIn = new Dictionary<string, AstExprName_BuildIn> {
+			["continue"] = new AstExprName_BuildIn { Token = null, Name = "continue", NameType = "" },
+			["break"] = new AstExprName_BuildIn { Token = null, Name = "break", NameType = "" },
 			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Action<string>" },
 		};
 
@@ -26,6 +28,16 @@ namespace fac.ASTs.Exprs.Names {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => Name;
+		public override string GuessType () => NameType;
+
+		public override (string, string) GenerateCSharp (int _indent) => ("", sName2Output_CSharp[Name]);
+
+		public override bool AllowAssign () => false;
+
+		private static Dictionary<string, string> sName2Output_CSharp = new Dictionary<string, string> {
+			["continue"] = "continue",
+			["break"] = "break",
+			["Console.WriteLine"] = "Console.WriteLine",
+		};
 	}
 }

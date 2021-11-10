@@ -30,5 +30,16 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override string GuessType () => Class.ClassVars[VariableIndex].DataType;
+
+		public override (string, string) GenerateCSharp (int _indent) {
+			if (ThisObject != null) {
+				var (_a, _b) = ThisObject.GenerateCSharp (_indent);
+				return (_a, $"{_b}.{Class.ClassVars[VariableIndex].Name}");
+			} else {
+				return ("", $"{Class.FullName}.{Class.ClassVars[VariableIndex].Name}");
+			}
+		}
+
+		public override bool AllowAssign () => true;
 	}
 }

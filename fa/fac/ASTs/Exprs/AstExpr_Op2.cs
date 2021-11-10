@@ -50,13 +50,15 @@ namespace fac.ASTs.Exprs {
 						ExpectType = ExpectType[..^1];
 				} else {
 					_exp1 = _exp2 = TypeFuncs.GetCompatibleType (_exp1, _exp2);
-					ExpectType = _exp2;
+					if (ExpectType == "")
+						ExpectType = _exp2;
 				}
 			}
 
 			Value1 = Value1.TraversalCalcType (_exp1);
 			Value2 = Value2.TraversalCalcType (_exp2);
-			ExpectType = TypeFuncs.GetCompatibleType (Value1.ExpectType, Value2.ExpectType);
+			if (ExpectType == "")
+				ExpectType = TypeFuncs.GetCompatibleType (Value1.ExpectType, Value2.ExpectType);
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
@@ -72,14 +74,18 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			return $"{Value1.GenerateCSharp (_indent)} {Operator} {Value1.GenerateCSharp (_indent)}";
+		public override (string, string) GenerateCSharp (int _indent) {
+			var (_a, _b) = Value1.GenerateCSharp (_indent);
+			var (_c, _d) = Value2.GenerateCSharp (_indent);
+			return ($"{_a}{_c}", $"{_b} {Operator} {_d}");
 		}
+
+		public override bool AllowAssign () => false;
 
 		private static HashSet<string> sCompareOp2s = new HashSet<string> { ">", "<", ">=", "<=", "==", "!=" };
 		private static HashSet<string> sLogicOp2s = new HashSet<string> { "||", "&&" };
 		private static HashSet<string> sNumOp2s = new HashSet<string> { "+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>" };
-		private static HashSet<string> sAssignOp2s = new HashSet<string> { "=", "+=", "-=", "*=", "/=", "%=", "|=", "&=", "^=", "<<=", ">>=" };
+		public static HashSet<string> sAssignOp2s = new HashSet<string> { "=", "+=", "-=", "*=", "/=", "%=", "|=", "&=", "^=", "<<=", ">>=" };
 		private static HashSet<string> sQusQusOp2s = new HashSet<string> { "??", "??=" };
 	}
 }

@@ -41,5 +41,18 @@ namespace fac.ASTs.Exprs {
 				return $"{ItemDataType}[]";
 			return $"{TypeFuncs.GetCompatibleType ((from p in InitValues select p.GuessType ()).ToArray ())}[]";
 		}
+
+		public override (string, string) GenerateCSharp (int _indent) {
+			var _psb = new StringBuilder ();
+			var _tmp_var_name = $"_{Guid.NewGuid ().ToString ("N")[..8]}";
+			_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{ItemDataType}> ();");
+			foreach (var _init_val in InitValues) {
+				var (_a, _b) = _init_val.GenerateCSharp (_indent);
+				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_tmp_var_name}.Add ({_b});");
+			}
+			return (_psb.ToString (), _tmp_var_name);
+		}
+
+		public override bool AllowAssign () => false;
 	}
 }

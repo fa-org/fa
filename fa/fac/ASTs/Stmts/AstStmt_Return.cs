@@ -24,8 +24,15 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			return $"{_indent.Indent ()}return {Expr.GenerateCSharp (_indent)};\n";
+		public override (string, string) GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
+			if (Expr != null) {
+				var (_a, _b) = Expr.GenerateCSharp (_indent);
+				_sb.AppendLine ($"{_indent.Indent ()}{_a}{_indent.Indent ()}return {_b};");
+			} else {
+				_sb.AppendLine ($"{_indent.Indent ()}return;");
+			}
+			return ("", _sb.ToString ());
 		}
 	}
 }
