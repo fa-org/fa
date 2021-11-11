@@ -153,7 +153,7 @@ ids:						Id (PointOp Id)*;
 //
 // type
 //
-typeAfter:					(QuotFangL QuotFangR) | AndOp | Qus | (QuotJianL type (Comma type)* QuotJianR) | StarOp;
+typeAfter:					(QuotFangL QuotFangR) | Qus | (QuotJianL type (Comma type)* QuotJianR);   /////// | AndOp | StarOp;
 type:						(Id | (QuotYuanL type (Comma type)+ QuotYuanR)) typeAfter*;
 typeNewable:				Id typeAfter*;
 //eTypeAfter:					(QuotFangL QuotFangR) | AndOp | StarOp;
