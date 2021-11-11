@@ -30,7 +30,7 @@ namespace fac.ASTs.Exprs {
 			} else if (Operator[0] == '.') {
 				string _access_name = Operator[1..];
 				if (Value is AstExprName_Class _cls) {
-					string _expect = (from p in _cls.Class.ClassVars where p.Name == _access_name select p.DataType).FirstOrDefault ();
+					string _expect = (from p in _cls.Class.ClassVars where p.Name == _access_name select p.DataType.TypeStr).FirstOrDefault ();
 					if (!string.IsNullOrEmpty (_expect))
 						return _expect;
 					_expect = (from p in _cls.Class.ClassFuncs where p.Name == _access_name select $"{_cls.Class}.{p.Name}").FirstOrDefault ();

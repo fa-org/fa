@@ -58,7 +58,7 @@ namespace fac {
 					_program.Compile ();
 			} catch (CodeException _ce) {
 				Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件第 {_ce.Token.Line} 行的错误：{_ce.Message}");
-				int _start = _ce.Token.StartIndex;
+				int _start = Info.CurrentSourceCode.LastIndexOfAny (new char[] { '\r', '\n' }, _ce.Token.StartIndex) + 1;
 				string _code = Info.CurrentSourceCode[_start..];
 				int _p = _code.IndexOfAny (new char [] { '\r', '\n' });
 				_code = _code[.._p];
@@ -74,7 +74,7 @@ namespace fac {
 					}
 				}
 				Console.WriteLine ($"{_sb}^");
-				Console.WriteLine ($"编译失败。按任意键退出。。。");
+				Console.WriteLine ($"按任意键退出。。。");
 				Console.ReadKey ();
 				return;
 			}
@@ -91,7 +91,7 @@ namespace fac {
 			File.WriteAllText (_dest_file, _dest_src, Encoding.UTF8);
 			_process_run ("dotnet run");
 			//
-			Console.WriteLine ($"编译成功。按任意键退出。。。");
+			Console.WriteLine ($"按任意键退出。。。");
 			Console.ReadKey ();
 		}
 	}

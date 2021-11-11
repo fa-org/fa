@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Exprs {
 	class AstExpr_If: IAstExpr {
 		public IAstExpr Condition { get; set; }
-		public List<IAstStmt> IfTrueCodes { get; set; }
+		public List<IAstStmt> IfTrueCodes { get; set; } = null;
 		public IAstExpr IfTrue { get; set; }
-		public List<IAstStmt> IfFalseCodes { get; set; }
+		public List<IAstStmt> IfFalseCodes { get; set; } = null;
 		public IAstExpr IfFalse { get; set; }
 
 
@@ -43,20 +43,24 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override (string, string) GenerateCSharp (int _indent) {
-			StringBuilder _psb = new StringBuilder ();
 			var (_a, _b) = Condition.GenerateCSharp (_indent);
-			var _tmp_var_name = Common.GetTempId ();
-			_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{ExpectType} {_tmp_var_name};");
-			_psb.AppendLine ($"{_indent.Indent ()}if ({_b}) {{");
-			_psb.AppendStmts (IfTrueCodes, _indent + 1);
-			(_a, _b) = IfTrue.GenerateCSharp (_indent + 1);
-			_psb.Append (_a).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_b};");
-			_psb.AppendLine ($"{_indent.Indent ()}}} else {{");
-			_psb.AppendStmts (IfFalseCodes, _indent + 1);
-			(_a, _b) = IfFalse.GenerateCSharp (_indent + 1);
-			_psb.Append (_a).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_b};");
-			_psb.AppendLine ($"{_indent.Indent ()}}}");
-			return (_psb.ToString (), _tmp_var_name);
+			var (_c, _d) = IfTrue.GenerateCSharp (_indent + 1);
+			var (_e, _f) = IfFalse.GenerateCSharp (_indent + 1);
+			if (_a == "" && _c == "" && _e == "" && (IfTrueCodes?.Count ?? 0) == 0 && (IfFalseCodes?.Count ?? 0) == 0) {
+				return ("", $"(({_b}) ? ({_d}) : ({_f}))");
+			} else {
+				StringBuilder _psb = new StringBuilder ();
+				var _tmp_var_name = Common.GetTempId ();
+				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{ExpectType} {_tmp_var_name};");
+				_psb.AppendLine ($"{_indent.Indent ()}if ({_b}) {{");
+				_psb.AppendStmts (IfTrueCodes, _indent + 1);
+				_psb.Append (_c).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_d};");
+				_psb.AppendLine ($"{_indent.Indent ()}}} else {{");
+				_psb.AppendStmts (IfFalseCodes, _indent + 1);
+				_psb.Append (_e).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_f};");
+				_psb.AppendLine ($"{_indent.Indent ()}}}");
+				return (_psb.ToString (), _tmp_var_name);
+			}
 		}
 
 		public override bool AllowAssign () => false;

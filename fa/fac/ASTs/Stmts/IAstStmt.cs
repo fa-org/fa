@@ -1,5 +1,6 @@
 ﻿using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace fac.ASTs.Stmts {
 				return FromIfStmt (_conditions, _contents);
 			} else if (_ctx.defVarStmt () != null) {
 				var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start };
-				_varstmt.DataType = _ctx.defVarStmt ().type ().GetText ();
+				_varstmt.DataType = IAstType.FromTypeStr (_ctx.defVarStmt ().type ().GetText (), _ctx.defVarStmt ().type ().Start);
 				_varstmt.VarName = _ctx.defVarStmt ().Id ().GetText ();
 				_varstmt.Expr = FromContext (_ctx.defVarStmt ().expr ());
 				return _varstmt;

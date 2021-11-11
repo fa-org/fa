@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs.Names {
 	class AstExprName_ClassVar: IAstExprName {
-		public AstClassStmt Class { init; get; }
+		public AstClass Class { init; get; }
 		public int VariableIndex { init; get; }
 		public IAstExpr ThisObject { get; set; }
 
@@ -29,7 +29,7 @@ namespace fac.ASTs.Exprs.Names {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => Class.ClassVars[VariableIndex].DataType;
+		public override string GuessType () => Class.ClassVars[VariableIndex].DataType.GuessType ();
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			if (ThisObject != null) {

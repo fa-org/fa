@@ -38,13 +38,13 @@ namespace fac.ASTs.Exprs {
 						for (; i < InitialValues.Count; ++i) {
 							if (InitialValues[i]._name != _vars.Name)
 								continue;
-							InitialValues[i] = (_name: _vars.Name, _value: InitialValues[i]._value.TraversalCalcType (_vars.DataType));
+							InitialValues[i] = (_name: _vars.Name, _value: InitialValues[i]._value.TraversalCalcType (_vars.DataType.TypeStr));
 							break;
 						}
 						if (i == InitialValues.Count) {
 							if (_vars.DefaultValue == null)
 								throw new CodeException (Token, $"未指定成员变量 {_vars.Name} 的初始值");
-							_default_init_vals.Add ((_name: _vars.Name, _value: _vars.DefaultValue.TraversalCalcType (_vars.DataType)));
+							_default_init_vals.Add ((_name: _vars.Name, _value: _vars.DefaultValue.TraversalCalcType (_vars.DataType.TypeStr)));
 						}
 					}
 					InitialValues.AddRange (_default_init_vals);

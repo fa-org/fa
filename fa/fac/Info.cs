@@ -33,8 +33,8 @@ namespace fac {
 		/// 项目所有源码文件的AST
 		/// </summary>
 		public static List<AstProgram> Programs = new List<AstProgram> ();
-		public static List<AstClassStmt> GetClassFromName (string _name) {
-			var _classes = new List<AstClassStmt> (); // 非绝对路径，收集起来，避免重复名称
+		public static List<AstClass> GetClassFromName (string _name) {
+			var _classes = new List<AstClass> (); // 非绝对路径，收集起来，避免重复名称
 			foreach (var _program in Info.Programs) {
 				foreach (var _class in _program.CurrentClasses) {
 					if (_class.FullName.Length >= _name.Length) {
@@ -137,7 +137,7 @@ namespace fac {
 		/// <summary>
 		/// 当前类
 		/// </summary>
-		public static AstClassStmt CurrentClass { get; set; } = null;
+		public static AstClass CurrentClass { get; set; } = null;
 
 		/// <summary>
 		/// 当前类方法
@@ -155,17 +155,17 @@ namespace fac {
 			_psb.AppendLine ();
 			_psb.AppendLine ();
 			_psb.AppendLine ();
-			//_psb.AppendLine ("namespace fa {");
-			//_psb.AppendLine ("class Optional<T> {");
-			//_psb.AppendLine ("	public T t = default;");
-			//_psb.AppendLine ("	public string err = \"\";");
-			//_psb.AppendLine ("	public bool HasValue () => err == \"\";");
-			//_psb.AppendLine ("	public T GetValue () => t;");
-			//_psb.AppendLine ("	public string GetError () => err;");
-			//_psb.AppendLine ("	public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
-			//_psb.AppendLine ("	public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
-			//_psb.AppendLine ("}");
-			//_psb.AppendLine ("}");
+			_psb.AppendLine ("namespace fa {");
+			_psb.AppendLine ("class Optional<T> {");
+			_psb.AppendLine ("	public T t = default;");
+			_psb.AppendLine ("	public string err = \"\";");
+			_psb.AppendLine ("	public bool HasValue () => err == \"\";");
+			_psb.AppendLine ("	public T GetValue () => t;");
+			_psb.AppendLine ("	public string GetError () => err;");
+			_psb.AppendLine ("	public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
+			_psb.AppendLine ("	public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
+			_psb.AppendLine ("}");
+			_psb.AppendLine ("}");
 			_psb.AppendLine ($"namespace {Info.CurrentNamespace} {{");
 			_sb.AppendLine ($"}}");
 			return $"{_psb}{_sb}";

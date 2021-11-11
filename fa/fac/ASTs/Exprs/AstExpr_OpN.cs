@@ -27,7 +27,7 @@ namespace fac.ASTs.Exprs {
 				if (_func_args.Count != Arguments.Count)
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
 				for (int i = 0; i < _func_args.Count; ++i)
-					Arguments[i] = Arguments[i].TraversalCalcType (_func_args[i]._type);
+					Arguments[i] = Arguments[i].TraversalCalcType (_func_args[i]._type.TypeStr);
 				if (_funcexpr.ThisObject != null)
 					Arguments.RemoveAt (0);
 				ExpectType = _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;

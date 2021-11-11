@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using fac.AntlrTools;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
 	abstract class IAstExpr: IAst {
-		public string ExpectType { get; set; } = "";
+		public IAstType ExpectType { get; set; } = null;
 
 		public abstract void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb);
 		public void TraversalWrap (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
@@ -25,7 +26,7 @@ namespace fac.ASTs.Exprs {
 			if (Info.TraversalLast)
 				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
 		}
-		public abstract IAstExpr TraversalCalcType (string _expect_type);
+		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);
 		public abstract string GuessType ();
 		public abstract bool AllowAssign ();
 
@@ -35,20 +36,28 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromContext (FaParser.ExprContext _ctx) {
 			if (_ctx == null)
 				return null;
-			var _expr_ctxs = _ctx.middleExpr ();
-			var _op2_ctxs = _ctx.allAssign ();
-			if (_expr_ctxs.Length == 0)
-				throw new UnimplException (_ctx);
-			//
-			var _expr = FromContext (_expr_ctxs[_expr_ctxs.Length - 1]);
-			for (int i = _expr_ctxs.Length - 2; i >= 0; --i) {
-				var _expr2 = new AstExpr_Op2 { Token = _ctx.Start };
-				_expr2.Value1 = FromContext (_expr_ctxs[i]);
-				_expr2.Value2 = _expr;
-				_expr2.Operator = _op2_ctxs[i].GetText ();
-				_expr = _expr2;
+			if (_ctx.Qus () != null) {
+				var _ifexpr = new AstExpr_If { Token = _ctx.Start };
+				_ifexpr.Condition = FromContext (_ctx.middleExpr ()[0]);
+				_ifexpr.IfTrue = FromContext (_ctx.strongExprBase ()[0]);
+				_ifexpr.IfFalse = FromContext (_ctx.strongExprBase ()[1]);
+				return _ifexpr;
+			} else {
+				var _expr_ctxs = _ctx.middleExpr ();
+				var _op2_ctxs = _ctx.allAssign ();
+				if (_expr_ctxs.Length == 0)
+					throw new UnimplException (_ctx);
+				//
+				var _expr = FromContext (_expr_ctxs[_expr_ctxs.Length - 1]);
+				for (int i = _expr_ctxs.Length - 2; i >= 0; --i) {
+					var _expr2 = new AstExpr_Op2 { Token = _ctx.Start };
+					_expr2.Value1 = FromContext (_expr_ctxs[i]);
+					_expr2.Value2 = _expr;
+					_expr2.Operator = _op2_ctxs[i].GetText ();
+					_expr = _expr2;
+				}
+				return _expr;
 			}
-			return _expr;
 		}
 
 		public static IAstExpr FromContext (FaParser.MiddleExprContext _ctx) {

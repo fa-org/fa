@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace fac.ASTs {
 	enum AstClassType { Class, Interface, Enum }
 
-	class AstClassStmt: IAst {
+	class AstClass: IAst {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public AstClassType ClassType { init; get; }
@@ -20,7 +20,7 @@ namespace fac.ASTs {
 
 
 
-		public AstClassStmt (FaParser.ClassStmtContext _ctx) {
+		public AstClass (FaParser.ClassStmtContext _ctx) {
 			Token = _ctx.Start;
 			//
 			FullName = $"{Info.CurrentNamespace}.{_ctx.Id ().GetText ()}";
@@ -88,7 +88,7 @@ namespace fac.ASTs {
 			foreach (var _var in ClassVars) {
 				Info.CurrentFunc = null;
 				if (_var.DefaultValue != null)
-					_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType);
+					_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType.TypeStr);
 			}
 			foreach (var _func in ClassFuncs) {
 				Info.CurrentFunc = _func;

@@ -66,7 +66,11 @@ namespace fac.ASTs.Exprs {
 			if (sCompareOp2s.Contains (Operator) || sLogicOp2s.Contains (Operator)) {
 				return "bool";
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
-				return TypeFuncs.GetCompatibleType (Value1.GuessType (), Value2.GuessType ());
+				bool _opt = Operator == "/";
+				var _type = TypeFuncs.GetCompatibleType (Value1.GuessType (), Value2.GuessType ());
+				if (_opt)
+					_type = _type[^1] == '?' ? _type : $"{_type}?";
+				return _type;
 			} else if (sQusQusOp2s.Contains (Operator)) {
 				return Value2.GuessType ();
 			} else {

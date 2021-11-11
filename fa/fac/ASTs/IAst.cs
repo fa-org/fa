@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs {
 	abstract class IAst {
-		public IToken Token { init; get; }
+		public IToken Token { init; get; } = null;
 
 		public abstract (string, string) GenerateCSharp (int _indent);
 	}

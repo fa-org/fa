@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime;
 using fac.ASTs.Exprs;
+using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace fac.ASTs {
 	class AstClassVar: IAst {
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
-		public string DataType { init; get; }
+		public IAstType DataType { init; get; }
 		public string Name { init; get; }
 		public ParserRuleContext DefaultValueRaw { init; get; }
 		public IAstExpr DefaultValue { get; set; } = null;
@@ -24,7 +25,7 @@ namespace fac.ASTs {
 			//
 			Static = _ctx.Static () != null;
 			//
-			DataType = _ctx.type ().GetText ();
+			DataType = IAstType.FromTypeStr (_ctx.type ().GetText (), _ctx.type ().Start);
 			//
 			Name = _ctx.Id ().GetText ();
 			//

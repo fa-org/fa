@@ -1,6 +1,7 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -13,8 +14,8 @@ namespace fac.ASTs {
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
 		public string Name { init; get; }
-		public string ReturnType { init; get; }
-		public List<(string _type, string _name)> Arguments { init; get; }
+		public IAstType ReturnType { init; get; }
+		public List<(IAstType _type, string _name)> Arguments { init; get; }
 		public FaParser.ClassFuncBodyContext BodyRaw { init; get; }
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
 
@@ -29,7 +30,7 @@ namespace fac.ASTs {
 			//
 			Name = _ctx.classFuncName ().GetText ();
 			//
-			ReturnType = _ctx.type ().GetText ();
+			ReturnType = IAstType.FromTypeStr (_ctx.type ().GetText (), _ctx.Start);
 			//
 			Arguments = AstElemParser.Parse (_ctx.typeVarList ());
 			//
@@ -40,7 +41,7 @@ namespace fac.ASTs {
 			// 代码转树状结构
 			if (BodyRaw.expr () != null) {
 				BodyCodes = new List<IAstStmt> ();
-				if (ReturnType != "void") {
+				if (ReturnType is not AstType_Void) {
 					BodyCodes.Add (IAstStmt.FromExpr (BodyRaw.expr (), true));
 				} else {
 					BodyCodes.Add (IAstStmt.FromExpr (BodyRaw.expr (), false));
@@ -55,7 +56,7 @@ namespace fac.ASTs {
 		// 遍历代码，确保所有路径均return
 		private void MakeSureReturn (List<IAstStmt> _stmts) {
 			if (_stmts.Count == 0) {
-				if (ReturnType != "void")
+				if (ReturnType is not AstType_Void)
 					throw new CodeException (Token, $"方法需返回 {ReturnType} 类型结果");
 				_stmts.Add (IAstStmt.FromExpr (null, true));
 			} else if (_stmts[^1] is AstStmt_Return) {
@@ -64,7 +65,7 @@ namespace fac.ASTs {
 				MakeSureReturn (_ifstmt.IfTrueCodes);
 				MakeSureReturn (_ifstmt.IfFalseCodes);
 			} else {
-				if (ReturnType != "void")
+				if (ReturnType is not AstType_Void)
 					throw new CodeException (Token, $"方法需返回 {ReturnType} 类型结果");
 				_stmts.Add (IAstStmt.FromExpr (null, true));
 			}

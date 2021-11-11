@@ -211,8 +211,8 @@ strongExprSuffix			: AddAddOp | SubSubOp															// บ๓ืบ ++ --
 							| (PointOp Id)																	//     wnd.Name
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
-middleExpr:					strongExpr (allOp2 strongExpr)*;												//      a == 24    a + b - c
-expr:						middleExpr (allAssign middleExpr)*;
+middleExpr:					strongExpr (allOp2 strongExpr)*;												//     a == 24    a + b - c
+expr:						middleExpr ((Qus strongExprBase Colon strongExprBase) | (allAssign middleExpr)*);
 
 
 

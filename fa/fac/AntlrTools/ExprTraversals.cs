@@ -2,6 +2,7 @@
 using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -120,7 +121,7 @@ namespace fac.AntlrTools {
 					// 访问类成员
 					// 参数0为对象，当访问静态成员时传null
 					// 参数1为类对象
-					Func<IAstExpr, AstClassStmt, IAstExpr> _access_func = (_obj, _class) => {
+					Func<IAstExpr, AstClass, IAstExpr> _access_func = (_obj, _class) => {
 						for (int i = 0; i < _class.ClassVars.Count; ++i) {
 							if (_class.ClassVars[i].Name == _access_name)
 								return new AstExprName_ClassVar { Token = _expr.Token, Class = _class, VariableIndex = i, ThisObject = _obj };
@@ -135,22 +136,26 @@ namespace fac.AntlrTools {
 					// 访问类成员
 					// 参数0为对象，当访问静态成员时传null
 					// 参数1为类名
-					Func<IAstExpr, string, IAstExpr> _access_func2 = (_obj, _str_class) => {
-						var _classes = Info.GetClassFromName (_str_class);
-						if (_classes.Count == 0) {
-							throw new CodeException (_obj.Token, $"未定义的标识符 {_str_class}");
-						} else if (_classes.Count == 1) {
-							return _access_func (_obj, _classes[0]);
-						} else {
-							throw new CodeException (_obj.Token, $"不明确的符号 {_str_class}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
-						}
+					Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
+						return _typeexpr switch {
+							AstType_Class _classexpr => _access_func (_obj, _classexpr.Class),
+							_ => throw new UnimplException (_typeexpr.Token),
+						};
+						//var _classes = Info.GetClassFromName (_typeexpr.TypeStr);
+						//if (_classes.Count == 0) {
+						//	throw new CodeException (_obj.Token, $"未定义的标识符 {_typeexpr.TypeStr}");
+						//} else if (_classes.Count == 1) {
+						//	return _access_func (_obj, _classes[0]);
+						//} else {
+						//	throw new CodeException (_obj.Token, $"不明确的符号 {_typeexpr.TypeStr}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
+						//}
 					};
 
 					if (_op1.Value is AstExprName_Class _classexpr) {
 						return _access_func (null, _classexpr.Class);
 					} else if (_op1.Value is AstExprName_Argument _argexpr) {
-						string _str_class = _argexpr.Func.Arguments[_argexpr.ArgumentIndex]._type;
-						return _access_func2 (_argexpr, _str_class);
+						var _argtype = _argexpr.Func.Arguments[_argexpr.ArgumentIndex]._type;
+						return _access_func2 (_argexpr, _argtype);
 					} else if (_op1.Value is AstExprName_ClassVar _cvarexpr) {
 						return _access_func (_cvarexpr, _cvarexpr.Class);
 					} else if (_op1.Value is AstExprName_Variable _varexpr) {

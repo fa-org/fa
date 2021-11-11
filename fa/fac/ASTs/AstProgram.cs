@@ -19,7 +19,7 @@ namespace fac.ASTs {
 		/// <summary>
 		/// 当前模块的类列表
 		/// </summary>
-		public List<AstClassStmt> CurrentClasses { get; set; }
+		public List<AstClass> CurrentClasses { get; set; }
 
 
 
@@ -51,7 +51,7 @@ namespace fac.ASTs {
 			Info.CurrentExternApis = (from p in _ctx.importStmt () select new ExternApi (p)).ToList ();
 
 			// 处理类
-			CurrentClasses = (from p in _ctx.classStmt () select new AstClassStmt (p)).ToList ();
+			CurrentClasses = (from p in _ctx.classStmt () select new AstClass (p)).ToList ();
 		}
 
 		public void Compile () {
