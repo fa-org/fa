@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace fac.ASTs {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public AstClassType ClassType { init; get; }
+		public List<(string _name, AstType_Placeholder _type)> Templates { init; get; }
 		public List<AstClassEnumAtom> ClassEnumAtoms { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
@@ -33,6 +35,8 @@ namespace fac.ASTs {
 			} else {
 				throw new UnimplException (_ctx);
 			}
+			//
+			Templates = new List<(string _name, AstType_Placeholder _type)> ();
 			//
 			ClassEnumAtoms = (from p in _ctx.classEnumAtom () select new AstClassEnumAtom (p)).ToList ();
 			if (ClassType != AstClassType.Enum && ClassEnumAtoms.Count > 0)

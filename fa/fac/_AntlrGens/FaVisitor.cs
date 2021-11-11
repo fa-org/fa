@@ -254,17 +254,23 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTypeAfter([NotNull] FaParser.TypeAfterContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeSingle"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeSingle([NotNull] FaParser.TypeSingleContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeMulti"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeMulti([NotNull] FaParser.TypeMultiContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.type"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitType([NotNull] FaParser.TypeContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.typeNewable"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitTypeNewable([NotNull] FaParser.TypeNewableContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.typeVar"/>.
 	/// </summary>
