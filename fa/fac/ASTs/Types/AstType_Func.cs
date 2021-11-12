@@ -12,39 +12,16 @@ namespace fac.ASTs.Types {
 
 
 
-		public static AstType_Func FromType (string _type_str, IToken _token) {
-			bool _last_return = false;
-			if (_type_str.StartsWith ("Func<")) {
-				_last_return = true;
-				_type_str = _type_str[5..^1];
-			} else if (_type_str.StartsWith ("Action<")) {
-				_type_str = _type_str[7..^1];
-			} else {
+		public static AstType_Func FromType (string _type_str, IToken _token, List<IAstType> _templates) {
+			if (_type_str != "Func" && _type_str != "Action")
 				return null;
-			}
 			var _functype = new AstType_Func { Token = _token, TypeStr = _type_str };
-			var _sb = new StringBuilder ();
-			int _level = 0;
-			foreach (char _ch in _type_str) {
-				if (_ch == ',' && _level == 0) {
-					_functype.ArgumentTypes.Add (FromTypeStr (_sb.ToString (), _token));
-					_sb.Clear ();
-				} else {
-					if (_ch == '{' || _ch == '(' || _ch == '<') {
-						_level++;
-					} else if (_ch == '}' || _ch == ')' || _ch == '>') {
-						_level--;
-					}
-					_sb.Append (_ch);
-				}
-			}
-			if (_sb.Length > 0)
-				_functype.ArgumentTypes.Add (FromTypeStr (_sb.ToString (), _token));
-			if (_last_return) {
-				_functype.ReturnType = _functype.ArgumentTypes[^1];
-				_functype.ArgumentTypes.RemoveAt (_functype.ArgumentTypes.Count - 1);
+			if (_type_str == "Func") {
+				_functype.ReturnType = _templates[^1];
+				_templates.RemoveAt (_templates.Count - 1);
+				_functype.ArgumentTypes = _templates;
 			} else {
-				_functype.ReturnType = FromTypeStr ("void", null);
+				_functype.ReturnType = new AstType_Void { Token = _token, TypeStr = "void" };
 			}
 			return _functype;
 		}

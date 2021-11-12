@@ -19,6 +19,10 @@ namespace fac.ASTs {
 		public FaParser.ClassFuncBodyContext BodyRaw { init; get; }
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
 
+		public AstType_Func FuncType {
+			get => new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList (), TypeStr = $"" };
+		}
+
 
 
 		public AstClassFunc (FaParser.ClassFuncContext _ctx) {
@@ -30,7 +34,7 @@ namespace fac.ASTs {
 			//
 			Name = _ctx.classFuncName ().GetText ();
 			//
-			ReturnType = IAstType.FromTypeStr (_ctx.type ().GetText (), _ctx.Start);
+			ReturnType = IAstType.FromContext (_ctx.type ());
 			//
 			Arguments = AstElemParser.Parse (_ctx.typeVarList ());
 			//

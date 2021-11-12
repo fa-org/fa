@@ -47,7 +47,11 @@ namespace fac {
 			string _name = _type.FullName;
 			if (_name.Contains ('.'))
 				_name = _name.Substring (_name.LastIndexOf ('.') + 1);
-			_name = _name.Substring (3).ToLower ();
+			if (_name.StartsWith ("Ast"))
+				_name = _name[3..];
+			if (_name.StartsWith ("IAst"))
+				_name = _name[4..];
+			_name = _name.ToLower ();
 			var _methods = (from p in typeof (FaParser).GetMethods () where p.Name.ToLower () == _name select p).ToList ();
 			if (_methods.Count != 1)
 				throw new Exception ($"Program.ParseCode<T>: 使用到了 {_type.FullName} 类型，但 {_name} 方法{(_methods.Any () ? "数量大于1" : "不存在")}");

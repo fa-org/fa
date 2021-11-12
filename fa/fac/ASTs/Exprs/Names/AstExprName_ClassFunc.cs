@@ -1,4 +1,5 @@
-﻿using fac.Exceptions;
+﻿using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,12 +25,12 @@ namespace fac.ASTs.Exprs.Names {
 				ThisObject = _cb (ThisObject, _deep, _group);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			ExpectType = GuessType ();
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => $"{Class.FullName}{Class.ClassFuncs[FunctionIndex].Name}";
+		public override IAstType GuessType () => $"{Class.FullName}.{Class.ClassFuncs[FunctionIndex].Name}";
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			if (ThisObject != null) {

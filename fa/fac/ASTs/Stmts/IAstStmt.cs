@@ -53,7 +53,7 @@ namespace fac.ASTs.Stmts {
 				return FromIfStmt (_conditions, _contents);
 			} else if (_ctx.defVarStmt () != null) {
 				var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start };
-				_varstmt.DataType = IAstType.FromTypeStr (_ctx.defVarStmt ().type ().GetText (), _ctx.defVarStmt ().type ().Start);
+				_varstmt.DataType = IAstType.FromContext (_ctx.defVarStmt ().type ());
 				_varstmt.VarName = _ctx.defVarStmt ().Id ().GetText ();
 				_varstmt.Expr = FromContext (_ctx.defVarStmt ().expr ());
 				return _varstmt;

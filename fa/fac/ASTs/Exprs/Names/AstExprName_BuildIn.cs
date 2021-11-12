@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fac.ASTs.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,12 +24,17 @@ namespace fac.ASTs.Exprs.Names {
 			return null;
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
-			ExpectType = NameType;
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			if (ExpectType == null)
+				ExpectType = NameType != "" ? IAstType.FromName (NameType) : null;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => NameType;
+		public override IAstExpr GuessType () {
+			if (ExpectType == null)
+				ExpectType = NameType != "" ? IAstType.FromName (NameType) : null;
+			return ExpectType;
+		}
 
 		public override (string, string) GenerateCSharp (int _indent) => ("", sName2Output_CSharp[Name]);
 

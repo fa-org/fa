@@ -22,8 +22,8 @@ namespace fac.AntlrTools {
 			}
 		}
 
-		public static bool AllowTypeCast (string _src, string _dest) {
-			if (_src == "" || _dest == "" || _src == _dest)
+		public static bool AllowTypeCast (IAstType _src, IAstType _dest) {
+			if (_src == null || _dest == null || _src.TypeStr == _dest.TypeStr)
 				return true;
 			return false;
 		}

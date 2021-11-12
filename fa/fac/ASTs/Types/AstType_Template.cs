@@ -12,7 +12,7 @@ namespace fac.ASTs.Types {
 
 
 		public override (string, string) GenerateCSharp (int _indent) {
-			throw new NotImplementedException ();
+			return ("", $"{Class.FullName}<{string.Join (", ", (from p in TemplateTypes select p.GenerateCSharp (_indent).Item2))}>");
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,12 @@ namespace fac.ASTs.Exprs.Names {
 
 
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			ExpectType = Func.Arguments[ArgumentIndex]._type;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => Func.Arguments[ArgumentIndex]._type;
+		public override IAstExpr GuessType () => Func.Arguments[ArgumentIndex]._type;
 
 		public override (string, string) GenerateCSharp (int _indent) => ("", Func.Arguments[ArgumentIndex]._name);
 

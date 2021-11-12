@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using fac.ASTs;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,13 @@ namespace fac.AntlrTools {
 			throw new NotImplementedException ();
 		}
 
+
+
 		public IAst VisitProgram (FaParser.ProgramContext _ctx) => new AstProgram (_ctx);
+		public IAst VisitType (FaParser.TypeContext _ctx) => IAstType.FromContext (_ctx);
+
+
+
 		public IAst VisitClassStmt (FaParser.ClassStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassEnumAtom (FaParser.ClassEnumAtomContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassVar (FaParser.ClassVarContext _ctx) => throw new NotImplementedException ();
@@ -103,9 +110,9 @@ namespace fac.AntlrTools {
 		public IAst VisitSubAssign (FaParser.SubAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTerminal (ITerminalNode node) => throw new NotImplementedException ();
 		public IAst VisitTmpAssignExpr (FaParser.TmpAssignExprContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitType (FaParser.TypeContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeAfter (FaParser.TypeAfterContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitTypeNewable (FaParser.TypeNewableContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeSingle (FaParser.TypeSingleContext context) => throw new NotImplementedException ();
+		public IAst VisitTypeMulti (FaParser.TypeMultiContext context) => throw new NotImplementedException ();
 		public IAst VisitTypeVar (FaParser.TypeVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();
