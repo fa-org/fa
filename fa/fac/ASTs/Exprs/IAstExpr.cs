@@ -27,7 +27,7 @@ namespace fac.ASTs.Exprs {
 				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
 		}
 		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);
-		public abstract IAstExpr GuessType ();
+		public abstract IAstType GuessType ();
 		public abstract bool AllowAssign ();
 
 

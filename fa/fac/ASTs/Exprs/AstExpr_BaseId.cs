@@ -1,4 +1,5 @@
-﻿using fac.Exceptions;
+﻿using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,11 @@ namespace fac.ASTs.Exprs {
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) { }
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
 		}
 
-		public override string GuessType () {
+		public override IAstType GuessType () {
 			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
 		}
 

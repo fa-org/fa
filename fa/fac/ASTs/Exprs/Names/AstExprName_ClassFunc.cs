@@ -30,7 +30,7 @@ namespace fac.ASTs.Exprs.Names {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override IAstType GuessType () => $"{Class.FullName}.{Class.ClassFuncs[FunctionIndex].Name}";
+		public override IAstType GuessType () => Class.ClassFuncs[FunctionIndex].FuncType;
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			if (ThisObject != null) {

@@ -1,4 +1,5 @@
 ﻿using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +12,12 @@ namespace fac.ASTs.Exprs.Names {
 
 
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			ExpectType = Var.DataType;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => Var.DataType;
+		public override IAstType GuessType () => Var.DataType;
 
 		public override (string, string) GenerateCSharp (int _indent) => ("", Var.VarName);
 

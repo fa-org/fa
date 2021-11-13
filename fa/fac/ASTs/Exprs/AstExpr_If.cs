@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -25,11 +26,11 @@ namespace fac.ASTs.Exprs {
 			IfFalse = _cb (IfFalse, _deep + 1, 1);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
-			if (_expect_type == "")
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			if (_expect_type == null)
 				_expect_type = GuessType ();
 			//
-			Condition = Condition.TraversalCalcType ("bool");
+			Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
 			IfTrueCodes.TraversalCalcType ();
 			IfTrue = IfTrue.TraversalCalcType (_expect_type);
 			IfFalseCodes.TraversalCalcType ();
@@ -38,7 +39,7 @@ namespace fac.ASTs.Exprs {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () {
+		public override IAstType GuessType () {
 			return TypeFuncs.GetCompatibleType (IfTrue.GuessType (), IfFalse.GuessType ());
 		}
 

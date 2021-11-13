@@ -34,7 +34,7 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) => throw new NotImplementedException ();
 
-		public override string GuessType () => Value.GuessType ();
+		public override IAstType GuessType () => Value.GuessType ();
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			var (_a, _b) = Value.GenerateCSharp (_indent);

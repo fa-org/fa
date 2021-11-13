@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace fac.AntlrTools {
 	class TypeFuncs {
-		public static string GetCompatibleType (params string[] _types) {
+		public static IAstType GetCompatibleType (params IAstType[] _types) {
 			// 确保如果无法计算则抛异常
-			_types = (from p in _types where p != "" select p).Distinct ().ToArray ();
+			_types = (from p in _types where p != null select p).Distinct ().ToArray ();
 			if (_types.Length == 0) {
 				throw new Exception ("无法计算类型");
 			} else if (_types.Length == 1) {

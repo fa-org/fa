@@ -1,4 +1,5 @@
 ﻿using fac.ASTs.Exprs.Names;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -18,23 +19,23 @@ namespace fac.ASTs.Exprs {
 			Value = _cb (Value, _deep, _group);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			Value = Value.TraversalCalcType (_expect_type);
 			ExpectType = Value.ExpectType;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () {
+		public override IAstType GuessType () {
 			if (IsPrefix || Operator == "++" || Operator == "--") {
 				return Value.GuessType ();
 			} else if (Operator[0] == '.') {
 				string _access_name = Operator[1..];
 				if (Value is AstExprName_Class _cls) {
-					string _expect = (from p in _cls.Class.ClassVars where p.Name == _access_name select p.DataType.TypeStr).FirstOrDefault ();
-					if (!string.IsNullOrEmpty (_expect))
+					var _expect = (from p in _cls.Class.ClassVars where p.Name == _access_name select p.DataType).FirstOrDefault ();
+					if (_expect != null)
 						return _expect;
-					_expect = (from p in _cls.Class.ClassFuncs where p.Name == _access_name select $"{_cls.Class}.{p.Name}").FirstOrDefault ();
-					if (!string.IsNullOrEmpty (_expect))
+					_expect = (from p in _cls.Class.ClassFuncs where p.Name == _access_name select p.FuncType).FirstOrDefault ();
+					if (_expect != null)
 						return _expect;
 				}
 			}

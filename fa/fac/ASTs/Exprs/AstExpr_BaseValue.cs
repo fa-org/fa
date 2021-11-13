@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
 	class AstExpr_BaseValue: IAstExpr {
-		public string DataType { get; set; }
+		public IAstType DataType { get; set; }
 		public string Value { get; set; }
 
 
@@ -33,20 +34,20 @@ namespace fac.ASTs.Exprs {
 			} else {
 				throw new UnimplException (_token);
 			}
-			return new AstExpr_BaseValue { Token = _token, DataType = "string", Value = _str };
+			return new AstExpr_BaseValue { Token = _token, DataType = IAstType.FromName ("string"), Value = _str };
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			ExpectType = DataType;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) { }
 
-		public override string GuessType () => DataType;
+		public override IAstType GuessType () => DataType;
 
 		public override (string, string) GenerateCSharp (int _indent) {
-			if (DataType == "string") {
+			if (DataType is AstType_String) {
 				var _sb = new StringBuilder ();
 				foreach (var _ch in Value) {
 					if (sTransReverse.ContainsKey (_ch)) {

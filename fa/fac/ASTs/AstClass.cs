@@ -92,7 +92,7 @@ namespace fac.ASTs {
 			foreach (var _var in ClassVars) {
 				Info.CurrentFunc = null;
 				if (_var.DefaultValue != null)
-					_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType.TypeStr);
+					_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType);
 			}
 			foreach (var _func in ClassFuncs) {
 				Info.CurrentFunc = _func;

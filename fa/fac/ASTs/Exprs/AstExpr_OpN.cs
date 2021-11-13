@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs.Names;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace fac.ASTs.Exprs {
 				Arguments[i] = _cb (Arguments[i], _deep, _group);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				var _func_args = _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].Arguments;
 				if (_funcexpr.ThisObject != null)
@@ -27,29 +28,32 @@ namespace fac.ASTs.Exprs {
 				if (_func_args.Count != Arguments.Count)
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
 				for (int i = 0; i < _func_args.Count; ++i)
-					Arguments[i] = Arguments[i].TraversalCalcType (_func_args[i]._type.TypeStr);
+					Arguments[i] = Arguments[i].TraversalCalcType (_func_args[i]._type);
 				if (_funcexpr.ThisObject != null)
 					Arguments.RemoveAt (0);
 				ExpectType = _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;
 				return AstExprTypeCast.Make (this, _expect_type);
 			} else {
 				Value = Value.TraversalCalcType (_expect_type);
-				var (_ret_type, _arg_type) = TypeFuncs.ParseFuncType (Token, Value.ExpectType);
-				if (_arg_type.Count != Arguments.Count)
+				var _func_type_tmp = Value.ExpectType as AstType_Func;
+				if (_func_type_tmp.ArgumentTypes.Count != Arguments.Count)
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
-				for (int i = 0; i < _arg_type.Count; ++i)
-					Arguments[i] = Arguments[i].TraversalCalcType (_arg_type[i]);
-				ExpectType = _ret_type;
+				//var (_ret_type, _arg_type) = TypeFuncs.ParseFuncType (Token, Value.ExpectType);
+				//if (_arg_type.Count != Arguments.Count)
+				//	throw new CodeException (Token, "函数调用传入的参数数量不匹配");
+				for (int i = 0; i < _func_type_tmp.ArgumentTypes.Count; ++i)
+					Arguments[i] = Arguments[i].TraversalCalcType (_func_type_tmp.ArgumentTypes[i]);
+				ExpectType = _func_type_tmp.ReturnType;
 				return AstExprTypeCast.Make (this, _expect_type);
 			}
 		}
 
-		public override string GuessType () {
+		public override IAstType GuessType () {
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				return _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;
 			} else {
-				string _type = Value.GuessType ();
-				return TypeFuncs.ParseFuncType (Token, _type)._ret_type;
+				var _type = Value.GuessType () as AstType_Func;
+				return _type.ReturnType;
 			}
 		}
 

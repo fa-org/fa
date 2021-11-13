@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -18,17 +19,17 @@ namespace fac.ASTs.Exprs {
 				Values [i] = _cb (Values[i], _deep, _group);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if ((from p in Operators where !sComare.Contains (p) select p).Any ())
 				throw new UnimplException (Values[0].Token);
-			string _item_type = TypeFuncs.GetCompatibleType ((from p in Values select p.GuessType ()).ToArray ());
+			var _item_type = TypeFuncs.GetCompatibleType ((from p in Values select p.GuessType ()).ToArray ());
 			for (int i = 0; i < Values.Count; ++i)
 				Values[i] = Values[i].TraversalCalcType (_item_type);
-			ExpectType = "bool";
+			ExpectType = IAstType.FromName ("bool");
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => "bool";
+		public override IAstType GuessType () => IAstType.FromName ("bool");
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();

@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -19,57 +20,56 @@ namespace fac.ASTs.Exprs {
 			Value2 = _cb (Value2, _deep, _group);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
-			string _exp1 = "", _exp2 = "";
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			IAstType _exp1 = null, _exp2 = null;
 			if (sCompareOp2s.Contains (Operator)) {
-				// unknown
-				ExpectType = "bool";
+				ExpectType = IAstType.FromName ("bool");
 			} else if (sLogicOp2s.Contains (Operator)) {
-				_exp1 = _exp2 = "bool";
-				ExpectType = "bool";
+				_exp1 = _exp2 = IAstType.FromName ("bool");
+				ExpectType = IAstType.FromName ("bool");
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
-				if (_expect_type != "")
+				if (_expect_type != null)
 					_exp1 = _exp2 = _expect_type;
 			} else if (sQusQusOp2s.Contains (Operator)) {
-				if (_expect_type != "") {
-					_exp1 = _expect_type[^1] == '?' ? _expect_type : $"{_expect_type}?";
+				if (_expect_type != null) {
+					_exp1 = _expect_type is AstType_OptionalWrap ? _expect_type : new AstType_OptionalWrap { Token = Token, TypeStr = $"{_expect_type.TypeStr}?", ItemType = _expect_type };
 					_exp2 = _expect_type;
 				}
 			} else {
 				throw new UnimplException (Token);
 			}
 
-			if (_exp1 == "" || _exp2 == "") {
+			if (_exp1 == null || _exp2 == null) {
 				_exp1 = Value1.GuessType ();
 				_exp2 = Value1.GuessType ();
 				if (sQusQusOp2s.Contains (Operator)) {
-					if (_exp1[^1] != '?')
+					if (_exp1 is not AstType_OptionalWrap)
 						throw new CodeException (Token, "不可空的值类型无法使用 ?? 运算符");
 					ExpectType = TypeFuncs.GetCompatibleType (_exp1, _exp2);
-					if (_exp2[^1] != '?' && ExpectType[^1] == '?')
-						ExpectType = ExpectType[..^1];
+					if (_exp2 is not AstType_OptionalWrap && ExpectType is AstType_OptionalWrap _exp_type_tmp)
+						ExpectType = _exp_type_tmp.ItemType;
 				} else {
 					_exp1 = _exp2 = TypeFuncs.GetCompatibleType (_exp1, _exp2);
-					if (ExpectType == "")
+					if (ExpectType == null)
 						ExpectType = _exp2;
 				}
 			}
 
 			Value1 = Value1.TraversalCalcType (_exp1);
 			Value2 = Value2.TraversalCalcType (_exp2);
-			if (ExpectType == "")
+			if (ExpectType == null)
 				ExpectType = TypeFuncs.GetCompatibleType (Value1.ExpectType, Value2.ExpectType);
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () {
+		public override IAstType GuessType () {
 			if (sCompareOp2s.Contains (Operator) || sLogicOp2s.Contains (Operator)) {
-				return "bool";
+				return IAstType.FromName ("bool");
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
 				bool _opt = Operator == "/";
 				var _type = TypeFuncs.GetCompatibleType (Value1.GuessType (), Value2.GuessType ());
 				if (_opt)
-					_type = _type[^1] == '?' ? _type : $"{_type}?";
+					_type = _type is AstType_OptionalWrap ? _type : new AstType_OptionalWrap { Token = Token, TypeStr = $"{_type.TypeStr}?", ItemType = _type };
 				return _type;
 			} else if (sQusQusOp2s.Contains (Operator)) {
 				return Value2.GuessType ();

@@ -1,4 +1,5 @@
-﻿using fac.Exceptions;
+﻿using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
 	class AstExpr_NewObject: IAstExpr {
-		public string DataType { get; set; }
+		public AstType_Class DataType { get; set; }
 		public List<(string _name, IAstExpr _value)> InitialValues { get; set; } = null; // 结构体初值，当有值时ConstructorArguments为空
 		public List<IAstExpr> ConstructorArguments { get; set; } = null;                 // 构造函数参数，当有值时InitialValues为空
 
@@ -20,44 +21,38 @@ namespace fac.ASTs.Exprs {
 				ConstructorArguments[i] = _cb (ConstructorArguments[i], _deep, _group);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
-			if (DataType == "") {
-				if (_expect_type == "")
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			if (DataType == null) {
+				if (_expect_type == null || _expect_type is not AstType_Class)
 					throw new CodeException (Token, "无法猜测对象类型");
-				DataType = _expect_type;
+				DataType = _expect_type as AstType_Class;
 			}
 			ExpectType = DataType;
 			if (InitialValues != null) {
-				var _classes = Info.GetClassFromName (DataType);
-				if (_classes.Count == 0) {
-					throw new CodeException (Token, $"未定义的标识符 {DataType}");
-				} else if (_classes.Count == 1) {
-					var _default_init_vals = new List<(string _name, IAstExpr _value)> ();
-					foreach (var _vars in _classes[0].ClassVars) {
-						int i = 0;
-						for (; i < InitialValues.Count; ++i) {
-							if (InitialValues[i]._name != _vars.Name)
-								continue;
-							InitialValues[i] = (_name: _vars.Name, _value: InitialValues[i]._value.TraversalCalcType (_vars.DataType.TypeStr));
-							break;
-						}
-						if (i == InitialValues.Count) {
-							if (_vars.DefaultValue == null)
-								throw new CodeException (Token, $"未指定成员变量 {_vars.Name} 的初始值");
-							_default_init_vals.Add ((_name: _vars.Name, _value: _vars.DefaultValue.TraversalCalcType (_vars.DataType.TypeStr)));
-						}
+				var _default_init_vals = new List<(string _name, IAstExpr _value)> ();
+				foreach (var _vars in DataType.Class.ClassVars) {
+					int i = 0;
+					for (; i < InitialValues.Count; ++i) {
+						if (InitialValues[i]._name != _vars.Name)
+							continue;
+						InitialValues[i] = (_name: _vars.Name, _value: InitialValues[i]._value.TraversalCalcType (_vars.DataType));
+						break;
 					}
-					InitialValues.AddRange (_default_init_vals);
-				} else {
-					throw new CodeException (Token, $"不明确的符号 {DataType}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
+					if (i == InitialValues.Count) {
+						if (_vars.DefaultValue == null)
+							throw new CodeException (Token, $"未指定成员变量 {_vars.Name} 的初始值");
+						_default_init_vals.Add ((_name: _vars.Name, _value: _vars.DefaultValue.TraversalCalcType (_vars.DataType)));
+					}
 				}
+				InitialValues.AddRange (_default_init_vals);
 			} else {
 				// TODO 检查构造函数参数
+				throw new UnimplException (Token);
 			}
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override string GuessType () => DataType;
+		public override IAstType GuessType () => DataType;
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
