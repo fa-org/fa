@@ -30,7 +30,7 @@ namespace fac.ASTs.Exprs.Names {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override IAstExpr GuessType () {
+		public override IAstType GuessType () {
 			if (ExpectType == null)
 				ExpectType = NameType != "" ? IAstType.FromName (NameType) : null;
 			return ExpectType;

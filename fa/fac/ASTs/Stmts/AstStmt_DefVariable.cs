@@ -18,16 +18,17 @@ namespace fac.ASTs.Stmts {
 			Expr = _cb (Expr, _deep, _group);
 		}
 
-		public override IAstExpr TraversalCalcType (string _expect_type) {
-			if (_expect_type != "")
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			Expr = Expr.TraversalCalcType (DataType.TypeStr);
+			Expr = Expr.TraversalCalcType (DataType);
 			return this;
 		}
 
 		public override (string, string) GenerateCSharp (int _indent) {
-			var (_a, _b) = Expr.GenerateCSharp (_indent);
-			return ("", $"{_a}{_indent.Indent ()}{DataType.GenerateCSharp (_indent)} {VarName} = {_b};\n");
+			var (_a, _b) = DataType.GenerateCSharp (_indent);
+			var (_c, _d) = Expr.GenerateCSharp (_indent);
+			return ($"{_a}{_c}", $"{_indent.Indent ()}{_b} {VarName} = {_d};\n");
 		}
 	}
 }

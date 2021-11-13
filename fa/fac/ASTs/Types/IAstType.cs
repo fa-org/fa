@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
 	abstract class IAstType: IAstExpr {
-		public string TypeStr { init; get; }
+		//public string TypeStr { init; get; }
 
 
 
@@ -20,7 +20,7 @@ namespace fac.ASTs.Types {
 			return this;
 		}
 
-		public override string GuessType () => TypeStr;
+		public override IAstType GuessType () => throw new NotImplementedException ();
 
 		public override bool AllowAssign () => false;
 
@@ -41,15 +41,14 @@ namespace fac.ASTs.Types {
 						_ret = _inttype;
 					//
 					if (_type_str == "string")
-						_ret = new AstType_String { Token = _ctx.Start, TypeStr = _type_str };
+						_ret = new AstType_String { Token = _ctx.Start };
 					//
 					if (_type_str == "void")
-						_ret = new AstType_Void { Token = _ctx.Start, TypeStr = _type_str };
+						_ret = new AstType_Void { Token = _ctx.Start };
 				}
 				var _classes = Info.GetClassFromName (_type_str);
 				if (_classes.Count == 1) {
-					_type_str = _templates1.Any () ? $"{_classes[0].FullName}<{string.Join (", ", from p in _templates1 select p.TypeStr)}>" : _classes[0].FullName;
-					_ret = new AstType_Template { Token = _ctx.Start, TypeStr = _type_str, Class = _classes[0], TemplateTypes = _templates1 };
+					_ret = new AstType_Class { Token = _ctx.Start, Class = _classes[0], TemplateTypes = _templates1 };
 				} else if (_classes.Count > 1) {
 					throw new CodeException (_ctx.Start, $"不明确的符号 {_type_str}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
 				}
@@ -57,16 +56,16 @@ namespace fac.ASTs.Types {
 					throw new CodeException (_ctx.Start, $"无法识别的类型 {_type_str}");
 			} else if (_ctx.typeMulti () != null) {
 				var _tuple_types = FromContexts (_ctx.typeMulti ().typeVar ());
-				_ret = new AstType_Tuple { Token = _ctx.Start, TypeStr = $"({string.Join (", ", from p in _tuple_types select $"{p._type.TypeStr} {p._name}")})", TupleTypes = _tuple_types };
+				_ret = new AstType_Tuple { Token = _ctx.Start, TupleTypes = _tuple_types };
 			} else {
 				throw new UnimplException (_ctx.Start);
 			}
 			foreach (var _after_ctx in _ctx.typeAfter ()) {
 				string _after = _after_ctx.GetText ();
 				if (_after == "[]") {
-					_ret = new AstType_ArrayWrap { Token = _after_ctx.Start, TypeStr = $"{_ret.TypeStr}{_after}", ItemType = _ret };
+					_ret = new AstType_ArrayWrap { Token = _after_ctx.Start, ItemType = _ret };
 				} else if (_after == "?") {
-					_ret = new AstType_OptionalWrap { Token = _after_ctx.Start, TypeStr = $"{_ret.TypeStr}{_after}", ItemType = _ret };
+					_ret = new AstType_OptionalWrap { Token = _after_ctx.Start, ItemType = _ret };
 				} else {
 					throw new UnimplException (_after_ctx.Start);
 				}
@@ -124,7 +123,7 @@ namespace fac.ASTs.Types {
 			//	var _classes = Info.GetClassFromName (_name);
 			//	if (_classes.Count == 1) {
 			//		_name = _templates1.Any () ? $"{_classes[0].FullName}<{string.Join (", ", from p in _templates1 select p.TypeStr)}>" : _classes[0].FullName;
-			//		_ret = new AstType_Template { Token = null, TypeStr = _name, Class = _classes[0], TemplateTypes = _templates1 };
+			//		_ret = new AstType_Class { Token = null, TypeStr = _name, Class = _classes[0], TemplateTypes = _templates1 };
 			//	} else if (_classes.Count > 1) {
 			//		throw new CodeException ((IToken) null, $"不明确的符号 {_name}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
 			//	}

@@ -13,7 +13,7 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) => AstExprTypeCast.Make (this, _expect_type);
 
-		public override IAstType GuessType () => new AstType_Class { Token = Token, TypeStr = Class.FullName, Class = Class };
+		public override IAstType GuessType () => new AstType_Class { Token = Token, Class = Class };
 
 		public override (string, string) GenerateCSharp (int _indent) => ("", "this");
 

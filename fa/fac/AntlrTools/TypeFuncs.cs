@@ -23,9 +23,17 @@ namespace fac.AntlrTools {
 		}
 
 		public static bool AllowTypeCast (IAstType _src, IAstType _dest) {
-			if (_src == null || _dest == null || _src.TypeStr == _dest.TypeStr)
+			if (_src == null || _dest == null /*|| _src.TypeStr == _dest.TypeStr*/) {
 				return true;
-			return false;
+			} else {
+				string _src_str = _src.GenerateCSharp (0).Item2, _dest_str = _dest.GenerateCSharp (0).Item2;
+				if (_src_str == _dest_str)
+					return true;
+				if (_dest is AstType_OptionalWrap _op1)
+					_dest = _op1.ItemType;
+				_dest_str = _dest.GenerateCSharp (0).Item2;
+				return (_src_str == _dest_str);
+			}
 		}
 	}
 }

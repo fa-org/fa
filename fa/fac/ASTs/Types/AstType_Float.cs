@@ -15,7 +15,7 @@ namespace fac.ASTs.Types {
 		public static AstType_Float FromType (string _type_str, IToken _token) {
 			if (!sTypeNames.Contains (_type_str))
 				return null;
-			var _floattype = new AstType_Float { Token = _token, TypeStr = _type_str };
+			var _floattype = new AstType_Float { Token = _token };
 			_floattype.BitWidth = int.Parse (_type_str.Replace ("float", ""));
 			return _floattype;
 		}

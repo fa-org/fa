@@ -25,7 +25,7 @@ namespace fac.ASTs {
 			//
 			Static = _ctx.Static () != null;
 			//
-			DataType = IAstType.FromTypeStr (_ctx.type ().GetText (), _ctx.type ().Start);
+			DataType = IAstType.FromContext (_ctx.type ());
 			//
 			Name = _ctx.Id ().GetText ();
 			//

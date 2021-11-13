@@ -31,12 +31,12 @@ namespace fac {
 
 		public static void TraversalCalcType (this List<IAstExpr> _exprs) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i)
-				_exprs[i] = _exprs[i].TraversalCalcType ("");
+				_exprs[i] = _exprs[i].TraversalCalcType (null);
 		}
 
 		public static void TraversalCalcType (this List<IAstStmt> _stmts) {
 			for (int i = 0; i < (_stmts?.Count ?? 0); ++i)
-				_stmts[i] = _stmts[i].TraversalCalcType ("") as IAstStmt;
+				_stmts[i] = _stmts[i].TraversalCalcType (null) as IAstStmt;
 		}
 
 		public static void AppendExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {

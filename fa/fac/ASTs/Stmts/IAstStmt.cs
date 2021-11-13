@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	abstract class IAstStmt: IAstExpr {
-		public override string GuessType () => "";
+		public override IAstType GuessType () => throw new NotImplementedException ();
 
 		public static IAstStmt FromExpr (FaParser.ExprContext _ctx, bool _return) {
 			if (_return) {

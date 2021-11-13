@@ -20,7 +20,7 @@ namespace fac.ASTs {
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
 
 		public AstType_Func FuncType {
-			get => new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList (), TypeStr = $"" };
+			get => new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList () };
 		}
 
 
@@ -77,7 +77,8 @@ namespace fac.ASTs {
 
 		public override (string, string) GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
-			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {ReturnType} {Name} (");
+			var (_a, _b) = ReturnType.GenerateCSharp (_indent);
+			_sb.Append ($"{_a}{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {_b} {Name} (");
 			foreach (var _arg in Arguments)
 				_sb.Append ($"{_arg._type} {_arg._name}, ");
 			if (Arguments.Any ())

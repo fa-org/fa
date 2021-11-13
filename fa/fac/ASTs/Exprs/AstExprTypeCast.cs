@@ -37,8 +37,9 @@ namespace fac.ASTs.Exprs {
 		public override IAstType GuessType () => Value.GuessType ();
 
 		public override (string, string) GenerateCSharp (int _indent) {
-			var (_a, _b) = Value.GenerateCSharp (_indent);
-			return (_a, $"({ExpectType}) {_b}");
+			var (_a, _b) = ExpectType.GenerateCSharp (_indent);
+			var (_c, _d) = Value.GenerateCSharp (_indent);
+			return ($"{_a}{_c}", $"({_b}) {_d}");
 		}
 
 		public override bool AllowAssign () => false;

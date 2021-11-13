@@ -28,11 +28,24 @@ namespace fac.ASTs.Exprs {
 				_exp1 = _exp2 = IAstType.FromName ("bool");
 				ExpectType = IAstType.FromName ("bool");
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
+				if (Operator == "/") {
+					if (_expect_type is AstType_OptionalWrap _oexpect) {
+						TODO;
+					} else {
+						if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap _oreturn) {
+							TODO;
+						} else {
+							throw new CodeException (Token, $"除法计算结果为可空，或者函数返回值为可空");
+						}
+					}
+					//if (Info.CurrentFunc.ReturnType is not AstType_OptionalWrap && _expect_type is not AstType_OptionalWrap)
+					//	throw new CodeException (Token, $"");
+				}
 				if (_expect_type != null)
 					_exp1 = _exp2 = _expect_type;
 			} else if (sQusQusOp2s.Contains (Operator)) {
 				if (_expect_type != null) {
-					_exp1 = _expect_type is AstType_OptionalWrap ? _expect_type : new AstType_OptionalWrap { Token = Token, TypeStr = $"{_expect_type.TypeStr}?", ItemType = _expect_type };
+					_exp1 = _expect_type is AstType_OptionalWrap ? _expect_type : new AstType_OptionalWrap { Token = Token, ItemType = _expect_type };
 					_exp2 = _expect_type;
 				}
 			} else {
@@ -66,11 +79,15 @@ namespace fac.ASTs.Exprs {
 			if (sCompareOp2s.Contains (Operator) || sLogicOp2s.Contains (Operator)) {
 				return IAstType.FromName ("bool");
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
-				bool _opt = Operator == "/";
+				bool _opt = Operator == "/" && Info.CurrentFunc.ReturnType is not AstType_OptionalWrap;
 				var _type = TypeFuncs.GetCompatibleType (Value1.GuessType (), Value2.GuessType ());
 				if (_opt)
-					_type = _type is AstType_OptionalWrap ? _type : new AstType_OptionalWrap { Token = Token, TypeStr = $"{_type.TypeStr}?", ItemType = _type };
+					_type = _type is AstType_OptionalWrap ? _type : new AstType_OptionalWrap { Token = Token, ItemType = _type };
 				return _type;
+				// 除法，返回不为空，那么猜测类型为    可空
+				// 除法，返回为空，那么猜测类型为    不可空
+				// 非除法，返回不为空，那么猜测类型为    不可空
+				// 非除法，返回为空，那么猜测类型为    不可空
 			} else if (sQusQusOp2s.Contains (Operator)) {
 				return Value2.GuessType ();
 			} else {

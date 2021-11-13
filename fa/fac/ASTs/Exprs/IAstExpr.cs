@@ -176,7 +176,7 @@ namespace fac.ASTs.Exprs {
 				} else {
 					throw new UnimplException (_ctx);
 				}
-				return new AstExpr_BaseValue { Token = _ctx.Start, DataType = _type, Value = _value };
+				return new AstExpr_BaseValue { Token = _ctx.Start, DataType = IAstType.FromName (_type), Value = _value };
 			} else if (_ctx.ifExpr () != null) {
 				var _exprs = (from p in _ctx.ifExpr ().expr () select FromContext (p)).ToList ();
 				var _branches = (from p in _ctx.ifExpr ().quotStmtExpr () select (IAstStmt.FromStmts (p.stmt ()), FromContext (p.expr ()))).ToList ();
@@ -196,18 +196,18 @@ namespace fac.ASTs.Exprs {
 				return FromContext (_ctx.quotExpr ().expr ());
 			} else if (_ctx.newExpr1 () != null) {
 				var _expr = new AstExpr_NewObject { Token = _ctx.Start };
-				_expr.DataType = _ctx.newExpr1 ().ids ().GetText ();
+				_expr.DataType = IAstType.FromName (_ctx.newExpr1 ().ids ().GetText ()) as AstType_Class;
 				_expr.InitialValues = (from p in _ctx.newExpr1 ().newExprItem () select (_name: p.Id ().GetText (), _value: FromContext (p.middleExpr ()))).ToList ();
 				return _expr;
 			} else if (_ctx.newExpr2 () != null) {
 				var _expr = new AstExpr_NewObject { Token = _ctx.Start };
-				_expr.DataType = _ctx.newExpr1 ().ids ().GetText ();
+				_expr.DataType = IAstType.FromName (_ctx.newExpr1 ().ids ().GetText ()) as AstType_Class;
 				_expr.ConstructorArguments = (from p in _ctx.newExpr2 ().expr () select FromContext (p)).ToList ();
 				return _expr;
 			} else if (_ctx.newArray () != null) {
 				var _expr = new AstExpr_Array { Token = _ctx.Start };
 				if (_ctx.newArray ().ids () != null)
-					_expr.ItemDataType = _ctx.newArray ().ids ().GetText ();
+					_expr.ItemDataType = IAstType.FromName (_ctx.newArray ().ids ().GetText ());
 				_expr.InitValues = new List<IAstExpr> ();
 				_expr.InitCount = FromContext (_ctx.newArray ().middleExpr ());
 				return _expr;
@@ -216,7 +216,7 @@ namespace fac.ASTs.Exprs {
 			} else if (_ctx.arrayExpr2 () != null) {
 				var _expr = new AstExpr_Array { Token = _ctx.Start };
 				if (_ctx.newArray ().ids () != null)
-					_expr.ItemDataType = _ctx.newArray ().ids ().GetText ();
+					_expr.ItemDataType = IAstType.FromName (_ctx.newArray ().ids ().GetText ());
 				_expr.InitValues = (from p in _ctx.arrayExpr2 ().expr () select FromContext (p)).ToList ();
 				_expr.InitCount = FromValue ("int32", $"{_expr.InitValues.Count}");
 				return _expr;
@@ -225,6 +225,6 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public static IAstExpr FromValue (string _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value };
+		public static IAstExpr FromValue (string _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName (_data_type), Value = _value };
 	}
 }

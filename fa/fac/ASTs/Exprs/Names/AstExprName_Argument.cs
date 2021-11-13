@@ -19,7 +19,7 @@ namespace fac.ASTs.Exprs.Names {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override IAstExpr GuessType () => Func.Arguments[ArgumentIndex]._type;
+		public override IAstType GuessType () => Func.Arguments[ArgumentIndex]._type;
 
 		public override (string, string) GenerateCSharp (int _indent) => ("", Func.Arguments[ArgumentIndex]._name);
 

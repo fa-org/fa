@@ -36,15 +36,15 @@ namespace fac.ASTs.Exprs {
 			InitCount = InitCount.TraversalCalcType (IAstType.FromName ("int"));
 			for (int i = 0; i < InitValues.Count; ++i)
 				InitValues[i] = InitValues[i].TraversalCalcType (ItemDataType);
-			ExpectType = new AstType_ArrayWrap { Token = Token, TypeStr = $"{ItemDataType}[]", ItemType = ItemDataType };
+			ExpectType = new AstType_ArrayWrap { Token = Token, ItemType = ItemDataType };
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
 		public override IAstType GuessType () {
 			if (ItemDataType != null)
-				return new AstType_ArrayWrap { Token = Token, TypeStr = $"{ItemDataType}[]", ItemType = ItemDataType };
+				return new AstType_ArrayWrap { Token = Token, ItemType = ItemDataType };
 			var _item_type = TypeFuncs.GetCompatibleType ((from p in InitValues select p.GuessType ()).ToArray ());
-			return new AstType_ArrayWrap { Token = Token, TypeStr = $"{_item_type.TypeStr}[]", ItemType = _item_type };
+			return new AstType_ArrayWrap { Token = Token, ItemType = _item_type };
 		}
 
 		public override (string, string) GenerateCSharp (int _indent) {

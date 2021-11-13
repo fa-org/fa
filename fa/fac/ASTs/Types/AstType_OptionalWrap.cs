@@ -10,6 +10,9 @@ namespace fac.ASTs.Types {
 
 
 
-		public override (string, string) GenerateCSharp (int _indent) => ("", $"fa.Optional<{ItemType.GenerateCSharp (_indent)}>");
+		public override (string, string) GenerateCSharp (int _indent) {
+			var (_str1, _str2) = ItemType.GenerateCSharp (_indent);
+			return (_str1, $"fa.Optional<{_str2}>");
+		}
 	}
 }

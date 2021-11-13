@@ -17,7 +17,7 @@ namespace fac.ASTs.Types {
 			if (!sTypeNames.Contains (_type_str))
 				return null;
 			_type_str = sTypeMap.ContainsKey (_type_str) ? sTypeMap[_type_str] : _type_str;
-			var _inttype = new AstType_Integer { Token = _token, TypeStr = _type_str };
+			var _inttype = new AstType_Integer { Token = _token };
 			_inttype.IsSign = _type_str[0] != 'u';
 			_inttype.BitWidth = int.Parse (_type_str.Replace ("u", "").Replace ("int", ""));
 			return _inttype;
