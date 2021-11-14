@@ -75,9 +75,9 @@ namespace fac.ASTs {
 			}
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
 			var _sb = new StringBuilder ();
-			var (_a, _b) = ReturnType.GenerateCSharp (_indent);
+			var (_a, _b) = ReturnType.GenerateCSharp (_indent, "");
 			_sb.Append ($"{_a}{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {_b} {Name} (");
 			foreach (var _arg in Arguments)
 				_sb.Append ($"{_arg._type} {_arg._name}, ");

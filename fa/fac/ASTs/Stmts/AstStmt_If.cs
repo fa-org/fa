@@ -29,9 +29,9 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
 			var _sb = new StringBuilder ();
-			var (_a, _b) = Condition.GenerateCSharp (_indent);
+			var (_a, _b) = Condition.GenerateCSharp (_indent, "");
 			_sb.AppendLine ($"{_a}{_indent.Indent ()}if ({_b}) {{");
 			_sb.AppendStmts (IfTrueCodes, _indent + 1);
 			if (IfFalseCodes.Any ()) {

@@ -20,15 +20,25 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			if (Expr != null)
-				Expr = Expr.TraversalCalcType (Info.CurrentFunc.ReturnType);
+			if (Expr != null) {
+				if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap _otype) {
+					try {
+						Expr = Expr.TraversalCalcType (_otype.ItemType);
+						Expr = AstExprTypeCast.Make (Expr, _otype);
+					} catch (Exception) {
+						Expr = Expr.TraversalCalcType (_otype);
+					}
+				} else {
+					Expr = Expr.TraversalCalcType (Info.CurrentFunc.ReturnType);
+				}
+			}
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
 			var _sb = new StringBuilder ();
 			if (Expr != null) {
-				var (_a, _b) = Expr.GenerateCSharp (_indent);
+				var (_a, _b) = Expr.GenerateCSharp (_indent, "");
 				_sb.AppendLine ($"{_indent.Indent ()}{_a}{_indent.Indent ()}return {_b};");
 			} else {
 				_sb.AppendLine ($"{_indent.Indent ()}return;");

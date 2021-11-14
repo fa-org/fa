@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
 	class AstType_Void: IAstType {
-		public override (string, string) GenerateCSharp (int _indent) => ("", "void");
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) => ("", "void");
 	}
 }

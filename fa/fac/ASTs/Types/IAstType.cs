@@ -155,5 +155,9 @@ namespace fac.ASTs.Types {
 			}
 			return _list;
 		}
+
+		public bool IsSame (IAstType _other) {
+
+		}
 	}
 }

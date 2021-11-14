@@ -11,11 +11,11 @@ namespace fac.ASTs.Types {
 
 
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
 			if ((TemplateTypes?.Count ?? 0) == 0) {
 				return ("", $"{Class.FullName}");
 			} else {
-				return ("", $"{Class.FullName}<{string.Join (", ", (from p in TemplateTypes select p.GenerateCSharp (_indent).Item2))}>");
+				return ("", $"{Class.FullName}<{string.Join (", ", (from p in TemplateTypes select p.GenerateCSharp (_indent, _cache_error_varname).Item2))}>");
 			}
 		}
 	}

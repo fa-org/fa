@@ -23,7 +23,7 @@ namespace fac.ASTs.Types {
 			return _inttype;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) => ("", (IsSign, BitWidth) switch {
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) => ("", (IsSign, BitWidth) switch {
 			(true, 8) => "sbyte", (false, 8) => "byte",
 			(true, 16) => "short", (false, 16) => "ushort",
 			(true, 32) => "int", (false, 32) => "uint",

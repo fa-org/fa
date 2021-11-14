@@ -26,7 +26,15 @@ namespace fac.ASTs.Stmts {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			Initialize = Initialize.TraversalCalcType (null) as IAstStmt;
-			Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
+			if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap) {
+				try {
+					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
+				} catch (Exception) {
+					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool?"));
+				}
+			} else {
+				Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
+			}
 			Increment.TraversalCalcType ();
 			BodyCodes.TraversalCalcType ();
 			return this;
@@ -38,13 +46,17 @@ namespace fac.ASTs.Stmts {
 			var (_a, _b) = Initialize.GenerateCSharp (_indent + 1);
 			_sb.Append ($"{_a}{_b}");
 			(_a, _b) = Condition.GenerateCSharp (_indent + 1);
-			if (_a != "")
-				_sb.Append ($"{(_indent + 1).Indent ()}{_a}");
-			_sb.AppendLine ($"{(_indent + 1).Indent ()}while ({_b}) {{");
+			if (Condition.ExpectType is AstType_OptionalWrap) {
+				_sb.AppendLine ($"{_a}{(_indent + 1).Indent ()}if (!{_b}.HasValue ())");
+				_sb.AppendLine ($"{(_indent + 2).Indent ()}return {Info.CurrentFunc.ReturnType.GenerateCSharp (0)}.FromError (_b.GetError ());");
+				_sb.AppendLine ($"{(_indent + 1).Indent ()}while ({_b}.GetValue ()) {{");
+			} else {
+				_sb.AppendLine ($"{_a}{(_indent + 1).Indent ()}while ({_b}) {{");
+			}
 			_sb.AppendStmts (BodyCodes, _indent + 2);
 			_sb.AppendExprs (Increment, _indent + 2);
 			if (_a != "")
-				_sb.Append ($"{(_indent + 2).Indent ()}{_a}");
+				_sb.Append (_a);
 			//
 			_sb.AppendLine ($"{(_indent + 1).Indent ()}}}");
 			_sb.AppendLine ($"{_indent.Indent ()}}}");

@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
 	class AstType_String: IAstType {
-		public override (string, string) GenerateCSharp (int _indent) => ("", "string");
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) => ("", "string");
 	}
 }

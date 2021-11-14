@@ -28,21 +28,7 @@ namespace fac.ASTs.Exprs {
 				_exp1 = _exp2 = IAstType.FromName ("bool");
 				ExpectType = IAstType.FromName ("bool");
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
-				if (Operator == "/") {
-					if (_expect_type is AstType_OptionalWrap _oexpect) {
-						TODO;
-					} else {
-						if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap _oreturn) {
-							TODO;
-						} else {
-							throw new CodeException (Token, $"除法计算结果为可空，或者函数返回值为可空");
-						}
-					}
-					//if (Info.CurrentFunc.ReturnType is not AstType_OptionalWrap && _expect_type is not AstType_OptionalWrap)
-					//	throw new CodeException (Token, $"");
-				}
-				if (_expect_type != null)
-					_exp1 = _exp2 = _expect_type;
+				_exp1 = _exp2 = _expect_type;
 			} else if (sQusQusOp2s.Contains (Operator)) {
 				if (_expect_type != null) {
 					_exp1 = _expect_type is AstType_OptionalWrap ? _expect_type : new AstType_OptionalWrap { Token = Token, ItemType = _expect_type };

@@ -20,7 +20,7 @@ namespace fac.ASTs.Types {
 			return _floattype;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) => ("", BitWidth == 32 ? "float" : (BitWidth == 64 ? "double" : throw new UnimplException (Token)));
+		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) => ("", BitWidth == 32 ? "float" : (BitWidth == 64 ? "double" : throw new UnimplException (Token)));
 
 		private static HashSet<string> sTypeNames = new HashSet<string> { "float32", "float64" };
 	}
