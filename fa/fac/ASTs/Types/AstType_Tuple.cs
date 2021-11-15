@@ -10,8 +10,8 @@ namespace fac.ASTs.Types {
 
 
 
-		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
-			return ("", $"({string.Join (", ", from p in TupleTypes select p._type.GenerateCSharp (_indent, _cache_error_varname).Item2).ToList ()})");
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			return ("", $"({string.Join (", ", from p in TupleTypes select p._type.GenerateCSharp (_indent, _check_cb).Item2).ToList ()})");
 		}
 	}
 }

@@ -57,13 +57,13 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
-			var (_a, _b) = Value.GenerateCSharp (_indent);
+			var (_a, _b) = Value.GenerateCSharp (_indent, _check_cb);
 			_psb.Append (_a);
 			_sb.Append ($"{_b} {Operator[0]}");
 			foreach (var _arg in Arguments) {
-				(_a, _b) = _arg.GenerateCSharp (_indent);
+				(_a, _b) = _arg.GenerateCSharp (_indent, _check_cb);
 				_psb.Append (_a);
 				_sb.Append ($"{_b}, ");
 			}

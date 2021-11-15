@@ -1,5 +1,7 @@
-﻿using fac.ASTs.Exprs;
+﻿using fac.AntlrTools;
+using fac.ASTs.Exprs;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -42,18 +44,34 @@ namespace fac {
 		public static void AppendExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {
 			if (_exprs == null)
 				return;
-			foreach (var _code in _exprs) {
-				var (_a, _b) = _code.GenerateCSharp (_indent);
-				_sb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b};");
+			foreach (var _expr in _exprs) {
+				var _ec = new ExprChecker (null);
+				var (_a, _b) = _expr.GenerateCSharp (_indent, _ec.CheckFunc);
+				//_sb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b};");
+				_sb.Append (_a).Append (_ec.GenerateCSharp (_indent, _expr.Token)).AppendLine ($"{_indent.Indent ()}{_b};");
 			}
 		}
 
 		public static void AppendStmts (this StringBuilder _sb, List<IAstStmt> _stmts, int _indent) {
 			if (_stmts == null)
 				return;
-			foreach (var _code in _stmts) {
-				var (_a, _b) = _code.GenerateCSharp (_indent);
+			foreach (var _stmt in _stmts) {
+				var (_a, _b) = _stmt.GenerateCSharp (_indent, null);
 				_sb.Append (_a).Append (_b);
+			}
+		}
+
+		public static bool ResultMayOptional (this IAstExpr _expr) {
+			if (_expr is IAstType) {
+				return _expr is AstType_OptionalWrap;
+			} else {
+				if (_expr.ExpectType is AstType_OptionalWrap) {
+					return true;
+				} else if (_expr is AstExprTypeCast _castexpr) {
+					return _castexpr.Value.ResultMayOptional ();
+				} else {
+					return false;
+				}
 			}
 		}
 	}

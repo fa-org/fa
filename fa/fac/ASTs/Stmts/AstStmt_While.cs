@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Exprs;
+﻿using fac.AntlrTools;
+using fac.ASTs.Exprs;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -38,17 +39,18 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
-			var (_a, _b) = Condition.GenerateCSharp (IsDoWhile ? (_indent + 1) : _indent, "");
+			var _ec = new ExprChecker (null);
+			var (_a, _b) = Condition.GenerateCSharp (IsDoWhile ? (_indent + 1) : _indent, _ec.CheckFunc);
 			if (IsDoWhile) {
 				_sb.AppendLine ($"{_indent.Indent ()}do {{");
 			} else {
-				_sb.AppendLine ($"{_a}{_indent.Indent ()}while ({_b}) {{");
+				_sb.AppendLine ($"{_a}{_ec.GenerateCSharp (_indent, Condition.Token)}{_indent.Indent ()}while ({_b}) {{");
 			}
 			_sb.AppendStmts (Contents, _indent + 1);
 			if (IsDoWhile) {
-				_sb.AppendLine ($"{_a}{_indent.Indent ()}}} while ({_b});");
+				_sb.AppendLine ($"{_a}{_ec.GenerateCSharp (_indent + 1, Condition.Token)}{_indent.Indent ()}}} while ({_b});");
 			} else {
 				_sb.AppendLine ($"{_indent.Indent ()}}}");
 			}

@@ -36,7 +36,7 @@ namespace fac.ASTs.Exprs.Names {
 			return ExpectType;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) => ("", sName2Output_CSharp[Name]);
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => ("", sName2Output_CSharp[Name]);
 
 		public override bool AllowAssign () => false;
 

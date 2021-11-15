@@ -43,16 +43,16 @@ namespace fac.ASTs.Exprs {
 		public override IAstType GuessType () {
 			if (ItemDataType != null)
 				return new AstType_ArrayWrap { Token = Token, ItemType = ItemDataType };
-			var _item_type = TypeFuncs.GetCompatibleType ((from p in InitValues select p.GuessType ()).ToArray ());
+			var _item_type = TypeFuncs.GetCompatibleType (true, (from p in InitValues select p.GuessType ()).ToArray ());
 			return new AstType_ArrayWrap { Token = Token, ItemType = _item_type };
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _psb = new StringBuilder ();
 			var _tmp_var_name = Common.GetTempId ();
 			_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{ItemDataType}> ();");
 			foreach (var _init_val in InitValues) {
-				var (_a, _b) = _init_val.GenerateCSharp (_indent);
+				var (_a, _b) = _init_val.GenerateCSharp (_indent, ItemDataType is AstType_OptionalWrap ? null : _check_cb);
 				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_tmp_var_name}.Add ({_b});");
 			}
 			return (_psb.ToString (), _tmp_var_name);

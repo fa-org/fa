@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Exprs;
+﻿using fac.AntlrTools;
+using fac.ASTs.Exprs;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -35,11 +36,12 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
 			if (Expr != null) {
-				var (_a, _b) = Expr.GenerateCSharp (_indent, "");
-				_sb.AppendLine ($"{_indent.Indent ()}{_a}{_indent.Indent ()}return {_b};");
+				var _ec = new ExprChecker (null);
+				var (_a, _b) = Expr.GenerateCSharp (_indent, _ec.CheckFunc);
+				_sb.AppendLine ($"{_a}{_ec.GenerateCSharp (_indent, Expr.Token)}{_indent.Indent ()}return {_b};");
 			} else {
 				_sb.AppendLine ($"{_indent.Indent ()}return;");
 			}

@@ -204,21 +204,19 @@ namespace fac.ASTs.Exprs {
 				_expr.DataType = IAstType.FromName (_ctx.newExpr1 ().ids ().GetText ()) as AstType_Class;
 				_expr.ConstructorArguments = (from p in _ctx.newExpr2 ().expr () select FromContext (p)).ToList ();
 				return _expr;
-			} else if (_ctx.newArray () != null) {
-				var _expr = new AstExpr_Array { Token = _ctx.Start };
-				if (_ctx.newArray ().ids () != null)
-					_expr.ItemDataType = IAstType.FromName (_ctx.newArray ().ids ().GetText ());
-				_expr.InitValues = new List<IAstExpr> ();
-				_expr.InitCount = FromContext (_ctx.newArray ().middleExpr ());
-				return _expr;
+			//} else if (_ctx.newArray () != null) {
+			//	var _expr = new AstExpr_Array { Token = _ctx.Start };
+			//	if (_ctx.newArray ().ids () != null)
+			//		_expr.ItemDataType = IAstType.FromName (_ctx.newArray ().ids ().GetText ());
+			//	_expr.InitValues = new List<IAstExpr> ();
+			//	_expr.InitCount = FromContext (_ctx.newArray ().middleExpr ());
+			//	return _expr;
 			} else if (_ctx.arrayExpr1 () != null) {
 				throw new UnimplException (_ctx);
 			} else if (_ctx.arrayExpr2 () != null) {
 				var _expr = new AstExpr_Array { Token = _ctx.Start };
-				if (_ctx.newArray ().ids () != null)
-					_expr.ItemDataType = IAstType.FromName (_ctx.newArray ().ids ().GetText ());
 				_expr.InitValues = (from p in _ctx.arrayExpr2 ().expr () select FromContext (p)).ToList ();
-				_expr.InitCount = FromValue ("int32", $"{_expr.InitValues.Count}");
+				_expr.InitCount = FromValue ("int", $"{_expr.InitValues.Count}");
 				return _expr;
 			} else {
 				throw new UnimplException (_ctx);

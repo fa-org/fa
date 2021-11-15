@@ -44,13 +44,15 @@ namespace fac.ASTs {
 			}
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, string _cache_error_varname) {
-			if (DefaultValue != null) {
-				var (_a, _b) = DefaultValue.GenerateCSharp (_indent, "");
-				return ("", $"{_a}{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name} = {_b};");
-			} else {
-				return ("", $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name};");
-			}
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			//if (DefaultValue != null) {
+			//	var (_a, _b) = DefaultValue.GenerateCSharp (_indent, "");
+			//	return ("", $"{_a}{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name} = {_b};");
+			//} else {
+			return ("", $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name};");
+			//}
 		}
+
+		//public static int n0 = new Func<int> (() => 1).Invoke ();
 	}
 }

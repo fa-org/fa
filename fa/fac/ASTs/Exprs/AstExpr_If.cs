@@ -40,13 +40,13 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstType GuessType () {
-			return TypeFuncs.GetCompatibleType (IfTrue.GuessType (), IfFalse.GuessType ());
+			return TypeFuncs.GetCompatibleType (true, IfTrue.GuessType (), IfFalse.GuessType ());
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
-			var (_a, _b) = Condition.GenerateCSharp (_indent);
-			var (_c, _d) = IfTrue.GenerateCSharp (_indent + 1);
-			var (_e, _f) = IfFalse.GenerateCSharp (_indent + 1);
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			var (_a, _b) = Condition.GenerateCSharp (_indent, _check_cb);
+			var (_c, _d) = IfTrue.GenerateCSharp (_indent + 1, _check_cb);
+			var (_e, _f) = IfFalse.GenerateCSharp (_indent + 1, _check_cb);
 			if (_a == "" && _c == "" && _e == "" && (IfTrueCodes?.Count ?? 0) == 0 && (IfFalseCodes?.Count ?? 0) == 0) {
 				return ("", $"(({_b}) ? ({_d}) : ({_f}))");
 			} else {

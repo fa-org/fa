@@ -54,13 +54,13 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => DataType;
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
 			_sb.Append ($"new {DataType} ");
 			if (InitialValues != null) {
 				_sb.Append ($"{{ ");
 				foreach (var _init in InitialValues) {
-					var (_a, _b) = _init._value.GenerateCSharp (_indent);
+					var (_a, _b) = _init._value.GenerateCSharp (_indent, _check_cb);
 					_psb.Append (_a);
 					_sb.Append ($"{_init._name} = {_b}, ");
 				}
@@ -70,7 +70,7 @@ namespace fac.ASTs.Exprs {
 			} else {
 				_sb.Append ($"(");
 				foreach (var _arg in ConstructorArguments) {
-					var (_a, _b) = _arg.GenerateCSharp (_indent);
+					var (_a, _b) = _arg.GenerateCSharp (_indent, _check_cb);
 					_psb.Append (_a);
 					_sb.Append ($"{_b}, ");
 				}

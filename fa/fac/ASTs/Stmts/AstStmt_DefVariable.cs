@@ -1,4 +1,6 @@
-﻿using fac.ASTs.Exprs;
+﻿using fac.AntlrTools;
+using fac.ASTs.Exprs;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -42,19 +44,14 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
-			var (_a, _b) = DataType.GenerateCSharp (_indent);
-			var (_c, _d) = Expr.GenerateCSharp (_indent);
-			if (Expr.ExpectType is AstType_OptionalWrap && DataType is not AstType_OptionalWrap) {
-				var _sb = new StringBuilder ();
-				var (_e, _f) = Info.CurrentFunc.ReturnType.GenerateCSharp (_indent);
-				_sb.Append (_a).Append (_c).Append (_e);
-				_sb.AppendLine ($"{_indent.Indent ()}if (!{_d}.HasValue ())");
-				_sb.AppendLine ($"{(_indent + 1).Indent ()}return {_f}.FromError ({_d}.GetError ());");
-				return (_sb.ToString (), $"{_indent.Indent ()}{_b} {VarName} = {_d}.GetValue ();\n");
-			} else {
-				return ($"{_a}{_c}", $"{_indent.Indent ()}{_b} {VarName} = {_d};\n");
-			}
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
+			var (_a, _b) = DataType.GenerateCSharp (_indent, null);
+			var _ec = new ExprChecker (DataType.ResultMayOptional () ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
+			var (_c, _d) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
+			_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_c).Append (_ec?.GenerateCSharp (_indent, Expr.Token) ?? "");
+			_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_d};");
+			return (_psb.ToString (), _sb.ToString ());
 		}
 	}
 }

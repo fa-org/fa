@@ -4,7 +4,7 @@ use fa;
 
 class Program {
 	public static int? test_div () {
-		int x = 5 / 0;
+		int x = 5 / 1;
 		return 12;
 	}
 

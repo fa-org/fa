@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Exprs;
+﻿using fac.AntlrTools;
+using fac.ASTs.Exprs;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -40,23 +41,18 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
+			var _ec = new ExprChecker (null);
 			_sb.AppendLine ($"{_indent.Indent ()}{{");
-			var (_a, _b) = Initialize.GenerateCSharp (_indent + 1);
-			_sb.Append ($"{_a}{_b}");
-			(_a, _b) = Condition.GenerateCSharp (_indent + 1);
-			if (Condition.ExpectType is AstType_OptionalWrap) {
-				_sb.AppendLine ($"{_a}{(_indent + 1).Indent ()}if (!{_b}.HasValue ())");
-				_sb.AppendLine ($"{(_indent + 2).Indent ()}return {Info.CurrentFunc.ReturnType.GenerateCSharp (0)}.FromError (_b.GetError ());");
-				_sb.AppendLine ($"{(_indent + 1).Indent ()}while ({_b}.GetValue ()) {{");
-			} else {
-				_sb.AppendLine ($"{_a}{(_indent + 1).Indent ()}while ({_b}) {{");
-			}
+			var (_a, _b) = Initialize.GenerateCSharp (_indent + 1, _ec.CheckFunc);
+			_sb.Append ($"{_a}{_ec.GenerateCSharp (_indent + 1, Initialize.Token)}{_b}");
+			_ec = new ExprChecker (null);
+			(_a, _b) = Condition.GenerateCSharp (_indent + 1, _ec.CheckFunc);
+			_sb.AppendLine ($"{_a}{_ec.GenerateCSharp (_indent + 1, Condition.Token)}{(_indent + 1).Indent ()}while ({_b}) {{");
 			_sb.AppendStmts (BodyCodes, _indent + 2);
 			_sb.AppendExprs (Increment, _indent + 2);
-			if (_a != "")
-				_sb.Append (_a);
+			_sb.Append ($"{_a}{_ec.GenerateCSharp (_indent + 2, Condition.Token)}");
 			//
 			_sb.AppendLine ($"{(_indent + 1).Indent ()}}}");
 			_sb.AppendLine ($"{_indent.Indent ()}}}");

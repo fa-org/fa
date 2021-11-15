@@ -32,9 +32,9 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => Class.ClassFuncs[FunctionIndex].FuncType;
 
-		public override (string, string) GenerateCSharp (int _indent) {
+		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			if (ThisObject != null) {
-				var (_a, _b) = ThisObject.GenerateCSharp (_indent);
+				var (_a, _b) = ThisObject.GenerateCSharp (_indent, _check_cb);
 				return (_a, $"{_b}.{Class.ClassFuncs[FunctionIndex].Name}");
 			} else {
 				return ("", $"{Class.FullName}.{Class.ClassFuncs[FunctionIndex].Name}");
