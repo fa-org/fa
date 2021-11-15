@@ -3,12 +3,14 @@ use fa;
 
 
 class Program {
-	public static int? test_div () {
-		int x = 5 / 1;
-		return 12;
-	}
+	//public static int? test_div () {
+	//	int x = 5 / 1;
+	//	return 12;
+	//}
 
 	public static void Main () {
-		int? n = test_div ();
+		//int? n = test_div ();
+		string s = "aaa {0} bbb".format (345);
+		Console.WriteLine (s);
 	}
 }
