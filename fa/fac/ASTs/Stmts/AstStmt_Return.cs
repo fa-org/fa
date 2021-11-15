@@ -36,16 +36,18 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
 			if (Expr != null) {
 				var _ec = new ExprChecker (null);
-				var (_a, _b) = Expr.GenerateCSharp (_indent, _ec.CheckFunc);
-				_sb.AppendLine ($"{_a}{_ec.GenerateCSharp (_indent, Expr.Token)}{_indent.Indent ()}return {_b};");
+				var (_a, _b, _c) = Expr.GenerateCSharp (_indent, _ec.CheckFunc);
+				var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Expr.Token);
+				_sb.AppendLine ($"{_a}{_d}{_indent.Indent ()}return {_b};");
+				return ("", _sb.ToString (), $"{_c}{_e}");
 			} else {
 				_sb.AppendLine ($"{_indent.Indent ()}return;");
+				return ("", _sb.ToString (), "");
 			}
-			return ("", _sb.ToString ());
 		}
 	}
 }

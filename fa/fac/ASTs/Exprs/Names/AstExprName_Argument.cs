@@ -21,11 +21,11 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => Func.Arguments[ArgumentIndex]._type;
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			string _argname = Func.Arguments[ArgumentIndex]._name;
 			if (Func.Arguments[ArgumentIndex]._type is AstType_OptionalWrap && _check_cb != null) {
 				_check_cb ($"!{_argname}.HasValue ()", $"{_argname}.GetError ()");
-				return ("", $"{_argname}.GetValue ()");
+				return ("", $"{_argname}.GetValue ()", "");
 			} else {
 				// 此处暂时不支持赋值
 				throw new CodeException (Token, "参数不能赋值");

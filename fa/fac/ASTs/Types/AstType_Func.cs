@@ -26,6 +26,6 @@ namespace fac.ASTs.Types {
 			return _functype;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => throw new NotImplementedException ();
+		public override string GenerateCSharp_Type () => throw new NotImplementedException ();
 	}
 }

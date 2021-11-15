@@ -36,29 +36,21 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => Value.GuessType ();
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			//// TODO 着重处理
-			//var (_a, _b) = ExpectType.GenerateCSharp (_indent, _check_cb);
-			//var (_c, _d) = Value.GenerateCSharp (_indent, _check_cb);
-			//StringBuilder _psb = new StringBuilder ().Append ($"{_a}{_c}"), _sb = new StringBuilder ();
-			//if (ExpectType is AstType_OptionalWrap && Value.ExpectType is not AstType_OptionalWrap) {
-			//	_sb.Append ($"{_b}.FromValue ({_d})");
-			//} else if (ExpectType is not AstType_OptionalWrap && Value.ExpectType is AstType_OptionalWrap) {
-			//	_psb.AppendLine ();
-			//}
-			//return (_psb.ToString (), $"({_b}) {_d}");
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			if (Value.ExpectType is AstType_OptionalWrap && Value is AstExpr_Op2 _op2expr && _op2expr.Operator == "/") {
 				return Value.GenerateCSharp (_indent, _check_cb);
 			} else {
-				var (_a, _b) = ExpectType.GenerateCSharp (_indent, _check_cb);
-				var (_c, _d) = Value.GenerateCSharp (_indent, _check_cb);
+				var _a = ExpectType.GenerateCSharp_Type ();
+				var (_d, _e, _f) = Value.GenerateCSharp (_indent, _check_cb);
 				if (ExpectType is AstType_OptionalWrap && Value.ExpectType is not AstType_OptionalWrap) {
-					return ($"{_a}{_c}", $"{_b}.FromValue ({_d})");
+					return (_d, $"{_a}.FromValue ({_e})", _f);
 				} else if (ExpectType is not AstType_OptionalWrap && Value.ExpectType is AstType_OptionalWrap) {
-					_check_cb ($"!{_d}.HasValue ()", $"{_d}.GetError ()");
-					return ($"{_a}{_c}", $"{_d}.GetValue ()");
+					var _tmp_var_name = Common.GetTempId ();
+					var _psb = new StringBuilder ().Append (_d).AppendLine ($"{_indent.Indent ()}{Value.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_e};");
+					_check_cb ($"!{_tmp_var_name}.HasValue ()", $"{_tmp_var_name}.GetError ()");
+					return (_psb.ToString (), $"{_tmp_var_name}.GetValue ()", _f);
 				} else {
-					return ($"{_a}{_c}", $"({_b}) {_d}");
+					return (_d, $"({_a}) {_e}", _f);
 				}
 			}
 		}

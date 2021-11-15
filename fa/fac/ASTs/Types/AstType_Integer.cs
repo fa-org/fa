@@ -23,13 +23,13 @@ namespace fac.ASTs.Types {
 			return _inttype;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => ("", (IsSign, BitWidth) switch {
+		public override string GenerateCSharp_Type () => (IsSign, BitWidth) switch {
 			(true, 8) => "sbyte", (false, 8) => "byte",
 			(true, 16) => "short", (false, 16) => "ushort",
 			(true, 32) => "int", (false, 32) => "uint",
 			(true, 64) => "long", (false, 64) => "ulong",
 			_ => throw new UnimplException (Token)
-		});
+		};
 
 		private static HashSet<string> sTypeNames = new HashSet<string> { "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64" };
 		private static Dictionary<string, string> sTypeMap = new Dictionary<string, string> { ["int"] = "int32", ["uint"] = "uint32" };

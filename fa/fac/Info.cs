@@ -148,9 +148,9 @@ namespace fac {
 		public static string GenerateCSharp () {
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
 			foreach (var _program in Programs) {
-				var (_a, _b) = _program.GenerateCSharp (0, null);
+				var (_a, _b, _c) = _program.GenerateCSharp (0, null);
 				_psb.Append (_a);
-				_sb.Append (_b);
+				_sb.Append (_b).Append (_c);
 			}
 			_psb.AppendLine ();
 			_psb.AppendLine ();

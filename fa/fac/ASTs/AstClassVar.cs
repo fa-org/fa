@@ -44,12 +44,12 @@ namespace fac.ASTs {
 			}
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			//if (DefaultValue != null) {
 			//	var (_a, _b) = DefaultValue.GenerateCSharp (_indent, "");
 			//	return ("", $"{_a}{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name} = {_b};");
 			//} else {
-			return ("", $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name};");
+			return ("", $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name};", "");
 			//}
 		}
 

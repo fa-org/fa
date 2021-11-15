@@ -139,25 +139,26 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			if (Operator == "/") {
-				var (_a, _b) = Value1.GenerateCSharp (_indent, _check_cb);
-				var (_c, _d) = Value2.GenerateCSharp (_indent, _check_cb);
-				_check_cb ($"{_d} == 0", "\"除数不能为0\"");
-				return ($"{_a}{_c}", $"{_b} {Operator} {_d}");
+				var (_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
+				var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
+				_check_cb ($"{_e} == 0", "\"除数不能为0\"");
+				return ($"{_a}{_d}", $"{_b} {Operator} {_e}", $"{_c}{_f}");
 			} else if (Operator == "=") {
 				if (Value1 is IAstExprName _exprn) {
 					var _ec = Value1.ResultMayOptional () ? new ExprChecker (_exprn) : null;
-					var (_a, _b) = Value1.GenerateCSharp (_indent, null);
-					var (_c, _d) = Value2.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
-					return ($"{_a}{_c}{_ec?.GenerateCSharp (_indent, Value2.Token) ?? ""}", $"{_b} {Operator} {_d}");
+					var (_a, _b, _c) = Value1.GenerateCSharp (_indent, null);
+					var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
+					var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Value2.Token) ?? ("", "");
+					return ($"{_a}{_d}{_g}", $"{_b} {Operator} {_e}", $"{_c}{_f}{_h}");
 				} else {
 					throw new CodeException (Value1.Token, "赋值运算符左侧必须为可赋值的变量或参数名称");
 				}
 			} else {
-				var (_a, _b) = Value1.GenerateCSharp (_indent, _check_cb);
-				var (_c, _d) = Value2.GenerateCSharp (_indent, _check_cb);
-				return ($"{_a}{_c}", $"{_b} {Operator} {_d}");
+				var (_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
+				var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
+				return ($"{_a}{_d}", $"{_b} {Operator} {_e}", $"{_c}{_f}");
 			}
 		}
 

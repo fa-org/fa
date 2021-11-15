@@ -44,14 +44,15 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
-			var (_a, _b) = DataType.GenerateCSharp (_indent, null);
+			var (_a, _b, _c) = DataType.GenerateCSharp (_indent, null);
 			var _ec = new ExprChecker (DataType.ResultMayOptional () ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
-			var (_c, _d) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
-			_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_c).Append (_ec?.GenerateCSharp (_indent, Expr.Token) ?? "");
-			_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_d};");
-			return (_psb.ToString (), _sb.ToString ());
+			var (_d, _e, _f) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
+			var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Expr.Token) ?? ("", "");
+			_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_d).Append (_g);
+			_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_e};");
+			return (_psb.ToString (), _sb.ToString (), $"{_c}{_f}{_h}");
 		}
 	}
 }

@@ -100,22 +100,22 @@ namespace fac.ASTs {
 			}
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			Info.CurrentClass = this;
 			Info.CurrentFuncVariables = null;
 			//
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]} {{");
 			foreach (var _var in ClassVars) {
-				var (_a, _b) = _var.GenerateCSharp (_indent + 1, null);
-				_sb.Append (_a).Append (_b);
+				var (_a, _b, _c) = _var.GenerateCSharp (_indent + 1, null);
+				_sb.Append (_a).Append (_b).Append (_c);
 			}
 			foreach (var _func in ClassFuncs) {
-				var (_a, _b) = _func.GenerateCSharp (_indent + 1, null);
-				_sb.Append (_a).Append (_b);
+				var (_a, _b, _c) = _func.GenerateCSharp (_indent + 1, null);
+				_sb.Append (_a).Append (_b).Append (_c);
 			}
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return ("", _sb.ToString ());
+			return ("", _sb.ToString (), "");
 		}
 	}
 }

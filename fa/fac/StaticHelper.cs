@@ -46,9 +46,10 @@ namespace fac {
 				return;
 			foreach (var _expr in _exprs) {
 				var _ec = new ExprChecker (null);
-				var (_a, _b) = _expr.GenerateCSharp (_indent, _ec.CheckFunc);
+				var (_a, _b, _c) = _expr.GenerateCSharp (_indent, _ec.CheckFunc);
 				//_sb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b};");
-				_sb.Append (_a).Append (_ec.GenerateCSharp (_indent, _expr.Token)).AppendLine ($"{_indent.Indent ()}{_b};");
+				var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, _expr.Token);
+				_sb.Append (_a).Append (_d).AppendLine ($"{_indent.Indent ()}{_b};").Append (_c).Append (_e);
 			}
 		}
 
@@ -56,8 +57,8 @@ namespace fac {
 			if (_stmts == null)
 				return;
 			foreach (var _stmt in _stmts) {
-				var (_a, _b) = _stmt.GenerateCSharp (_indent, null);
-				_sb.Append (_a).Append (_b);
+				var (_a, _b, _c) = _stmt.GenerateCSharp (_indent, null);
+				_sb.Append (_a).Append (_b).Append (_c);
 			}
 		}
 

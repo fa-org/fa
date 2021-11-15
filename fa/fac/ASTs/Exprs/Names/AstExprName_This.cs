@@ -15,7 +15,7 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => new AstType_Class { Token = Token, Class = Class };
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => ("", "this");
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => ("", "this", "");
 
 		public override bool AllowAssign () => false;
 	}

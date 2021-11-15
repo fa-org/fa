@@ -31,18 +31,19 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => IAstType.FromName ("bool");
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
 			_sb.Append ("(");
 			for (int i = 0; i < Operators.Count; ++i) {
-				var (_a, _b) = Values[i].GenerateCSharp (_indent, _check_cb);
-				var (_c, _d) = Values[i + 1].GenerateCSharp (_indent, _check_cb);
-				_psb.Append (_a).Append (_c);
-				_sb.Append ($"({_b} {Operators[i]} {_d}) && ");
+				var (_a, _b, _c) = Values[i].GenerateCSharp (_indent, _check_cb);
+				var (_d, _e, _f) = Values[i + 1].GenerateCSharp (_indent, _check_cb);
+				_psb.Append (_a).Append (_d);
+				_sb.Append ($"({_b} {Operators[i]} {_e}) && ");
+				_ssb.Append (_c).Append (_f);
 			}
 			_sb.Remove (_sb.Length - 4, 4);
 			_sb.Append (")");
-			return (_psb.ToString (), _sb.ToString ());
+			return (_psb.ToString (), _sb.ToString (), _ssb.ToString ());
 		}
 
 		private static HashSet<string> sComare = new HashSet<string> { ">", ">=", "<", "<=" };

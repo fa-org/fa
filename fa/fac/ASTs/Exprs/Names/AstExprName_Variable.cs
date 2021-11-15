@@ -19,12 +19,12 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => Var.DataType;
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			if (Var.DataType is AstType_OptionalWrap && _check_cb != null) {
 				_check_cb ($"!{Var.VarName}.HasValue ()", $"{Var.VarName}.GetError ()");
-				return ("", $"{Var.VarName}.GetValue ()");
+				return ("", $"{Var.VarName}.GetValue ()", "");
 			} else {
-				return ("", Var.VarName);
+				return ("", Var.VarName, "");
 			}
 		}
 

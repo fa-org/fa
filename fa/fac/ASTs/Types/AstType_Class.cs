@@ -11,12 +11,6 @@ namespace fac.ASTs.Types {
 
 
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			if ((TemplateTypes?.Count ?? 0) == 0) {
-				return ("", $"{Class.FullName}");
-			} else {
-				return ("", $"{Class.FullName}<{string.Join (", ", (from p in TemplateTypes select p.GenerateCSharp (_indent, _check_cb).Item2))}>");
-			}
-		}
+		public override string GenerateCSharp_Type () => $"{Class.FullName}{((TemplateTypes?.Count ?? 0) > 0 ? $"<{string.Join (", ", from p in TemplateTypes select p.GenerateCSharp_Type ())}>" : "")}";
 	}
 }

@@ -47,15 +47,16 @@ namespace fac.ASTs.Exprs {
 			return new AstType_ArrayWrap { Token = Token, ItemType = _item_type };
 		}
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var _psb = new StringBuilder ();
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			StringBuilder _psb = new StringBuilder (), _ssb = new StringBuilder ();
 			var _tmp_var_name = Common.GetTempId ();
 			_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{ItemDataType}> ();");
 			foreach (var _init_val in InitValues) {
-				var (_a, _b) = _init_val.GenerateCSharp (_indent, ItemDataType is AstType_OptionalWrap ? null : _check_cb);
+				var (_a, _b, _c) = _init_val.GenerateCSharp (_indent, ItemDataType is AstType_OptionalWrap ? null : _check_cb);
 				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_tmp_var_name}.Add ({_b});");
+				_ssb.Append (_c);
 			}
-			return (_psb.ToString (), _tmp_var_name);
+			return (_psb.ToString (), _tmp_var_name, _ssb.ToString ());
 		}
 
 		public override bool AllowAssign () => false;

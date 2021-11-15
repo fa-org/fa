@@ -46,7 +46,7 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => DataType;
 
-		public override (string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			if (DataType is AstType_String) {
 				var _sb = new StringBuilder ();
 				foreach (var _ch in Value) {
@@ -56,9 +56,9 @@ namespace fac.ASTs.Exprs {
 						_sb.Append (_ch);
 					}
 				}
-				return ("", $"\"{_sb}\"");
+				return ("", $"\"{_sb}\"", "");
 			} else {
-				return ("", Value);
+				return ("", Value, "");
 			}
 		}
 

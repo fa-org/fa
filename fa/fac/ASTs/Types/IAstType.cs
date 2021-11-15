@@ -13,6 +13,10 @@ namespace fac.ASTs.Types {
 
 
 
+		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => ("", GenerateCSharp_Type (), "");
+
+		public abstract string GenerateCSharp_Type ();
+
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) { }
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
