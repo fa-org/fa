@@ -46,9 +46,9 @@ namespace fac.ASTs.Exprs {
 					return (_d, $"{_a}.FromValue ({_e})", _f);
 				} else if (ExpectType is not AstType_OptionalWrap && Value.ExpectType is AstType_OptionalWrap) {
 					var _tmp_var_name = Common.GetTempId ();
-					var _psb = new StringBuilder ().Append (_d).AppendLine ($"{_indent.Indent ()}{Value.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_e};");
-					_check_cb ($"!{_tmp_var_name}.HasValue ()", $"{_tmp_var_name}.GetError ()");
-					return (_psb.ToString (), $"{_tmp_var_name}.GetValue ()", _f);
+					var _psb = new StringBuilder ().Append (_d).AppendLine ($"{_indent.Indent ()}{ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_e};");
+					//return (_psb.ToString (), $"{_tmp_var_name}.GetValue ()", _f);
+					return (_psb.ToString (), _tmp_var_name, _f);
 				} else {
 					return (_d, $"({_a}) {_e}", _f);
 				}

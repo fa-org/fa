@@ -47,16 +47,16 @@ namespace fac.ASTs.Stmts {
 			_sb.AppendLine ($"{_indent.Indent ()}{{");
 			var (_a, _b, _c) = Initialize.GenerateCSharp (_indent + 1, _ec.CheckFunc);
 			var (_e, _f) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Initialize.Token);
-			_sb.Append ($"{_a}{_e}{_b}");
+			_sb.Append ($"{_e}{_a}{_b}");
 			_ec = new ExprChecker (null);
 			string _d;
 			(_a, _b, _d) = Condition.GenerateCSharp (_indent + 1, _ec.CheckFunc);
 			var (_g, _h) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Condition.Token);
-			_sb.AppendLine ($"{_a}{_g}{(_indent + 1).Indent ()}while ({_b}) {{");
+			_sb.AppendLine ($"{_g}{_a}{(_indent + 1).Indent ()}while ({_b}) {{");
 			_sb.AppendStmts (BodyCodes, _indent + 2);
 			_sb.AppendExprs (Increment, _indent + 2);
 			var (_i, _j) = _ec.GenerateCSharpPrefixSuffix (_indent + 2, Condition.Token);
-			_sb.Append ($"{_a}{_i}");
+			_sb.Append ($"{_i}{_a}");
 			//
 			_sb.AppendLine ($"{(_indent + 1).Indent ()}}}");
 			_sb.AppendLine ($"{_indent.Indent ()}}}");

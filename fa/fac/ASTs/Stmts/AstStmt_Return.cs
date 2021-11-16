@@ -42,7 +42,7 @@ namespace fac.ASTs.Stmts {
 				var _ec = new ExprChecker (null);
 				var (_a, _b, _c) = Expr.GenerateCSharp (_indent, _ec.CheckFunc);
 				var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Expr.Token);
-				_sb.AppendLine ($"{_a}{_d}{_indent.Indent ()}return {_b};");
+				_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}return {_b};");
 				return ("", _sb.ToString (), $"{_c}{_e}");
 			} else {
 				_sb.AppendLine ($"{_indent.Indent ()}return;");

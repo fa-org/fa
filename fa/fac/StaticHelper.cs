@@ -49,7 +49,7 @@ namespace fac {
 				var (_a, _b, _c) = _expr.GenerateCSharp (_indent, _ec.CheckFunc);
 				//_sb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b};");
 				var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, _expr.Token);
-				_sb.Append (_a).Append (_d).AppendLine ($"{_indent.Indent ()}{_b};").Append (_c).Append (_e);
+				_sb.Append (_d).Append (_a).AppendLine ($"{_indent.Indent ()}{_b};").Append (_c).Append (_e);
 			}
 		}
 

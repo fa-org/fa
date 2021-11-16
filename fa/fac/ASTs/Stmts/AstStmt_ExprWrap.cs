@@ -27,7 +27,7 @@ namespace fac.ASTs.Stmts {
 			var (_a, _b, _c) = Expr.GenerateCSharp (_indent, _ec.CheckFunc);
 			var _sb = new StringBuilder ();
 			var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Expr.Token);
-			_sb.AppendLine ($"{_a}{_d}{_indent.Indent ()}{_b};");
+			_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}{_b};");
 			return ("", _sb.ToString (), $"{_c}{_e}");
 		}
 	}

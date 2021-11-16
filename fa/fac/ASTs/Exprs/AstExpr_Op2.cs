@@ -59,8 +59,9 @@ namespace fac.ASTs.Exprs {
 				if (Operator == "??") {
 					Value2 = Value2.TraversalCalcType (null);
 					var _exp_type = _expect_type ?? Value2.ExpectType;
-					ExpectType = _exp_type is AstType_OptionalWrap ? _exp_type : new AstType_OptionalWrap { Token = Token, ItemType = _exp_type };
+					_exp_type = _exp_type is AstType_OptionalWrap ? _exp_type : new AstType_OptionalWrap { Token = Token, ItemType = _exp_type };
 					Value1 = Value1.TraversalCalcType (_exp_type);
+					ExpectType = Value2.ExpectType;
 					return AstExprTypeCast.Make (this, _expect_type);
 				} else if (Operator == "??=") {
 					Value1 = Value1.TraversalCalcType (null);
@@ -79,44 +80,6 @@ namespace fac.ASTs.Exprs {
 				}
 			}
 			throw new UnimplException (Token);
-			//IAstType _exp1 = null, _exp2 = null;
-			//if (sCompareOp2s.Contains (Operator)) {
-			//	ExpectType = IAstType.FromName ("bool");
-			//} else if (sLogicOp2s.Contains (Operator)) {
-			//	_exp1 = _exp2 = IAstType.FromName ("bool");
-			//	ExpectType = IAstType.FromName ("bool");
-			//} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
-			//	_exp1 = _exp2 = _expect_type;
-			//} else if (sQusQusOp2s.Contains (Operator)) {
-			//	if (_expect_type != null) {
-			//		_exp1 = _expect_type is AstType_OptionalWrap ? _expect_type : new AstType_OptionalWrap { Token = Token, ItemType = _expect_type };
-			//		_exp2 = _expect_type;
-			//	}
-			//} else {
-			//	throw new UnimplException (Token);
-			//}
-			//
-			//if (_exp1 == null || _exp2 == null) {
-			//	_exp1 = Value1.GuessType ();
-			//	_exp2 = Value2.GuessType ();
-			//	if (sQusQusOp2s.Contains (Operator)) {
-			//		if (_exp1 is not AstType_OptionalWrap)
-			//			throw new CodeException (Token, "不可空的值类型无法使用 ?? 运算符");
-			//		ExpectType = TypeFuncs.GetCompatibleType (_exp1, _exp2);
-			//		if (_exp2 is not AstType_OptionalWrap && ExpectType is AstType_OptionalWrap _exp_type_tmp)
-			//			ExpectType = _exp_type_tmp.ItemType;
-			//	} else {
-			//		_exp1 = _exp2 = TypeFuncs.GetCompatibleType (_exp1, _exp2);
-			//		if (ExpectType == null)
-			//			ExpectType = _exp2;
-			//	}
-			//}
-
-			//Value1 = Value1.TraversalCalcType (_exp1);
-			//Value2 = Value2.TraversalCalcType (_exp2);
-			//if (ExpectType == null)
-			//	ExpectType = TypeFuncs.GetCompatibleType (Value1.ExpectType, Value2.ExpectType);
-			//return AstExprTypeCast.Make (this, _expect_type);
 		}
 
 		public override IAstType GuessType () {
@@ -140,25 +103,26 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			string _oper = Operator != "??" ? Operator : "|";
 			if (Operator == "/") {
 				var (_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
 				var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
 				_check_cb ($"{_e} == 0", "\"除数不能为0\"");
-				return ($"{_a}{_d}", $"{_b} {Operator} {_e}", $"{_c}{_f}");
+				return ($"{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}");
 			} else if (Operator == "=") {
 				if (Value1 is IAstExprName _exprn) {
 					var _ec = Value1.ResultMayOptional () ? new ExprChecker (_exprn) : null;
 					var (_a, _b, _c) = Value1.GenerateCSharp (_indent, null);
 					var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
 					var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Value2.Token) ?? ("", "");
-					return ($"{_a}{_d}{_g}", $"{_b} {Operator} {_e}", $"{_c}{_f}{_h}");
+					return ($"{_g}{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}{_h}");
 				} else {
 					throw new CodeException (Value1.Token, "赋值运算符左侧必须为可赋值的变量或参数名称");
 				}
 			} else {
 				var (_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
 				var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
-				return ($"{_a}{_d}", $"{_b} {Operator} {_e}", $"{_c}{_f}");
+				return ($"{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}");
 			}
 		}
 

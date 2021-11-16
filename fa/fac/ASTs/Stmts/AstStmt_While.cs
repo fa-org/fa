@@ -48,12 +48,12 @@ namespace fac.ASTs.Stmts {
 				_sb.AppendLine ($"{_indent.Indent ()}do {{");
 			} else {
 				(_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Condition.Token);
-				_sb.AppendLine ($"{_a}{_d}{_indent.Indent ()}while ({_b}) {{");
+				_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}while ({_b}) {{");
 			}
 			_sb.AppendStmts (Contents, _indent + 1);
 			if (IsDoWhile) {
 				(_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Condition.Token);
-				_sb.AppendLine ($"{_a}{_d}{_indent.Indent ()}}} while ({_b});");
+				_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}}} while ({_b});");
 			} else {
 				_sb.AppendLine ($"{_indent.Indent ()}}}");
 			}

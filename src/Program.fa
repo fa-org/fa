@@ -2,18 +2,11 @@ use fa;
 
 
 
-//class MyClass<T> {
-//	public static T calc (T a) {
-//		return a + 12;
-//	}
-//}
-
 class Program {
-	public static int calc (int a) => a + 12;
+	public static int? add (int a, int? b) => a + b;
+
 	public static void Main () {
-		//Console.WriteLine (@FILECONTENT);
-		//int n = MyClass<int>.calc (12);
-		int n = calc (12);
+		int n = add (3, 5) ?? 7;
 		Console.WriteLine ("{0}".format (n));
 	}
 }

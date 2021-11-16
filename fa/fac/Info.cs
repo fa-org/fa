@@ -164,6 +164,7 @@ namespace fac {
 			_psb.AppendLine ("    public string GetError () => err;");
 			_psb.AppendLine ("    public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
 			_psb.AppendLine ("    public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
+			_psb.AppendLine ("    public static T operator | (Optional<T> t1, T t2) => t1.HasValue () ? t1.GetValue () : t2; // operator ??");
 			_psb.AppendLine ("}");
 			_psb.AppendLine ("}");
 			_psb.AppendLine ($"namespace {Info.CurrentNamespace} {{");

@@ -35,7 +35,7 @@ namespace fac.ASTs.Stmts {
 			var _ec = new ExprChecker (null);
 			var (_a, _b, _c) = Condition.GenerateCSharp (_indent, _ec.CheckFunc);
 			var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Condition.Token);
-			_sb.AppendLine ($"{_a}{_d}{_indent.Indent ()}if ({_b}) {{");
+			_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}if ({_b}) {{");
 			_sb.AppendStmts (IfTrueCodes, _indent + 1);
 			if (IfFalseCodes.Any ()) {
 				_sb.AppendLine ($"{_indent.Indent ()}}} else {{");

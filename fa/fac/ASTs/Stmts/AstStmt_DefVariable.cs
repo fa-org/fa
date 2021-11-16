@@ -33,7 +33,7 @@ namespace fac.ASTs.Stmts {
 			var _ec = new ExprChecker (DataType.ResultMayOptional () ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
 			var (_d, _e, _f) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
 			var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Expr.Token) ?? ("", "");
-			_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_d).Append (_g);
+			_psb.Append (_g).Append (_a).AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_d);
 			_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_e};");
 			return (_psb.ToString (), _sb.ToString (), $"{_c}{_f}{_h}");
 		}
