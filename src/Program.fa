@@ -2,15 +2,18 @@ use fa;
 
 
 
-class Program {
-	//public static int? test_div () {
-	//	int x = 5 / 1;
-	//	return 12;
-	//}
+//class MyClass<T> {
+//	public static T calc (T a) {
+//		return a + 12;
+//	}
+//}
 
+class Program {
+	public static int calc (int a) => a + 12;
 	public static void Main () {
-		//int? n = test_div ();
-		string s = "aaa {0} bbb".format (345);
-		Console.WriteLine (s);
+		//Console.WriteLine (@FILECONTENT);
+		//int n = MyClass<int>.calc (12);
+		int n = calc (12);
+		Console.WriteLine ("{0}".format (n));
 	}
 }

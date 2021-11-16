@@ -4,6 +4,7 @@ using fac.AntlrTools;
 using fac.ASTs;
 using fac.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -82,7 +83,41 @@ namespace fac {
 
 		public static string GetTempId () => $"_{Guid.NewGuid ().ToString ("N")[..8]}";
 
-		//public static string GetStringLiterialText (ParserRuleContext _ctx) {}
-		//public static string GetStringLiterialText (string _text, IToken _pos) {}
+		public static string WrapStringValue (string _s) {
+			var _sb = new StringBuilder ().Append ("\"");
+			foreach (var _ch in _s) {
+				if (sTransReverse.ContainsKey (_ch)) {
+					_sb.Append (sTransReverse[_ch]);
+				} else {
+					_sb.Append (_ch);
+				}
+			}
+			_sb.Append ("\"");
+			return _sb.ToString ();
+		}
+		private static Dictionary<char, string> sTransReverse = new Dictionary<char, string> {
+			['\r'] = "\\r", ['\n'] = "\\n", ['\t'] = "\\t", ['\''] = "\\'", ['\\'] = "\\\\", ['\"'] = "\\\"",
+		};
+
+		public static string UnwrapStringValue (string _s) {
+			var _sb = new StringBuilder ();
+			bool _trans = false;
+			foreach (char _ch in _s[1..^1]) {
+				if (_trans) {
+					if (!sTransChar.ContainsKey (_ch))
+						throw new Exception ($"未识别的转义字符 \\{_ch}");
+					_sb.Append (sTransChar[_ch]);
+					_trans = false;
+				} else if (_ch == '\\') {
+					_trans = true;
+				} else {
+					_sb.Append (_ch);
+				}
+			}
+			return _sb.ToString ();
+		}
+		private static Dictionary<char, char> sTransChar = new Dictionary<char, char> {
+			['r'] = '\r', ['n'] = '\n', ['t'] = '\t', ['\''] = '\'', ['\\'] = '\\', ['\"'] = '\"',
+		};
 	}
 }

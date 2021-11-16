@@ -27,11 +27,8 @@ namespace fac.ASTs.Exprs.Names {
 				_check_cb ($"!{_argname}.HasValue ()", $"{_argname}.GetError ()");
 				return ("", $"{_argname}.GetValue ()", "");
 			} else {
-				// 此处暂时不支持赋值
-				throw new CodeException (Token, "参数不能赋值");
-				//return ("", _argname);
+				return ("", _argname, "");
 			}
-			
 		}
 
 		public override bool AllowAssign () => false;

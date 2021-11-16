@@ -23,24 +23,7 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			if (DataType is AstType_OptionalWrap _owrap) {
-				try {
-					Expr = Expr.TraversalCalcType (_owrap.ItemType);
-					Expr = AstExprTypeCast.Make (Expr, DataType);
-				} catch (Exception) {
-					Expr = Expr.TraversalCalcType (DataType);
-				}
-			} else {
-				if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap) {
-					try {
-						Expr = Expr.TraversalCalcType (DataType);
-					} catch (Exception) {
-						Expr = Expr.TraversalCalcType (new AstType_OptionalWrap { Token = Token, ItemType = DataType });
-					}
-				} else {
-					Expr = Expr.TraversalCalcType (DataType);
-				}
-			}
+			Expr = Expr.TraversalCalcType (DataType);
 			return this;
 		}
 

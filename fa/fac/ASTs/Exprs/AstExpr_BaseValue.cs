@@ -16,21 +16,7 @@ namespace fac.ASTs.Exprs {
 
 		public static AstExpr_BaseValue FromCodeString (IToken _token, string _str) {
 			if (_str[0] == '"') {
-				var _sb = new StringBuilder ();
-				bool _trans = false;
-				foreach (char _ch in _str[1..^1]) {
-					if (_trans) {
-						if (!sTransChar.ContainsKey (_ch))
-							throw new CodeException (_token, $"未识别的转义字符 \\{_ch}");
-						_sb.Append (sTransChar[_ch]);
-						_trans = false;
-					} else if (_ch == '\\') {
-						_trans = true;
-					} else {
-						_sb.Append (_ch);
-					}
-				}
-				_str = _sb.ToString ();
+				_str = Common.UnwrapStringValue (_str);
 			} else {
 				throw new UnimplException (_token);
 			}
@@ -48,27 +34,12 @@ namespace fac.ASTs.Exprs {
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			if (DataType is AstType_String) {
-				var _sb = new StringBuilder ();
-				foreach (var _ch in Value) {
-					if (sTransReverse.ContainsKey (_ch)) {
-						_sb.Append (sTransReverse[_ch]);
-					} else {
-						_sb.Append (_ch);
-					}
-				}
-				return ("", $"\"{_sb}\"", "");
+				return ("", Common.WrapStringValue (Value), "");
 			} else {
 				return ("", Value, "");
 			}
 		}
 
 		public override bool AllowAssign () => false;
-
-		private static Dictionary<char, char> sTransChar = new Dictionary<char, char> {
-			['r'] = '\r', ['n'] = '\n', ['t'] = '\t', ['\''] = '\'', ['\\'] = '\\', ['\"'] = '\"',
-		};
-		private static Dictionary<char, string> sTransReverse = new Dictionary<char, string> {
-			['\r'] = "\\r", ['\n'] = "\\n", ['\t'] = "\\t", ['\''] = "\\'", ['\\'] = "\\\\", ['\"'] = "\\\"",
-		};
 	}
 }

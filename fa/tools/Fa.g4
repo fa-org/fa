@@ -32,6 +32,7 @@ Interface:					'interface';
 Internal:					'internal';
 Namespace:					'namespace';
 New:						'new';
+Params:						'params';
 Public:						'public';
 Protected:					'protected';
 Private:					'private';
@@ -143,9 +144,9 @@ literal:					BoolLiteral | intNum | floatNum | String1Literal;
 
 fragment NUM:				[0-9];
 fragment HEX:				NUM | [a-fA-F];
-fragment ID_BEGIN:			[a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-Id:							ID_BEGIN ID_AFTER*;
+//fragment ID_BEGIN:			[a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
+//fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
+Id:							('@' | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX)) (NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX))*;
 ids:						Id (PointOp Id)*;
 
 
@@ -156,7 +157,7 @@ ids:						Id (PointOp Id)*;
 typeAfter:					(QuotFangL QuotFangR) | Qus;
 typeSingle:					Id (QuotJianL type (Comma type)* QuotJianR)?;
 typeMulti:					QuotYuanL typeVar (Comma typeVar)+ QuotYuanR;
-type:						(typeSingle | typeMulti) typeAfter*;
+type:						Params? (typeSingle | typeMulti) typeAfter*;
 
 
 

@@ -81,7 +81,7 @@ namespace fac.ASTs {
 			var (_a, _b, _c) = ReturnType.GenerateCSharp (_indent, null);
 			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {_b} {Name} (");
 			foreach (var _arg in Arguments)
-				_sb.Append ($"{_arg._type} {_arg._name}, ");
+				_sb.Append ($"{_arg._type.GenerateCSharp_Type ()} {_arg._name}, ");
 			if (Arguments.Any ())
 				_sb.Remove (_sb.Length - 2, 2);
 			_sb.AppendLine (") {");

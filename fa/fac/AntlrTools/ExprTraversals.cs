@@ -65,6 +65,11 @@ namespace fac.AntlrTools {
 				// 生成变量定义组
 				Info.CurrentFuncVariables[^1]._vars.Add (_varexpr.VarName, _varexpr);
 			} else if (_expr is AstExpr_BaseId _idexpr) {
+				// 查找预定义名称
+				var _buildinexpr = AstExprName_BuildIn.FindFromName (_idexpr.Id);
+				if (_buildinexpr != null)
+					return _buildinexpr;
+
 				// 映射变量名/参数
 				var _nameexpr = IAstExprName.FindVariableOrArgument (_idexpr.Token, _idexpr.Id);
 				if (_nameexpr != null)
@@ -141,14 +146,6 @@ namespace fac.AntlrTools {
 							AstType_Class _classexpr => _access_func (_obj, _classexpr.Class),
 							_ => throw new UnimplException (_typeexpr.Token),
 						};
-						//var _classes = Info.GetClassFromName (_typeexpr.TypeStr);
-						//if (_classes.Count == 0) {
-						//	throw new CodeException (_obj.Token, $"未定义的标识符 {_typeexpr.TypeStr}");
-						//} else if (_classes.Count == 1) {
-						//	return _access_func (_obj, _classes[0]);
-						//} else {
-						//	throw new CodeException (_obj.Token, $"不明确的符号 {_typeexpr.TypeStr}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
-						//}
 					};
 
 					if (_op1.Value is AstExprName_Class _classexpr) {
@@ -161,6 +158,13 @@ namespace fac.AntlrTools {
 					} else if (_op1.Value is AstExprName_Variable _varexpr) {
 						return _access_func2 (_varexpr, _varexpr.Var.DataType);
 					}
+				}
+			} else if (_expr is AstExpr_OpN _opnexpr) {
+				if (_opnexpr.Value is AstExpr_Op1 _op1expr
+					&& (!_op1expr.IsPrefix) && _op1expr.Operator[1..] == "format"
+					&& _op1expr.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
+					_opnexpr.Arguments.Insert (0, _op1expr.Value);
+					_opnexpr.Value = AstExprName_BuildIn.FindFromName ("string.Format");
 				}
 			}
 			return _expr;

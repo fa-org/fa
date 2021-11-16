@@ -57,23 +57,32 @@ namespace fac {
 				foreach (var _program in Info.Programs)
 					_program.Compile ();
 			} catch (CodeException _ce) {
-				Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件第 {_ce.Token.Line} 行的错误：{_ce.Message}");
-				int _start = Info.CurrentSourceCode.LastIndexOfAny (new char[] { '\r', '\n' }, _ce.Token.StartIndex) + 1;
-				string _code = Info.CurrentSourceCode[_start..];
-				int _p = _code.IndexOfAny (new char [] { '\r', '\n' });
-				_code = _code[.._p];
-				Console.WriteLine (_code);
-				var _sb = new StringBuilder ();
-				for (int i = 0; i < _ce.Token.Column; ++i) {
-					if (_code[i] == '\t') {
-						_sb.Append ('\t');
-					} else if (((short)_code[i]) < 128) {
-						_sb.Append (' ');
-					} else {
-						_sb.Append ('　');
+				if (_ce.Token != null) {
+					Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件第 {_ce.Token.Line} 行的错误：{_ce.Message}");
+					int _start = Info.CurrentSourceCode.LastIndexOfAny (new char[] { '\r', '\n' }, _ce.Token.StartIndex) + 1;
+					string _code = Info.CurrentSourceCode[_start..];
+					int _p = _code.IndexOfAny (new char [] { '\r', '\n' });
+					_code = _code[.._p];
+					Console.WriteLine (_code);
+					var _sb = new StringBuilder ();
+					for (int i = 0; i < _ce.Token.Column; ++i) {
+						if (_code[i] == '\t') {
+							_sb.Append ('\t');
+						} else if (((short) _code[i]) < 128) {
+							_sb.Append (' ');
+						} else {
+							_sb.Append ('　');
+						}
 					}
+					Console.WriteLine ($"{_sb}^");
+				} else {
+					Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件的错误：{_ce.Message}");
 				}
-				Console.WriteLine ($"{_sb}^");
+				
+				Console.WriteLine ();
+				// 重写一遍，此处抛异常
+				foreach (var _program in Info.Programs)
+					_program.Compile ();
 				Console.WriteLine ($"按任意键退出。。。");
 				Console.ReadKey ();
 				return;
