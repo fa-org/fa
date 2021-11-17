@@ -1,3 +1,6 @@
 [submodule "draft"]
 	path = draft
 	url = git@github.com:falangorg/draft.git
+[submodule "facc"]
+	path = facc
+	url = https://github.com/falangorg/facc
