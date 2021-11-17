@@ -111,7 +111,7 @@ namespace fac.ASTs {
 			//
 			var _sb = new StringBuilder ();
 			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
-			if (Variants.Count > 0) {
+			if (Variants?.Count > 0) {
 				_sb.Append ('<').Append (string.Join (", ", from p in Variants select p.Name)).Append ('>');
 			}
 			_sb.AppendLine ($" {{");

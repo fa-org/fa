@@ -19,7 +19,7 @@ namespace fac.ASTs.Exprs.Names {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override IAstType GuessType () => new AstType_EnumItem { Token = Token, EnumType = EnumClass };
+		public override IAstType GuessType () => new AstType_Class { Token = Token, Class = EnumClass, TemplateTypes = new List<IAstType> () };
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			throw new NotImplementedException ();
