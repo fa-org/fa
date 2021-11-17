@@ -99,6 +99,11 @@ namespace fac.AntlrTools {
 						_cvarexpr.ThisObject = new AstExprName_This { Token = _idexpr.Token, Class = Info.CurrentClass };
 					return _cvarexpr;
 				}
+
+				// 查找类名称
+				_nameexpr = IAstExprName.FindClass (_idexpr.Token, _idexpr.Id);
+				if (_nameexpr != null)
+					return _nameexpr;
 			}
 			return _expr;
 		}
@@ -127,6 +132,10 @@ namespace fac.AntlrTools {
 					// 参数0为对象，当访问静态成员时传null
 					// 参数1为类对象
 					Func<IAstExpr, AstClass, IAstExpr> _access_func = (_obj, _class) => {
+						for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
+							if (_class.ClassEnumItems[i].Name == _access_name)
+								return new AstExprName_ClassEnumItem { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i };
+						}
 						for (int i = 0; i < _class.ClassVars.Count; ++i) {
 							if (_class.ClassVars[i].Name == _access_name)
 								return new AstExprName_ClassVar { Token = _expr.Token, Class = _class, VariableIndex = i, ThisObject = _obj };
@@ -161,7 +170,7 @@ namespace fac.AntlrTools {
 				}
 			} else if (_expr is AstExpr_OpN _opnexpr) {
 				if (_opnexpr.Value is AstExpr_Op1 _op1expr
-					&& (!_op1expr.IsPrefix) && _op1expr.Operator[1..] == "format"
+					&& (!_op1expr.IsPrefix) && _op1expr.Operator[1..] == "Format"
 					&& _op1expr.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
 					_opnexpr.Arguments.Insert (0, _op1expr.Value);
 					_opnexpr.Value = AstExprName_BuildIn.FindFromName ("string.Format");

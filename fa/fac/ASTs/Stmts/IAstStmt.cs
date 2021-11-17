@@ -74,8 +74,12 @@ namespace fac.ASTs.Stmts {
 				_forstmt.Increment = FromExprs (_ctx.forStmt ().expr ()[1..]);
 				_forstmt.BodyCodes = FromStmts (_ctx.forStmt ().stmt ()[1..]);
 				return _forstmt;
-			} else if (_ctx.forStmt () != null) {
-
+			} else if (_ctx.forStmt2 () != null) {
+				var _forstmt2 = new AstStmt_For2 { Token = _ctx.Start };
+				_forstmt2.Iterator = new AstStmt_DefVariable { Token = _ctx.forStmt2 ().type ().Start, DataType = IAstType.FromContext (_ctx.forStmt2 ().type ()), VarName = _ctx.forStmt2 ().Id ().GetText (), Expr = null };
+				_forstmt2.ListContainer = FromContext (_ctx.forStmt2 ().expr ());
+				_forstmt2.BodyCodes = FromStmts (_ctx.forStmt ().stmt ()[1..]);
+				return _forstmt2;
 			}
 			throw new UnimplException (_ctx.Start);
 		}

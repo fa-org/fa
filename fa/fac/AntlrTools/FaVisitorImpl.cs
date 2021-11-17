@@ -31,7 +31,7 @@ namespace fac.AntlrTools {
 
 
 		public IAst VisitClassStmt (FaParser.ClassStmtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassEnumAtom (FaParser.ClassEnumAtomContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassEnumItem (FaParser.ClassEnumItemContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassVar (FaParser.ClassVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassFunc (FaParser.ClassFuncContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitAddAssign (FaParser.AddAssignContext _ctx) => throw new NotImplementedException ();

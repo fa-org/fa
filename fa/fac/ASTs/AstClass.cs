@@ -15,8 +15,8 @@ namespace fac.ASTs {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public AstClassType ClassType { init; get; }
-		public List<(string _name, AstType_Placeholder _type)> Templates { init; get; }
-		public List<AstClassEnumAtom> ClassEnumAtoms { init; get; }
+		public List<AstType_Placeholder> Variants { init; get; }
+		public List<AstClassEnumItem> ClassEnumItems { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
 
@@ -29,20 +29,25 @@ namespace fac.ASTs {
 			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			//
-			var _cls_type = Common.ParseEnum<AstClassType> (_ctx.classType ().GetText ());
-			if (_cls_type != null) {
-				ClassType = _cls_type.Value;
-			} else {
-				throw new UnimplException (_ctx);
-			}
+			ClassType = Common.ParseEnum<AstClassType> (_ctx.classType ().GetText ()) ?? AstClassType.Class;
 			//
-			Templates = new List<(string _name, AstType_Placeholder _type)> ();
+			//if (_ctx.classVariant () != null) {
+			//	Variants = (from p in _ctx.classVariant ().Id () select new AstType_Placeholder { Token = p.Symbol, Name = p.GetText () }).ToList ();
+			//	foreach (var _var in Variants) {
+			//		if (_var.Name[0] != 'T')
+			//			throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
+			//	}
+			//} else {
+			//	Variants = new List<AstType_Placeholder> ();
+			//}
 			//
-			ClassEnumAtoms = (from p in _ctx.classEnumAtom () select new AstClassEnumAtom (p)).ToList ();
-			if (ClassType != AstClassType.Enum && ClassEnumAtoms.Count > 0)
-				throw new CodeException (_ctx.classEnumAtom ()[0], $"{ClassType} 类型结构不允许出现枚举成员");
+			ClassEnumItems = (from p in _ctx.classEnumItem () select new AstClassEnumItem (p)).ToList ();
+			if (ClassType != AstClassType.Enum && ClassEnumItems.Count > 0)
+				throw new CodeException (_ctx.classEnumItem ()[0], $"{ClassType} 类型结构不允许出现枚举成员");
 			//
 			ClassVars = (from p in _ctx.classVar () select new AstClassVar (p)).ToList ();
+			if (ClassType == AstClassType.Enum && ClassVars.Count > 0)
+				throw new CodeException (ClassVars[0].Token, $"{ClassType} 类型结构不允许出现成员变量");
 			//
 			ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (p)).ToList ();
 		}
@@ -105,7 +110,11 @@ namespace fac.ASTs {
 			Info.CurrentFuncVariables = null;
 			//
 			var _sb = new StringBuilder ();
-			_sb.AppendLine ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]} {{");
+			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
+			if (Variants.Count > 0) {
+				_sb.Append ('<').Append (string.Join (", ", from p in Variants select p.Name)).Append ('>');
+			}
+			_sb.AppendLine ($" {{");
 			foreach (var _var in ClassVars) {
 				var (_a, _b, _c) = _var.GenerateCSharp (_indent + 1, null);
 				_sb.Append (_a).Append (_b).Append (_c);

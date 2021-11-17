@@ -17,7 +17,8 @@ namespace fac.ASTs.Stmts {
 
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Expr = _cb (Expr, _deep, _group);
+			if (Expr != null)
+				Expr = _cb (Expr, _deep, _group);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -33,7 +34,7 @@ namespace fac.ASTs.Stmts {
 			var _ec = new ExprChecker (DataType.ResultMayOptional () ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
 			var (_d, _e, _f) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
 			var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Expr.Token) ?? ("", "");
-			_psb.Append (_g).Append (_a).AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_d);
+			_psb.AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_g).Append (_a).Append (_d);
 			_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_e};");
 			return (_psb.ToString (), _sb.ToString (), $"{_c}{_f}{_h}");
 		}

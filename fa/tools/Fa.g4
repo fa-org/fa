@@ -40,6 +40,7 @@ Return:						'return';
 Signed:						'signed';
 Static:						'static';
 Step:						'step';
+Switch:						'switch';
 Unsigned:					'unsigned';
 Use:						'use';
 While:						'while';
@@ -192,6 +193,14 @@ forStmt2:					For type Id Colon expr QuotHuaL stmt* QuotHuaR;
 
 
 //
+// switch
+//
+//switchStmtPart:				expr
+//switchStmt:					Switch expr QuotHuaL QuotHuaR;
+
+
+
+//
 // expr
 //
 quotExpr:					QuotYuanL expr QuotYuanR;
@@ -237,7 +246,8 @@ stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | whileStmt2 | forStmt |
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
 classType:					Class | Interface | Enum;
-classStmt:					publicLevel? classType Id classParent? QuotHuaL classEnumAtom* (classVar | classFunc)* QuotHuaR;
+//classVariant:				QuotJianL Id (Comma Id)* QuotJianR;
+classStmt:					publicLevel? classType Id classParent? QuotHuaL classEnumItem* (classVar | classFunc)* QuotHuaR;
 							// classParent 由 class 和 struct 专属使用
 							// enumItems 由 enum 专属使用
 							// enum 的 classVar 不允许使用
@@ -250,7 +260,7 @@ classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnumAtom:				Id (QuotYuanL type QuotYuanR)? Comma;
+classEnumItem:				Id (QuotYuanL type QuotYuanR)? Comma;
 
 
 

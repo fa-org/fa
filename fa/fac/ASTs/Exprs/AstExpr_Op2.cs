@@ -108,7 +108,7 @@ namespace fac.ASTs.Exprs {
 				var (_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
 				var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
 				_check_cb ($"{_e} == 0", "\"除数不能为0\"");
-				return ($"{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}");
+				return ($"{_a}{_d}", $"{ExpectType.GenerateCSharp_Type ()}.FromValue ({_b} {_oper} {_e})", $"{_c}{_f}");
 			} else if (Operator == "=") {
 				if (Value1 is IAstExprName _exprn) {
 					var _ec = Value1.ResultMayOptional () ? new ExprChecker (_exprn) : null;

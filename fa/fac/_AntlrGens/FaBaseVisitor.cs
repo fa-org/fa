@@ -805,7 +805,7 @@ public partial class FaBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// <return>The visitor result.</return>
 	public virtual Result VisitClassFunc([NotNull] FaParser.ClassFuncContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classEnumAtom"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.classEnumItem"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -813,7 +813,7 @@ public partial class FaBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitClassEnumAtom([NotNull] FaParser.ClassEnumAtomContext context) { return VisitChildren(context); }
+	public virtual Result VisitClassEnumItem([NotNull] FaParser.ClassEnumItemContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.useStmt"/>.
 	/// <para>

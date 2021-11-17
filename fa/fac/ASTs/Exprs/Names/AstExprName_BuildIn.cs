@@ -24,7 +24,7 @@ namespace fac.ASTs.Exprs.Names {
 			["File.WriteAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.WriteAllText", NameType = "Action<string, string>" },
 			["File.AppendAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.AppendAllText", NameType = "Action<string, string>" },
 			["@FILE"] = new AstExprName_BuildIn { Token = null, Name = "@FILE", NameType = "string" },
-			["@FILECONTENT"] = new AstExprName_BuildIn { Token = null, Name = "@FILECONTENT", NameType = "string" },
+			["@SOURCE"] = new AstExprName_BuildIn { Token = null, Name = "@SOURCE", NameType = "string" },
 		};
 
 		public static AstExprName_BuildIn FindFromName (string _name) {
@@ -55,7 +55,7 @@ namespace fac.ASTs.Exprs.Names {
 			"File.WriteAllText" => "File.WriteAllText",
 			"File.AppendAllText" => "File.AppendAllText",
 			"@FILE" => Common.WrapStringValue (Info.CurrentFile),
-			"@FILECONTENT" => Common.WrapStringValue (File.ReadAllText (Info.CurrentFile, Encoding.UTF8)),
+			"@SOURCE" => Common.WrapStringValue (File.ReadAllText (Info.CurrentFile, Encoding.UTF8)),
 			_ => throw new UnimplException (Token),
 		}, "");
 

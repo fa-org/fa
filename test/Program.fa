@@ -1,0 +1,15 @@
+use fa;
+
+
+
+class Program {
+	public static int? add (int a, int? b) {
+		//int? x = 5 / 1;
+		return a + b;
+	}
+
+	public static void Main () {
+		int @n = add (3, 5) ?? 7;
+		Console.WriteLine ("{0}".format (@n));
+	}
+}
