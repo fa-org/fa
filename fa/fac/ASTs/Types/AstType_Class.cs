@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
 	class AstType_Class: IAstType {
-		public AstClass Class { get; set; }
+		public IAstClass Class { get; set; }
 		public List<IAstType> TemplateTypes { get; set; }
 
 

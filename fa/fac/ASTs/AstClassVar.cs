@@ -18,6 +18,7 @@ namespace fac.ASTs {
 
 
 
+		public AstClassVar () { }
 		public AstClassVar (FaParser.ClassVarContext _ctx) {
 			Token = _ctx.Start;
 			//
@@ -49,7 +50,7 @@ namespace fac.ASTs {
 			//	var (_a, _b) = DefaultValue.GenerateCSharp (_indent, "");
 			//	return ("", $"{_a}{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name} = {_b};");
 			//} else {
-			return ("", $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name};", "");
+			return ("", $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType.GenerateCSharp_Type ()} {Name};\r\n", "");
 			//}
 		}
 

@@ -18,7 +18,7 @@ namespace fac.ASTs {
 		/// <summary>
 		/// 当前模块的类列表
 		/// </summary>
-		public List<AstClass> CurrentClasses { get; set; }
+		public List<IAstClass> CurrentClasses { get; set; }
 
 
 
@@ -49,8 +49,11 @@ namespace fac.ASTs {
 			// 处理当前文件引用的外部接口
 			CurrentExternApis = Info.CurrentExternApis = (from p in _ctx.importStmt () select new ExternApi (p)).ToList ();
 
+			// 处理枚举
+			CurrentClasses = (from p in _ctx.enumStmt () select (IAstClass) new AstEnum (p)).ToList ();
+
 			// 处理类
-			CurrentClasses = (from p in _ctx.classStmt () select new AstClass (p)).ToList ();
+			CurrentClasses.AddRange (from p in _ctx.classStmt () select (IAstClass) new AstClass (p));
 		}
 
 		public void Compile () {

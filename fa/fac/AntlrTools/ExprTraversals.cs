@@ -131,10 +131,10 @@ namespace fac.AntlrTools {
 					// 访问类成员
 					// 参数0为对象，当访问静态成员时传null
 					// 参数1为类对象
-					Func<IAstExpr, AstClass, IAstExpr> _access_func = (_obj, _class) => {
+					Func<IAstExpr, IAstClass, IAstExpr> _access_func = (_obj, _class) => {
 						for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
 							if (_class.ClassEnumItems[i].Name == _access_name)
-								return new AstExprName_ClassEnumItem { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i };
+								return new AstExprName_ClassEnumItem { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i, AttachExprs = new List<IAstExpr> () };
 						}
 						for (int i = 0; i < _class.ClassVars.Count; ++i) {
 							if (_class.ClassVars[i].Name == _access_name)
@@ -174,6 +174,8 @@ namespace fac.AntlrTools {
 					&& _op1expr.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
 					_opnexpr.Arguments.Insert (0, _op1expr.Value);
 					_opnexpr.Value = AstExprName_BuildIn.FindFromName ("string.Format");
+				} else if (_opnexpr.Value is AstExprName_ClassEnumItem _ceexpr) {
+					throw new NotImplementedException ();
 				}
 			}
 			return _expr;

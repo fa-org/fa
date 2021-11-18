@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 namespace fac.ASTs {
 	enum AstClassType { Class, Interface, Enum }
 
-	class AstClass: IAst {
+	class AstClass: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public AstClassType ClassType { init; get; }
+		public List<AstClassEnumItem> ClassEnumItems { get; } = new List<AstClassEnumItem> ();
 		public List<AstType_Placeholder> Variants { init; get; }
-		public List<AstClassEnumItem> ClassEnumItems { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
 
@@ -40,10 +40,6 @@ namespace fac.ASTs {
 			//} else {
 			//	Variants = new List<AstType_Placeholder> ();
 			//}
-			//
-			ClassEnumItems = (from p in _ctx.classEnumItem () select new AstClassEnumItem (p)).ToList ();
-			if (ClassType != AstClassType.Enum && ClassEnumItems.Count > 0)
-				throw new CodeException (_ctx.classEnumItem ()[0], $"{ClassType} 类型结构不允许出现枚举成员");
 			//
 			ClassVars = (from p in _ctx.classVar () select new AstClassVar (p)).ToList ();
 			if (ClassType == AstClassType.Enum && ClassVars.Count > 0)

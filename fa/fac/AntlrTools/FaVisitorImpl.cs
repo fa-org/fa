@@ -116,5 +116,6 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitXorAssign (FaParser.XorAssignContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitEnumStmt (FaParser.EnumStmtContext context) => throw new NotImplementedException ();
 	}
 }

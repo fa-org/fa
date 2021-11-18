@@ -52,6 +52,8 @@ namespace fac.ASTs.Types {
 					//
 					if (_type_str == "any") {
 						_ret = new AstType_Any { Token = _ctx.Start };
+					} else if (_type_str == "bool") {
+						_ret = new AstType_Bool { Token = _ctx.Start };
 					} else if (_type_str == "string") {
 						_ret = new AstType_String { Token = _ctx.Start };
 					} else if (_type_str == "void") {
@@ -120,28 +122,33 @@ namespace fac.ASTs.Types {
 			return _list;
 		}
 
-		public bool IsSame (IAstType _other) => this switch {
-			AstType_ArrayWrap _arrtype1 when _other is AstType_ArrayWrap _arrtype2 => _arrtype1.ItemType.IsSame (_arrtype2.ItemType),
-			AstType_Class _clstype1 when _other is AstType_Class _clstype2 => _clstype1.Class.FullName == _clstype2.Class.FullName,
-			AstType_Float _ftype1 when _other is AstType_Float _ftype2 => _ftype1.BitWidth == _ftype2.BitWidth,
-			AstType_Func _functype1 when _other is AstType_Func _functype2 => new Func<bool> (() => {
-				if (_functype1.ArgumentTypes.Count != _functype2.ArgumentTypes.Count)
-					return false;
-				if ((from _p in _functype1.ArgumentTypes.Zip (_functype2.ArgumentTypes) where !_p.First.IsSame (_p.Second) select 1).Any ())
-					return false;
-				return _functype1.ReturnType == _functype2.ReturnType;
-			}).Invoke (),
-			AstType_Integer _inttype1 when _other is AstType_Integer _inttype2 => _inttype1.BitWidth == _inttype2.BitWidth,
-			AstType_OptionalWrap _otype1 when _other is AstType_OptionalWrap _otype2 => _otype1.ItemType.IsSame (_otype2.ItemType),
-			AstType_Placeholder _ptype1 when _other is AstType_Placeholder _ptype2 => _ptype1.Name == _ptype2.Name,
-			AstType_String when _other is AstType_String => true,
-			AstType_Tuple _tptype1 when _other is AstType_Tuple _tptype2 => new Func<bool> (() => {
-				if (_tptype1.TupleTypes.Count != _tptype2.TupleTypes.Count)
-					return false;
-				return !(from _p in _tptype1.TupleTypes.Zip (_tptype2.TupleTypes) where !_p.First._type.IsSame (_p.Second._type) select 1).Any ();
-			}).Invoke (),
-			AstType_Void when _other is AstType_Void => true,
-			_ => false,
-		};
+		public bool IsSame (IAstType _other) {
+			if (_other == null)
+				return false;
+			return this switch {
+				AstType_ArrayWrap _arrtype1 when _other is AstType_ArrayWrap _arrtype2 => _arrtype1.ItemType.IsSame (_arrtype2.ItemType),
+				AstType_Bool when _other is AstType_Bool => true,
+				AstType_Class _clstype1 when _other is AstType_Class _clstype2 => _clstype1.Class.FullName == _clstype2.Class.FullName,
+				AstType_Float _ftype1 when _other is AstType_Float _ftype2 => _ftype1.BitWidth == _ftype2.BitWidth,
+				AstType_Func _functype1 when _other is AstType_Func _functype2 => new Func<bool> (() => {
+					if (_functype1.ArgumentTypes.Count != _functype2.ArgumentTypes.Count)
+						return false;
+					if ((from _p in _functype1.ArgumentTypes.Zip (_functype2.ArgumentTypes) where !_p.First.IsSame (_p.Second) select 1).Any ())
+						return false;
+					return _functype1.ReturnType == _functype2.ReturnType;
+				}).Invoke (),
+				AstType_Integer _inttype1 when _other is AstType_Integer _inttype2 => _inttype1.BitWidth == _inttype2.BitWidth,
+				AstType_OptionalWrap _otype1 when _other is AstType_OptionalWrap _otype2 => _otype1.ItemType.IsSame (_otype2.ItemType),
+				AstType_Placeholder _ptype1 when _other is AstType_Placeholder _ptype2 => _ptype1.Name == _ptype2.Name,
+				AstType_String when _other is AstType_String => true,
+				AstType_Tuple _tptype1 when _other is AstType_Tuple _tptype2 => new Func<bool> (() => {
+					if (_tptype1.TupleTypes.Count != _tptype2.TupleTypes.Count)
+						return false;
+					return !(from _p in _tptype1.TupleTypes.Zip (_tptype2.TupleTypes) where !_p.First._type.IsSame (_p.Second._type) select 1).Any ();
+				}).Invoke (),
+				AstType_Void when _other is AstType_Void => true,
+				_ => false,
+			};
+		}
 	}
 }

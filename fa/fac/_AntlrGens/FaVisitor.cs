@@ -452,6 +452,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitClassType([NotNull] FaParser.ClassTypeContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.enumStmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitEnumStmt([NotNull] FaParser.EnumStmtContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.classStmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

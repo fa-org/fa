@@ -245,9 +245,10 @@ stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | whileStmt2 | forStmt |
 //
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
-classType:					Class | Interface | Enum;
+classType:					Class | Interface;
 //classVariant:				QuotJianL Id (Comma Id)* QuotJianR;
-classStmt:					publicLevel? classType Id classParent? QuotHuaL classEnumItem* (classVar | classFunc)* QuotHuaR;
+enumStmt:					publicLevel? Enum Id QuotHuaL (classEnumItem (Comma classEnumItem)* Comma?)? QuotHuaR;
+classStmt:					publicLevel? classType Id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
 							// classParent 由 class 和 struct 专属使用
 							// enumItems 由 enum 专属使用
 							// enum 的 classVar 不允许使用
@@ -260,7 +261,7 @@ classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnumItem:				Id (QuotYuanL type QuotYuanR)? Comma;
+classEnumItem:				Id (QuotYuanL type QuotYuanR)?;
 
 
 
@@ -278,7 +279,7 @@ namespaceStmt:				Namespace ids;
 //
 // fa_entry_main
 //
-program:					(useStmt | importStmt | libStmt | namespaceStmt)* classStmt*;
+program:					(useStmt | importStmt | libStmt | namespaceStmt)* (enumStmt | classStmt)*;
 
 
 

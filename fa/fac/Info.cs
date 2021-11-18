@@ -33,8 +33,8 @@ namespace fac {
 		/// 项目所有源码文件的AST
 		/// </summary>
 		public static List<AstProgram> Programs = new List<AstProgram> ();
-		public static List<AstClass> GetClassFromName (string _name) {
-			var _classes = new List<AstClass> (); // 非绝对路径，收集起来，避免重复名称
+		public static List<IAstClass> GetClassFromName (string _name) {
+			var _classes = new List<IAstClass> (); // 非绝对路径，收集起来，避免重复名称
 			foreach (var _program in Info.Programs) {
 				foreach (var _class in _program.CurrentClasses) {
 					if (_class.FullName.Length >= _name.Length) {
