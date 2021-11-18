@@ -272,6 +272,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitType([NotNull] FaParser.TypeContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeList"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeList([NotNull] FaParser.TypeListContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.typeVar"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

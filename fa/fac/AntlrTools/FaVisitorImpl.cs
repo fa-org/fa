@@ -112,6 +112,7 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeAfter (FaParser.TypeAfterContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeSingle (FaParser.TypeSingleContext context) => throw new NotImplementedException ();
 		public IAst VisitTypeMulti (FaParser.TypeMultiContext context) => throw new NotImplementedException ();
+		public IAst VisitTypeList (FaParser.TypeListContext context) => throw new NotImplementedException ();
 		public IAst VisitTypeVar (FaParser.TypeVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();

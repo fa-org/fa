@@ -165,6 +165,7 @@ type:						Params? (typeSingle | typeMulti) typeAfter*;
 //
 // list
 //
+typeList:					type (Comma type)*;
 typeVar:					type Id?;
 typeVarList:				typeVar (Comma typeVar)*;
 //eTypeVar:					eType Id?;
@@ -261,7 +262,7 @@ classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnumItem:				Id (QuotYuanL type QuotYuanR)?;
+classEnumItem:				Id (QuotYuanL typeList QuotYuanR)?;
 
 
 

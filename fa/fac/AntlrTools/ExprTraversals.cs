@@ -174,7 +174,12 @@ namespace fac.AntlrTools {
 					&& _op1expr.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
 					_opnexpr.Arguments.Insert (0, _op1expr.Value);
 					_opnexpr.Value = AstExprName_BuildIn.FindFromName ("string.Format");
-				} else if (_opnexpr.Value is AstExprName_ClassEnumItem _ceexpr) {
+				} else if (_opnexpr.Value is AstExprName_ClassEnumItem _ceiexpr) {
+					_ceiexpr.AttachExprs = _opnexpr.Arguments;
+					return _ceiexpr;
+				}
+			} else if (_expr is AstExpr_Op2 _op2expr && (_op2expr.Operator == "==" || _op2expr.Operator == "!=")) {
+				if (_op2expr.Value1 is AstExprName_ClassEnumItem _ceiexpr || (_op2expr.Value1 is AstExprName_Class _clsexpr && _clsexpr.Class is AstEnum)) {
 					throw new NotImplementedException ();
 				}
 			}
