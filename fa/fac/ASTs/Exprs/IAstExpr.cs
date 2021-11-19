@@ -218,6 +218,8 @@ namespace fac.ASTs.Exprs {
 				_expr.InitValues = (from p in _ctx.arrayExpr2 ().expr () select FromContext (p)).ToList ();
 				_expr.InitCount = FromValue ("int", $"{_expr.InitValues.Count}");
 				return _expr;
+			} else if (_ctx.switchExpr () != null) {
+				throw new UnimplException (_ctx);
 			} else {
 				throw new UnimplException (_ctx);
 			}

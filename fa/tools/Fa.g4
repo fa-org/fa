@@ -165,7 +165,6 @@ type:						Params? (typeSingle | typeMulti) typeAfter*;
 //
 // list
 //
-typeList:					type (Comma type)*;
 typeVar:					type Id?;
 typeVarList:				typeVar (Comma typeVar)*;
 //eTypeVar:					eType Id?;
@@ -196,8 +195,10 @@ forStmt2:					For type Id Colon expr QuotHuaL stmt* QuotHuaR;
 //
 // switch
 //
-//switchStmtPart:				expr
-//switchStmt:					Switch expr QuotHuaL QuotHuaR;
+switchStmtPart:				expr exprFuncDef stmt;
+switchStmt:					Switch expr QuotHuaL switchStmtPart* QuotHuaR;
+switchExprPart:				expr exprFuncDef (expr | quotStmtExpr);
+switchExpr:					Switch expr QuotHuaL switchExprPart* QuotHuaR;
 
 
 
@@ -212,7 +213,7 @@ newExpr2:					New ids? QuotYuanL (expr (Comma expr)*)? QuotYuanR;
 //newArray:					New ids? QuotFangL middleExpr QuotFangR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
-strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2;
+strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// Ç°×º - ++ -- ~
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
@@ -237,7 +238,7 @@ defVarStmt:					type Id Assign expr Semi;
 // stmt
 //
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
-stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | whileStmt2 | forStmt | forStmt2;
+stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt;
 
 
 
@@ -262,7 +263,7 @@ classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnumItem:				Id (QuotYuanL typeList QuotYuanR)?;
+classEnumItem:				Id (QuotYuanL type QuotYuanR)?;
 
 
 

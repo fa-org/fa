@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace fac.ASTs {
 	class AstClassEnumItem: IAst {
 		public string Name { init; get; }
-		public List<IAstType> AttachTypes { init; get; }
+		public IAstType AttachType { init; get; } = null;
 
 
 
@@ -18,7 +18,8 @@ namespace fac.ASTs {
 			//
 			Name = _ctx.Id ().GetText ();
 			//
-			AttachTypes = IAstType.FromContexts (_ctx.typeList ().type ());
+			if (_ctx.type () != null)
+				AttachType = IAstType.FromContext (_ctx.type ());
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => throw new NotImplementedException ();

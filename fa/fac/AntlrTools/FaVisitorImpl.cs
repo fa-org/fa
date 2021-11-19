@@ -112,11 +112,14 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeAfter (FaParser.TypeAfterContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeSingle (FaParser.TypeSingleContext context) => throw new NotImplementedException ();
 		public IAst VisitTypeMulti (FaParser.TypeMultiContext context) => throw new NotImplementedException ();
-		public IAst VisitTypeList (FaParser.TypeListContext context) => throw new NotImplementedException ();
 		public IAst VisitTypeVar (FaParser.TypeVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitXorAssign (FaParser.XorAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitEnumStmt (FaParser.EnumStmtContext context) => throw new NotImplementedException ();
+		public IAst VisitSwitchStmtPart (FaParser.SwitchStmtPartContext context) => throw new NotImplementedException ();
+		public IAst VisitSwitchStmt (FaParser.SwitchStmtContext context) => throw new NotImplementedException ();
+		public IAst VisitSwitchExprPart (FaParser.SwitchExprPartContext context) => throw new NotImplementedException ();
+		public IAst VisitSwitchExpr (FaParser.SwitchExprContext context) => throw new NotImplementedException ();
 	}
 }

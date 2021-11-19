@@ -80,6 +80,10 @@ namespace fac.ASTs.Stmts {
 				_forstmt2.ListContainer = FromContext (_ctx.forStmt2 ().expr ());
 				_forstmt2.BodyCodes = FromStmts (_ctx.forStmt ().stmt ()[1..]);
 				return _forstmt2;
+			} else if (_ctx.quotStmtPart () != null) {
+				throw new UnimplException (_ctx.Start);
+			} else if (_ctx.switchStmt () != null) {
+				throw new UnimplException (_ctx.Start);
 			}
 			throw new UnimplException (_ctx.Start);
 		}

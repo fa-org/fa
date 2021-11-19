@@ -272,12 +272,6 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitType([NotNull] FaParser.TypeContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.typeList"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitTypeList([NotNull] FaParser.TypeListContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.typeVar"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -337,6 +331,30 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitForStmt2([NotNull] FaParser.ForStmt2Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchStmtPart"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchStmtPart([NotNull] FaParser.SwitchStmtPartContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchStmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchStmt([NotNull] FaParser.SwitchStmtContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchExprPart"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchExprPart([NotNull] FaParser.SwitchExprPartContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchExpr([NotNull] FaParser.SwitchExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.quotExpr"/>.
 	/// </summary>

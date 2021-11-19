@@ -10,7 +10,11 @@ namespace fac.ASTs {
 		List<AstClassEnumItem> ClassEnumItems { get; }
 		List<AstClassVar> ClassVars { get; }
 		List<AstClassFunc> ClassFuncs { get; }
+
 		void Compile ();
-		public (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb);
+		(string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb);
+
+		// 计算枚举类型所对应的附加变量的实际映射变量位置
+		public int GetRealAttachVarPos (int _enum_index) => -1;
 	}
 }

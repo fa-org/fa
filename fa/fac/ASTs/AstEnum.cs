@@ -35,6 +35,15 @@ namespace fac.ASTs {
 			ClassVars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
 		}
 
+		public int GetRealAttachVarPos (int _enum_index) {
+			var _attach_type = ClassEnumItems[_enum_index].AttachType;
+			for (int i = 1; i < ClassVars.Count; ++i) {
+				if (_attach_type.IsSame (ClassVars[i].DataType))
+					return i;
+			}
+			return -1;
+		}
+
 		public void Compile () {
 			Info.CurrentClass = null;
 			Info.CurrentFuncVariables = null;

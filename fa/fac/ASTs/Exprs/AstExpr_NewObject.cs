@@ -28,7 +28,6 @@ namespace fac.ASTs.Exprs {
 					throw new CodeException (Token, "无法猜测对象类型");
 				DataType = _expect_type as AstType_Class;
 			}
-			ExpectType = DataType;
 			if (InitialValues != null) {
 				var _default_init_vals = new List<(string _name, IAstExpr _value)> ();
 				foreach (var _vars in DataType.Class.ClassVars) {
@@ -50,6 +49,7 @@ namespace fac.ASTs.Exprs {
 				// TODO 检查构造函数参数
 				throw new UnimplException (Token);
 			}
+			ExpectType = DataType;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 

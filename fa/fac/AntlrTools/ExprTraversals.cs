@@ -134,7 +134,7 @@ namespace fac.AntlrTools {
 					Func<IAstExpr, IAstClass, IAstExpr> _access_func = (_obj, _class) => {
 						for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
 							if (_class.ClassEnumItems[i].Name == _access_name)
-								return new AstExprName_ClassEnumItem { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i, AttachExprs = new List<IAstExpr> () };
+								return new AstExprName_ClassEnum { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i, AttachExpr = null };
 						}
 						for (int i = 0; i < _class.ClassVars.Count; ++i) {
 							if (_class.ClassVars[i].Name == _access_name)
@@ -174,13 +174,80 @@ namespace fac.AntlrTools {
 					&& _op1expr.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
 					_opnexpr.Arguments.Insert (0, _op1expr.Value);
 					_opnexpr.Value = AstExprName_BuildIn.FindFromName ("string.Format");
-				} else if (_opnexpr.Value is AstExprName_ClassEnumItem _ceiexpr) {
-					_ceiexpr.AttachExprs = _opnexpr.Arguments;
+				} else if (_opnexpr.Value is AstExprName_ClassEnum _ceiexpr) {
+					if (_opnexpr.Arguments.Count != 1)
+						throw new CodeException (_ceiexpr.Token, "附带参数只能是一个");
+					_ceiexpr.AttachExpr = _opnexpr.Arguments[0];
 					return _ceiexpr;
 				}
 			} else if (_expr is AstExpr_Op2 _op2expr && (_op2expr.Operator == "==" || _op2expr.Operator == "!=")) {
-				if (_op2expr.Value1 is AstExprName_ClassEnumItem _ceiexpr || (_op2expr.Value1 is AstExprName_Class _clsexpr && _clsexpr.Class is AstEnum)) {
-					throw new NotImplementedException ();
+				IAstClass _enum = null;
+				if (_op2expr.Value1 is AstExprName_ClassEnum _ceiexpr)
+					_enum = _ceiexpr.EnumClass;
+				if (_op2expr.Value1.GuessType () is AstType_Class _ctype && _ctype.Class is AstEnum _enum1)
+					_enum = _enum1;
+				if (_enum != null) {
+					int _enum_index = -1;
+					if (_op2expr.Value1 is AstExprName_ClassEnum _ceiexpr1)
+						_enum_index = _ceiexpr1.EnumItemIndex;
+					if (_op2expr.Value2 is AstExprName_ClassEnum _ceiexpr2) {
+						if (_enum_index != -1 && _enum_index != _ceiexpr2.EnumItemIndex)
+							throw new CodeException (_expr.Token, "表达式两边不能同时出现不同的枚举值");
+						_enum_index = (_enum_index != -1) ? _enum_index : _ceiexpr2.EnumItemIndex;
+					}
+					if (_enum_index == -1) {
+						// TODO 判断完等式再识别index，判断对应attach value，这段代码以后再写
+						throw new NotImplementedException ();
+					}
+
+					// 获得提取index的表达式
+					Func<IAstExpr, IAstExpr> _get_index = (_expr0) => {
+						if (_expr0 is AstExprName_ClassEnum _expr1) {
+							return IAstExpr.FromValue ("int", $"{_enum_index}");
+						} else if (_expr0.GuessType () is AstType_Class _expr2 && _expr2.Class is AstEnum) {
+							return new AstExprName_ClassVar { Token = _expr0.Token, Class = _enum, VariableIndex = 0, ThisObject = _expr0 };
+						} else {
+							throw new CodeException (_expr0.Token, "表达式两端无法比较");
+						}
+					};
+
+					// 获得提取attach的表达式
+					Func<IAstExpr, IAstExpr> _get_attach = (_expr0) => {
+						if (_expr0 is AstExprName_ClassEnum _expr1) {
+							return _expr1.AttachExpr;
+						} else if (_expr0.GuessType () is AstType_Class _expr2 && _expr2.Class is AstEnum) {
+							int _real_var_index = _enum.GetRealAttachVarPos (_enum_index);
+							return new AstExprName_ClassVar { Token = _expr0.Token, Class = _enum, VariableIndex = _real_var_index, ThisObject = _expr0 };
+						} else {
+							throw new CodeException (_expr0.Token, "表达式两端无法比较");
+						}
+					};
+
+					if (_enum.ClassEnumItems[_enum_index].AttachType == null) {
+						return new AstExpr_Op2 {
+							Token = _op2expr.Token,
+							Value1 = _get_index (_op2expr.Value1),
+							Value2 = _get_index (_op2expr.Value2),
+							Operator = _op2expr.Operator
+						};
+					} else {
+						return new AstExpr_Op2 {
+							Token = _op2expr.Token,
+							Value1 = new AstExpr_Op2 {
+								Token = _op2expr.Token,
+								Value1 = _get_index (_op2expr.Value1),
+								Value2 = _get_index (_op2expr.Value2),
+								Operator = _op2expr.Operator
+							},
+							Value2 = new AstExpr_Op2 {
+								Token = _op2expr.Token,
+								Value1 = _get_attach (_op2expr.Value1),
+								Value2 = _get_attach (_op2expr.Value2),
+								Operator = _op2expr.Operator
+							},
+							Operator = _op2expr.Operator == "==" ? "&&" : "||"
+						};
+					}
 				}
 			}
 			return _expr;
