@@ -73,6 +73,7 @@ allAssign:					Assign | qusQusAssign | addAssign | subAssign | starAssign | star
 ReverseOp:					'~';
 AddAddOp:					'++';
 SubSubOp:					'--';
+Exclam:						'!';
 
 // 二元计算
 PointPoint:					'..';
@@ -98,7 +99,6 @@ Comma:						',';
 ColonColon:					'::';
 Colon:						':';
 Semi:						';';
-Exclam:						'!';
 
 // 括号
 QuotFangL:					'[';
@@ -214,7 +214,7 @@ newExpr2:					New ids? QuotYuanL (expr (Comma expr)*)? QuotYuanR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
 strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr;
-strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp;										// 前缀 - ++ -- ~
+strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// 前缀 - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
@@ -259,7 +259,7 @@ classVarExtFunc:			publicLevel? Id (Semi | classFuncBody);
 classVarExt:				QuotHuaL classVarExtFunc+ QuotHuaR tmpAssignExpr?;
 classVar:					publicLevel? Static? type Id (Semi | tmpAssignExpr | classVarExt);
 //
-classFuncName:				Id | (QuotFangL QuotFangR) | allOp2 | allAssign;
+classFuncName:				Id ((QuotFangL QuotFangR) | allOp2 | allAssign)?;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //

@@ -7,13 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	class AstClassEnumItem: IAst {
+	class AstEnumItem: IAst {
 		public string Name { init; get; }
 		public IAstType AttachType { init; get; } = null;
 
 
 
-		public AstClassEnumItem (FaParser.ClassEnumItemContext _ctx) {
+		public AstEnumItem (FaParser.ClassEnumItemContext _ctx) {
 			Token = _ctx.Start;
 			//
 			Name = _ctx.Id ().GetText ();

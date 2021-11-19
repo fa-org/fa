@@ -15,7 +15,7 @@ namespace fac.ASTs {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public AstClassType ClassType { init; get; }
-		public List<AstClassEnumItem> ClassEnumItems { get; } = new List<AstClassEnumItem> ();
+		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
 		public List<AstType_Placeholder> Variants { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }

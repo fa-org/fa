@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace fac.ASTs {
 	interface IAstClass {
 		string FullName { get; }
-		List<AstClassEnumItem> ClassEnumItems { get; }
+		List<AstEnumItem> ClassEnumItems { get; }
 		List<AstClassVar> ClassVars { get; }
 		List<AstClassFunc> ClassFuncs { get; }
 

@@ -44,6 +44,7 @@ namespace fac.ASTs.Exprs {
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var (_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
+			_b = Value is IAstExprName ? _b : $"({_b})";
 			return (_a, (IsPrefix ? $"{Operator}{_b}" : $"{_b}{Operator}"), _c);
 		}
 

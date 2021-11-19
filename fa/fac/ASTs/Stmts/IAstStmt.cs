@@ -81,7 +81,7 @@ namespace fac.ASTs.Stmts {
 				_forstmt2.BodyCodes = FromStmts (_ctx.forStmt ().stmt ()[1..]);
 				return _forstmt2;
 			} else if (_ctx.quotStmtPart () != null) {
-				throw new UnimplException (_ctx.Start);
+				return new AstStmt_HuaQuotWrap { Token = _ctx.Start, Stmts = FromStmts (_ctx.quotStmtPart ().stmt ()) };
 			} else if (_ctx.switchStmt () != null) {
 				throw new UnimplException (_ctx.Start);
 			}

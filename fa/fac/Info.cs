@@ -137,7 +137,7 @@ namespace fac {
 		/// <summary>
 		/// 当前类
 		/// </summary>
-		public static AstClass CurrentClass { get; set; } = null;
+		public static IAstClass CurrentClass { get; set; } = null;
 
 		/// <summary>
 		/// 当前类方法
