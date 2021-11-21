@@ -83,7 +83,11 @@ namespace fac.ASTs.Stmts {
 			} else if (_ctx.quotStmtPart () != null) {
 				return new AstStmt_HuaQuotWrap { Token = _ctx.Start, Stmts = FromStmts (_ctx.quotStmtPart ().stmt ()) };
 			} else if (_ctx.switchStmt () != null) {
-				throw new UnimplException (_ctx.Start);
+				var _t = new AstStmt_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchStmt ().expr ()) };
+				var _switch_items = _ctx.switchStmt ().switchStmtPart ();
+				_t.CaseValues = (from p in _switch_items select FromContext (p.expr ())).ToList ();
+				_t.CaseCodes = (from p in _switch_items select FromContext (p.stmt ())).ToList ();
+				return _t;
 			}
 			throw new UnimplException (_ctx.Start);
 		}

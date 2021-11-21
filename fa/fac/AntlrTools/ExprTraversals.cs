@@ -65,6 +65,9 @@ namespace fac.AntlrTools {
 				// 生成变量定义组
 				Info.CurrentFuncVariables[^1]._vars.Add (_varexpr.VarName, _varexpr);
 			} else if (_expr is AstExpr_BaseId _idexpr) {
+				if (_idexpr.Id == "_")
+					return new AstExprName_Ignore { Token = _expr.Token };
+
 				// 查找预定义名称
 				var _buildinexpr = AstExprName_BuildIn.FindFromName (_idexpr.Id);
 				if (_buildinexpr != null)

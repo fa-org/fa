@@ -31,14 +31,16 @@ namespace fac {
 				_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
 		}
 
-		public static void TraversalCalcType (this List<IAstExpr> _exprs) {
+		public static void TraversalCalcType (this List<IAstExpr> _exprs, IAstType _expect_type = null) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i)
-				_exprs[i] = _exprs[i].TraversalCalcType (null);
+				_exprs[i] = _exprs[i].TraversalCalcType (_expect_type);
 		}
 
 		public static void TraversalCalcType (this List<IAstStmt> _stmts) {
-			for (int i = 0; i < (_stmts?.Count ?? 0); ++i)
-				_stmts[i] = _stmts[i].TraversalCalcType (null) as IAstStmt;
+			for (int i = 0; i < (_stmts?.Count ?? 0); ++i) {
+				if (_stmts[i] != null)
+					_stmts[i] = _stmts[i].TraversalCalcType (null) as IAstStmt;
+			}
 		}
 
 		public static void AppendExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {

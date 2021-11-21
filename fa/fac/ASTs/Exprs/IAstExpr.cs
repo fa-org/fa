@@ -219,7 +219,18 @@ namespace fac.ASTs.Exprs {
 				_expr.InitCount = FromValue ("int", $"{_expr.InitValues.Count}");
 				return _expr;
 			} else if (_ctx.switchExpr () != null) {
-				throw new UnimplException (_ctx);
+				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchExpr ().expr ()) };
+				var _switch_items = _ctx.switchExpr ().switchExprPart ();
+				_t.CaseValues = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
+				//_t.CaseCodes = (from p in _switch_items select p.expr ()[1] != null ? null : new AstStmt_HuaQuotWrap { Token = p.Start, Stmts = IAstStmt.FromStmts (p.quotStmtExpr ().stmt ()) } as IAstStmt).ToList ();
+				//_t.CaseValue2s = (from p in _switch_items select p.expr ()[1] != null ? FromContext (p.expr ()[1]) : FromContext (p.quotStmtExpr ().expr ())).ToList ();
+				_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
+				for (int i = 0; i < _switch_items.Length; ++i) {
+					var _stmts = _switch_items[i].expr ()[1] != null ? new List<IAstStmt> () : IAstStmt.FromStmts (_switch_items[i].quotStmtExpr ().stmt ());
+					var _expr = FromContext (_switch_items[i].expr ()[1] != null ? _switch_items[i].expr ()[1] : _switch_items[i].quotStmtExpr ().expr ());
+					_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
+				}
+				return _t;
 			} else {
 				throw new UnimplException (_ctx);
 			}

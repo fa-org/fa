@@ -52,7 +52,7 @@ namespace fac.ASTs.Exprs {
 			} else {
 				StringBuilder _psb = new StringBuilder ();
 				var _tmp_var_name = Common.GetTempId ();
-				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{ExpectType} {_tmp_var_name};");
+				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{ExpectType.GenerateCSharp_Type ()} {_tmp_var_name};");
 				_psb.AppendLine ($"{_indent.Indent ()}if ({_b}) {{");
 				_psb.AppendStmts (IfTrueCodes, _indent + 1);
 				_psb.Append (_d).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_e};").Append (_f);

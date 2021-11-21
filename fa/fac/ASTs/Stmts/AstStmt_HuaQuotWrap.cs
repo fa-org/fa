@@ -25,7 +25,7 @@ namespace fac.ASTs.Stmts {
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{{");
 			_sb.AppendStmts (Stmts, _indent + 1);
-			_sb.AppendLine ($"}}");
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return ("", _sb.ToString (), "");
 		}
 	}

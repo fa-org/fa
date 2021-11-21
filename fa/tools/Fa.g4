@@ -197,7 +197,7 @@ forStmt2:					For type Id Colon expr QuotHuaL stmt* QuotHuaR;
 //
 switchStmtPart:				expr exprFuncDef stmt;
 switchStmt:					Switch expr QuotHuaL switchStmtPart* QuotHuaR;
-switchExprPart:				expr exprFuncDef (expr | quotStmtExpr);
+switchExprPart:				expr exprFuncDef (expr | quotStmtExpr) Comma;
 switchExpr:					Switch expr QuotHuaL switchExprPart* QuotHuaR;
 
 
