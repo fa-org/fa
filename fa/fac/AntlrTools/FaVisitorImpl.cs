@@ -61,6 +61,7 @@ namespace fac.AntlrTools {
 		public IAst VisitFloatNum (FaParser.FloatNumContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitGtEqualOp (FaParser.GtEqualOpContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitGtOp (FaParser.GtOpContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitId (FaParser.IdContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIds (FaParser.IdsContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIfExpr (FaParser.IfExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIfStmt (FaParser.IfStmtContext _ctx) => throw new NotImplementedException ();
@@ -90,6 +91,7 @@ namespace fac.AntlrTools {
 		public IAst VisitPublicLevel (FaParser.PublicLevelContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitQuotExpr (FaParser.QuotExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitQuotStmtExpr (FaParser.QuotStmtExprContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotStmtExprWrap (FaParser.QuotStmtExprWrapContext context) => throw new NotImplementedException ();
 		public IAst VisitQuotStmtPart (FaParser.QuotStmtPartContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitQusQusAssign (FaParser.QusQusAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitQusQusOp (FaParser.QusQusOpContext _ctx) => throw new NotImplementedException ();
@@ -121,5 +123,11 @@ namespace fac.AntlrTools {
 		public IAst VisitSwitchStmt (FaParser.SwitchStmtContext context) => throw new NotImplementedException ();
 		public IAst VisitSwitchExprPart (FaParser.SwitchExprPartContext context) => throw new NotImplementedException ();
 		public IAst VisitSwitchExpr (FaParser.SwitchExprContext context) => throw new NotImplementedException ();
+		public IAst VisitSwitchStmtPart2Last (FaParser.SwitchStmtPart2LastContext context) => throw new NotImplementedException ();
+		public IAst VisitSwitchExprPartLast (FaParser.SwitchExprPartLastContext context) => throw new NotImplementedException ();
+		public IAst VisitSwitchStmtPart2 (FaParser.SwitchStmtPart2Context context) => throw new NotImplementedException ();
+		public IAst VisitSwitchStmt2 (FaParser.SwitchStmt2Context context) => throw new NotImplementedException ();
+		public IAst VisitSwitchExprPart2 (FaParser.SwitchExprPart2Context context) => throw new NotImplementedException ();
+		public IAst VisitSwitchExpr2 (FaParser.SwitchExpr2Context context) => throw new NotImplementedException ();
 	}
 }

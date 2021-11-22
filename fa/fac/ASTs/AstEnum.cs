@@ -23,7 +23,7 @@ namespace fac.ASTs {
 		public AstEnum (FaParser.EnumStmtContext _ctx) {
 			Token = _ctx.Start;
 			//
-			FullName = $"{Info.CurrentNamespace}.{_ctx.Id ().GetText ()}";
+			FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}";
 			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			//

@@ -16,7 +16,7 @@ namespace fac.ASTs {
 		public AstEnumItem (FaParser.ClassEnumItemContext _ctx) {
 			Token = _ctx.Start;
 			//
-			Name = _ctx.Id ().GetText ();
+			Name = _ctx.id ().GetText ();
 			//
 			if (_ctx.type () != null)
 				AttachType = IAstType.FromContext (_ctx.type ());

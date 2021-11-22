@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace fac.AntlrTools {
 	class AstElemParser {
 		public static (IAstType _type, string _name) Parse (FaParser.TypeVarContext _ctx) {
-			return (IAstType.FromContext (_ctx.type ()), (_ctx.Id () != null ? _ctx.Id ().GetText () : ""));
+			return (IAstType.FromContext (_ctx.type ()), (_ctx.id () != null ? _ctx.id ().GetText () : ""));
 		}
 
 		public static List<(IAstType _type, string _name)> Parse (FaParser.TypeVarListContext _ctx) {

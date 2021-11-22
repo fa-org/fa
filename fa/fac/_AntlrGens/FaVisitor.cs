@@ -242,6 +242,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLiteral([NotNull] FaParser.LiteralContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.id"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitId([NotNull] FaParser.IdContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.ids"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -332,6 +338,24 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitForStmt2([NotNull] FaParser.ForStmt2Context context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchStmtPart2Last"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchStmtPart2Last([NotNull] FaParser.SwitchStmtPart2LastContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.quotStmtExprWrap"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitQuotStmtExprWrap([NotNull] FaParser.QuotStmtExprWrapContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchExprPartLast"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchExprPartLast([NotNull] FaParser.SwitchExprPartLastContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.switchStmtPart"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -344,6 +368,18 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitSwitchStmt([NotNull] FaParser.SwitchStmtContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchStmtPart2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchStmtPart2([NotNull] FaParser.SwitchStmtPart2Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchStmt2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchStmt2([NotNull] FaParser.SwitchStmt2Context context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.switchExprPart"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -355,6 +391,18 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitSwitchExpr([NotNull] FaParser.SwitchExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchExprPart2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchExprPart2([NotNull] FaParser.SwitchExprPart2Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.switchExpr2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSwitchExpr2([NotNull] FaParser.SwitchExpr2Context context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.quotExpr"/>.
 	/// </summary>

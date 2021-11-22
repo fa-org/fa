@@ -25,14 +25,14 @@ namespace fac.ASTs {
 		public AstClass (FaParser.ClassStmtContext _ctx) {
 			Token = _ctx.Start;
 			//
-			FullName = $"{Info.CurrentNamespace}.{_ctx.Id ().GetText ()}";
+			FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}";
 			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			//
 			ClassType = Common.ParseEnum<AstClassType> (_ctx.classType ().GetText ()) ?? AstClassType.Class;
 			//
 			//if (_ctx.classVariant () != null) {
-			//	Variants = (from p in _ctx.classVariant ().Id () select new AstType_Placeholder { Token = p.Symbol, Name = p.GetText () }).ToList ();
+			//	Variants = (from p in _ctx.classVariant ().id () select new AstType_Placeholder { Token = p.Symbol, Name = p.GetText () }).ToList ();
 			//	foreach (var _var in Variants) {
 			//		if (_var.Name[0] != 'T')
 			//			throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");

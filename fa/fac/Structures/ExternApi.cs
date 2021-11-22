@@ -28,7 +28,7 @@ namespace fac.Structures {
 				throw new UnimplException (_ctx.callConvention ());
 			}
 			//
-			Name = _ctx.Id ().GetText ();
+			Name = _ctx.id ().GetText ();
 			//
 			ParamTypes = (from p in _ctx.typeVarList ().typeVar () select p.type ().GetText ()).ToList ();
 		}

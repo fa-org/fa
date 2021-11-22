@@ -37,8 +37,8 @@ namespace fac.ASTs.Types {
 
 			IAstType _ret = null;
 			if (_ctx.typeSingle () != null) {
-				// Id<xxx>、Id?
-				string _type_str = _ctx.typeSingle ().Id ().GetText ();
+				// id<xxx>、id?
+				string _type_str = _ctx.typeSingle ().id ().GetText ();
 				var _templates1 = FromContexts (_ctx.typeSingle ().type ());
 				if ((_templates1?.Count ?? 0) == 0) {
 					var _floattype = AstType_Float.FromType (_type_str, _ctx.Start);
@@ -102,20 +102,20 @@ namespace fac.ASTs.Types {
 		public static List<IAstType> FromContexts (FaParser.TypeContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
 
 		public static (IAstType _type, string _name) FromContext (FaParser.TypeVarContext _ctx) {
-			return (_type: FromContext (_ctx.type ()), _ctx.Id () != null ? _ctx.Id ().GetText () : "");
+			return (_type: FromContext (_ctx.type ()), _ctx.id () != null ? _ctx.id ().GetText () : "");
 		}
 
 		public static List<(IAstType _type, string _name)> FromContexts (FaParser.TypeVarContext[] _ctxs) {
 			var _list = new List<(IAstType _type, string _name)> ();
 			for (int i = 0; i < _ctxs.Length; ++i) {
 				var _type = FromContext (_ctxs[i].type ());
-				var _name = _ctxs[i].Id ()?.GetText () ?? "";
+				var _name = _ctxs[i].id ()?.GetText () ?? "";
 				if (_name == "") {
 					_name = $"Item{i}";
 				} else if (_name.StartsWith ("Item")) {
 					if (int.TryParse (_name[4..], out int n)) {
 						if (n != i)
-							throw new CodeException (_ctxs[i].Id ().Symbol, $"此位置无法使用 {_name} 作为命名元组的项名称");
+							throw new CodeException (_ctxs[i].id ().Start, $"此位置无法使用 {_name} 作为命名元组的项名称");
 					}
 				}
 			}

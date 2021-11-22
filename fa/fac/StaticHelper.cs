@@ -22,18 +22,24 @@ namespace fac {
 		public static string Indent (this int _indent) => new string (' ', _indent * 4);
 
 		public static void Traversal (this List<IAstExpr> _exprs, int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			for (int i = 0; i < (_exprs?.Count ?? 0); ++i)
-				_exprs[i] = _cb (_exprs[i], _deep, _group);
+			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
+				if (_exprs[i] != null)
+					_exprs[i] = _cb (_exprs[i], _deep, _group);
+			}
 		}
 
 		public static void Traversal (this List<IAstStmt> _stmts, int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			for (int i = 0; i < (_stmts?.Count ?? 0); ++i)
-				_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
+			for (int i = 0; i < (_stmts?.Count ?? 0); ++i) {
+				if (_stmts[i] != null)
+					_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
+			}
 		}
 
 		public static void TraversalCalcType (this List<IAstExpr> _exprs, IAstType _expect_type = null) {
-			for (int i = 0; i < (_exprs?.Count ?? 0); ++i)
-				_exprs[i] = _exprs[i].TraversalCalcType (_expect_type);
+			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
+				if (_exprs[i] != null)
+					_exprs[i] = _exprs[i].TraversalCalcType (_expect_type);
+			}
 		}
 
 		public static void TraversalCalcType (this List<IAstStmt> _stmts) {

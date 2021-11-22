@@ -43,6 +43,7 @@ Step:						'step';
 Switch:						'switch';
 Unsigned:					'unsigned';
 Use:						'use';
+When:						'when';
 While:						'while';
 
 
@@ -99,6 +100,7 @@ Comma:						',';
 ColonColon:					'::';
 Colon:						':';
 Semi:						';';
+Underline:					'_';
 
 // 括号
 QuotFangL:					'[';
@@ -147,8 +149,9 @@ fragment NUM:				[0-9];
 fragment HEX:				NUM | [a-fA-F];
 //fragment ID_BEGIN:			[a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
 //fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-Id:							('@' | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX)) (NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX))*;
-ids:						Id (PointOp Id)*;
+RawId:						('@' | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX)) (NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX))*;
+id:							Underline | RawId;
+ids:						id (PointOp id)*;
 
 
 
@@ -156,7 +159,7 @@ ids:						Id (PointOp Id)*;
 // type
 //
 typeAfter:					(QuotFangL QuotFangR) | Qus;
-typeSingle:					Id (QuotJianL type (Comma type)* QuotJianR)?;
+typeSingle:					id (QuotJianL type (Comma type)* QuotJianR)?;
 typeMulti:					QuotYuanL typeVar (Comma typeVar)+ QuotYuanR;
 type:						Params? (typeSingle | typeMulti) typeAfter*;
 
@@ -165,9 +168,9 @@ type:						Params? (typeSingle | typeMulti) typeAfter*;
 //
 // list
 //
-typeVar:					type Id?;
+typeVar:					type id?;
 typeVarList:				typeVar (Comma typeVar)*;
-//eTypeVar:					eType Id?;
+//eTypeVar:					eType id?;
 //eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 
 
@@ -188,17 +191,26 @@ ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr
 whileStmt:					While expr QuotHuaL stmt* QuotHuaR;
 whileStmt2:					Do QuotHuaL stmt* QuotHuaR While expr;
 forStmt:					For stmt expr Semi (expr (Comma expr)*)? QuotHuaL stmt* QuotHuaR;
-forStmt2:					For type Id Colon expr QuotHuaL stmt* QuotHuaR;
+forStmt2:					For type id Colon expr QuotHuaL stmt* QuotHuaR;
 
 
 
 //
 // switch
 //
-switchStmtPart:				expr exprFuncDef stmt;
+switchStmtPart2Last:		Underline exprFuncDef stmt;
+quotStmtExprWrap:			quotStmtExpr | expr;
+switchExprPartLast:			Underline exprFuncDef quotStmtExprWrap Comma;
+//
+switchStmtPart:				expr (When expr)? exprFuncDef stmt;
 switchStmt:					Switch expr QuotHuaL switchStmtPart* QuotHuaR;
-switchExprPart:				expr exprFuncDef (expr | quotStmtExpr) Comma;
-switchExpr:					Switch expr QuotHuaL switchExprPart* QuotHuaR;
+switchStmtPart2:			When expr exprFuncDef stmt;
+switchStmt2:				Switch QuotHuaL switchStmtPart2* switchStmtPart2Last QuotHuaR;
+//
+switchExprPart:				expr (When expr)? exprFuncDef quotStmtExprWrap Comma;
+switchExpr:					Switch expr QuotHuaL switchExprPart* switchExprPartLast QuotHuaR;
+switchExprPart2:			When expr exprFuncDef quotStmtExprWrap Comma;
+switchExpr2:				Switch QuotHuaL switchExprPart2* switchExprPartLast QuotHuaR;
 
 
 
@@ -207,18 +219,18 @@ switchExpr:					Switch expr QuotHuaL switchExprPart* QuotHuaR;
 //
 quotExpr:					QuotYuanL expr QuotYuanR;
 exprOpt:					expr?;
-newExprItem:				Id (Assign middleExpr)?;
+newExprItem:				id (Assign middleExpr)?;
 newExpr1:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
 newExpr2:					New ids? QuotYuanL (expr (Comma expr)*)? QuotYuanR;
 //newArray:					New ids? QuotFangL middleExpr QuotFangR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
-strongExprBase:				(ColonColon? Id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr;
+strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// 前缀 - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
-							| (PointOp Id)																	//     wnd.Name
+							| (PointOp id)																	//     wnd.Name
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
 middleExpr:					strongExpr (allOp2 strongExpr)*;												//     a == 24    a + b - c
@@ -230,7 +242,7 @@ expr:						middleExpr ((Qus strongExprBase Colon strongExprBase) | (allAssign mi
 // define variable
 //
 tmpAssignExpr:				Assign middleExpr Semi;
-defVarStmt:					type Id Assign expr Semi;
+defVarStmt:					type id Assign expr Semi;
 
 
 
@@ -238,7 +250,7 @@ defVarStmt:					type Id Assign expr Semi;
 // stmt
 //
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
-stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt;
+stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
 
 
 
@@ -248,22 +260,22 @@ stmt:						normalStmt | ifStmt | defVarStmt | whileStmt | whileStmt2 | forStmt |
 publicLevel:				Public | Internal | Protected | Private;
 classParent:				Colon ids (Comma ids)*;
 classType:					Class | Interface;
-//classVariant:				QuotJianL Id (Comma Id)* QuotJianR;
-enumStmt:					publicLevel? Enum Id QuotHuaL (classEnumItem (Comma classEnumItem)* Comma?)? QuotHuaR;
-classStmt:					publicLevel? classType Id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
+//classVariant:				QuotJianL id (Comma id)* QuotJianR;
+enumStmt:					publicLevel? Enum id QuotHuaL (classEnumItem (Comma classEnumItem)* Comma?)? QuotHuaR;
+classStmt:					publicLevel? classType id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
 							// classParent 由 class 和 struct 专属使用
 							// enumItems 由 enum 专属使用
 							// enum 的 classVar 不允许使用
 //
-classVarExtFunc:			publicLevel? Id (Semi | classFuncBody);
+classVarExtFunc:			publicLevel? id (Semi | classFuncBody);
 classVarExt:				QuotHuaL classVarExtFunc+ QuotHuaR tmpAssignExpr?;
-classVar:					publicLevel? Static? type Id (Semi | tmpAssignExpr | classVarExt);
+classVar:					publicLevel? Static? type id (Semi | tmpAssignExpr | classVarExt);
 //
-classFuncName:				Id ((QuotFangL QuotFangR) | allOp2 | allAssign)?;
+classFuncName:				id ((QuotFangL QuotFangR) | allOp2 | allAssign)?;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnumItem:				Id (QuotYuanL type QuotYuanR)?;
+classEnumItem:				id (QuotYuanL type QuotYuanR)?;
 
 
 
@@ -272,7 +284,7 @@ classEnumItem:				Id (QuotYuanL type QuotYuanR)?;
 //
 useStmt:					Use ids Semi;
 callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
-importStmt:					AImport type callConvention Id QuotYuanL typeVarList QuotYuanR Semi;
+importStmt:					AImport type callConvention id QuotYuanL typeVarList QuotYuanR Semi;
 libStmt:					ALib String1Literal Semi;
 namespaceStmt:				Namespace ids;
 

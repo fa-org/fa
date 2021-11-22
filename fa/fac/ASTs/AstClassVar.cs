@@ -28,7 +28,7 @@ namespace fac.ASTs {
 			//
 			DataType = IAstType.FromContext (_ctx.type ());
 			//
-			Name = _ctx.Id ().GetText ();
+			Name = _ctx.id ().GetText ();
 			//
 			DefaultValueRaw = (_ctx.classVarExt () != null ? _ctx.classVarExt ().tmpAssignExpr () : _ctx.tmpAssignExpr ())?.middleExpr ();
 		}
