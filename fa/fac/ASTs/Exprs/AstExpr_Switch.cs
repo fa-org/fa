@@ -100,8 +100,42 @@ namespace fac.ASTs.Exprs {
 					_sb.AppendLine ();
 				}
 			} else {
-				//TODO;
-				throw new NotImplementedException ();
+				string _a, _b, _c;
+				_sb.AppendLine ($"{_indent.Indent ()}{ExpectType.GenerateCSharp_Type ()} {_tmp_var_name2};");
+				if (CaseConds2[0] == null) {
+					for (int j = 0; j < CaseCodes[0]._stmts.Count; ++j) {
+						(_a, _b, _c) = CaseCodes[0]._stmts[j].GenerateCSharp (_indent + 1, _check_cb);
+						_sb.AppendLine ($"{_indent.Indent ()}{{");
+						_sb.Append (_a).Append (_b).Append (_c);
+						_sb.AppendLine ($"{_indent.Indent ()}}}");
+					}
+					(_a, _b, _c) = CaseCodes[0]._expr.GenerateCSharp (_indent + 1, _check_cb);
+					_sb.AppendLine ($"{_indent.Indent ()}{{");
+					_sb.Append (_a).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name2} = {_b};").Append (_c);
+					_sb.AppendLine ($"{_indent.Indent ()}}}");
+				} else {
+					for (int i = 0; i < CaseConds2.Count; ++i) {
+						_sb.Append (i > 0 ? " else " : _indent.Indent ());
+						if (CaseConds2[i] == null) {
+							if (i != CaseConds2.Count - 1)
+								throw new CodeException (CaseConds2[i].Token, "只能在语句最后一项匹配所有条件");
+							_sb.AppendLine ($"{{");
+						} else {
+							(_a, _b, _c) = CaseConds2[i] == null ? ("", "", "") : CaseConds2[i].GenerateCSharp (_indent, _check_cb);
+							if (_a != "" || _c != "")
+								throw new CodeException (CaseConds2[i].Token, "条件不允许带隐藏逻辑的表达式");
+							_sb.AppendLine ($"if ({_b}) {{");
+						}
+						for (int j = 0; j < CaseCodes[i]._stmts.Count; ++j) {
+							(_a, _b, _c) = CaseCodes[i]._stmts[j].GenerateCSharp (_indent + 1, _check_cb);
+							_sb.Append (_a).Append (_b).Append (_c);
+						}
+						(_a, _b, _c) = CaseCodes[i]._expr.GenerateCSharp (_indent + 1, _check_cb);
+						_sb.Append (_a).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name2} = {_b};").Append (_c);
+						_sb.Append ($"{_indent.Indent ()}}}");
+					}
+					_sb.AppendLine ();
+				}
 			}
 			return (_sb.ToString (), _tmp_var_name2, "");
 		}

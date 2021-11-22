@@ -65,23 +65,23 @@ namespace fac.AntlrTools {
 				// 生成变量定义组
 				Info.CurrentFuncVariables[^1]._vars.Add (_varexpr.VarName, _varexpr);
 			} else if (_expr is AstExpr_BaseId _idexpr) {
-				if (_idexpr.id == "_")
+				if (_idexpr.Id == "_")
 					return new AstExprName_Ignore { Token = _expr.Token };
 
 				// 查找预定义名称
-				var _buildinexpr = AstExprName_BuildIn.FindFromName (_idexpr.id);
+				var _buildinexpr = AstExprName_BuildIn.FindFromName (_idexpr.Id);
 				if (_buildinexpr != null)
 					return _buildinexpr;
 
 				// 映射变量名/参数
-				var _nameexpr = IAstExprName.FindVariableOrArgument (_idexpr.Token, _idexpr.id);
+				var _nameexpr = IAstExprName.FindVariableOrArgument (_idexpr.Token, _idexpr.Id);
 				if (_nameexpr != null)
 					return _nameexpr;
 
 				// 查找当前类的成员变量
 				var _is_static = Info.CurrentFunc.Static;
 				for (int i = 0; i < Info.CurrentClass.ClassVars.Count; ++i) {
-					if (Info.CurrentClass.ClassVars[i].Name != _idexpr.id)
+					if (Info.CurrentClass.ClassVars[i].Name != _idexpr.Id)
 						continue;
 					if (_is_static != Info.CurrentClass.ClassVars[i].Static)
 						throw new CodeException (_idexpr.Token, $"{(_is_static ? "静态" : "动态")}方法内无法访问{(!_is_static ? "静态" : "动态")}成员变量");
@@ -93,7 +93,7 @@ namespace fac.AntlrTools {
 
 				// 查找当前类的成员方法
 				for (int i = 0; i < Info.CurrentClass.ClassFuncs.Count; ++i) {
-					if (Info.CurrentClass.ClassFuncs[i].Name != _idexpr.id)
+					if (Info.CurrentClass.ClassFuncs[i].Name != _idexpr.Id)
 						continue;
 					if (_is_static != Info.CurrentClass.ClassFuncs[i].Static)
 						throw new CodeException (_idexpr.Token, $"{(_is_static ? "静态" : "动态")}方法内无法访问{(!_is_static ? "静态" : "动态")}成员方法");
@@ -104,7 +104,7 @@ namespace fac.AntlrTools {
 				}
 
 				// 查找类名称
-				_nameexpr = IAstExprName.FindClass (_idexpr.Token, _idexpr.id);
+				_nameexpr = IAstExprName.FindClass (_idexpr.Token, _idexpr.Id);
 				if (_nameexpr != null)
 					return _nameexpr;
 			}
@@ -116,7 +116,7 @@ namespace fac.AntlrTools {
 			if (_expr is AstExpr_Op1 _op1 && (!_op1.IsPrefix) && _op1.Operator[0] == '.') {
 				string _access_name = _op1.Operator[1..];
 				if (_op1.Value is AstExpr_BaseId _idexpr) {
-					string _name = $"{_idexpr.id}.{_access_name}";
+					string _name = $"{_idexpr.Id}.{_access_name}";
 
 					// 查找类名称
 					var _nameexpr = IAstExprName.FindClass (_idexpr.Token, _name);
@@ -129,7 +129,7 @@ namespace fac.AntlrTools {
 						return _buildinexpr;
 
 					// 合并冗余名称
-					return new AstExpr_BaseId { Token = _idexpr.Token, id = _name };
+					return new AstExpr_BaseId { Token = _idexpr.Token, Id = _name };
 				} else {
 					// 访问类成员
 					// 参数0为对象，当访问静态成员时传null
@@ -260,7 +260,7 @@ namespace fac.AntlrTools {
 		private static IAstExpr Traversal2 (IAstExpr _expr) {
 			// 不允许再出现 AstExpr_BaseId 类型
 			if (_expr is AstExpr_BaseId _idexpr) {
-				throw new CodeException (_expr.Token, $"未识别的标识符 {_idexpr.id}");
+				throw new CodeException (_expr.Token, $"未识别的标识符 {_idexpr.Id}");
 			} else if (_expr is AstExpr_Op1 _op1expr && (!_op1expr.IsPrefix) && _op1expr.Operator[0]=='.') {
 				throw new CodeException (_expr.Token, $"未识别的成员方法或属性 {_op1expr.Operator[1..]}");
 			} else if (_expr is AstExpr_Op2 _op2expr && AstExpr_Op2.sAssignOp2s.Contains (_op2expr.Operator)) {
