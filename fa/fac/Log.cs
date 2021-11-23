@@ -15,7 +15,12 @@ namespace fac {
 
 	class Log {
 		public static void Mark (LogMark _mark) {
-			Console.WriteLine ($"正在{_mark.GetDisplayName ()} {Info.CurrentRelativeFile}");
+			if (_cache != (_mark, Info.CurrentRelativeFile)) {
+				_cache = (_mark, Info.CurrentRelativeFile);
+				Console.WriteLine ($"正在{_cache.Item1.GetDisplayName ()} {_cache.Item2}。。。");
+			}
 		}
+
+		private static (LogMark, string) _cache = (LogMark.Parse, "");
 	}
 }

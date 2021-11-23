@@ -17,8 +17,8 @@ namespace fac.ASTs.Stmts {
 
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Iterator.Traversal (_deep + 1, 0, _cb);
-			ListContainer.Traversal (_deep + 1, 0, _cb);
+			Iterator = _cb (Iterator, _deep + 1, 0) as AstStmt_DefVariable;
+			ListContainer = _cb (ListContainer, _deep + 1, 0);
 			BodyCodes.Traversal (_deep + 1, 0, _cb);
 		}
 

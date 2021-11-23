@@ -30,6 +30,7 @@ For:						'for';
 If:							'if';
 Interface:					'interface';
 Internal:					'internal';
+Mut:						'mut';
 Namespace:					'namespace';
 New:						'new';
 Params:						'params';
@@ -161,7 +162,7 @@ ids:						id (PointOp id)*;
 typeAfter:					(QuotFangL QuotFangR) | Qus;
 typeSingle:					id (QuotJianL type (Comma type)* QuotJianR)?;
 typeMulti:					QuotYuanL typeVar (Comma typeVar)+ QuotYuanR;
-type:						Params? (typeSingle | typeMulti) typeAfter*;
+type:						(Mut | Params)? (typeSingle | typeMulti) typeAfter*;
 
 
 

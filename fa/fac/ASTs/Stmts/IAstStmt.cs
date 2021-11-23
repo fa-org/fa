@@ -62,7 +62,7 @@ namespace fac.ASTs.Stmts {
 				var _forstmt2 = new AstStmt_For2 { Token = _ctx.Start };
 				_forstmt2.Iterator = new AstStmt_DefVariable { Token = _ctx.forStmt2 ().type ().Start, DataType = IAstType.FromContext (_ctx.forStmt2 ().type ()), VarName = _ctx.forStmt2 ().id ().GetText (), Expr = null };
 				_forstmt2.ListContainer = FromContext (_ctx.forStmt2 ().expr ());
-				_forstmt2.BodyCodes = FromStmts (_ctx.forStmt ().stmt ()[1..]);
+				_forstmt2.BodyCodes = FromStmts (_ctx.forStmt2 ().stmt ()[1..]);
 				return _forstmt2;
 			} else if (_ctx.quotStmtPart () != null) {
 				return new AstStmt_HuaQuotWrap { Token = _ctx.Start, Stmts = FromStmts (_ctx.quotStmtPart ().stmt ()) };

@@ -45,8 +45,8 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			Value = Value.TraversalCalcType (null);
 			if (Value is AstExprName_ClassFunc _funcexpr) {
-				var _func_args = _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].Arguments;
 				if (_funcexpr.ThisObject != null)
 					Arguments.Insert (0, _funcexpr.ThisObject);
 				CheckArguments (_funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].FuncType);
@@ -63,17 +63,6 @@ namespace fac.ASTs.Exprs {
 					return AstExprTypeCast.Make (this, _expect_type);
 				} else {
 					throw new CodeException (Token, "表达式无法当做方法进行调用");
-					//Value = Value.TraversalCalcType (_expect_type);
-					//var _func_type_tmp = Value.ExpectType as AstType_Func;
-					//if (_func_type_tmp.ArgumentTypes.Count != Arguments.Count)
-					//	throw new CodeException (Token, "函数调用传入的参数数量不匹配");
-					////var (_ret_type, _arg_type) = TypeFuncs.ParseFuncType (Token, Value.ExpectType);
-					////if (_arg_type.Count != Arguments.Count)
-					////	throw new CodeException (Token, "函数调用传入的参数数量不匹配");
-					//for (int i = 0; i < _func_type_tmp.ArgumentTypes.Count; ++i)
-					//	Arguments[i] = Arguments[i].TraversalCalcType (_func_type_tmp.ArgumentTypes[i]);
-					//ExpectType = _func_type_tmp.ReturnType;
-					//return AstExprTypeCast.Make (this, _expect_type);
 				}
 			}
 		}
@@ -88,16 +77,40 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;
+			if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
+				_arg_types = _arg_types.Skip (1).ToList ();
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
 			var (_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
 			_psb.Append (_a);
 			_sb.Append ($"{_b} {Operator[0]}");
 			_ssb.Append (_c);
-			foreach (var _arg in Arguments) {
-				(_a, _b, _c) = _arg.GenerateCSharp (_indent, _check_cb);
-				_psb.Append (_a);
-				_sb.Append ($"{_b}, ");
-				_ssb.Append (_c);
+			if (_arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params) {
+				for (int i = 0; i < _arg_types.Count - 1; ++i) {
+					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
+					_psb.Append (_a);
+					if (_arg_types[i].Mut)
+						_sb.Append ($"ref ");
+					_sb.Append ($"{_b}, ");
+					_ssb.Append (_c);
+				}
+				//TODO 识别原本传入类型匹配的array的情况;
+				//_sb.Append ($"new List<{_awrap.ItemType.GenerateCSharp_Type ()}> {{");
+				//if (Arguments.Count >= _arg_types.Count) {
+				//	for (int i = _arg_types.Count - 1; i < Arguments.Count; ++i) {
+				//		TODO;
+				//	}
+				//}
+				throw new NotImplementedException ();
+			} else {
+				for (int i = 0; i < Arguments.Count; ++i) {
+					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
+					_psb.Append (_a);
+					if (_arg_types[i].Mut)
+						_sb.Append ($"ref ");
+					_sb.Append ($"{_b}, ");
+					_ssb.Append (_c);
+				}
 			}
 			if (Value is AstExprName_BuildIn _biexpr && _biexpr.Name.EndsWith ("AllText"))
 				_sb.Append ($"Encoding.UTF8, ");

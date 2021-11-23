@@ -11,6 +11,13 @@ namespace fac.ASTs.Types {
 
 
 
-		public override string GenerateCSharp_Type () => $"{Class.FullName}{((TemplateTypes?.Count ?? 0) > 0 ? $"<{string.Join (", ", from p in TemplateTypes select p.GenerateCSharp_Type ())}>" : "")}";
+		public override string GenerateCSharp_Type () {
+			string _full_name = Class.FullName;
+			if (_full_name.StartsWith (Info.CurrentNamespace))
+				_full_name = _full_name[(Info.CurrentNamespace.Length + 1)..];
+			if (_full_name.StartsWith ("."))
+				_full_name = _full_name[1..];
+			return $"{_full_name}{((TemplateTypes?.Count ?? 0) > 0 ? $"<{string.Join (", ", from p in TemplateTypes select p.GenerateCSharp_Type ())}>" : "")}";
+		}
 	}
 }

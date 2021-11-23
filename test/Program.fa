@@ -3,19 +3,58 @@ use fa;
 
 
 class Program {
+	public static void test (params int[] a) {
+		for int i : a {
+			Console.WriteLine ("{0}".Format (i));
+		}
+	}
+
 	public static void Main () {
 		int aaa = 10;
-		string _s = switch {
-			when aaa == 3      => "A",
-			when aaa == 5      => "B",
-			when aaa == 8      => "C",
-			when aaa == 10     => "D",
-			when aaa == 15     => "E",
-			_                  => "F",
-		};
-		Console.WriteLine (_s);
+		test (aaa, 12, 32);
 	}
 }
+
+//class Program {
+//	public static void test (int a) {
+//		a = 5;
+//	}
+//
+//	public static void Main () {
+//		int aaa = 10;
+//		test (aaa);
+//		Console.WriteLine ("hello {0}".Format (aaa));
+//	}
+//}
+
+//class Program {
+//	public static void Main () {
+//		int aaa = 10;
+//		string _s = if aaa == 4 {
+//			"ab"
+//		} else if aaa == 10 {
+//			"hello"
+//		} else {
+//			"C"
+//		};
+//		Console.WriteLine (_s);
+//	}
+//}
+
+//class Program {
+//	public static void Main () {
+//		int aaa = 10;
+//		string _s = switch {
+//			when aaa == 3      => "A",
+//			when aaa == 5      => "B",
+//			when aaa == 8      => "C",
+//			when aaa == 10     => "Hello World",
+//			when aaa == 15     => "E",
+//			_                  => "F",
+//		};
+//		Console.WriteLine (_s);
+//	}
+//}
 
 //class Program {
 //	public static void Main () {

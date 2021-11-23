@@ -37,7 +37,12 @@ namespace fac.ASTs.Exprs.Names {
 				var (_a, _b, _c) = ThisObject.GenerateCSharp (_indent, _check_cb);
 				return (_a, $"{_b}.{Class.ClassFuncs[FunctionIndex].Name}", _c);
 			} else {
-				return ("", $"{Class.FullName}.{Class.ClassFuncs[FunctionIndex].Name}", "");
+				string _full_name = Class.FullName;
+				if (_full_name.StartsWith (Info.CurrentNamespace))
+					_full_name = _full_name[(Info.CurrentNamespace.Length + 1)..];
+				if (_full_name.StartsWith ("."))
+					_full_name = _full_name[1..];
+				return ("", $"{_full_name}.{Class.ClassFuncs[FunctionIndex].Name}", "");
 			}
 		}
 

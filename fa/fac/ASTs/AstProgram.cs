@@ -31,13 +31,14 @@ namespace fac.ASTs {
 			CurrentModule = $"{Info.ProjectName}.{Info.CurrentRelativeFile.Replace ('/', '.').Replace ('\\', '.')}"[..^3];
 
 			// 生成命名空间
-			CurrentNamespace = Info.CurrentNamespace = CurrentModule[..CurrentModule.LastIndexOf ('.')];
+			CurrentNamespace = CurrentModule[..CurrentModule.LastIndexOf ('.')];
 			var _namespaces = _ctx.namespaceStmt ();
 			if (_namespaces.Length > 1) {
 				throw new CodeException (_ctx.namespaceStmt ()[1], "源码中不允许出现第二个 namespace 声明。");
 			} else if (_namespaces.Length == 1) {
-				CurrentNamespace = Info.CurrentNamespace = _namespaces[0].ids ().GetText ();
+				CurrentNamespace = _namespaces[0].ids ().GetText ();
 			}
+			Info.CurrentNamespace = CurrentNamespace = CurrentNamespace[(CurrentNamespace.LastIndexOfAny (new char[] { '/', '\\' }) + 1)..];
 
 			// 处理当前引用
 			CurrentUses = Info.CurrentUses = (from p in _ctx.useStmt () select p.ids ().GetText ()).ToList ();
@@ -67,6 +68,7 @@ namespace fac.ASTs {
 			Info.CurrentNamespace = CurrentNamespace;
 			Info.CurrentUses = CurrentUses;
 			Info.CurrentExternApis = CurrentExternApis;
+			Log.Mark (LogMark.Build);
 			//
 			if (CurrentClasses.Count == 0)
 				return ("", "", "");

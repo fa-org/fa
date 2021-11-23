@@ -25,7 +25,7 @@ namespace fac.ASTs.Stmts {
 				CaseValues.Traversal (_deep, _group, _cb);
 			CaseConds2.Traversal (_deep, _group, _cb);
 			for (int i = 0; i < CaseCodes.Count; ++i)
-				CaseCodes[i].Traversal (_deep + 1, i, _cb);
+				CaseCodes[i] = _cb (CaseCodes[i], _deep + 1, i) as IAstStmt;
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

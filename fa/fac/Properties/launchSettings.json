@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "fac": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\GitHub\\_\\fa\\test\\Program.fa -d"
+    }
+  }
+}

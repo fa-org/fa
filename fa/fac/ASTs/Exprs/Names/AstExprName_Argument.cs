@@ -31,6 +31,6 @@ namespace fac.ASTs.Exprs.Names {
 			}
 		}
 
-		public override bool AllowAssign () => false;
+		public override bool AllowAssign () => Func.Arguments[ArgumentIndex]._type.Mut;
 	}
 }

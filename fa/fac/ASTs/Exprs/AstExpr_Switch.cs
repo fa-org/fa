@@ -26,8 +26,8 @@ namespace fac.ASTs.Exprs {
 			CaseConds2.Traversal (_deep, _group, _cb);
 			for (int i = 0; i < CaseCodes.Count; ++i) {
 				for (int j = 0; j < CaseCodes[i]._stmts.Count; ++j)
-					CaseCodes[i]._stmts[j].Traversal (_deep + 1, i, _cb);
-				CaseCodes[i]._expr.Traversal (_deep + 1, i, _cb);
+					CaseCodes[i]._stmts[j] = _cb (CaseCodes[i]._stmts[j],_deep + 1, i) as IAstStmt;
+				CaseCodes[i] = (_stmts: CaseCodes[i]._stmts, _expr: _cb (CaseCodes[i]._expr, _deep + 1, i));
 			}
 		}
 

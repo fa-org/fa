@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
 	abstract class IAstType: IAstExpr {
-		//public string TypeStr { init; get; }
+		public bool Mut { init; get; } = false;
 
 
 
@@ -34,6 +34,7 @@ namespace fac.ASTs.Types {
 					throw new CodeException (_ctx.Start, "错误的使用 params 标识");
 				}
 			}
+			bool _mut = _ctx.Mut () != null;
 
 			IAstType _ret = null;
 			if (_ctx.typeSingle () != null) {
@@ -41,35 +42,34 @@ namespace fac.ASTs.Types {
 				string _type_str = _ctx.typeSingle ().id ().GetText ();
 				var _templates1 = FromContexts (_ctx.typeSingle ().type ());
 				if ((_templates1?.Count ?? 0) == 0) {
-					var _floattype = AstType_Float.FromType (_type_str, _ctx.Start);
+					var _floattype = AstType_Float.FromType (_type_str, _mut, _ctx.Start);
 					if (_floattype != null)
 						_ret = _floattype;
 					//
-					//
-					var _inttype = AstType_Integer.FromType (_type_str, _ctx.Start);
+					var _inttype = AstType_Integer.FromType (_type_str, _mut, _ctx.Start);
 					if (_inttype != null)
 						_ret = _inttype;
 					//
 					if (_type_str == "any") {
-						_ret = new AstType_Any { Token = _ctx.Start };
+						_ret = new AstType_Any { Token = _ctx.Start, Mut = _mut };
 					} else if (_type_str == "bool") {
-						_ret = new AstType_Bool { Token = _ctx.Start };
+						_ret = new AstType_Bool { Token = _ctx.Start, Mut = _mut };
 					} else if (_type_str == "string") {
-						_ret = new AstType_String { Token = _ctx.Start };
+						_ret = new AstType_String { Token = _ctx.Start, Mut = _mut };
 					} else if (_type_str == "void") {
-						_ret = new AstType_Void { Token = _ctx.Start };
+						_ret = new AstType_Void { Token = _ctx.Start, Mut = _mut };
 					}
 				} else {
 					if (_type_str == "Func") {
-						_ret = new AstType_Func { Token = _ctx.Start, ReturnType = _templates1[^1], ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
+						_ret = new AstType_Func { Token = _ctx.Start, Mut = _mut, ReturnType = _templates1[^1], ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
 					} else if (_type_str == "Action") {
-						_ret = new AstType_Func { Token = _ctx.Start, ReturnType = IAstType.FromName ("void"), ArgumentTypes = _templates1 };
+						_ret = new AstType_Func { Token = _ctx.Start, Mut = _mut, ReturnType = IAstType.FromName ("void"), ArgumentTypes = _templates1 };
 					}
 				}
 				if (_ret == null) {
 					var _classes = Info.GetClassFromName (_type_str);
 					if (_classes.Count == 1) {
-						_ret = new AstType_Class { Token = _ctx.Start, Class = _classes[0], TemplateTypes = _templates1 };
+						_ret = new AstType_Class { Token = _ctx.Start, Mut = _mut, Class = _classes[0], TemplateTypes = _templates1 };
 					} else if (_classes.Count > 1) {
 						throw new CodeException (_ctx.Start, $"不明确的符号 {_type_str}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
 					}
@@ -78,16 +78,16 @@ namespace fac.ASTs.Types {
 					throw new CodeException (_ctx.Start, $"无法识别的类型 {_type_str}");
 			} else if (_ctx.typeMulti () != null) {
 				var _tuple_types = FromContexts (_ctx.typeMulti ().typeVar ());
-				_ret = new AstType_Tuple { Token = _ctx.Start, TupleTypes = _tuple_types };
+				_ret = new AstType_Tuple { Token = _ctx.Start, Mut = _mut, TupleTypes = _tuple_types };
 			} else {
 				throw new UnimplException (_ctx.Start);
 			}
 			foreach (var _after_ctx in _ctx.typeAfter ()) {
 				string _after = _after_ctx.GetText ();
 				if (_after == "[]") {
-					_ret = new AstType_ArrayWrap { Token = _after_ctx.Start, Params = false, ItemType = _ret };
+					_ret = new AstType_ArrayWrap { Token = _after_ctx.Start, Mut = _mut, Params = false, ItemType = _ret };
 				} else if (_after == "?") {
-					_ret = new AstType_OptionalWrap { Token = _after_ctx.Start, ItemType = _ret };
+					_ret = new AstType_OptionalWrap { Token = _after_ctx.Start, Mut = _mut, ItemType = _ret };
 				} else {
 					throw new UnimplException (_after_ctx.Start);
 				}

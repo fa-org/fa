@@ -80,8 +80,14 @@ namespace fac.ASTs {
 			var _sb = new StringBuilder ();
 			var (_a, _b, _c) = ReturnType.GenerateCSharp (_indent, null);
 			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {_b} {Name} (");
-			foreach (var _arg in Arguments)
+			foreach (var _arg in Arguments) {
+				//if (_arg._type is AstType_ArrayWrap _awrap && _awrap.Params)
+				//	_sb.Append ("params ");
+				if (_arg._type.Mut) {
+					_sb.Append ("ref ");
+				}
 				_sb.Append ($"{_arg._type.GenerateCSharp_Type ()} {_arg._name}, ");
+			}
 			if (Arguments.Any ())
 				_sb.Remove (_sb.Length - 2, 2);
 			_sb.AppendLine (") {");
