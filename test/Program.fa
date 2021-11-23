@@ -16,6 +16,20 @@ class Program {
 }
 
 //class Program {
+//	public static void Main () {
+//		int aaa = 10;
+//		int xx = switch "C" {
+//			"A"               => 1,
+//			"B"               => 2,
+//			"C" when aaa == 5 => 3,
+//			"C"               => 4,
+//			_                 => 5,
+//		};
+//		Console.WriteLine ("{0}".Format (xx));
+//	}
+//}
+
+//class Program {
 //	public static void test (int a) {
 //		a = 5;
 //	}
@@ -53,20 +67,6 @@ class Program {
 //			_                  => "F",
 //		};
 //		Console.WriteLine (_s);
-//	}
-//}
-
-//class Program {
-//	public static void Main () {
-//		int aaa = 10;
-//		int xx = switch "C" {
-//			"A"               => 1,
-//			"B"               => 2,
-//			"C" when aaa == 5 => 3,
-//			"C"               => 4,
-//			_                 => 5,
-//		};
-//		Console.WriteLine ("{0}".Format (xx));
 //	}
 //}
 

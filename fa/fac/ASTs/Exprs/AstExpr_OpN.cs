@@ -82,34 +82,38 @@ namespace fac.ASTs.Exprs {
 				_arg_types = _arg_types.Skip (1).ToList ();
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
 			var (_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
-			_psb.Append (_a);
+			if (_a != "" || _c != "")
+				throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
 			_sb.Append ($"{_b} {Operator[0]}");
-			_ssb.Append (_c);
-			if (_arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params) {
+			if (_arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params && Value is not AstExprName_BuildIn) {
 				for (int i = 0; i < _arg_types.Count - 1; ++i) {
 					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-					_psb.Append (_a);
+					if (_a != "" || _c != "")
+						throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
 					if (_arg_types[i].Mut)
 						_sb.Append ($"ref ");
 					_sb.Append ($"{_b}, ");
-					_ssb.Append (_c);
 				}
-				//TODO 识别原本传入类型匹配的array的情况;
-				//_sb.Append ($"new List<{_awrap.ItemType.GenerateCSharp_Type ()}> {{");
-				//if (Arguments.Count >= _arg_types.Count) {
-				//	for (int i = _arg_types.Count - 1; i < Arguments.Count; ++i) {
-				//		TODO;
-				//	}
-				//}
-				throw new NotImplementedException ();
+				//TODO 考虑是否识别原本传入类型匹配的array的情况;
+				_sb.Append ($"new List<{_awrap.ItemType.GenerateCSharp_Type ()}> {{ ");
+				if (Arguments.Count >= _arg_types.Count) {
+					for (int i = _arg_types.Count - 1; i < Arguments.Count; ++i) {
+						(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
+						if (_a != "" || _c != "")
+							throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
+						_sb.Append ($"{_b}, ");
+					}
+					_sb.Remove (_sb.Length - 2, 2);
+				}
+				_sb.Append ($" }}, ");
 			} else {
 				for (int i = 0; i < Arguments.Count; ++i) {
 					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-					_psb.Append (_a);
+					if (_a != "" || _c != "")
+						throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
 					if (_arg_types[i].Mut)
 						_sb.Append ($"ref ");
 					_sb.Append ($"{_b}, ");
-					_ssb.Append (_c);
 				}
 			}
 			if (Value is AstExprName_BuildIn _biexpr && _biexpr.Name.EndsWith ("AllText"))

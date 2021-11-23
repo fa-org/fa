@@ -52,14 +52,14 @@ namespace fac {
 		}
 
 		static void Main (string[] args) {
+			var _asm = Assembly.GetExecutingAssembly ();
+			Console.WriteLine ($"fa语言编译器");
+			Console.WriteLine ($"    版权：{(Attribute.GetCustomAttribute (_asm, typeof (AssemblyCopyrightAttribute)) as AssemblyCopyrightAttribute).Copyright}");
+			Console.WriteLine ($"    版本：{_asm.GetName ().Version}");
+			Console.WriteLine ($"    源码：https://github.com/fa-org/fa");
+			Console.WriteLine ();
 			if (args.Length == 0 || (args.Length == 1 && (args[0] == "--help" || args[0] == "-help" || args[0] == "/help" || args[0] == "-?" || args[0] == "/?"))) {
 				var _exename = Process.GetCurrentProcess ().MainModule.ModuleName;
-				var _asm = System.Reflection.Assembly.GetExecutingAssembly ();
-				Console.WriteLine ($"fa语言编译器");
-				Console.WriteLine ($"    版权：{(Attribute.GetCustomAttribute (_asm, typeof (AssemblyCopyrightAttribute)) as AssemblyCopyrightAttribute).Copyright}");
-				Console.WriteLine ($"    版本：{_asm.GetName ().Version}");
-				Console.WriteLine ($"    源码：https://github.com/falangorg/fa");
-				Console.WriteLine ();
 				Console.WriteLine ($"{_exename} fa程序文件目录|fa程序文件.fa [-d] [-r]");
 				Console.WriteLine ();
 				Console.WriteLine ($"    -d    调试模式，将在控制台打印C#后端输出");
