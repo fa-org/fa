@@ -353,3 +353,4 @@ MigrationBackup/
 
 # fa compile temp folder
 _build/
+.DS_Store
