@@ -8,8 +8,9 @@ class Program {
 	}
 
 	public static int? test2 () {
-		int n = test ()?;
-		return n;
+		int? n = test ();
+		int x = n? + 10;
+		return x;
 	}
 
 	public static void Main () {
