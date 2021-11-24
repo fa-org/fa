@@ -37,13 +37,13 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromContext (FaParser.ExprContext _ctx) {
 			if (_ctx == null)
 				return null;
-			if (_ctx.Qus () != null) {
-				var _ifexpr = new AstExpr_If { Token = _ctx.Start };
-				_ifexpr.Condition = FromContext (_ctx.middleExpr ()[0]);
-				_ifexpr.IfTrue = FromContext (_ctx.strongExprBase ()[0]);
-				_ifexpr.IfFalse = FromContext (_ctx.strongExprBase ()[1]);
-				return _ifexpr;
-			} else {
+			//if (_ctx.Qus () != null) {
+			//	var _ifexpr = new AstExpr_If { Token = _ctx.Start };
+			//	_ifexpr.Condition = FromContext (_ctx.middleExpr ()[0]);
+			//	_ifexpr.IfTrue = FromContext (_ctx.strongExprBase ()[0]);
+			//	_ifexpr.IfFalse = FromContext (_ctx.strongExprBase ()[1]);
+			//	return _ifexpr;
+			//} else {
 				var _expr_ctxs = _ctx.middleExpr ();
 				var _op2_ctxs = _ctx.allAssign ();
 				if (_expr_ctxs.Length == 0)
@@ -58,7 +58,7 @@ namespace fac.ASTs.Exprs {
 					_expr = _expr2;
 				}
 				return _expr;
-			}
+			//}
 		}
 
 		public static IAstExpr FromContext (FaParser.MiddleExprContext _ctx) {
@@ -126,7 +126,7 @@ namespace fac.ASTs.Exprs {
 			var _prefix_ctxs = _ctx.strongExprPrefix ();
 			var _suffix_ctxs = _ctx.strongExprSuffix ();
 			foreach (var _suffix_ctx in _suffix_ctxs) {
-				if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.id () != null) {
+				if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.Qus () != null || _suffix_ctx.id () != null) {
 					var _tmp_expr = new AstExpr_Op1 { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;
 					_tmp_expr.Operator = _suffix_ctx.GetText ();

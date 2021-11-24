@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace fac {
@@ -60,6 +61,12 @@ namespace fac {
 			Console.WriteLine ();
 			if (args.Length == 0 || (args.Length == 1 && (args[0] == "--help" || args[0] == "-help" || args[0] == "/help" || args[0] == "-?" || args[0] == "/?"))) {
 				var _exename = Process.GetCurrentProcess ().MainModule.ModuleName;
+				if (_exename == "dotnet" || _exename == "dotnet.exe") {
+					var _location = Assembly.GetEntryAssembly ().Location;
+					_location = _location[(_location.LastIndexOfAny (new char[] { '/', '\\' }) + 1)..];
+					_exename = $"{_exename} {_location}";
+				}
+				Console.WriteLine ($"用法：");
 				Console.WriteLine ($"{_exename} fa程序文件目录|fa程序文件.fa [-d] [-r]");
 				Console.WriteLine ();
 				Console.WriteLine ($"    -d    调试模式，将在控制台打印C#后端输出");
@@ -67,8 +74,13 @@ namespace fac {
 				Console.WriteLine ();
 				Console.WriteLine ($"备注：如果指定目录，则目录名不要以“.fa”结尾，另外fa程序扩展名必须小写");
 				Console.WriteLine ($"示例：");
-				Console.WriteLine ($"    {_exename} D:\\FaProject -r");
-				Console.WriteLine ($"    {_exename} D:\\FaProject\\Program.fa -d");
+				if (RuntimeInformation.IsOSPlatform (OSPlatform.Windows)) {
+					Console.WriteLine ($"    {_exename} D:\\FaProject -r");
+					Console.WriteLine ($"    {_exename} D:\\FaProject\\Program.fa -d");
+				} else {
+					Console.WriteLine ($"    {_exename} /FaProject -r");
+					Console.WriteLine ($"    {_exename} /FaProject/Program.fa -d");
+				}
 				Console.WriteLine ();
 				return;
 			}

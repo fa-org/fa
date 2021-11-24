@@ -25,6 +25,7 @@ namespace fac.ASTs.Exprs {
 				if (_functype.ArgumentTypes.Count == Arguments.Count) {
 					try {
 						Arguments[^1] = Arguments[^1].TraversalCalcType (_functype.ArgumentTypes[^1]);
+						return;
 					} catch (Exception) {
 					}
 				}
@@ -82,35 +83,45 @@ namespace fac.ASTs.Exprs {
 				_arg_types = _arg_types.Skip (1).ToList ();
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
 			var (_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
-			if (_a != "" || _c != "")
-				throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
+			_psb.Append (_a);
+			_ssb.Append (_c);
 			_sb.Append ($"{_b} {Operator[0]}");
-			if (_arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params && Value is not AstExprName_BuildIn) {
-				for (int i = 0; i < _arg_types.Count - 1; ++i) {
+			// 如果最后一个参数为params列表
+			if (_arg_types.Count > 0 && _arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params && Value is not AstExprName_BuildIn) {
+				bool _process_last = false;
+				for (int i = 0; i < _arg_types.Count; ++i) {
+					if (i == _arg_types.Count - 1) {
+						if (!Arguments[^1].ExpectType.IsSame (_awrap))
+							break;
+						// 用户传了数组的情况
+						_process_last = true;
+					}
 					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-					if (_a != "" || _c != "")
-						throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
+					_psb.Append (_a);
+					_ssb.Append (_c);
 					if (_arg_types[i].Mut)
 						_sb.Append ($"ref ");
 					_sb.Append ($"{_b}, ");
 				}
-				//TODO 考虑是否识别原本传入类型匹配的array的情况;
-				_sb.Append ($"new List<{_awrap.ItemType.GenerateCSharp_Type ()}> {{ ");
-				if (Arguments.Count >= _arg_types.Count) {
+				if (!_process_last) {
+					// 用户没传数组，手动拼接剩余项
+					var _tmp_var_name = Common.GetTempId ();
+					_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{_awrap.ItemType.GenerateCSharp_Type ()}> ();");
+					StringBuilder _psb1 = new StringBuilder (), _psb2 = new StringBuilder ();
 					for (int i = _arg_types.Count - 1; i < Arguments.Count; ++i) {
 						(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-						if (_a != "" || _c != "")
-							throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
-						_sb.Append ($"{_b}, ");
+						_psb.Append (_a);
+						_psb1.AppendLine ($"{_indent.Indent ()}{_tmp_var_name}.Add ({_b});");
+						_psb2.Append (_c);
 					}
-					_sb.Remove (_sb.Length - 2, 2);
+					_psb.Append (_psb1).Append (_psb2);
+					_sb.Append ($"{_tmp_var_name}, ");
 				}
-				_sb.Append ($" }}, ");
 			} else {
 				for (int i = 0; i < Arguments.Count; ++i) {
 					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-					if (_a != "" || _c != "")
-						throw new CodeException (Token, "函数调用不允许带隐藏逻辑的表达式");
+					_psb.Append (_a);
+					_ssb.Append (_c);
 					if (_arg_types[i].Mut)
 						_sb.Append ($"ref ");
 					_sb.Append ($"{_b}, ");

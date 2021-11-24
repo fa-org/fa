@@ -11,6 +11,7 @@ namespace fac.ASTs.Types {
 
 
 
+		public override string ToString () => $"{Class.FullName}{((TemplateTypes?.Count ?? 0) > 0 ? $"<{string.Join (", ", from p in TemplateTypes select p.GenerateCSharp_Type ())}>" : "")}";
 		public override string GenerateCSharp_Type () {
 			string _full_name = Class.FullName;
 			if (_full_name.StartsWith (Info.CurrentNamespace))

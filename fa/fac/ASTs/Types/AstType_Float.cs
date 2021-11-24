@@ -12,6 +12,7 @@ namespace fac.ASTs.Types {
 
 
 
+		public override string ToString () => $"float{BitWidth}";
 		public static AstType_Float FromType (string _type_str, bool _mut, IToken _token) {
 			if (!sTypeNames.Contains (_type_str))
 				return null;

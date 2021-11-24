@@ -228,14 +228,15 @@ arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
 strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// 前缀 - ++ -- ~ !
-strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
+strongExprSuffix			: AddAddOp | SubSubOp | Qus														// 后缀 ++ -- ?
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
 							| (PointOp id)																	//     wnd.Name
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
 middleExpr:					strongExpr (allOp2 strongExpr)*;												//     a == 24    a + b - c
-expr:						middleExpr ((Qus strongExprBase Colon strongExprBase) | (allAssign middleExpr)*);
+//expr:						middleExpr ((Qus strongExprBase Colon strongExprBase) | (allAssign middleExpr)*); // 放弃三目运算符?:
+expr:						middleExpr (allAssign middleExpr)*;
 
 
 

@@ -10,6 +10,7 @@ namespace fac.ASTs.Types {
 
 
 
-		public override string GenerateCSharp_Type () => $"({string.Join (", ", from p in TupleTypes select p._type.GenerateCSharp_Type ()).ToList ()})";
+		public override string ToString () => $"({string.Join (", ", from p in TupleTypes select $"{p._type} {p._name}")})";
+		public override string GenerateCSharp_Type () => $"({string.Join (", ", from p in TupleTypes select p._type.GenerateCSharp_Type ())})";
 	}
 }

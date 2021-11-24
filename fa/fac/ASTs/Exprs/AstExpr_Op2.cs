@@ -110,14 +110,23 @@ namespace fac.ASTs.Exprs {
 				_check_cb ($"{_e} == 0", "\"除数不能为0\"");
 				return ($"{_a}{_d}", $"{ExpectType.GenerateCSharp_Type ()}.FromValue ({_b} {_oper} {_e})", $"{_c}{_f}");
 			} else if (Operator == "=") {
-				if (Value1 is IAstExprName _exprn) {
-					var _ec = Value1.ResultMayOptional () ? new ExprChecker (_exprn) : null;
-					var (_a, _b, _c) = Value1.GenerateCSharp (_indent, null);
-					var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
-					var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Value2.Token) ?? ("", "");
-					return ($"{_g}{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}{_h}");
-				} else {
+				if (Value1 is not IAstExprName)
 					throw new CodeException (Value1.Token, "赋值运算符左侧必须为可赋值的变量或参数名称");
+				if (Value2 is AstExpr_Op1 _op1expr && (!_op1expr.IsPrefix) && _op1expr.Operator == "?") {
+					var _ec = new ExprChecker (Value1 as IAstExprName);
+					var (_a, _b, _c) = Value1.GenerateCSharp (_indent, null);
+					var (_d, _e, _f) = _op1expr.Value.GenerateCSharp (_indent, _ec.CheckFunc);
+					var _tmp_var_name = Common.GetTempId ();
+					StringBuilder _psb = new StringBuilder ();
+					_psb.Append (_a).Append (_d).AppendLine ($"{_indent.Indent ()}{_op1expr.Value.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_e};");
+					_ec.CheckFunc ($"!{_tmp_var_name}.HasValue ()", $"{_tmp_var_name}.GetError ()");
+					var (_g, _h) = _ec.GenerateCSharpPrefixSuffix (_indent, Value2.Token);
+					_psb.Append (_g);
+					return (_psb.ToString (), $"{_b} {_oper} {_tmp_var_name}.GetValue ()", $"{_h}{_c}{_f}");
+				} else {
+					var (_a, _b, _c) = Value1.GenerateCSharp (_indent, null);
+					var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
+					return ($"{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}");
 				}
 			} else {
 				var (_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);

@@ -62,8 +62,8 @@ namespace fac.ASTs.Types {
 				} else {
 					if (_type_str == "Func") {
 						_ret = new AstType_Func { Token = _ctx.Start, Mut = _mut, ReturnType = _templates1[^1], ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
-					} else if (_type_str == "Action") {
-						_ret = new AstType_Func { Token = _ctx.Start, Mut = _mut, ReturnType = IAstType.FromName ("void"), ArgumentTypes = _templates1 };
+					//} else if (_type_str == "Action") {
+					//	_ret = new AstType_Func { Token = _ctx.Start, Mut = _mut, ReturnType = IAstType.FromName ("void"), ArgumentTypes = _templates1 };
 					}
 				}
 				if (_ret == null) {

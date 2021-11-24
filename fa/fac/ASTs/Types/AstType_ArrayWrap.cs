@@ -11,6 +11,7 @@ namespace fac.ASTs.Types {
 
 
 
+		public override string ToString () => $"{ItemType}[]";
 		public override string GenerateCSharp_Type () => $"List<{ItemType.GenerateCSharp_Type ()}>";
 	}
 }

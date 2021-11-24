@@ -69,19 +69,5 @@ namespace fac {
 				_sb.Append (_a).Append (_b).Append (_c);
 			}
 		}
-
-		public static bool ResultMayOptional (this IAstExpr _expr) {
-			if (_expr is IAstType) {
-				return _expr is AstType_OptionalWrap;
-			} else {
-				if (_expr.ExpectType is AstType_OptionalWrap) {
-					return true;
-				} else if (_expr is AstExprTypeCast _castexpr) {
-					return _castexpr.Value.ResultMayOptional ();
-				} else {
-					return false;
-				}
-			}
-		}
 	}
 }

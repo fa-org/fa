@@ -17,12 +17,12 @@ namespace fac.ASTs.Exprs.Names {
 		private static Dictionary<string, AstExprName_BuildIn> sBuildIn = new Dictionary<string, AstExprName_BuildIn> {
 			["continue"] = new AstExprName_BuildIn { Token = null, Name = "continue", NameType = "" },
 			["break"] = new AstExprName_BuildIn { Token = null, Name = "break", NameType = "" },
-			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Action<string>" },
+			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Func<string, void>" },
 			["string.Format"] = new AstExprName_BuildIn { Token = null, Name = "string.Format", NameType = "Func<string, params any[], string>" },
 			["File.Exists"] = new AstExprName_BuildIn { Token = null, Name = "File.Exists", NameType = "Func<string, bool>" },
 			["File.ReadAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.ReadAllText", NameType = "Func<string, string>" },
-			["File.WriteAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.WriteAllText", NameType = "Action<string, string>" },
-			["File.AppendAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.AppendAllText", NameType = "Action<string, string>" },
+			["File.WriteAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.WriteAllText", NameType = "Func<string, string, void>" },
+			["File.AppendAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.AppendAllText", NameType = "Func<string, string, void>" },
 			["@FILE"] = new AstExprName_BuildIn { Token = null, Name = "@FILE", NameType = "string" },
 			["@SOURCE"] = new AstExprName_BuildIn { Token = null, Name = "@SOURCE", NameType = "string" },
 		};

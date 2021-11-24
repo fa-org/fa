@@ -50,7 +50,7 @@ namespace fac.ASTs.Exprs {
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			StringBuilder _psb = new StringBuilder (), _ssb = new StringBuilder ();
 			var _tmp_var_name = Common.GetTempId ();
-			_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{ItemDataType}> ();");
+			_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{ItemDataType.GenerateCSharp_Type ()}> ();");
 			foreach (var _init_val in InitValues) {
 				var (_a, _b, _c) = _init_val.GenerateCSharp (_indent, ItemDataType is AstType_OptionalWrap ? null : _check_cb);
 				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_tmp_var_name}.Add ({_b});");

@@ -10,6 +10,7 @@ namespace fac.ASTs.Types {
 
 
 
+		public override string ToString () => $"{ItemType}?";
 		public override string GenerateCSharp_Type () => $"fa.Optional<{ItemType.GenerateCSharp_Type ()}>";
 	}
 }

@@ -3,17 +3,51 @@ use fa;
 
 
 class Program {
-	public static void test (params int[] a) {
-		for int i : a {
-			Console.WriteLine ("{0}".Format (i));
-		}
+	public static int? test () {
+		return 5 / 1;
+	}
+
+	public static int? test2 () {
+		int n = test ()?;
+		return n;
 	}
 
 	public static void Main () {
-		int aaa = 10;
-		test (aaa, 12, 32);
+		int? n = test2 ();
 	}
 }
+
+//////////////////////////////////////// TODO ////////////////////////////////////////////
+//class Program {
+//	public static void? test () {
+//		int i = (5 / 0)?;     // ?运算符将可空的值转为不可空值，为空时候函数返回空
+//		int i = (5 / 0) ?? 0; // ??运算符在识别到
+//		int? i2 = 5 / 0;      // 
+//		_ = 5 / 0;            //
+//	}
+//
+//	public static void Main () {
+//		test ();              // 容易失误导致忽略，此处编译错误
+//		_ = test ();          // 强制忽略错误
+//		test ()?;             // 遇到错误则返回（要求调用者所在函数返回类型带?）
+//	}
+//}
+//////////////////////////////////////// TODO ////////////////////////////////////////////
+
+//class Program {
+//	public static void test (params int[] a) {
+//		for int i : a {
+//			Console.WriteLine ("{0}".Format (i));
+//		}
+//	}
+//
+//	public static void Main () {
+//		int aaa = 10;
+//		test (aaa, 12, 32);
+//		int[] bbb = [10, 12, 32];
+//		test (bbb);
+//	}
+//}
 
 //class Program {
 //	public static void Main () {

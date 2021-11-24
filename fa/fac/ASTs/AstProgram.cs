@@ -76,6 +76,7 @@ namespace fac.ASTs {
 			_psb.AppendLine ($"{_indent.Indent ()}using System;");
 			_psb.AppendLine ($"{_indent.Indent ()}using System.IO;");
 			_psb.AppendLine ($"{_indent.Indent ()}using System.Text;");
+			_psb.AppendLine ($"{_indent.Indent ()}using System.Collections.Generic;");
 			foreach (var _class in CurrentClasses) {
 				var (_a, _b, _c) = _class.GenerateCSharp (_indent, null);
 				_sb.Append (_a).Append (_b).Append  (_c);

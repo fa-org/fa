@@ -29,14 +29,27 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
-			var (_a, _b, _c) = DataType.GenerateCSharp (_indent, null);
-			var _ec = new ExprChecker (DataType.ResultMayOptional () ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
-			var (_d, _e, _f) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
-			var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Expr.Token) ?? ("", "");
-			_psb.AppendLine ($"{_indent.Indent ()}{_b} {VarName};").Append (_g).Append (_a).Append (_d);
-			_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_e};");
-			return (_psb.ToString (), _sb.ToString (), $"{_c}{_f}{_h}");
+			//StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
+			//var _ec = new ExprChecker (DataType.ResultMayOptional () ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
+			//var (_d, _e, _f) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
+			//var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Expr.Token) ?? ("", "");
+			//_psb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};").Append (_g).Append (_d);
+			//_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_e};");
+			//return (_psb.ToString (), _sb.ToString (), $"{_f}{_h}");
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};");
+			var _tmp_expr = new AstExpr_Op2 {
+				Token = Token,
+				Value1 = new AstExprName_Variable { Token = Token, ExpectType = DataType, Var = this },
+				Value2 = Expr,
+				Operator = "=",
+				ExpectType = DataType,
+			};
+			var (_a, _b, _c) = _tmp_expr.GenerateCSharp (_indent, _check_cb);
+			_sb.Append (_a);
+			_sb.AppendLine ($"{_indent.Indent ()}{_b};");
+			_sb.Append (_c);
+			return ("", _sb.ToString (), "");
 		}
 	}
 }
