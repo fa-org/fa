@@ -52,12 +52,13 @@ namespace fac.ASTs.Exprs {
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
-			var _ec = new ExprChecker (null);
 			string _tmp_var_name2 = Common.GetTempId ();
 			if (Condition != null) {
 				string _tmp_var_name = Common.GetTempId ();
 				var (_a, _b, _c) = Condition.GenerateCSharp (_indent, _check_cb);
-				_sb.Append (_a).AppendLine ($"{_indent.Indent ()}{Condition.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_b};").Append (_c);
+				if (_a != "" || _c != "")
+					throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");
+				_sb.AppendLine ($"{_indent.Indent ()}{Condition.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_b};");
 				_sb.AppendLine ($"{_indent.Indent ()}{ExpectType.GenerateCSharp_Type ()} {_tmp_var_name2};");
 				var _cases = (from p in CaseValues select p.GenerateCSharp (_indent, _check_cb)).ToList ();
 				if (_cases.Count == 1 && CaseValues[0] is AstExprName_Ignore && CaseConds2[0] == null) {

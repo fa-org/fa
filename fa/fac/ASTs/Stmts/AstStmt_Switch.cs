@@ -45,15 +45,16 @@ namespace fac.ASTs.Stmts {
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
-			var _ec = new ExprChecker (null);
 			if (Condition != null) {
 				var _tmp_var_name = Common.GetTempId ();
 				var (_a, _b, _c) = Condition.GenerateCSharp (_indent, _check_cb);
-				_sb.Append (_a).AppendLine ($"{_indent.Indent ()}{Condition.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_b};").Append (_c);
+				if (_a != "" || _c != "")
+					throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");
+				_sb.AppendLine ($"{_indent.Indent ()}{Condition.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_b};");
 				var _cases = (from p in CaseValues select p.GenerateCSharp (_indent, _check_cb)).ToList ();
 				if (_cases.Count == 1 && CaseValues[0] is AstExprName_Ignore && CaseConds2[0] == null) {
-					(_a, _b, _c) = CaseCodes[0].GenerateCSharp (_indent + 1, _check_cb);
 					_sb.AppendLine ($"{_indent.Indent ()}{{");
+					(_a, _b, _c) = CaseCodes[0].GenerateCSharp (_indent + 1, null);
 					_sb.Append (_a).Append (_b).Append (_c);
 					_sb.AppendLine ($"{_indent.Indent ()}}}");
 				} else {
