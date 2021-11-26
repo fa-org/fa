@@ -4,17 +4,12 @@ use fa;
 
 class Program {
 	public static int? test () {
-		return 5 / 1;
-	}
-
-	public static int? test2 () {
-		int? n = test ();
+		int? n = 5 / 1;
 		int x = n? + 10;
 		return x;
 	}
-
 	public static void Main () {
-		int? n = test2 ();
+		test ();
 	}
 }
 

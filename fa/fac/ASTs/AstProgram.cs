@@ -72,16 +72,14 @@ namespace fac.ASTs {
 			//
 			if (CurrentClasses.Count == 0)
 				return ("", "", "");
-			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
-			_psb.AppendLine ($"{_indent.Indent ()}using System;");
-			_psb.AppendLine ($"{_indent.Indent ()}using System.IO;");
-			_psb.AppendLine ($"{_indent.Indent ()}using System.Text;");
-			_psb.AppendLine ($"{_indent.Indent ()}using System.Collections.Generic;");
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"namespace {Info.CurrentNamespace} {{");
 			foreach (var _class in CurrentClasses) {
 				var (_a, _b, _c) = _class.GenerateCSharp (_indent, null);
 				_sb.Append (_a).Append (_b).Append  (_c);
 			}
-			return (_psb.ToString (), _sb.ToString (), "");
+			_sb.AppendLine ($"}}");
+			return ("", _sb.ToString (), "");
 		}
 	}
 }

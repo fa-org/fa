@@ -36,7 +36,7 @@ namespace fac.ASTs.Stmts {
 			//_psb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};").Append (_g).Append (_d);
 			//_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_e};");
 			//return (_psb.ToString (), _sb.ToString (), $"{_f}{_h}");
-			var _ec = new ExprChecker (new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType });
+			var _ec = new ExprChecker (ExpectType is AstType_OptionalWrap ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};");
 			var _tmp_expr = new AstExpr_Op2 {

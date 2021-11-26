@@ -146,30 +146,35 @@ namespace fac {
 
 		//
 		public static string GenerateCSharp () {
-			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"using System;");
+			_sb.AppendLine ($"using System.IO;");
+			_sb.AppendLine ($"using System.Text;");
+			_sb.AppendLine ($"using System.Collections.Generic;");
+			_sb.AppendLine ();
+			_sb.AppendLine ();
+			_sb.AppendLine ();
+			_sb.AppendLine ("namespace fa {");
+			_sb.AppendLine ("public class Optional<T> {");
+			_sb.AppendLine ("    public T t = default;");
+			_sb.AppendLine ("    public string err = \"\";");
+			_sb.AppendLine ("    public bool HasValue () => err == \"\";");
+			_sb.AppendLine ("    public T GetValue () => t;");
+			_sb.AppendLine ("    public string GetError () => err;");
+			_sb.AppendLine ("    public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
+			_sb.AppendLine ("    public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
+			_sb.AppendLine ("    public static T operator | (Optional<T> t1, T t2) => t1.HasValue () ? t1.GetValue () : t2; // operator ??");
+			// FIXME: 支持“?? 异常”用法，但传字符串不对，假如出现 string? 类型的 ?? 就尴尬了
+			_sb.AppendLine ("}");
+			_sb.AppendLine ("}");
+			_sb.AppendLine ();
+			_sb.AppendLine ();
+			_sb.AppendLine ();
 			foreach (var _program in Programs) {
 				var (_a, _b, _c) = _program.GenerateCSharp (0, null);
-				_psb.Append (_a);
-				_sb.Append (_b).Append (_c);
+				_sb.Append (_a).Append (_b).Append (_c);
 			}
-			_psb.AppendLine ();
-			_psb.AppendLine ();
-			_psb.AppendLine ();
-			_psb.AppendLine ("namespace fa {");
-			_psb.AppendLine ("public class Optional<T> {");
-			_psb.AppendLine ("    public T t = default;");
-			_psb.AppendLine ("    public string err = \"\";");
-			_psb.AppendLine ("    public bool HasValue () => err == \"\";");
-			_psb.AppendLine ("    public T GetValue () => t;");
-			_psb.AppendLine ("    public string GetError () => err;");
-			_psb.AppendLine ("    public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
-			_psb.AppendLine ("    public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
-			_psb.AppendLine ("    public static T operator | (Optional<T> t1, T t2) => t1.HasValue () ? t1.GetValue () : t2; // operator ??");
-			_psb.AppendLine ("}");
-			_psb.AppendLine ("}");
-			_psb.AppendLine ($"namespace {Info.CurrentNamespace} {{");
-			_sb.AppendLine ($"}}");
-			return $"{_psb}{_sb}";
+			return _sb.ToString ();
 		}
 	}
 }

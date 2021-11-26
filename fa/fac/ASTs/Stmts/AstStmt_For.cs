@@ -1,6 +1,7 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
 using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,21 +47,25 @@ namespace fac.ASTs.Stmts {
 			var _ec = new ExprChecker (null);
 			_sb.AppendLine ($"{_indent.Indent ()}{{");
 			var (_a, _b, _c) = Initialize.GenerateCSharp (_indent + 1, _ec.CheckFunc);
-			var (_e, _f) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Initialize.Token);
-			_sb.Append ($"{_e}{_a}{_b}");
-			_ec = new ExprChecker (null);
-			string _d;
-			(_a, _b, _d) = Condition.GenerateCSharp (_indent + 1, _ec.CheckFunc);
-			var (_g, _h) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Condition.Token);
-			_sb.AppendLine ($"{_g}{_a}{(_indent + 1).Indent ()}while ({_b}) {{");
+			var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Initialize.Token);
+			_sb.Append ($"{_a}{_d}{_b}{_e}{_c}");
+			(_a, _b, _c) = Condition.GenerateCSharp (_indent + 1, Common.NoCheck (Condition.Token));
+			if (_a != "" || _c != "")
+				throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");
+			_sb.Append ($"{(_indent + 1).Indent ()}for (; {_b}; ");
+			for (int i = 0; i < Increment.Count; ++i) {
+				(_a, _b, _c) = Increment[i].GenerateCSharp (_indent + 1, Common.NoCheck (Condition.Token));
+				if (_a != "" || _c != "")
+					throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");
+				_sb.Append (_b);
+				if (i < Increment.Count - 1)
+					_sb.Append (", ");
+			}
+			_sb.AppendLine ($") {{");
 			_sb.AppendStmts (BodyCodes, _indent + 2);
-			_sb.AppendExprs (Increment, _indent + 2);
-			var (_i, _j) = _ec.GenerateCSharpPrefixSuffix (_indent + 2, Condition.Token);
-			_sb.Append ($"{_i}{_a}");
-			//
 			_sb.AppendLine ($"{(_indent + 1).Indent ()}}}");
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return ("", _sb.ToString (), $"{_c}{_d}{_f}{_h}{_j}");
+			return ("", _sb.ToString (), "");
 		}
 	}
 }

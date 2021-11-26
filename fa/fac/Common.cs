@@ -119,5 +119,7 @@ namespace fac {
 		private static Dictionary<char, char> sTransChar = new Dictionary<char, char> {
 			['r'] = '\r', ['n'] = '\n', ['t'] = '\t', ['\''] = '\'', ['\\'] = '\\', ['\"'] = '\"',
 		};
+
+		public static Action<string, string> NoCheck (IToken _t) => (_a, _b) => throw new CodeException (_t, "此处不允许带隐藏逻辑的表达式");
 	}
 }
