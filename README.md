@@ -1,6 +1,11 @@
 # fa
 
-fa语言是一款按照我个人最主观的看法，设计出的一款最不容易误解、最简单的编程语言。目前处于还不完善阶段，无法测试及使用。
+[![license](https://img.shields.io/github/license/fa-org/fa?color=09f)](./LICENSE)
+[![csharp](https://img.shields.io/lgtm/alerts/github/fa-org/fa)](https://lgtm.com/projects/g/fa-org/fa)
+[![csharp](https://img.shields.io/lgtm/grade/csharp/github/fa-org/fa)](https://lgtm.com/projects/g/fa-org/fa)
+<!--[![download](https://img.shields.io/github/downloads/fa-org/fa/total.svg)](https://github.com/fa-org/fa/releases)-->
+
+fa语言是一款不容易误解、简单的编程语言。目前处于还不完善阶段，无法测试及使用。
 
 ### **qq交流群：1018390466 欢迎一起讨论语法/实现/轮子**
 
