@@ -252,7 +252,8 @@ defVarStmt:					type id Assign expr Semi;
 // stmt
 //
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
-stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
+							// void? ×¨Êô
+stmt:						(middleExpr qusQusOp)? ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
 
 
 

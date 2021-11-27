@@ -40,7 +40,13 @@ namespace fac.ASTs.Exprs {
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) => Value = _cb (Value, _deep, _group);
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) => throw new NotImplementedException ();
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			// 只有一种情况会调用到，提前构造好转换，也就是ExpectType设置好之后
+			if (ExpectType == null)
+				throw new NotImplementedException ();
+			Value.TraversalCalcType (null);
+			return this;
+		}
 
 		public override IAstType GuessType () => Value.GuessType ();
 

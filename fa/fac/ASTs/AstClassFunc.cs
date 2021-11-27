@@ -59,19 +59,20 @@ namespace fac.ASTs {
 
 		// 遍历代码，确保所有路径均return
 		private void MakeSureReturn (List<IAstStmt> _stmts) {
+			string _ret_type = ReturnType.ToString ();
 			if (_stmts.Count == 0) {
-				if (ReturnType is not AstType_Void)
+				if (_ret_type != "void" && _ret_type != "void?")
 					throw new CodeException (Token, $"方法需返回 {ReturnType} 类型结果");
-				_stmts.Add (IAstStmt.FromExpr (null, true));
+				_stmts.Add (new AstStmt_Return { Token = null, Expr = _ret_type == "void" ? null : AstExprTypeCast.ForceMake (new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName ("int"), Value = "0" }, IAstType.FromName ("int?")) });
 			} else if (_stmts[^1] is AstStmt_Return) {
 				return;
 			} else if (_stmts[^1] is AstStmt_If _ifstmt) {
 				MakeSureReturn (_ifstmt.IfTrueCodes);
 				MakeSureReturn (_ifstmt.IfFalseCodes);
 			} else {
-				if (ReturnType is not AstType_Void)
+				if (_ret_type != "void" && _ret_type != "void?")
 					throw new CodeException (Token, $"方法需返回 {ReturnType} 类型结果");
-				_stmts.Add (IAstStmt.FromExpr (null, true));
+				_stmts.Add (new AstStmt_Return { Token = null, Expr = _ret_type == "void" ? null : AstExprTypeCast.ForceMake (new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName ("int"), Value = "0" }, IAstType.FromName ("int?")) });
 			}
 		}
 

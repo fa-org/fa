@@ -29,14 +29,7 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			//StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder ();
-			//var _ec = new ExprChecker (DataType.ResultMayOptional () ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
-			//var (_d, _e, _f) = Expr.GenerateCSharp (_indent, _ec != null ? _ec.CheckFunc : _check_cb);
-			//var (_g, _h) = _ec?.GenerateCSharpPrefixSuffix (_indent, Expr.Token) ?? ("", "");
-			//_psb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};").Append (_g).Append (_d);
-			//_sb.AppendLine ($"{_indent.Indent ()}{VarName} = {_e};");
-			//return (_psb.ToString (), _sb.ToString (), $"{_f}{_h}");
-			var _ec = new ExprChecker (ExpectType is AstType_OptionalWrap ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
+			var _ec = new ExprChecker (DataType is AstType_OptionalWrap ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};");
 			var _tmp_expr = new AstExpr_Op2 {

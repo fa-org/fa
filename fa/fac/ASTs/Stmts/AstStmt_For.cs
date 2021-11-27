@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	class AstStmt_For: IAstStmt {
-		public IAstStmt Initialize { get; set; }
+		public List<IAstStmt> Initializes { get; set; }
 		public IAstExpr Condition { get; set; }
 		public List<IAstExpr> Increment { get; set; }
 		public List<IAstStmt> BodyCodes { get; set; }
@@ -18,7 +18,7 @@ namespace fac.ASTs.Stmts {
 
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Initialize = _cb (Initialize, _deep, _group) as IAstStmt;
+			Initializes.Traversal (_deep, _group, _cb);
 			Condition = _cb (Condition, _deep, _group);
 			Increment.Traversal (_deep, _group, _cb);
 			BodyCodes.Traversal (_deep + 1, 0, _cb);
@@ -27,7 +27,7 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			Initialize = Initialize.TraversalCalcType (null) as IAstStmt;
+			Initializes.TraversalCalcType ();
 			if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap) {
 				try {
 					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
@@ -44,11 +44,12 @@ namespace fac.ASTs.Stmts {
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
-			var _ec = new ExprChecker (null);
 			_sb.AppendLine ($"{_indent.Indent ()}{{");
-			var (_a, _b, _c) = Initialize.GenerateCSharp (_indent + 1, _ec.CheckFunc);
-			var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Initialize.Token);
-			_sb.Append ($"{_a}{_d}{_b}{_e}{_c}");
+			string _a, _b, _c;
+			foreach (var _initlize in Initializes) {
+				(_a, _b, _c) = _initlize.GenerateCSharp (_indent + 1, Common.NoCheck (_initlize.Token));
+				_sb.Append ($"{_a}{_b}{_c}");
+			}
 			(_a, _b, _c) = Condition.GenerateCSharp (_indent + 1, Common.NoCheck (Condition.Token));
 			if (_a != "" || _c != "")
 				throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");

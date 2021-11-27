@@ -85,6 +85,8 @@ namespace fac {
 				return;
 			}
 
+			// TODO: 读取编译器自带标准库，比如Error等，用于后续part拼接，以及替换掉buildin实现
+
 			string _path = Path.GetFullPath (args[0]);
 			if (_path.EndsWith (".fa")) {
 				// 文件

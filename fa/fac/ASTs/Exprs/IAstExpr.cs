@@ -223,9 +223,9 @@ namespace fac.ASTs.Exprs {
 				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = null };
 				var _switch_items = _ctx.switchExpr2 ().switchExprPart2 ();
 				_t.CaseValues = null;
-				_t.CaseConds2 = (from p in _switch_items select FromContext (p.expr ())).ToList ();
+				_t.CaseWhen = (from p in _switch_items select FromContext (p.expr ())).ToList ();
 				_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
-				_t.CaseConds2.Add (null);
+				_t.CaseWhen.Add (null);
 				var _wraps = (from p in _switch_items select p.quotStmtExprWrap ()).ToList ();
 				_wraps.Add (_ctx.switchExpr2 ().switchExprPartLast ().quotStmtExprWrap ());
 				foreach (var _wrap in _wraps) {
@@ -240,13 +240,14 @@ namespace fac.ASTs.Exprs {
 					}
 				}
 				return _t;
+				// TODO: 移植为if else
 			} else if (_ctx.switchExpr () != null) {
 				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchExpr ().expr ()) };
 				var _switch_items = _ctx.switchExpr ().switchExprPart ();
 				_t.CaseValues = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
 				_t.CaseValues.Add (new AstExprName_Ignore { Token = _ctx.switchExpr ().switchExprPartLast ().Start });
-				_t.CaseConds2 = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
-				_t.CaseConds2.Add (null);
+				_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
+				_t.CaseWhen.Add (null);
 				_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
 				var _wraps = (from p in _switch_items select p.quotStmtExprWrap ()).ToList ();
 				_wraps.Add (_ctx.switchExpr ().switchExprPartLast ().quotStmtExprWrap ());
@@ -262,6 +263,7 @@ namespace fac.ASTs.Exprs {
 					}
 				}
 				return _t;
+				// TODO: 移植为if else
 			} else {
 				throw new UnimplException (_ctx);
 			}

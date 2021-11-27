@@ -36,78 +36,82 @@ namespace fac.ASTs.Stmts {
 			return _ifexpr;
 		}
 
-		public static IAstStmt FromContext (FaParser.StmtContext _ctx) {
+		public static List<IAstStmt> FromStmt (FaParser.StmtContext _ctx) {
+			var _stmts = new List<IAstStmt> ();
 			if (_ctx.ifStmt () != null) {
 				var _conditions = _ctx.ifStmt ().expr ().ToList ();
 				var _contents = _ctx.ifStmt ().quotStmtPart ().ToList ();
-				return FromIfStmt (_conditions, _contents);
+				_stmts.Add (FromIfStmt (_conditions, _contents));
 			} else if (_ctx.whileStmt () != null) {
 				var _whilestmt = new AstStmt_While { Token = _ctx.Start, IsDoWhile = false };
 				_whilestmt.Condition = FromContext (_ctx.whileStmt ().expr ());
 				_whilestmt.Contents = FromStmts (_ctx.whileStmt ().stmt ());
-				return _whilestmt;
+				_stmts.Add (_whilestmt);
 			} else if (_ctx.whileStmt2 () != null) {
 				var _whilestmt = new AstStmt_While { Token = _ctx.Start, IsDoWhile = true };
 				_whilestmt.Condition = FromContext (_ctx.whileStmt2 ().expr ());
 				_whilestmt.Contents = FromStmts (_ctx.whileStmt2 ().stmt ());
-				return _whilestmt;
+				_stmts.Add (_whilestmt);
 			} else if (_ctx.forStmt () != null) {
 				var _forstmt = new AstStmt_For { Token = _ctx.Start };
-				_forstmt.Initialize = FromContext (_ctx.forStmt ().stmt ()[0]);
+				_forstmt.Initializes = FromStmt (_ctx.forStmt ().stmt ()[0]);
 				_forstmt.Condition = FromContext (_ctx.forStmt ().expr ()[0]);
 				_forstmt.Increment = FromExprs (_ctx.forStmt ().expr ()[1..]);
 				_forstmt.BodyCodes = FromStmts (_ctx.forStmt ().stmt ()[1..]);
-				return _forstmt;
+				_stmts.Add (_forstmt);
 			} else if (_ctx.forStmt2 () != null) {
 				var _forstmt2 = new AstStmt_For2 { Token = _ctx.Start };
 				_forstmt2.Iterator = new AstStmt_DefVariable { Token = _ctx.forStmt2 ().type ().Start, DataType = IAstType.FromContext (_ctx.forStmt2 ().type ()), VarName = _ctx.forStmt2 ().id ().GetText (), Expr = null };
 				_forstmt2.ListContainer = FromContext (_ctx.forStmt2 ().expr ());
 				_forstmt2.BodyCodes = FromStmts (_ctx.forStmt2 ().stmt ());
-				return _forstmt2;
+				_stmts.Add (_forstmt2);
 			} else if (_ctx.quotStmtPart () != null) {
-				return new AstStmt_HuaQuotWrap { Token = _ctx.Start, Stmts = FromStmts (_ctx.quotStmtPart ().stmt ()) };
+				_stmts.Add (new AstStmt_HuaQuotWrap { Token = _ctx.Start, Stmts = FromStmts (_ctx.quotStmtPart ().stmt ()) });
 			} else if (_ctx.switchStmt2 () != null) {
 				var _t = new AstStmt_Switch { Token = _ctx.Start, Condition = null };
 				var _switch_items = _ctx.switchStmt2 ().switchStmtPart2 ();
 				_t.CaseValues = null;
-				_t.CaseConds2 = (from p in _switch_items select FromContext (p.expr ())).ToList ();
-				_t.CaseCodes = (from p in _switch_items select FromContext (p.stmt ())).ToList ();
+				_t.CaseWhen = (from p in _switch_items select FromContext (p.expr ())).ToList ();
+				_t.CaseCodes = (from p in _switch_items select FromStmt (p.stmt ()).ToSingleStmt ()).ToList ();
 				if (_ctx.switchStmt2 ().switchStmtPart2Last () != null) {
-					_t.CaseConds2.Add (new AstExprName_Ignore { Token = _ctx.switchStmt2 ().switchStmtPart2Last ().Underline ().Symbol });
-					_t.CaseCodes.Add (FromContext (_ctx.switchStmt2 ().switchStmtPart2Last ().stmt ()));
+					_t.CaseWhen.Add (new AstExprName_Ignore { Token = _ctx.switchStmt2 ().switchStmtPart2Last ().Underline ().Symbol });
+					_t.CaseCodes.Add (FromStmt (_ctx.switchStmt2 ().switchStmtPart2Last ().stmt ()).ToSingleStmt ());
 				}
-				return _t;
+				_stmts.Add (_t);
+				// TODO: 移植为if else
 			} else if (_ctx.switchStmt () != null) {
 				var _t = new AstStmt_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchStmt ().expr ()) };
 				var _switch_items = _ctx.switchStmt ().switchStmtPart ();
 				_t.CaseValues = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
-				_t.CaseConds2 = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
-				_t.CaseCodes = (from p in _switch_items select FromContext (p.stmt ())).ToList ();
-				return _t;
+				_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
+				_t.CaseCodes = (from p in _switch_items select FromStmt (p.stmt ()).ToSingleStmt ()).ToList ();
+				_stmts.Add (_t);
+				// TODO: 移植为if else
 			} else if (_ctx.normalStmt () != null) {
 				if (_ctx.normalStmt ().Continue () != null) {
-					return new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("continue") };
+					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("continue") });
 				} else if (_ctx.normalStmt ().Break () != null) {
-					return new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("break") };
+					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("break") });
 				} else if (_ctx.normalStmt ().Return () != null) {
-					return new AstStmt_Return { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) };
+					_stmts.Add (new AstStmt_Return { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) });
 				} else {
-					return new AstStmt_ExprWrap { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) };
+					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) });
 				}
 			} else if (_ctx.defVarStmt () != null) {
 				var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start };
 				_varstmt.DataType = IAstType.FromContext (_ctx.defVarStmt ().type ());
 				_varstmt.VarName = _ctx.defVarStmt ().id ().GetText ();
 				_varstmt.Expr = FromContext (_ctx.defVarStmt ().expr ());
-				return _varstmt;
+				_stmts.Add (_varstmt);
 			} else {
 				throw new UnimplException (_ctx.Start);
 			}
+			return _stmts;
 		}
 
 		public static List<IAstExpr> FromExprs (FaParser.ExprContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
 
-		public static List<IAstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
+		public static List<IAstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select FromStmt (p)).CombileStmts ();
 
 		public override bool AllowAssign () => false;
 	}

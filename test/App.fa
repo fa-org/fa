@@ -2,18 +2,17 @@ use fa;
 
 
 
-class Program {
-	public static int? test () {
-		int? n = 5 / 1;
-		int x = n? + 10;
-		return x;
-	}
-	public static void Main () {
-		test ();
-	}
-}
+//class Program {
+//	public static void? test () {
+//		int? n = 5 / 1;
+//		int x = n? + 10;
+//	}
+//	public static void Main () {
+//		test ();
+//	}
+//}
 
-//////////////////////////////////////// TODO ////////////////////////////////////////////
+//////////////////////////////////////// TODO 暂未测试 ////////////////////////////////////////////
 //class Program {
 //	public static void? test () {
 //		int i = (5 / 0)?;     // ?运算符将可空的值转为不可空值，为空时候函数返回空
@@ -28,7 +27,77 @@ class Program {
 //		test ()?;             // 遇到错误则返回（要求调用者所在函数返回类型带?）
 //	}
 //}
-//////////////////////////////////////// TODO ////////////////////////////////////////////
+//////////////////////////////////////// TODO 暂未测试 ////////////////////////////////////////////
+
+//enum TestEnum { A, B (int), C }
+//class Program {
+//	public static void Main () {
+//		TestEnum e = TestEnum.B (2);
+//		switch e {
+//			TestEnum.A => Console.WriteLine ("error1");
+//			TestEnum.B (6) => Console.WriteLine ("error2");
+//			TestEnum.B (2) => Console.WriteLine ("hello");
+//			TestEnum.C => Console.WriteLine ("error3");
+//		}
+//	}
+//}
+
+//enum TestEnum { A, B, C }
+//class Program {
+//	public static void Main () {
+//		TestEnum e = TestEnum.B;
+//		switch e {
+//			TestEnum.A => Console.WriteLine ("error1");
+//			TestEnum.B => Console.WriteLine ("hello");
+//			TestEnum.C => Console.WriteLine ("error2");
+//		}
+//	}
+//}
+
+//enum TestEnum { A, B, C }
+//class Program {
+//	public static void Main () {
+//		TestEnum e = TestEnum.B;
+//		if (e == TestEnum.A) {
+//			Console.WriteLine ("error1");
+//		} else if (e == TestEnum.B) {
+//			Console.WriteLine ("hello");
+//		} else {
+//			Console.WriteLine ("error2");
+//		}
+//	}
+//}
+
+//enum TestEnum { A, B, C }
+//class Program {
+//	public static void Main () {
+//		TestEnum e = TestEnum.B;
+//		string s = if (e == TestEnum.A) {
+//			"error1"
+//		} else if (e == TestEnum.B) {
+//			"hello"
+//		} else {
+//			"error2"
+//		};
+//        Console.WriteLine (s);
+//	}
+//}
+
+//enum TestEnum { A, B (int), C }
+//class Program {
+//	public static void Main () {
+//		TestEnum e = TestEnum.B (2);
+//		if (e == TestEnum.A) {
+//			Console.WriteLine ("error1");
+//		} else if (e == TestEnum.B (6)) {
+//			Console.WriteLine ("error2");
+//		} else if (e == TestEnum.B (2)) {
+//			Console.WriteLine ("hello");
+//		} else {
+//			Console.WriteLine ("error3");
+//		}
+//	}
+//}
 
 //class Program {
 //	public static void test (params int[] a) {
@@ -60,7 +129,7 @@ class Program {
 //}
 
 //class Program {
-//	public static void test (int a) {
+//	public static void test (mut int a) {
 //		a = 5;
 //	}
 //

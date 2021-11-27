@@ -69,5 +69,22 @@ namespace fac {
 				_sb.Append (_a).Append (_b).Append (_c);
 			}
 		}
+
+		public static List<IAstStmt> CombileStmts (this IEnumerable<List<IAstStmt>> _stmtss) {
+			var _stmts = new List<IAstStmt> ();
+			foreach (var _stmtss_item in _stmtss)
+				_stmts.AddRange (_stmtss_item);
+			return _stmts;
+		}
+
+		public static IAstStmt ToSingleStmt (this List<IAstStmt> _stmts) {
+			if ((_stmts?.Count ?? 0) == 0) {
+				return new AstStmt_ExprWrap { Token = null, Expr = null };
+			} else if (_stmts.Count == 1) {
+				return _stmts[0];
+			} else {
+				return new AstStmt_HuaQuotWrap { Token = _stmts[0].Token, Stmts = _stmts };
+			}
+		}
 	}
 }
