@@ -5,7 +5,7 @@
 [![csharp](https://img.shields.io/lgtm/grade/csharp/github/fa-org/fa?logo=lgtm)](https://lgtm.com/projects/g/fa-org/fa)
 <!--[![download](https://img.shields.io/github/downloads/fa-org/fa/total.svg)](https://github.com/fa-org/fa/releases)-->
 
-fa语言是一款不容易误解、简单的编程语言。目前处于还不完善阶段，无法测试及使用。
+fa语言是一款不容易误解、简单易学的编程语言。目前处于测试阶段，可以编译简单的功能代码。
 
 ### **qq交流群：1018390466 欢迎一起讨论语法/实现/轮子**
 
