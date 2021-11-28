@@ -2,7 +2,7 @@
   "profiles": {
     "fac": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\GitHub\\_\\fa\\test\\App.fa -d"
+      "commandLineArgs": "D:\\GitHub\\_\\_fa_org\\fa\\test\\App.fa -d"
     }
   }
 }

@@ -2,15 +2,16 @@ use fa;
 
 
 
-//class Program {
-//	public static void? test () {
-//		int? n = 5 / 1;
-//		int x = n? + 10;
-//	}
-//	public static void Main () {
-//		test ();
-//	}
-//}
+class Program {
+	public static void? test () {
+		int? n = 5 / 1;
+		int x = n? + 10;
+	}
+	public static void Main () {
+		test ();       // 编译报错，提示需处理
+		_ = test ();   // 忽略错误，编译成功
+	}
+}
 
 //////////////////////////////////////// TODO 暂未测试 ////////////////////////////////////////////
 //class Program {

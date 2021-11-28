@@ -2,6 +2,7 @@
 using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,8 @@ namespace fac.ASTs.Stmts {
 
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+			if (VarName == "_")
+				throw new CodeException (Token, "声明的变量名不能为“_”");
 			if (Expr != null)
 				Expr = _cb (Expr, _deep, _group);
 		}

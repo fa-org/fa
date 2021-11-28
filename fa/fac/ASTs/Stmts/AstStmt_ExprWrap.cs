@@ -1,6 +1,7 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
 using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,10 @@ namespace fac.ASTs.Stmts {
 				throw new Exception ("语句类型不可指定期望类型");
 			if (Expr != null) {
 				Expr = Expr.TraversalCalcType (null);
-				// FIXME: 异常强制处理
+
+				// 异常强制处理
+				if ((!(Expr is AstExpr_Op2 _op2expr && _op2expr.Operator == "=")) && Expr.ExpectType is AstType_OptionalWrap)
+					throw new CodeException (Token, "此处未处理异常必须处理");
 			}
 			return this;
 		}
