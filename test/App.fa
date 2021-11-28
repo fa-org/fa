@@ -2,16 +2,46 @@ use fa;
 
 
 
+enum TestEnum { A, B (int), C }
 class Program {
-	public static void? test () {
-		int? n = 5 / 1;
-		int x = n? + 10;
-	}
 	public static void Main () {
-		test ();       // 编译报错，提示需处理
-		_ = test ();   // 忽略错误，编译成功
+		TestEnum e = TestEnum.B (2);
+		switch e {
+			TestEnum.A     => Console.WriteLine ("error1");
+			TestEnum.B (6) => Console.WriteLine ("error2");
+			TestEnum.B (2) => Console.WriteLine ("hello");
+			TestEnum.C     => Console.WriteLine ("error3");
+		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//class Program {
+//	public static void? test () {
+//		int? n = 5 / 1;
+//		int x = n? + 10;
+//	}
+//	public static void Main () {
+//		test ();       // 编译报错，提示需处理
+//		_ = test ();   // 忽略错误，编译成功
+//	}
+//}
 
 //////////////////////////////////////// TODO 暂未测试 ////////////////////////////////////////////
 //class Program {
@@ -29,19 +59,6 @@ class Program {
 //	}
 //}
 //////////////////////////////////////// TODO 暂未测试 ////////////////////////////////////////////
-
-//enum TestEnum { A, B (int), C }
-//class Program {
-//	public static void Main () {
-//		TestEnum e = TestEnum.B (2);
-//		switch e {
-//			TestEnum.A => Console.WriteLine ("error1");
-//			TestEnum.B (6) => Console.WriteLine ("error2");
-//			TestEnum.B (2) => Console.WriteLine ("hello");
-//			TestEnum.C => Console.WriteLine ("error3");
-//		}
-//	}
-//}
 
 //enum TestEnum { A, B, C }
 //class Program {
