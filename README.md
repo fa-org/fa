@@ -1,7 +1,7 @@
 # fa
 
 [![license](https://img.shields.io/github/license/fa-org/fa?color=09f)](./LICENSE)
-[![csharp](https://img.shields.io/lgtm/alerts/github/fa-org/fa)](https://lgtm.com/projects/g/fa-org/fa)
+[![csharp](https://img.shields.io/lgtm/alerts/github/fa-org/fa?logo=lgtm)](https://lgtm.com/projects/g/fa-org/fa)
 [![csharp](https://img.shields.io/lgtm/grade/csharp/github/fa-org/fa?logo=lgtm)](https://lgtm.com/projects/g/fa-org/fa)
 <!--[![download](https://img.shields.io/github/downloads/fa-org/fa/total.svg)](https://github.com/fa-org/fa/releases)-->
 
@@ -11,7 +11,7 @@ fa语言是一款不容易误解、简单的编程语言。目前处于还不完
 
 ## TODO
 
-- .Ok ()、.Err () 函数的处理（理想处理方式：传lambda，接收正确结果或错误信息并执行代码）
+<!--- .Ok ()、.Err () 函数的处理（理想处理方式：传lambda，接收正确结果或错误信息并执行代码）-->
 - 可空类型变量switch
 - 类型switch
 - ~~void?~~ void? ??运算符的处理
