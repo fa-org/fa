@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.AntlrTools {
-	class AstElemParser {
+	public class AstElemParser {
 		public static (IAstType _type, string _name) Parse (FaParser.TypeVarContext _ctx) {
 			return (IAstType.FromContext (_ctx.type ()), (_ctx.id () != null ? _ctx.id ().GetText () : ""));
 		}

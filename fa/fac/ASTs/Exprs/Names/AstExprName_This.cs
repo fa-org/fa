@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs.Names {
-	class AstExprName_This: IAstExprName {
+	public class AstExprName_This: IAstExprName {
 		public IAstClass Class { init; get; }
 
 

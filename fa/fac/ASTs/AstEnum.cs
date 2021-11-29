@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	class AstEnum: IAst, IAstClass {
+	public class AstEnum: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public List<AstEnumItem> ClassEnumItems { init; get; }

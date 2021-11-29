@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.Exceptions {
-	class CodeException: Exception {
+	public class CodeException: Exception {
 		public IToken Token { init; get; }
 
 		public CodeException (ITerminalNode _node, string _msg) : base (_msg) {

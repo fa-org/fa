@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	abstract class IAstExpr: IAst {
+	public abstract class IAstExpr: IAst {
 		public IAstType ExpectType { get; set; } = null;
 
 		public abstract void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb);

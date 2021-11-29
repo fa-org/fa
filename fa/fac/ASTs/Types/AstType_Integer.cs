@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
-	class AstType_Integer: IAstType {
+	public class AstType_Integer: IAstType {
 		public bool IsSign { get; set; } = true;
 		public int BitWidth { get; set; } = 32;
 

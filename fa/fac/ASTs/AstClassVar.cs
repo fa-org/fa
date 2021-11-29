@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	class AstClassVar: IAst {
+	public class AstClassVar: IAst {
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
 		public IAstType DataType { init; get; }

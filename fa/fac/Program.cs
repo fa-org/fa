@@ -82,17 +82,22 @@ namespace fac {
 					Console.WriteLine ($"    {_exename} /FaProject/Program.fa -d");
 				}
 				Console.WriteLine ();
+				if (Debugger.IsAttached) {
+					Console.WriteLine ($"按任意键退出。。。");
+					Console.ReadKey ();
+				}
 				return;
 			}
-
-			// TODO: 读取编译器自带标准库，比如Error等，用于后续part拼接，以及替换掉buildin实现
 
 			string _path = Path.GetFullPath (args[0]);
 			if (_path.EndsWith (".fa")) {
 				// 文件
 				if (!File.Exists (_path)) {
 					Console.WriteLine ($"指定文件 {_path} 不存在，无法编译");
-					return;
+					if (Debugger.IsAttached) {
+						Console.WriteLine ($"按任意键退出。。。");
+						Console.ReadKey ();
+					}
 				}
 				Info.ProjectName = _GetLastName (_path[..^3]);
 				Info.SrcPath = Path.GetDirectoryName (_path);
@@ -100,7 +105,10 @@ namespace fac {
 				// 文件夹
 				if (!Directory.Exists (_path)) {
 					Console.WriteLine ($"指定目录 {_path} 不存在，无法编译");
-					return;
+					if (Debugger.IsAttached) {
+						Console.WriteLine ($"按任意键退出。。。");
+						Console.ReadKey ();
+					}
 				}
 				Info.ProjectName = _GetLastName (_path);
 				Info.SrcPath = args[0];
@@ -122,6 +130,8 @@ namespace fac {
 				_src_files = _GetAllFiles (Info.SrcPath);
 				_src_files = (from p in _src_files where p[^3..].ToLower () == ".fa" select p).ToList ();
 			}
+
+			// TODO: 读取编译器自带标准库，比如Error等，用于后续part拼接，以及替换掉buildin实现
 
 			// 读取源码
 			foreach (var _src_file in _src_files) {

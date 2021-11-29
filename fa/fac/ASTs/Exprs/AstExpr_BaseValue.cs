@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_BaseValue: IAstExpr {
+	public class AstExpr_BaseValue: IAstExpr {
 		public IAstType DataType { get; set; }
 		public string Value { get; set; }
 

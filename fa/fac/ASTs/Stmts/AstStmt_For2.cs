@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	class AstStmt_For2: IAstStmt {
+	public class AstStmt_For2: IAstStmt {
 		public AstStmt_DefVariable Iterator { get; set; }
 		public IAstExpr ListContainer { get; set; }
 		public List<IAstStmt> BodyCodes { get; set; }

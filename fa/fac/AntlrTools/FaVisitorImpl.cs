@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.AntlrTools {
-	class FaVisitorImpl: IFaVisitor<IAst> {
+	public class FaVisitorImpl: IFaVisitor<IAst> {
 		public IAst Visit (IParseTree tree) => tree.Accept (this);
 		public IAst VisitChildren (IRuleNode node) {
 			for (int i = 0; i < node.ChildCount; ++i) {
@@ -129,5 +129,6 @@ namespace fac.AntlrTools {
 		public IAst VisitSwitchStmt2 (FaParser.SwitchStmt2Context context) => throw new NotImplementedException ();
 		public IAst VisitSwitchExprPart2 (FaParser.SwitchExprPart2Context context) => throw new NotImplementedException ();
 		public IAst VisitSwitchExpr2 (FaParser.SwitchExpr2Context context) => throw new NotImplementedException ();
+		public IAst VisitIdAssignExpr (FaParser.IdAssignExprContext context) => throw new NotImplementedException ();
 	}
 }

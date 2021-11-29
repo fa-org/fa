@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.AntlrTools {
-	class Operators {
+	public class Operators {
 		/// <summary>
 		/// 运算符优先级列表，小代表高优先级
 		/// </summary>

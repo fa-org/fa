@@ -488,6 +488,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTmpAssignExpr([NotNull] FaParser.TmpAssignExprContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.idAssignExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIdAssignExpr([NotNull] FaParser.IdAssignExprContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.defVarStmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

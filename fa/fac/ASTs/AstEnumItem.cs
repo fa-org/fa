@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	class AstEnumItem: IAst {
+	public class AstEnumItem: IAst {
 		public string Name { init; get; }
 		public IAstType AttachType { init; get; } = null;
 

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs.Names {
-	class AstExprName_ClassEnum: IAstExprName {
+	public class AstExprName_ClassEnum: IAstExprName {
 		public IAstClass EnumClass { init; get; }
 		public int EnumItemIndex { init; get; }
 		public IAstExpr ThisObject { get; set; }

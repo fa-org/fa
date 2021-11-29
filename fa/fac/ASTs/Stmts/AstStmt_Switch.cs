@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	class AstStmt_Switch: IAstStmt {
+	public class AstStmt_Switch: IAstStmt {
 		public IAstExpr Condition { get; set; }
 		public List<IAstExpr> CaseValues { get; set; }
 		public List<IAstExpr> CaseWhen { get; set; }

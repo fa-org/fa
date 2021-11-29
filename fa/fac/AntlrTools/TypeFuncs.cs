@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.AntlrTools {
-	class TypeFuncs {
+	public class TypeFuncs {
 		public static IAstType GetCompatibleType (bool _allow_optional, params IAstType[] _types) {
 			// 确保如果无法计算则抛异常
 			if (_types.Length == 0) {

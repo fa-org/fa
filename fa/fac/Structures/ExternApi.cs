@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using static FaParser;
 
 namespace fac.Structures {
-	enum ExternApiCC { __cdecl, __fastcall, __stdcall }
+	public enum ExternApiCC { __cdecl, __fastcall, __stdcall }
 
-	class ExternApi {
+	public class ExternApi {
 		public string ReturnType { init; get; }
 		public ExternApiCC CC { init; get; }
 		public string Name { init; get; }

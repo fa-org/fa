@@ -244,7 +244,8 @@ expr:						middleExpr (allAssign middleExpr)*;
 // define variable
 //
 tmpAssignExpr:				Assign middleExpr Semi;
-defVarStmt:					type id Assign expr Semi;
+idAssignExpr:				id Assign expr;
+defVarStmt:					type idAssignExpr (Comma idAssignExpr)* Semi;
 
 
 

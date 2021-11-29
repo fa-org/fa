@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace fac.AntlrTools {
 	[Flags]
-	enum TraversalType {
+	public enum TraversalType {
 		Root2Leaf = 1, // 从 表达式组合 遍历到 最基本元素，如果两种枚举方式皆存在则此种方式优先
 		Leaf2Root = 2, // 从 最基本元素 遍历到 表达式组合，如果两种枚举方式皆存在则此种方式滞后
 		CalcVar = 4, // 如果有此标识则计算 Info.CurrentFuncVariables

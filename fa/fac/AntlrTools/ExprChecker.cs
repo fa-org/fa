@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.AntlrTools {
-	class ExprChecker {
+	public class ExprChecker {
 		private IAstExprName m_cache_err_var = null;
 		private List<(string _cond, string _errmsg)> _checks = new List<(string _cond, string _errmsg)> ();
 

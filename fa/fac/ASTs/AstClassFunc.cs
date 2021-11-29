@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	class AstClassFunc: IAst {
+	public class AstClassFunc: IAst {
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
 		public string Name { init; get; }

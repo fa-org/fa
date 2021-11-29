@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_NewObject: IAstExpr {
+	public class AstExpr_NewObject: IAstExpr {
 		public AstType_Class DataType { get; set; }
 		public List<IAstType> Variants { get; set; }
 		public List<(string _name, IAstExpr _value)> InitialValues { get; set; } = null; // 结构体初值，当有值时ConstructorArguments为空

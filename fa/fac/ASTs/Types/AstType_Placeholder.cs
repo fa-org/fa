@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
-	class AstType_Placeholder: IAstType {
+	public class AstType_Placeholder: IAstType {
 		public string Name { get; set; }
 
 

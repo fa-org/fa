@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac {
-	static class StaticHelper {
+	public static class StaticHelper {
 		public static string GetDisplayName (this Enum _enum) {
 			var _def_name = $"{_enum}";
 			var _info = _enum.GetType ().GetField (_def_name);

@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	enum AstClassType { Class, Interface, Enum }
+	public enum AstClassType { Class, Interface, Enum }
 
-	class AstClass: IAst, IAstClass {
+	public class AstClass: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public AstClassType ClassType { init; get; }

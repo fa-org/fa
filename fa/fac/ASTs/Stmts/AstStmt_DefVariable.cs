@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	class AstStmt_DefVariable: IAstStmt {
+	public class AstStmt_DefVariable: IAstStmt {
 		public IAstType DataType { get; set; }
 		public string VarName { get; set; }
 		public IAstExpr Expr { get; set; }

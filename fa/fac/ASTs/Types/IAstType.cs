@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
-	abstract class IAstType: IAstExpr {
+	public abstract class IAstType: IAstExpr {
 		public bool Mut { init; get; } = false;
 
 

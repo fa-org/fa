@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	abstract class IAstStmt: IAstExpr {
+	public abstract class IAstStmt: IAstExpr {
 		public override IAstType GuessType () => throw new NotImplementedException ();
 
 		public static IAstStmt FromExpr (FaParser.ExprContext _ctx, bool _return) {
@@ -38,7 +38,8 @@ namespace fac.ASTs.Stmts {
 
 		public static List<IAstStmt> FromStmt (FaParser.StmtContext _ctx) {
 			var _stmts = new List<IAstStmt> ();
-			if (_ctx.ifStmt () != null) {
+			if (_ctx == null) {
+			} else if (_ctx.ifStmt () != null) {
 				var _conditions = _ctx.ifStmt ().expr ().ToList ();
 				var _contents = _ctx.ifStmt ().quotStmtPart ().ToList ();
 				_stmts.Add (FromIfStmt (_conditions, _contents));
@@ -98,11 +99,14 @@ namespace fac.ASTs.Stmts {
 					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) });
 				}
 			} else if (_ctx.defVarStmt () != null) {
-				var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start };
-				_varstmt.DataType = IAstType.FromContext (_ctx.defVarStmt ().type ());
-				_varstmt.VarName = _ctx.defVarStmt ().id ().GetText ();
-				_varstmt.Expr = FromContext (_ctx.defVarStmt ().expr ());
-				_stmts.Add (_varstmt);
+				var _type = IAstType.FromContext (_ctx.defVarStmt ().type ());
+				foreach (var _var_ctx in _ctx.defVarStmt ().idAssignExpr ()) {
+					var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start };
+					_varstmt.DataType = _type;
+					_varstmt.VarName = _var_ctx.id ().GetText ();
+					_varstmt.Expr = FromContext (_var_ctx.expr ());
+					_stmts.Add (_varstmt);
+				}
 			} else {
 				throw new UnimplException (_ctx.Start);
 			}

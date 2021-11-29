@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	interface IAstClass {
+	public interface IAstClass {
 		string FullName { get; }
 		List<AstEnumItem> ClassEnumItems { get; }
 		List<AstClassVar> ClassVars { get; }

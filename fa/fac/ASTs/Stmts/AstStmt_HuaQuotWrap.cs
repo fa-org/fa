@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	class AstStmt_HuaQuotWrap: IAstStmt {
+	public class AstStmt_HuaQuotWrap: IAstStmt {
 		public List<IAstStmt> Stmts { get; set; }
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {

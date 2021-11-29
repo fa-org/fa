@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_BaseId: IAstExpr {
+	public class AstExpr_BaseId: IAstExpr {
 		public string Id { get; set; }
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) { }

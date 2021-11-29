@@ -6,14 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac {
-	enum LogMark {
+	public enum LogMark {
 		[Display (Name = "解析")]
 		Parse,
 		[Display (Name = "编译")]
 		Build
 	}
 
-	class Log {
+	public class Log {
 		public static void Mark (LogMark _mark) {
 			if (_cache != (_mark, Info.CurrentRelativeFile)) {
 				_cache = (_mark, Info.CurrentRelativeFile);

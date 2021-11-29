@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	class AstStmt_While: IAstStmt {
+	public class AstStmt_While: IAstStmt {
 		public bool IsDoWhile { init; get; }
 		public IAstExpr Condition { get; set; }
 		public List<IAstStmt> Contents { get; set; }

@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_Switch: IAstExpr {
+	public class AstExpr_Switch: IAstExpr {
 		public IAstExpr Condition { get; set; }
 		public List<IAstExpr> CaseValues { get; set; }
 		public List<IAstExpr> CaseWhen { get; set; }

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
-	class AstType_Func: IAstType {
+	public class AstType_Func: IAstType {
 		public IAstType ReturnType { get; set; }
 		public List<IAstType> ArgumentTypes { get; set; }
 

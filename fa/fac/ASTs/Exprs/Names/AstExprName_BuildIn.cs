@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs.Names {
-	class AstExprName_BuildIn: IAstExprName {
+	public class AstExprName_BuildIn: IAstExprName {
 		public string Name { init; get; }
 		public string NameType { init; get; }
 
@@ -18,6 +18,7 @@ namespace fac.ASTs.Exprs.Names {
 			["continue"] = new AstExprName_BuildIn { Token = null, Name = "continue", NameType = "" },
 			["break"] = new AstExprName_BuildIn { Token = null, Name = "break", NameType = "" },
 			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Func<string, void>" },
+			["Console.Write"] = new AstExprName_BuildIn { Token = null, Name = "Console.Write", NameType = "Func<string, void>" },
 			["string.Format"] = new AstExprName_BuildIn { Token = null, Name = "string.Format", NameType = "Func<string, params any[], string>" },
 			["File.Exists"] = new AstExprName_BuildIn { Token = null, Name = "File.Exists", NameType = "Func<string, bool>" },
 			["File.ReadAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.ReadAllText", NameType = "Func<string, string>" },
@@ -49,6 +50,7 @@ namespace fac.ASTs.Exprs.Names {
 			"continue" => "continue",
 			"break" => "break",
 			"Console.WriteLine" => "Console.WriteLine",
+			"Console.Write" => "Console.Write",
 			"string.Format" => "string.Format",
 			"File.Exists" => "File.Exists",
 			"File.ReadAllText" => "File.ReadAllText",

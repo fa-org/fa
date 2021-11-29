@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	class AstStmt_For: IAstStmt {
+	public class AstStmt_For: IAstStmt {
 		public List<IAstStmt> Initializes { get; set; }
 		public IAstExpr Condition { get; set; }
 		public List<IAstExpr> Increment { get; set; }

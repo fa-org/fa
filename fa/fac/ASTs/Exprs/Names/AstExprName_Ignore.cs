@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs.Names {
-	class AstExprName_Ignore: IAstExprName {
+	public class AstExprName_Ignore: IAstExprName {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			ExpectType = new AstType_Any { Token = Token };
 			return AstExprTypeCast.Make (this, _expect_type);

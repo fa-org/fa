@@ -10,11 +10,11 @@ using System.Linq;
 using System.Text;
 
 namespace fac {
-	enum PublicLevel { Public, Protected, Private }
+	public enum PublicLevel { Public, Protected, Private }
 
 
 
-	class Common {
+	public class Common {
 		/// <summary>
 		/// 解析字符串为枚举类型
 		/// </summary>

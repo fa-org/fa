@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_Array: IAstExpr {
+	public class AstExpr_Array: IAstExpr {
 		public IAstType ItemDataType { get; set; }
 		public IAstExpr InitCount { get; set; }
 		public List<IAstExpr> InitValues { get; set; }

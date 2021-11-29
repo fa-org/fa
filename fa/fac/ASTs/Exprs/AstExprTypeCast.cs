@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExprTypeCast: IAstExpr {
+	public class AstExprTypeCast: IAstExpr {
 		public IAstExpr Value { get; set; }
 
 

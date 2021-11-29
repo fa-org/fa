@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 
 namespace fac {
-	class Info {
+	public class Info {
 		/// <summary>
 		/// 项目名
 		/// </summary>

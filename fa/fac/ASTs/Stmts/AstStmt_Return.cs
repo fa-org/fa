@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
-	class AstStmt_Return: IAstStmt {
+	public class AstStmt_Return: IAstStmt {
 		public IAstExpr Expr { get; set; }
 
 

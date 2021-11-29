@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
-	class AstType_ArrayWrap: IAstType {
+	public class AstType_ArrayWrap: IAstType {
 		public bool Params { get; set; }
 		public IAstType ItemType { init; get; }
 

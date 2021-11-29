@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	class AstExpr_If: IAstExpr {
+	public class AstExpr_If: IAstExpr {
 		public IAstExpr Condition { get; set; }
 		public List<IAstStmt> IfTrueCodes { get; set; } = null;
 		public IAstExpr IfTrue { get; set; }

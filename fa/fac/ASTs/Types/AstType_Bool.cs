@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
-	class AstType_Bool: IAstType {
+	public class AstType_Bool: IAstType {
 		public override string ToString () => $"bool";
 		public override string GenerateCSharp_Type () => "bool";
 	}

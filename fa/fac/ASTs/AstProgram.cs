@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	class AstProgram: IAst {
+	public class AstProgram: IAst {
 		public string CurrentFile { init; get; }
 		public string CurrentSourceCode { init; get; }
 		public string CurrentModule { init; get; }
