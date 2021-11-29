@@ -70,10 +70,15 @@ namespace fac.Test {
 				_process_run ("dotnet new console --force");
 			string _dest_file = Path.Combine (Info.DestPath, "Program.cs");
 			File.WriteAllText (_dest_file, _dest_src, Encoding.UTF8);
-			_process_run ("dotnet build");
+			string _out = _process_run ("dotnet build");
 
 			// 获取运行结果
-			string _bin_file = Path.Combine (Info.DestPath, "bin", "Debug", "net5.0", $"{Info.ProjectName}.exe");
+			string _bin_file = "";
+			if (Directory.Exists (Path.Combine (Info.DestPath, "bin", "Debug", "net5.0"))) {
+				_bin_file = Path.Combine (Info.DestPath, "bin", "Debug", "net5.0", $"{Info.ProjectName}.exe");
+			} else {
+				_bin_file = Path.Combine (Info.DestPath, "bin", "Debug", "net6.0", $"{Info.ProjectName}.exe");
+			}
 			return _process_run (_bin_file);
 			//if (!File.Exists (_bin_file))
 			//	throw new FileNotFoundException ();
