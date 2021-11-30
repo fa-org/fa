@@ -30,7 +30,7 @@ namespace fac.ASTs.Stmts {
 						Expr = Expr.TraversalCalcType (_otype);
 					}
 				} else {
-					Expr = Expr.TraversalCalcType (Info.CurrentFunc.ReturnType);
+					Expr = Expr.TraversalCalcType (Info.CurrentReturnType ());
 				}
 			}
 			return this;

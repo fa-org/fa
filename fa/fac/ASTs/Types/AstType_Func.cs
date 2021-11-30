@@ -32,6 +32,15 @@ namespace fac.ASTs.Types {
 		//	return _functype;
 		//}
 
-		public override string GenerateCSharp_Type () => throw new NotImplementedException ();
+		public override string GenerateCSharp_Type () {
+			if (ReturnType is AstType_Void) {
+				return $"Action<{string.Join (", ", (from p in ArgumentTypes select p.GenerateCSharp_Type ()))}>";
+			} else {
+				var _list = new List<IAstType> ();
+				_list.AddRange (ArgumentTypes);
+				_list.Add (ReturnType);
+				return $"Func<{string.Join (", ", (from p in _list select p.GenerateCSharp_Type ()))}>";
+			}
+		}
 	}
 }

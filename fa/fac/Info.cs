@@ -1,6 +1,8 @@
-﻿using Antlr4.Runtime.Tree;
+﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 using fac.AntlrTools;
 using fac.ASTs;
+using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
@@ -133,23 +135,41 @@ namespace fac {
 		/// </summary>
 		public class FuncArgumentOrVars {
 			public int Group { get; set; }
-			public AstType_Func FuncType { get; set; } = null;
+			public AstExpr_Lambda LambdaFunc { get; set; } = null;
+			public AstClassFunc ClassFunc { get; set; } = null;
 			public Dictionary<string, AstStmt_DefVariable> Vars { get; set; } = null;
 		}
-		//public static List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> CurrentFuncVariables { get; set; } = null;
-		//public static AstStmt_DefVariable GetCurrentFuncVariableFromName (string _name) {
-		//	//return (from p in CurrentFuncVariables.Reverse<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> () where p._vars.ContainsKey (_name) select p._vars[_name]).FirstOrDefault ();
-		//}
 		public static List<FuncArgumentOrVars> CurrentFuncVariables { get; set; } = null;
-		public static IAstExprName GetCurrentFuncVariableFromName (string _name) {
-			for (int i = CurrentFuncVariables.Count; i >= 0; --i) {
-				if (CurrentFuncVariables[i].FuncType != null) {
-					CurrentFuncVariables[i].FuncType.
+		public static IAstExprName GetCurrentFuncVariableFromName (IToken _token, string _name) {
+			for (int i = CurrentFuncVariables.Count - 1; i >= 0; --i) {
+				var _item = CurrentFuncVariables[i];
+				if (_item.LambdaFunc != null) {
+					for (int j = 0; j < _item.LambdaFunc.Arguments.Count; ++j) {
+						if (_item.LambdaFunc.Arguments[j]._name == _name)
+							return new AstExprName_LambdaArgument { Token = _token, ArgumentIndex = j, Func = _item.LambdaFunc };
+					}
+				} else if (_item.ClassFunc != null) {
+					for (int j = 0; j < _item.ClassFunc.Arguments.Count; ++j) {
+						if (_name == _item.ClassFunc.Arguments[j]._name)
+							return new AstExprName_Argument { Token = _token, Func = _item.ClassFunc, ArgumentIndex = i };
+					}
 				} else {
-					if (CurrentFuncVariables[i].Vars.ContainsKey (_name))
-						return new AstExprName_Variable { Token = CurrentFuncVariables[i].Vars[_name].Token, Var = CurrentFuncVariables[i].Vars[_name] };
+					if (_item.Vars.ContainsKey (_name))
+						return new AstExprName_Variable { Token = _token, Var = _item.Vars[_name] };
 				}
 			}
+			return null;
+		}
+		public static IAstType CurrentReturnType () {
+			for (int i = CurrentFuncVariables.Count - 1; i >= 0; --i) {
+				var _item = CurrentFuncVariables[i];
+				if (_item.LambdaFunc != null) {
+					return _item.LambdaFunc.ReturnType;
+				} else if (_item.ClassFunc != null) {
+					return _item.ClassFunc.ReturnType;
+				}
+			}
+			return null;
 		}
 
 		/// <summary>

@@ -86,8 +86,9 @@ if (_l.@index != _r.@index) {{
 				// 类成员方法
 				for (int j = 0; j < ClassFuncs.Count; ++j) {
 					Info.CurrentFunc = ClassFuncs[j];
-					Info.CurrentFuncVariables = new List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> ();
-					Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, AstStmt_DefVariable> (), _group: 0));
+					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = -1, ClassFunc = Info.CurrentFunc });
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
 					for (int k = 0; k < ClassFuncs[j].BodyCodes.Count; ++k) {
 						if (Info.TraversalFirst)

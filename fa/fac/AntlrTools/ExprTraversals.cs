@@ -23,6 +23,7 @@ namespace fac.AntlrTools {
 			TraversalType.Root2Leaf | TraversalType.CalcVar,
 			TraversalType.Leaf2Root,
 			TraversalType.Root2Leaf | TraversalType.Leaf2Root,
+			TraversalType.Root2Leaf | TraversalType.CalcVar,
 		};
 
 		/// <summary>
@@ -36,12 +37,15 @@ namespace fac.AntlrTools {
 		public static IAstExpr Traversal (IAstExpr _expr, int _index, int _deep, int _group) {
 			// 计算 Info.CurrentFuncVariables
 			if (_deep != 0 && (TraversalTypes[_index] | TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
-				if (_deep > Info.CurrentFuncVariables.Count) {
+				if (_expr is AstExpr_Lambda _lambdaexpr) {
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = _lambdaexpr });
+				} else if (_deep > Info.CurrentFuncVariables.Count) {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
 					//Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> (), _group));
 					if (_deep != Info.CurrentFuncVariables.Count)
 						throw new Exception ("节点遍历错误：不允许存在跳动过大的节点");
 				} else {
+					// TODO: 检查切换语句时，后接大括号的情况是否正常
 					while (_deep < Info.CurrentFuncVariables.Count)
 						Info.CurrentFuncVariables.RemoveAt (Info.CurrentFuncVariables.Count - 1);
 					if (Info.CurrentFuncVariables[^1].Group != _group)
@@ -55,6 +59,8 @@ namespace fac.AntlrTools {
 				return Traversal1 (_expr);
 			} else if (_index == 2) {
 				return Traversal2 (_expr);
+			} else if (_index == 3) {
+				return Traversal3 (_expr);
 			} else {
 				throw new NotImplementedException ();
 			}
@@ -75,7 +81,7 @@ namespace fac.AntlrTools {
 					return _buildinexpr;
 
 				// 映射变量名/参数
-				var _nameexpr = IAstExprName.FindVariableOrArgument (_idexpr.Token, _idexpr.Id);
+				var _nameexpr = Info.GetCurrentFuncVariableFromName (_idexpr.Token, _idexpr.Id);
 				if (_nameexpr != null)
 					return _nameexpr;
 
@@ -201,6 +207,11 @@ namespace fac.AntlrTools {
 					throw new CodeException (_op2expr.Value1.Token, "目标不可被赋值");
 			}
 			return _expr;
+		}
+
+		// 第四遍遍历
+		private static IAstExpr Traversal3 (IAstExpr _expr) {
+			return _expr.TraversalCalcType (null);
 		}
 	}
 }

@@ -66,7 +66,8 @@ namespace fac.ASTs {
 					if (ClassVars[j].DefaultValue == null)
 						continue;
 					Info.CurrentFunc = null;
-					Info.CurrentFuncVariables = new List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> ();
+					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
 					if (Info.TraversalFirst)
 						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i, 0, 0);
@@ -78,8 +79,9 @@ namespace fac.ASTs {
 				// 类成员方法
 				for (int j = 0; j < ClassFuncs.Count; ++j) {
 					Info.CurrentFunc = ClassFuncs[j];
-					Info.CurrentFuncVariables = new List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> ();
-					Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, AstStmt_DefVariable> (), _group: 0));
+					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = -1, ClassFunc = Info.CurrentFunc });
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
 					for (int k = 0; k < ClassFuncs[j].BodyCodes.Count; ++k) {
 						if (Info.TraversalFirst)
@@ -90,15 +92,20 @@ namespace fac.ASTs {
 					}
 				}
 			}
-			foreach (var _var in ClassVars) {
-				Info.CurrentFunc = null;
-				if (_var.DefaultValue != null)
-					_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType);
-			}
-			foreach (var _func in ClassFuncs) {
-				Info.CurrentFunc = _func;
-				_func.BodyCodes.TraversalCalcType ();
-			}
+			//foreach (var _var in ClassVars) {
+			//	Info.CurrentFunc = null;
+			//	Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+			//	Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+			//	if (_var.DefaultValue != null)
+			//		_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType);
+			//}
+			//foreach (var _func in ClassFuncs) {
+			//	Info.CurrentFunc = _func;
+			//	Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+			//	Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = -1, ClassFunc = Info.CurrentFunc });
+			//	Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+			//	_func.BodyCodes.TraversalCalcType ();
+			//}
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
