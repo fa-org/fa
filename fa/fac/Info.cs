@@ -1,7 +1,9 @@
 ﻿using Antlr4.Runtime.Tree;
 using fac.AntlrTools;
 using fac.ASTs;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Structures;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,9 +131,25 @@ namespace fac {
 		/// <summary>
 		/// 函数内变量递归查找辅助类，List每一项代表一个生命周期，Dictionary存储的是这个生命周期中的所有变量
 		/// </summary>
-		public static List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> CurrentFuncVariables { get; set; } = null;
-		public static AstStmt_DefVariable GetCurrentFuncVariableFromName (string _name) {
-			return (from p in CurrentFuncVariables.Reverse<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> () where p._vars.ContainsKey (_name) select p._vars[_name]).FirstOrDefault ();
+		public class FuncArgumentOrVars {
+			public int Group { get; set; }
+			public AstType_Func FuncType { get; set; } = null;
+			public Dictionary<string, AstStmt_DefVariable> Vars { get; set; } = null;
+		}
+		//public static List<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> CurrentFuncVariables { get; set; } = null;
+		//public static AstStmt_DefVariable GetCurrentFuncVariableFromName (string _name) {
+		//	//return (from p in CurrentFuncVariables.Reverse<(Dictionary<string, AstStmt_DefVariable> _vars, int _group)> () where p._vars.ContainsKey (_name) select p._vars[_name]).FirstOrDefault ();
+		//}
+		public static List<FuncArgumentOrVars> CurrentFuncVariables { get; set; } = null;
+		public static IAstExprName GetCurrentFuncVariableFromName (string _name) {
+			for (int i = CurrentFuncVariables.Count; i >= 0; --i) {
+				if (CurrentFuncVariables[i].FuncType != null) {
+					CurrentFuncVariables[i].FuncType.
+				} else {
+					if (CurrentFuncVariables[i].Vars.ContainsKey (_name))
+						return new AstExprName_Variable { Token = CurrentFuncVariables[i].Vars[_name].Token, Var = CurrentFuncVariables[i].Vars[_name] };
+				}
+			}
 		}
 
 		/// <summary>

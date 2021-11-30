@@ -42,38 +42,7 @@ namespace fac.ASTs {
 		}
 
 		public void ToAST () {
-			// 代码转树状结构
-			if (BodyRaw.expr () != null) {
-				BodyCodes = new List<IAstStmt> ();
-				if (ReturnType is not AstType_Void) {
-					BodyCodes.Add (IAstStmt.FromExpr (BodyRaw.expr (), true));
-				} else {
-					BodyCodes.Add (IAstStmt.FromExpr (BodyRaw.expr (), false));
-					BodyCodes.Add (IAstStmt.FromExpr (null, true));
-				}
-			} else {
-				BodyCodes = IAstStmt.FromStmts (BodyRaw.stmt ());
-				MakeSureReturn (BodyCodes);
-			}
-		}
-
-		// 遍历代码，确保所有路径均return
-		private void MakeSureReturn (List<IAstStmt> _stmts) {
-			string _ret_type = ReturnType.ToString ();
-			if (_stmts.Count == 0) {
-				if (_ret_type != "void" && _ret_type != "void?")
-					throw new CodeException (Token, $"方法需返回 {ReturnType} 类型结果");
-				_stmts.Add (new AstStmt_Return { Token = null, Expr = _ret_type == "void" ? null : AstExprTypeCast.ForceMake (new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName ("int"), Value = "0" }, IAstType.FromName ("int?")) });
-			} else if (_stmts[^1] is AstStmt_Return) {
-				return;
-			} else if (_stmts[^1] is AstStmt_If _ifstmt) {
-				MakeSureReturn (_ifstmt.IfTrueCodes);
-				MakeSureReturn (_ifstmt.IfFalseCodes);
-			} else {
-				if (_ret_type != "void" && _ret_type != "void?")
-					throw new CodeException (Token, $"方法需返回 {ReturnType} 类型结果");
-				_stmts.Add (new AstStmt_Return { Token = null, Expr = _ret_type == "void" ? null : AstExprTypeCast.ForceMake (new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName ("int"), Value = "0" }, IAstType.FromName ("int?")) });
-			}
+			BodyCodes = TypeFuncs.GetFuncBodyCodes (Token, ReturnType, BodyRaw.expr (), BodyRaw.stmt ());
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {

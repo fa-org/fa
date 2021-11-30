@@ -264,6 +264,8 @@ namespace fac.ASTs.Exprs {
 				}
 				return _t;
 				// TODO: 移植为if else
+			} else if (_ctx.lambdaExpr () != null) {
+				return new AstExpr_Lambda { Token = _ctx.Start, LambdaExprCtx = _ctx.lambdaExpr () };
 			} else {
 				throw new UnimplException (_ctx);
 			}

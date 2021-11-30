@@ -290,6 +290,18 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTypeVarList([NotNull] FaParser.TypeVarListContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeVar2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeVar2([NotNull] FaParser.TypeVar2Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeVar2List"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeVar2List([NotNull] FaParser.TypeVar2ListContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.quotStmtPart"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -445,6 +457,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitArrayExpr2([NotNull] FaParser.ArrayExpr2Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.lambdaExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLambdaExpr([NotNull] FaParser.LambdaExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.strongExprBase"/>.
 	/// </summary>

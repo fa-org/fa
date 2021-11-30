@@ -130,5 +130,8 @@ namespace fac.AntlrTools {
 		public IAst VisitSwitchExprPart2 (FaParser.SwitchExprPart2Context context) => throw new NotImplementedException ();
 		public IAst VisitSwitchExpr2 (FaParser.SwitchExpr2Context context) => throw new NotImplementedException ();
 		public IAst VisitIdAssignExpr (FaParser.IdAssignExprContext context) => throw new NotImplementedException ();
+		public IAst VisitTypeVar2 (FaParser.TypeVar2Context context) => throw new NotImplementedException ();
+		public IAst VisitTypeVar2List (FaParser.TypeVar2ListContext context) => throw new NotImplementedException ();
+		public IAst VisitLambdaExpr (FaParser.LambdaExprContext context) => throw new NotImplementedException ();
 	}
 }

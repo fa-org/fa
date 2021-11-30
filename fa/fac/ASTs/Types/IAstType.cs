@@ -135,7 +135,7 @@ namespace fac.ASTs.Types {
 						return false;
 					if ((from _p in _functype1.ArgumentTypes.Zip (_functype2.ArgumentTypes) where !_p.First.IsSame (_p.Second) select 1).Any ())
 						return false;
-					return _functype1.ReturnType == _functype2.ReturnType;
+					return _functype1.ReturnType.IsSame (_functype2.ReturnType);
 				}).Invoke (),
 				AstType_Integer _inttype1 when _other is AstType_Integer _inttype2 => _inttype1.BitWidth == _inttype2.BitWidth,
 				AstType_OptionalWrap _otype1 when _other is AstType_OptionalWrap _otype2 => _otype1.ItemType.IsSame (_otype2.ItemType),

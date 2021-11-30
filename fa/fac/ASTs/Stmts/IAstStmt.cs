@@ -105,6 +105,8 @@ namespace fac.ASTs.Stmts {
 					_varstmt.DataType = _type;
 					_varstmt.VarName = _var_ctx.id ().GetText ();
 					_varstmt.Expr = FromContext (_var_ctx.expr ());
+					if (_varstmt.Expr is AstExpr_Lambda _lambdaexpr)
+						_lambdaexpr.InitLambda (_type);
 					_stmts.Add (_varstmt);
 				}
 			} else {

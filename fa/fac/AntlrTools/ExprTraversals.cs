@@ -37,14 +37,15 @@ namespace fac.AntlrTools {
 			// 计算 Info.CurrentFuncVariables
 			if (_deep != 0 && (TraversalTypes[_index] | TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
 				if (_deep > Info.CurrentFuncVariables.Count) {
-					Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> (), _group));
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
+					//Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> (), _group));
 					if (_deep != Info.CurrentFuncVariables.Count)
 						throw new Exception ("节点遍历错误：不允许存在跳动过大的节点");
 				} else {
 					while (_deep < Info.CurrentFuncVariables.Count)
 						Info.CurrentFuncVariables.RemoveAt (Info.CurrentFuncVariables.Count - 1);
-					if (Info.CurrentFuncVariables[^1]._group != _group)
-						Info.CurrentFuncVariables[^1] = (_vars: new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> (), _group: _group);
+					if (Info.CurrentFuncVariables[^1].Group != _group)
+						Info.CurrentFuncVariables[^1] = (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
 				}
 			}
 
@@ -63,7 +64,7 @@ namespace fac.AntlrTools {
 		private static IAstExpr Traversal0 (IAstExpr _expr) {
 			if (_expr is AstStmt_DefVariable _varexpr) {
 				// 生成变量定义组
-				Info.CurrentFuncVariables[^1]._vars.Add (_varexpr.VarName, _varexpr);
+				Info.CurrentFuncVariables[^1].Vars.Add (_varexpr.VarName, _varexpr);
 			} else if (_expr is AstExpr_BaseId _idexpr) {
 				if (_idexpr.Id == "_")
 					return new AstExprName_Ignore { Token = _expr.Token };
@@ -156,6 +157,7 @@ namespace fac.AntlrTools {
 					Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
 						return _typeexpr switch {
 							AstType_Class _classexpr => _access_func (_obj, _classexpr.Class),
+							AstType_ArrayWrap _arrexpr when _access_name == "Length" => new AstExpr_Op1_Length { Token = _typeexpr.Token, Value = _obj },
 							_ => throw new UnimplException (_typeexpr.Token),
 						};
 					};

@@ -171,6 +171,8 @@ type:						(Mut | Params)? (typeSingle | typeMulti) typeAfter*;
 //
 typeVar:					type id?;
 typeVarList:				typeVar (Comma typeVar)*;
+typeVar2:					type? id;
+typeVar2List:				typeVar2 (Comma typeVar2)*;
 //eTypeVar:					eType id?;
 //eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 
@@ -226,7 +228,8 @@ newExpr2:					New ids? QuotYuanL (expr (Comma expr)*)? QuotYuanR;
 //newArray:					New ids? QuotFangL middleExpr QuotFangR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
-strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr;
+lambdaExpr:					QuotYuanL typeVar2List? QuotYuanR exprFuncDef (expr | (QuotHuaL stmt* QuotHuaR));
+strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// Ç°×º - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp | Qus														// ºó×º ++ -- ?
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")

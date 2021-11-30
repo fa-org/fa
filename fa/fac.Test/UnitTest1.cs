@@ -8,7 +8,6 @@ namespace fac.Test {
 			string _code = @"
 use fa;
 
-enum TestEnum { A, B (int), C }
 class Program {
 	public static void Main () {
 		Console.Write (""hello"");
