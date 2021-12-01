@@ -36,17 +36,18 @@ namespace fac.AntlrTools {
 		/// <returns></returns>
 		public static IAstExpr Traversal (IAstExpr _expr, int _index, int _deep, int _group) {
 			// 计算 Info.CurrentFuncVariables
+			// TODO 这一堆应该放到表达式或语句里去，放此处逻辑不对
 			if (_deep != 0 && (TraversalTypes[_index] | TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
 				if (_expr is AstExpr_Lambda _lambdaexpr) {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = _lambdaexpr });
-				} else if (_deep > Info.CurrentFuncVariables.Count) {
+				} else if (_deep >= Info.CurrentFuncVariables.Count) {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
 					//Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> (), _group));
-					if (_deep != Info.CurrentFuncVariables.Count)
+					if (_deep < Info.CurrentFuncVariables.Count - 1)
 						throw new Exception ("节点遍历错误：不允许存在跳动过大的节点");
 				} else {
 					// TODO: 检查切换语句时，后接大括号的情况是否正常
-					while (_deep < Info.CurrentFuncVariables.Count)
+					while (_deep < Info.CurrentFuncVariables.Count - 1)
 						Info.CurrentFuncVariables.RemoveAt (Info.CurrentFuncVariables.Count - 1);
 					if (Info.CurrentFuncVariables[^1].Group != _group)
 						Info.CurrentFuncVariables[^1] = (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
@@ -163,7 +164,7 @@ namespace fac.AntlrTools {
 					Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
 						return _typeexpr switch {
 							AstType_Class _classexpr => _access_func (_obj, _classexpr.Class),
-							AstType_ArrayWrap _arrexpr when _access_name == "Length" => new AstExpr_Op1_Length { Token = _typeexpr.Token, Value = _obj },
+							AstType_ArrayWrap _arrexpr when _access_name == "Length" => new AstExpr_AccessBuildIn { Token = _typeexpr.Token, Value = _obj, MemberName = "Length", ExpectType = IAstType.FromName ("int") },
 							_ => throw new UnimplException (_typeexpr.Token),
 						};
 					};

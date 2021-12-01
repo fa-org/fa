@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	public class AstExpr_Op1_Length: IAstExpr {
+	public class AstExpr_AccessBuildIn: IAstExpr {
 		public IAstExpr Value { get; set; }
+		public string MemberName { get; set; }
 
 
 
@@ -17,17 +18,24 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			Value = Value.TraversalCalcType (null);
-			ExpectType = IAstType.FromName ("int");
+			if (ExpectType == null)
+				throw new Exception ("此类需构造时指定类型");
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override IAstType GuessType () => IAstType.FromName ("int");
+		public override IAstType GuessType () {
+			if (ExpectType == null)
+				throw new Exception ("此类需构造时指定类型");
+			return ExpectType;
+		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var (_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
-			return (_a, $"{_b}.Count", _c);
+			return (_a, $"{_b}.{s_csharp_codemap [MemberName]}", _c);
 		}
 
 		public override bool AllowAssign () => false;
+
+		private static Dictionary<string, string> s_csharp_codemap = new Dictionary<string, string> { ["Length"] = "Count" };
 	}
 }

@@ -51,7 +51,10 @@ namespace fac.ASTs.Exprs {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (ReturnType == null)
 				throw new CodeException (Token, "此处无法声明 lambda 表达式主体");
+			int _size = Info.CurrentFuncVariables.Count;
+			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = Info.CurrentFuncVariables[^1].Group + 1, LambdaFunc = this });
 			BodyCodes.TraversalCalcType ();
+			Info.CurrentFuncVariables.RemoveRange (_size, Info.CurrentFuncVariables.Count - _size);
 			ExpectType = GuessType ();
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

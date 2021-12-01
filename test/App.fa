@@ -4,9 +4,8 @@ use fa;
 
 class Program {
 	public static void Main () {
-		Func<int, int, int> _add = (a, b) => a+b;
-		int n = _add (3, 5);
-		Console.WriteLine ("{0}".Format (n));
+		int[] n = [45, 4123, 213, 42];
+		Console.WriteLine ("{0}".Format (n [3]));
 	}
 }
 
@@ -22,7 +21,22 @@ class Program {
 
 
 
+//class Program {
+//	public static void Main () {
+//		int c = 10;
+//		Func<int, int, int> _add = (a, b) => a+b+c;
+//		int n = _add (3, 5);
+//		Console.WriteLine ("{0}".Format (n));
+//	}
+//}
 
+//class Program {
+//	public static void Main () {
+//		Func<int, int, int> _add = (a, b) => a+b;
+//		int n = _add (3, 5);
+//		Console.WriteLine ("{0}".Format (n));
+//	}
+//}
 
 //class Program {
 //	public static void Main () {

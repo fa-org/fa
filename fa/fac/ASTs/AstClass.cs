@@ -80,8 +80,8 @@ namespace fac.ASTs {
 				for (int j = 0; j < ClassFuncs.Count; ++j) {
 					Info.CurrentFunc = ClassFuncs[j];
 					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = -1, ClassFunc = Info.CurrentFunc });
-					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
 					for (int k = 0; k < ClassFuncs[j].BodyCodes.Count; ++k) {
 						if (Info.TraversalFirst)

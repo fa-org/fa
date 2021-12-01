@@ -62,6 +62,9 @@ namespace fac.ASTs.Exprs {
 					CheckArguments (_functype);
 					ExpectType = _functype.ReturnType;
 					return AstExprTypeCast.Make (this, _expect_type);
+				} else if (Value.ExpectType is AstType_ArrayWrap _arrtype && Operator == "[]") {
+					ExpectType = _arrtype.ItemType;
+					return AstExprTypeCast.Make (this, _expect_type);
 				} else {
 					throw new CodeException (Token, "表达式无法当做方法进行调用");
 				}
@@ -78,11 +81,29 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
+			string _a, _b, _c;
+			if (Operator == "[]") {
+				(_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
+				_psb.Append (_a);
+				_sb.Append ($"{_b} [");
+				var _items = (from p in Arguments select p.GenerateCSharp (_indent, _check_cb)).ToList ();
+				foreach (var _item in from p in _items select p.Item1)
+					_psb.Append (_item);
+				foreach (var _item in from p in _items select p.Item2)
+					_sb.Append ($"{_item}, ");
+				foreach (var _item in (from p in _items select p.Item3).Reverse ())
+					_ssb.Append (_item);
+				_sb.Remove (_sb.Length - 2, 2);
+				_sb.Append ("]");
+				_ssb.Append (_c);
+				return (_psb.ToString (), _sb.ToString (), _ssb.ToString ());
+			}
+
 			var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;
 			if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
 				_arg_types = _arg_types.Skip (1).ToList ();
-			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
-			var (_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
+			(_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
 			_psb.Append (_a);
 			_ssb.Append (_c);
 			_sb.Append ($"{_b} {Operator[0]}");
