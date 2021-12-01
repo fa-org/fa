@@ -74,9 +74,10 @@ namespace fac.ASTs.Exprs {
 		public override IAstType GuessType () {
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				return _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;
+			} else if (Operator == "[]") {
+				return (Value.GuessType () as AstType_ArrayWrap).ItemType;
 			} else {
-				var _type = Value.GuessType () as AstType_Func;
-				return _type.ReturnType;
+				return (Value.GuessType () as AstType_Func).ReturnType;
 			}
 		}
 
@@ -156,6 +157,6 @@ namespace fac.ASTs.Exprs {
 			return (_psb.ToString (), _sb.ToString (), _ssb.ToString ());
 		}
 
-		public override bool AllowAssign () => false;
+		public override bool AllowAssign () => Operator == "[]" ? Value.AllowAssign () : false;
 	}
 }

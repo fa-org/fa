@@ -151,7 +151,7 @@ namespace fac {
 				} else if (_item.ClassFunc != null) {
 					for (int j = 0; j < _item.ClassFunc.Arguments.Count; ++j) {
 						if (_name == _item.ClassFunc.Arguments[j]._name)
-							return new AstExprName_Argument { Token = _token, Func = _item.ClassFunc, ArgumentIndex = i };
+							return new AstExprName_Argument { Token = _token, Func = _item.ClassFunc, ArgumentIndex = j };
 					}
 				} else {
 					if (_item.Vars.ContainsKey (_name))

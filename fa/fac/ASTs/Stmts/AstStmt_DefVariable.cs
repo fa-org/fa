@@ -32,7 +32,7 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var _ec = new ExprChecker (DataType is AstType_OptionalWrap ? new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType } : null);
+			var _ec = new ExprChecker (new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType });
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};");
 			var _tmp_expr = new AstExpr_Op2 {

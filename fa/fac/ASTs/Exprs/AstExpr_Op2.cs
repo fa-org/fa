@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs.Names;
+using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -105,15 +106,26 @@ namespace fac.ASTs.Exprs {
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			if (Operator == "=" && Value1 is AstExprName_Ignore)
 				return Value2.GenerateCSharp (_indent, _check_cb);
+			string _a, _b, _c, _d, _e, _f;
+			if (Operator == "??" && FirstGen) {
+				FirstGen = false;
+				var _temp_id = Common.GetTempId ();
+				var _val = new AstStmt_DefVariable { Token = Token, DataType = Value1.ExpectType, ExpectType = Value1.ExpectType, VarName = _temp_id, Expr = Value1 };
+				Value1 = new AstExprName_Variable { Token = Token, ExpectType = _val.DataType, Var = _val };
+				(_a, _b, _c) = _val.GenerateCSharp (_indent, null);
+				(_d, _e, _f) = GenerateCSharp (_indent, _check_cb);
+				return ($"{_a}{_b}{_c}{_d}", _e, _f);
+			}
+
 			string _oper = Operator != "??" ? Operator : "|";
-			var (_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
-			var (_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
+			(_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
+			(_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
 			if (Operator == "/") {
 				_check_cb ($"{_e} == 0", "\"除数不能为0\"");
 				return ($"{_a}{_d}", $"{ExpectType.GenerateCSharp_Type ()}.FromValue ({_b} {_oper} {_e})", $"{_c}{_f}");
 			}
 			if (Operator == "=") {
-				if (Value1 is not IAstExprName)
+				if (!(Value1 is IAstExprName || (Value1 is AstExpr_OpN _opnexpr && _opnexpr.Operator == "[]")))
 					throw new CodeException (Value1.Token, "赋值运算符左侧必须为可赋值的变量或参数名称");
 				//if (Value2 is AstExpr_Op1 _op1expr && (!_op1expr.IsPrefix) && _op1expr.Operator == "?") {
 				//	var _ec = new ExprChecker (Value1 as IAstExprName);
@@ -127,9 +139,10 @@ namespace fac.ASTs.Exprs {
 				//	_psb.Append (_g);
 				//	return (_psb.ToString (), $"{_b} {_oper} {_tmp_var_name}.GetValue ()", $"{_h}{_c}{_f}");
 				//}
-
+				return ($"{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}");
+			} else {
+				return ($"{_a}{_d}", $"({_b} {_oper} {_e})", $"{_c}{_f}");
 			}
-			return ($"{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}");
 		}
 
 		public override bool AllowAssign () => false;
@@ -139,5 +152,7 @@ namespace fac.ASTs.Exprs {
 		private static HashSet<string> sNumOp2s = new HashSet<string> { "+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>" };
 		public static HashSet<string> sAssignOp2s = new HashSet<string> { "=", "+=", "-=", "*=", "/=", "%=", "|=", "&=", "^=", "<<=", ">>=" };
 		private static HashSet<string> sQusQusOp2s = new HashSet<string> { "??", "??=" };
+
+		private bool FirstGen = true;
 	}
 }
