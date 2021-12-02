@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs.Names;
+using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -75,7 +76,7 @@ namespace fac.ASTs.Exprs {
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				return _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;
 			} else if (Operator == "[]") {
-				return (Value.GuessType () as AstType_ArrayWrap).ItemType;
+				return new AstType_OptionalWrap { Token = Token, ItemType = (Value.GuessType () as AstType_ArrayWrap).ItemType };
 			} else {
 				return (Value.GuessType () as AstType_Func).ReturnType;
 			}
@@ -86,18 +87,49 @@ namespace fac.ASTs.Exprs {
 			string _a, _b, _c;
 			if (Operator == "[]") {
 				(_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
-				_psb.Append (_a);
-				_sb.Append ($"{_b} [");
-				var _items = (from p in Arguments select p.GenerateCSharp (_indent, _check_cb)).ToList ();
-				foreach (var _item in from p in _items select p.Item1)
-					_psb.Append (_item);
-				foreach (var _item in from p in _items select p.Item2)
-					_sb.Append ($"{_item}, ");
-				foreach (var _item in (from p in _items select p.Item3).Reverse ())
-					_ssb.Append (_item);
-				_sb.Remove (_sb.Length - 2, 2);
-				_sb.Append ("]");
-				_ssb.Append (_c);
+				if (Value.ExpectType is AstType_ArrayWrap && Arguments.Count == 1 && Arguments[0].ExpectType is AstType_Integer && _Judge) {
+					// TODO: 生成新的expr对象，_Judge设置为false
+					/* val [3+4+6]
+					 * int a = 3+4+6;
+					 * if (a < 0)
+					 *     a += val.Length;
+					 * if (a < 0)
+					 *     // check_cb
+					 * if (a >= val.Length)
+					 *     // check_cb
+					 * val [a]
+					 */
+					var _stmts = new List<IAstStmt> ();
+					var _index_id = Common.GetTempId ();
+					var _index_obj = new AstExprName_Variable { Token = Token, Var = new AstStmt_DefVariable { Token = Token, DataType = Arguments[0].ExpectType, VarName = _index_id, Expr = Arguments[0] }, ExpectType = Arguments[0].ExpectType };
+					var _length = new AstExpr_AccessBuildIn { Token = Token, Value = Value, MemberName = "Length", ExpectType = IAstType.FromName ("int") };
+					//
+					_stmts.Add (_index_obj.Var);
+					_stmts.Add (new AstStmt_If {
+						Token = Token,
+						Condition = new AstExpr_Op2 { Token = Token, Value1 = _index_obj, Value2 = IAstExpr.FromValue ("int", "0"), Operator = "<", ExpectType = IAstType.FromName ("bool") },
+						IfTrueCodes = new List<IAstStmt> { new AstStmt_ExprWrap { Token = Token, Expr = new AstExpr_Op2 { Token = Token, Value1 = _index_obj, Value2 = _length, Operator = "+=", ExpectType = _index_obj.ExpectType } } },
+						IfFalseCodes = new List<IAstStmt> { },
+					});
+					_check_cb ($"{_index_id} < 0", "\"数组随机访问范围超限\"");
+					_check_cb ($"{_index_id} >= {_length.GenerateCSharp (_indent, _check_cb).Item2}", "\"数组随机访问范围超限\"");
+					// TODO _stmts
+					_psb.Append (_a);
+					// TODO _b _c
+				} else {
+					_psb.Append (_a);
+					_sb.Append ($"{_b} [");
+					var _items = (from p in Arguments select p.GenerateCSharp (_indent, _check_cb)).ToList ();
+					foreach (var _item in from p in _items select p.Item1)
+						_psb.Append (_item);
+					foreach (var _item in from p in _items select p.Item2)
+						_sb.Append ($"{_item}, ");
+					foreach (var _item in (from p in _items select p.Item3).Reverse ())
+						_ssb.Append (_item);
+					_sb.Remove (_sb.Length - 2, 2);
+					_sb.Append ("]");
+					_ssb.Append (_c);
+				}
 				return (_psb.ToString (), _sb.ToString (), _ssb.ToString ());
 			}
 
@@ -158,5 +190,7 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override bool AllowAssign () => Operator == "[]" ? Value.AllowAssign () : false;
+
+		private bool _Judge = true;
 	}
 }

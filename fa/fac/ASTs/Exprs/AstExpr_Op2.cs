@@ -107,8 +107,7 @@ namespace fac.ASTs.Exprs {
 			if (Operator == "=" && Value1 is AstExprName_Ignore)
 				return Value2.GenerateCSharp (_indent, _check_cb);
 			string _a, _b, _c, _d, _e, _f;
-			if (Operator == "??" && FirstGen) {
-				FirstGen = false;
+			if (Operator == "??" && Value1 is not IAstExprName) {
 				var _temp_id = Common.GetTempId ();
 				var _val = new AstStmt_DefVariable { Token = Token, DataType = Value1.ExpectType, ExpectType = Value1.ExpectType, VarName = _temp_id, Expr = Value1 };
 				Value1 = new AstExprName_Variable { Token = Token, ExpectType = _val.DataType, Var = _val };
@@ -152,7 +151,5 @@ namespace fac.ASTs.Exprs {
 		private static HashSet<string> sNumOp2s = new HashSet<string> { "+", "-", "*", "/", "%", "|", "&", "^", "<<", ">>" };
 		public static HashSet<string> sAssignOp2s = new HashSet<string> { "=", "+=", "-=", "*=", "/=", "%=", "|=", "&=", "^=", "<<=", ">>=" };
 		private static HashSet<string> sQusQusOp2s = new HashSet<string> { "??", "??=" };
-
-		private bool FirstGen = true;
 	}
 }
