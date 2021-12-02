@@ -122,12 +122,6 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitAllAssign([NotNull] FaParser.AllAssignContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.qusQusOp"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitQusQusOp([NotNull] FaParser.QusQusOpContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.starStarOp"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

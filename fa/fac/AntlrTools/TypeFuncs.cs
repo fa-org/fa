@@ -35,7 +35,7 @@ namespace fac.AntlrTools {
 		}
 
 		public static bool AllowTypeCast (IAstType _src, IAstType _dest) {
-			if (_src == null || _dest == null || _src.IsSame (_dest)) {
+			if (_src == null || _dest == null || _src.IsSame (_dest) || _dest is AstType_Any) {
 				return true;
 			} else {
 				if (_dest is AstType_OptionalWrap _op1)

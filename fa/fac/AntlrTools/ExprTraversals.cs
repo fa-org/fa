@@ -37,9 +37,9 @@ namespace fac.AntlrTools {
 		public static IAstExpr Traversal (IAstExpr _expr, int _index, int _deep, int _group) {
 			// 计算 Info.CurrentFuncVariables
 			// TODO 这一堆应该放到表达式或语句里去，放此处逻辑不对
-			if (_deep != 0 && (TraversalTypes[_index] | TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
+			if ((TraversalTypes[_index] & TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
 				if (_expr is AstExpr_Lambda _lambdaexpr) {
-					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = _lambdaexpr });
+					//Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = _lambdaexpr });
 				} else if (_deep >= Info.CurrentFuncVariables.Count) {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
 					//Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> (), _group));
@@ -51,6 +51,11 @@ namespace fac.AntlrTools {
 						Info.CurrentFuncVariables.RemoveAt (Info.CurrentFuncVariables.Count - 1);
 					if (Info.CurrentFuncVariables[^1].Group != _group)
 						Info.CurrentFuncVariables[^1] = (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
+				}
+
+				if (_expr is AstStmt_DefVariable _varexpr) {
+					// 生成变量定义组
+					Info.CurrentFuncVariables[^1].Vars.Add (_varexpr.VarName, _varexpr);
 				}
 			}
 
@@ -69,10 +74,12 @@ namespace fac.AntlrTools {
 
 		// 第一遍遍历
 		private static IAstExpr Traversal0 (IAstExpr _expr) {
-			if (_expr is AstStmt_DefVariable _varexpr) {
-				// 生成变量定义组
-				Info.CurrentFuncVariables[^1].Vars.Add (_varexpr.VarName, _varexpr);
-			} else if (_expr is AstExpr_BaseId _idexpr) {
+			if (_expr is AstStmt_DefVariable _defstmt && _defstmt.VarName == "nn") {
+				_defstmt.VarName = _defstmt.VarName;
+			}
+			if (_expr is AstExpr_BaseId _idexpr) {
+				if (_idexpr.Id == "nn")
+					_idexpr.Id = _idexpr.Id;
 				if (_idexpr.Id == "_")
 					return new AstExprName_Ignore { Token = _expr.Token };
 

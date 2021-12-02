@@ -64,7 +64,7 @@ namespace fac.ASTs.Exprs {
 					ExpectType = _functype.ReturnType;
 					return AstExprTypeCast.Make (this, _expect_type);
 				} else if (Value.ExpectType is AstType_ArrayWrap _arrtype && Operator == "[]") {
-					ExpectType = _arrtype.ItemType;
+					ExpectType = new AstType_OptionalWrap { Token = Token, ItemType = _arrtype.ItemType };
 					return AstExprTypeCast.Make (this, _expect_type);
 				} else {
 					throw new CodeException (Token, "表达式无法当做方法进行调用");
@@ -113,9 +113,10 @@ namespace fac.ASTs.Exprs {
 					});
 					_check_cb ($"{_index_id} < 0", "\"数组随机访问范围超限\"");
 					_check_cb ($"{_index_id} >= {_length.GenerateCSharp (_indent, _check_cb).Item2}", "\"数组随机访问范围超限\"");
-					// TODO _stmts
+					_psb.AppendStmts (_stmts, _indent);
 					_psb.Append (_a);
-					// TODO _b _c
+					_sb.Append ($"{_b} [{_index_id}]");
+					_ssb.Append (_c);
 				} else {
 					_psb.Append (_a);
 					_sb.Append ($"{_b} [");

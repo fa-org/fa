@@ -77,14 +77,14 @@ namespace fac.AntlrTools {
 		public IAst VisitNewExpr (FaParser.NewExpr1Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitNewExpr (FaParser.NewExpr2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitNewExprItem (FaParser.NewExprItemContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitNewExpr1 ([NotNull] FaParser.NewExpr1Context context) => throw new NotImplementedException ();
-		public IAst VisitNewExpr2 ([NotNull] FaParser.NewExpr2Context context) => throw new NotImplementedException ();
+		public IAst VisitNewExpr1 (FaParser.NewExpr1Context context) => throw new NotImplementedException ();
+		public IAst VisitNewExpr2 (FaParser.NewExpr2Context context) => throw new NotImplementedException ();
 		public IAst VisitNormalStmt (FaParser.NormalStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNotEqualOp (FaParser.NotEqualOpContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitWhileStmt (FaParser.WhileStmtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitWhileStmt2 ([NotNull] FaParser.WhileStmt2Context context) => throw new NotImplementedException ();
-		public IAst VisitForStmt ([NotNull] FaParser.ForStmtContext context) => throw new NotImplementedException ();
-		public IAst VisitForStmt2 ([NotNull] FaParser.ForStmt2Context context) => throw new NotImplementedException ();
+		public IAst VisitWhileStmt2 (FaParser.WhileStmt2Context context) => throw new NotImplementedException ();
+		public IAst VisitForStmt (FaParser.ForStmtContext context) => throw new NotImplementedException ();
+		public IAst VisitForStmt2 (FaParser.ForStmt2Context context) => throw new NotImplementedException ();
 		public IAst VisitOrAssign (FaParser.OrAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitOrOrAssign (FaParser.OrOrAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitOrOrOp (FaParser.OrOrOpContext _ctx) => throw new NotImplementedException ();
@@ -94,7 +94,6 @@ namespace fac.AntlrTools {
 		public IAst VisitQuotStmtExprWrap (FaParser.QuotStmtExprWrapContext context) => throw new NotImplementedException ();
 		public IAst VisitQuotStmtPart (FaParser.QuotStmtPartContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitQusQusAssign (FaParser.QusQusAssignContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitQusQusOp (FaParser.QusQusOpContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitSelfOp2 (FaParser.SelfOp2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitShiftLAssign (FaParser.ShiftLAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitShiftLOp (FaParser.ShiftLOpContext _ctx) => throw new NotImplementedException ();

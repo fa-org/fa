@@ -124,7 +124,7 @@ namespace fac.ASTs.Exprs {
 				return ($"{_a}{_d}", $"{ExpectType.GenerateCSharp_Type ()}.FromValue ({_b} {_oper} {_e})", $"{_c}{_f}");
 			}
 			if (Operator == "=") {
-				if (!(Value1 is IAstExprName || (Value1 is AstExpr_OpN _opnexpr && _opnexpr.Operator == "[]")))
+				if (!Value1.AllowAssign ())
 					throw new CodeException (Value1.Token, "赋值运算符左侧必须为可赋值的变量或参数名称");
 				//if (Value2 is AstExpr_Op1 _op1expr && (!_op1expr.IsPrefix) && _op1expr.Operator == "?") {
 				//	var _ec = new ExprChecker (Value1 as IAstExprName);

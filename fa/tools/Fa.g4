@@ -63,7 +63,7 @@ modAssign:					ModOp Assign;
 orAssign:					OrOp Assign;
 andAssign:					AndOp Assign;
 xorAssign:					XorOp Assign;
-qusQusAssign:				qusQusOp Assign;
+qusQusAssign:				QusQusOp Assign;
 starStarAssign:				starStarOp Assign;
 andAndAssign:				andAndOp Assign;
 orOrAssign:					orOrOp Assign;
@@ -88,7 +88,7 @@ ModOp:						'%';
 OrOp:						'|';
 AndOp:						'&';
 XorOp:						'^';
-qusQusOp:					Qus Qus;
+QusQusOp:					Qus Qus;
 starStarOp:					StarOp StarOp;
 andAndOp:					AndOp AndOp;
 orOrOp:						OrOp OrOp;
@@ -125,7 +125,7 @@ exprFuncDef:				Assign QuotJianR;
 
 selfOp2:					AddOp | SubOp | StarOp | DivOp | starStarOp | ModOp | AndOp | OrOp | XorOp | andAndOp | orOrOp | shiftLOp | shiftROp;
 compareOp2:					ltOp | ltEqualOp | gtOp | gtEqualOp | equalOp | notEqualOp;
-changeOp2:					qusQusOp | compareOp2;
+changeOp2:					QusQusOp | compareOp2;
 allOp2:						selfOp2 | changeOp2;
 
 
@@ -257,7 +257,7 @@ defVarStmt:					type idAssignExpr (Comma idAssignExpr)* Semi;
 //
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
 							// void? ×¨Êô
-stmt:						(middleExpr qusQusOp)? ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
+stmt:						(middleExpr QusQusOp)? ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
 
 
 

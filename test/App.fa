@@ -23,8 +23,8 @@ class Program {
 			}
 			Swap(numbers, i, j)?;
 		}
-		QuickSort(numbers, left, i - 1);
-		QuickSort(numbers, j + 1, right);
+		QuickSort(numbers, left, i - 1)?;
+		QuickSort(numbers, j + 1, right)?;
 	}
 
 	private static void? Swap (mut int[] numbers, int i, int j) {
@@ -37,7 +37,8 @@ class Program {
 		int[] n = [45, 4123, 213, 42, 123, 53, 22];
 		Sort (n);
 		for int i = 0; i < n.Length; ++i {
-			Console.WriteLine ("{0}".Format (n[i] ?? -1));
+			int nn = n[i] ?? -1;
+			Console.WriteLine ("{0}".Format (nn));
 		}
 	}
 }

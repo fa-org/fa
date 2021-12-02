@@ -21,12 +21,18 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if ((!IsPrefix) && Operator == "?") {
-				Value = Value.TraversalCalcType (new AstType_OptionalWrap { Token = _expect_type?.Token ?? null, Mut = false, ItemType = _expect_type });
-				// 方式1：保留当前类强转
-				ExpectType = _expect_type;
+				if (_expect_type != null) {
+					Value = Value.TraversalCalcType (new AstType_OptionalWrap { Token = Token, Mut = false, ItemType = _expect_type });
+					ExpectType = _expect_type;
+				} else {
+					Value = Value.TraversalCalcType (null);
+					if (Value.ExpectType is AstType_OptionalWrap _otype) {
+						ExpectType = _otype.ItemType;
+					} else {
+						throw new CodeException (Token, "? 运算符只能用于可空类型的值的计算");
+					}
+				}
 				return this;
-				// 方式2：切换为AstExprTypeCast类
-				//return AstExprTypeCast.ForceMake (Value, _expect_type);
 			} else {
 				Value = Value.TraversalCalcType (_expect_type);
 				ExpectType = Value.ExpectType;
@@ -47,6 +53,13 @@ namespace fac.ASTs.Exprs {
 					if (_expect != null)
 						return _expect;
 				}
+			} else if (Operator == "?") {
+				var _type = Value.GuessType ();
+				if (_type is AstType_OptionalWrap _otype) {
+					return _otype.ItemType;
+				} else {
+					return _type;
+				}
 			}
 			throw new UnimplException (Token);
 		}
@@ -65,6 +78,6 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override bool AllowAssign () => false;
+		public override bool AllowAssign () => Value.AllowAssign ();
 	}
 }

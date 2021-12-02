@@ -45,7 +45,11 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+			int _size = Info.CurrentFuncVariables.Count;
+			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = this });
+			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Vars = new Dictionary<string, AstStmt_DefVariable> (), Group = _group + 2 });
 			BodyCodes.Traversal (_deep + 2, 0, _cb);
+			Info.CurrentFuncVariables.RemoveRange (_size, Info.CurrentFuncVariables.Count - _size);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -53,6 +57,7 @@ namespace fac.ASTs.Exprs {
 				throw new CodeException (Token, "此处无法声明 lambda 表达式主体");
 			int _size = Info.CurrentFuncVariables.Count;
 			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = Info.CurrentFuncVariables[^1].Group + 1, LambdaFunc = this });
+			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Vars = new Dictionary<string, AstStmt_DefVariable> (), Group = Info.CurrentFuncVariables[^1].Group + 1 });
 			BodyCodes.TraversalCalcType ();
 			Info.CurrentFuncVariables.RemoveRange (_size, Info.CurrentFuncVariables.Count - _size);
 			ExpectType = GuessType ();
