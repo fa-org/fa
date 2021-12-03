@@ -23,6 +23,7 @@ namespace fac.ASTs.Stmts {
 		public static List<IAstStmt> FromStmt (FaParser.StmtContext _ctx) {
 			var _stmts = new List<IAstStmt> ();
 			if (_ctx == null) {
+				return new List<IAstStmt> ();
 			} else if (_ctx.ifStmt () != null) {
 				return AstStmt_If.FromCtx (_ctx.ifStmt ());
 			} else if (_ctx.whileStmt () != null) {
@@ -61,7 +62,6 @@ namespace fac.ASTs.Stmts {
 					_t.CaseCodes.Add (FromStmt (_ctx.switchStmt2 ().switchStmtPart2Last ().stmt ()).ToSingleStmt ());
 				}
 				_stmts.Add (_t);
-				// TODO: 移植为if else
 			} else if (_ctx.switchStmt () != null) {
 				var _t = new AstStmt_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchStmt ().expr ()) };
 				var _switch_items = _ctx.switchStmt ().switchStmtPart ();
@@ -69,7 +69,6 @@ namespace fac.ASTs.Stmts {
 				_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
 				_t.CaseCodes = (from p in _switch_items select FromStmt (p.stmt ()).ToSingleStmt ()).ToList ();
 				_stmts.Add (_t);
-				// TODO: 移植为if else
 			} else if (_ctx.normalStmt () != null) {
 				if (_ctx.normalStmt ().Continue () != null) {
 					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("continue") });

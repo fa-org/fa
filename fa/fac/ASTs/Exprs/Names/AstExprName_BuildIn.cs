@@ -46,7 +46,7 @@ namespace fac.ASTs.Exprs.Names {
 			return ExpectType;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => ("", Name switch {
+		public override string GenerateCSharp (int _indent) => Name switch {
 			"continue" => "continue",
 			"break" => "break",
 			"Console.WriteLine" => "Console.WriteLine",
@@ -59,7 +59,7 @@ namespace fac.ASTs.Exprs.Names {
 			"@FILE" => Common.WrapStringValue (Info.CurrentFile),
 			"@SOURCE" => Common.WrapStringValue (File.ReadAllText (Info.CurrentFile, Encoding.UTF8)),
 			_ => throw new UnimplException (Token),
-		}, "");
+		};
 
 		public override bool AllowAssign () => false;
 	}

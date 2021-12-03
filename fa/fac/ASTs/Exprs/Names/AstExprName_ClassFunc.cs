@@ -32,17 +32,17 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => Class.ClassFuncs[FunctionIndex].FuncType;
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			if (ThisObject != null) {
-				var (_a, _b, _c) = ThisObject.GenerateCSharp (_indent, _check_cb);
-				return (_a, $"{_b}.{Class.ClassFuncs[FunctionIndex].Name}", _c);
+				var _b = ThisObject.GenerateCSharp (_indent);
+				return $"{_b}.{Class.ClassFuncs[FunctionIndex].Name}";
 			} else {
 				string _full_name = Class.FullName;
 				if (_full_name.StartsWith (Info.CurrentNamespace))
 					_full_name = _full_name[(Info.CurrentNamespace.Length + 1)..];
 				if (_full_name.StartsWith ("."))
 					_full_name = _full_name[1..];
-				return ("", $"{_full_name}.{Class.ClassFuncs[FunctionIndex].Name}", "");
+				return $"{_full_name}.{Class.ClassFuncs[FunctionIndex].Name}";
 			}
 		}
 

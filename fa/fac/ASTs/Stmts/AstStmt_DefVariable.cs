@@ -47,14 +47,29 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override List<IAstStmt> ExpandStmt () {
-			var (_stmts, _expr) = Expr.ExpandExpr ();
-			Expr = _expr;
-			_stmts.Add (this);
+			var _stmts = new List<IAstStmt> { this };
+			if (Expr != null) {
+				var (_stmts2, _expr) = Expr.ExpandExpr ();
+				Expr = null;
+				_stmts.AddRange (_stmts2);
+				_stmts.Add (new AstStmt_ExprWrap {
+					Token = Token,
+					Expr = new AstExpr_Op2 {
+						Token = Token,
+						Value1 = new AstExprName_Variable { Token = Token, Var = this, ExpectType = ExpectType, },
+						Value2 = _expr,
+						Operator = "=",
+						ExpectType = ExpectType,
+					},
+				});
+			}
 			return _stmts;
 		}
 
 		public override string GenerateCSharp (int _indent) {
-			return $"{_indent.Indent ()}{DataType.GenerateCSharp (_indent)} {VarName} = {Expr.GenerateCSharp (_indent)};";
+			if (Expr != null)
+				throw new Exception ("不应执行此处代码");
+			return $"{_indent.Indent ()}{DataType.GenerateCSharp (_indent)} {VarName};";
 		}
 	}
 }

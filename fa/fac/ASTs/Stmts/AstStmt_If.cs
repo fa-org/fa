@@ -55,19 +55,25 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override List<IAstStmt> ExpandStmt () {
+			var (_stmts, _expr) = Condition.ExpandExpr ();
+			Condition = _expr;
+			IfTrueCodes = (from p in IfTrueCodes select p.ExpandStmt ()).CombileStmts ();
+			IfFalseCodes = (from p in IfFalseCodes select p.ExpandStmt ()).CombileStmts ();
+			_stmts.Add (this);
+			return _stmts;
+		}
+
+		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
-			var _ec = new ExprChecker (null);
-			var (_a, _b, _c) = Condition.GenerateCSharp (_indent, _ec.CheckFunc);
-			var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Condition.Token);
-			_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}if ({_b}) {{");
+			_sb.AppendLine ($"{_indent.Indent ()}if ({Condition.GenerateCSharp (_indent)}) {{");
 			_sb.AppendStmts (IfTrueCodes, _indent + 1);
 			if (IfFalseCodes.Any ()) {
 				_sb.AppendLine ($"{_indent.Indent ()}}} else {{");
 				_sb.AppendStmts (IfFalseCodes, _indent + 1);
 			}
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return ("", _sb.ToString (), $"{_c}{_e}");
+			return _sb.ToString ();
 		}
 	}
 }

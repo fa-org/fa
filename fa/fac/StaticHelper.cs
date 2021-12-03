@@ -95,5 +95,9 @@ namespace fac {
 				return new AstStmt_HuaQuotWrap { Token = _stmts[0].Token, Stmts = _stmts };
 			}
 		}
+
+		public static List<IAstStmt> ExpandStmts (this List<IAstStmt> _stmts) {
+			return (from p in _stmts select p.ExpandStmt ()).CombileStmts ();
+		}
 	}
 }

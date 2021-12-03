@@ -32,24 +32,12 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => Class.ClassVars[VariableIndex].DataType;
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			if (ThisObject != null) {
-				var (_a, _b, _c) = ThisObject.GenerateCSharp (_indent, _check_cb);
-				string _varname = $"{_b}.{Class.ClassVars[VariableIndex].Name}";
-				if (Class.ClassVars[VariableIndex].DataType is AstType_OptionalWrap && _check_cb != null) {
-					_check_cb ($"!{_varname}.HasValue ()", $"{_varname}.GetError ()");
-					return (_a, $"{_varname}.GetValue ()", _c);
-				} else {
-					return (_a, $"{_varname}", _c);
-				}
+				var _b = ThisObject.GenerateCSharp (_indent);
+				return $"{_b}.{Class.ClassVars[VariableIndex].Name}";
 			} else {
-				string _varname = $"{Class.FullName}.{Class.ClassVars[VariableIndex].Name}";
-				if (Class.ClassVars[VariableIndex].DataType is AstType_OptionalWrap && _check_cb != null) {
-					_check_cb ($"!{_varname}.HasValue ()", $"{_varname}.GetError ()");
-					return ("", $"{_varname}.GetValue ()", "");
-				} else {
-					return ("", $"{_varname}", "");
-				}
+				return $"{Class.FullName}.{Class.ClassVars[VariableIndex].Name}";
 			}
 		}
 

@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -36,17 +37,23 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var _sb = new StringBuilder ();
-			if (Expr != null) {
-				var _ec = new ExprChecker (null);
-				var (_a, _b, _c) = Expr.GenerateCSharp (_indent, _ec.CheckFunc);
-				var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Expr.Token);
-				_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}return {_b};");
-				return ("", _sb.ToString (), $"{_c}{_e}");
+		public override List<IAstStmt> ExpandStmt () {
+			if (Expr == null)
+				return new List<IAstStmt> { this };
+			var _temp_defvar = new AstStmt_DefVariable { Token = Token, DataType = Expr.ExpectType, VarName = Common.GetTempId (), Expr = Expr };
+			var _stmts = _temp_defvar.ExpandStmt ();
+			Expr = new AstExprName_Variable { Token = Token, ExpectType = _temp_defvar.DataType, Var = _temp_defvar };
+			_stmts.Add (this);
+			return _stmts;
+		}
+
+		public override string GenerateCSharp (int _indent) {
+			if (Expr == null && Info.CurrentReturnType ().ToString () == "void?") {
+				return $"return fa.Optional<int>.FromValue (0);";
+			} else if (Expr != null) {
+				return $"return {Expr.GenerateCSharp (_indent)};";
 			} else {
-				_sb.AppendLine ($"{_indent.Indent ()}return;");
-				return ("", _sb.ToString (), "");
+				return $"return;";
 			}
 		}
 	}

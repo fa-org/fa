@@ -35,14 +35,14 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => new AstType_Class { Token = Token, Class = EnumClass, TemplateTypes = new List<IAstType> () };
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			bool _need_attach = EnumClass.ClassEnumItems[EnumItemIndex].AttachType != null;
 			if (_need_attach) {
 				int _real_var_index = EnumClass.GetRealAttachVarPos (EnumItemIndex);
-				var (_a, _b, _c) = AttachExpr.GenerateCSharp (_indent, _check_cb);
-				return new (_a, $"new {EnumClass.FullName} {{ @index = {EnumItemIndex}, {EnumClass.ClassVars[_real_var_index].Name} = {_b} }}", _c);
+				var _b = AttachExpr.GenerateCSharp (_indent);
+				return $"new {EnumClass.FullName} {{ @index = {EnumItemIndex}, {EnumClass.ClassVars[_real_var_index].Name} = {_b} }}";
 			} else {
-				return new ("", $"new {EnumClass.FullName} {{ @index = {EnumItemIndex} }}", "");
+				return $"new {EnumClass.FullName} {{ @index = {EnumItemIndex} }}";
 			}
 			//throw new NotImplementedException ();
 		}

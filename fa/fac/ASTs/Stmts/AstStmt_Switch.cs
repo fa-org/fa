@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public class AstStmt_Switch: IAstStmt {
-		public IAstExpr Condition { get; set; }
-		public List<IAstExpr> CaseValues { get; set; }
+		public IAstExpr Condition { get; set; } = null;
+		public List<IAstExpr> CaseValues { get; set; } = null;
 		public List<IAstExpr> CaseWhen { get; set; }
 		public List<IAstStmt> CaseCodes { get; set; }
 
@@ -43,72 +43,71 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var _sb = new StringBuilder ();
-			if (Condition != null) {
-				var _tmp_var_name = Common.GetTempId ();
-				var (_a, _b, _c) = Condition.GenerateCSharp (_indent, _check_cb);
-				if (_a != "" || _c != "")
-					throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");
-				_sb.AppendLine ($"{_indent.Indent ()}{Condition.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_b};");
-				var _cases = (from p in CaseValues select p.GenerateCSharp (_indent, _check_cb)).ToList ();
-				if (_cases.Count == 1 && CaseValues[0] is AstExprName_Ignore && CaseWhen[0] == null) {
-					_sb.AppendLine ($"{_indent.Indent ()}{{");
-					(_a, _b, _c) = CaseCodes[0].GenerateCSharp (_indent + 1, null);
-					_sb.Append (_a).Append (_b).Append (_c);
-					_sb.AppendLine ($"{_indent.Indent ()}}}");
+		public override List<IAstStmt> ExpandStmt () {
+			var _stmts = new List<IAstStmt> ();
+			if (CaseValues != null) {
+				// 带val match
+				var (_stmts1, _cond1) = Condition.ExpandExpr ();
+				_stmts.AddRange (_stmts1);
+				if (CaseValues.Count == 0) {
+					// do nothing
+				} else if (CaseValues[0] is AstExprName_Ignore && CaseWhen[0] == null) {
+					_stmts.AddRange (CaseCodes[0].ExpandStmt ());
 				} else {
-					for (int i = 0; i < _cases.Count; ++i) {
-						if (_cases[i].Item1 != "" || _cases[i].Item3 != "")
-							throw new CodeException (CaseWhen[i].Token, "条件不允许带隐藏逻辑的表达式");
-						//
-						_sb.Append (i > 0 ? " else " : _indent.Indent ());
-						if (CaseValues[i] is AstExprName_Ignore && CaseWhen[i] == null) {
-							if (i != _cases.Count - 1)
-								throw new CodeException (CaseValues[i].Token, "只能在语句最后一项匹配所有条件");
-							_sb.AppendLine ($"{{");
-						} else {
-							string _left = CaseValues[i] is AstExprName_Ignore ? "" : $"{_tmp_var_name} == {_cases[i].Item2}", _right = "";
-							(_a, _right, _c) = CaseWhen[i] == null ? ("", "", "") : CaseWhen[i].GenerateCSharp (_indent, _check_cb);
-							if (_a != "" || _c != "")
-								throw new CodeException (CaseWhen[i].Token, "条件不允许带隐藏逻辑的表达式");
-							string _mid = _left != "" && _right != "" ? " && " : "";
-							_sb.AppendLine ($"if ({_left}{_mid}{_right}) {{");
-						}
-						(_a, _b, _c) = CaseCodes[i].GenerateCSharp (_indent + 1, _check_cb);
-						_sb.Append (_a).Append (_b).Append (_c);
-						_sb.Append ($"{_indent.Indent ()}}}");
-					}
-					_sb.AppendLine ();
+					var (_stmts2, _cond2) = CaseValues[0].ExpandExpr ();
+					var (_stmts3, _cond3) = CaseWhen[0]?.ExpandExpr () ?? (new List<IAstStmt> (), null);
+					_stmts.AddRange (_stmts2);
+					_stmts.AddRange (_stmts3);
+					var _cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond1, Value2 = _cond2, Operator = "==", ExpectType = IAstType.FromName ("bool") };
+					if (_cond3 != null)
+						_cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond_expr, Value2 = _cond3, Operator = "&&", ExpectType = IAstType.FromName ("bool") };
+					var (_stmts4, _cond4) = _cond_expr.ExpandExpr ();
+					_stmts.AddRange (_stmts4);
+					_stmts.Add (new AstStmt_If {
+						Token = CaseValues[0].Token,
+						Condition = _cond4,
+						IfTrueCodes = CaseCodes[0].ExpandStmt (),
+						IfFalseCodes = CaseCodes.Count switch {
+							1 => new List<IAstStmt> (),
+							_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (),
+							_ => new AstStmt_Switch {
+								Token = CaseWhen[1].Token,
+								Condition = _cond1,
+								CaseValues = CaseValues.Skip (1).ToList (),
+								CaseWhen = CaseWhen.Skip (1).ToList (),
+								CaseCodes = CaseCodes.Skip (1).ToList (),
+							}.ExpandStmt (),
+						},
+					});
 				}
 			} else {
-				string _a, _b, _c;
-				if (CaseWhen[0] is AstExprName_Ignore) {
-					(_a, _b, _c) = CaseCodes[0].GenerateCSharp (_indent + 1, _check_cb);
-					_sb.AppendLine ($"{_indent.Indent ()}{{");
-					_sb.Append (_a).Append (_b).Append (_c);
-					_sb.AppendLine ($"{_indent.Indent ()}}}");
+				// 不带val match
+				if (CaseValues.Count == 0) {
+					// do nothing
+				} else if (CaseWhen[0] is AstExprName_Ignore) {
+					_stmts.AddRange (CaseCodes[0].ExpandStmt ());
 				} else {
-					for (int i = 0; i < CaseWhen.Count; ++i) {
-						_sb.Append (i > 0 ? " else " : _indent.Indent ());
-						if (CaseWhen[i] is AstExprName_Ignore) {
-							if (i != CaseWhen.Count - 1)
-								throw new CodeException (CaseWhen[i].Token, "只能在语句最后一项匹配所有条件");
-							_sb.AppendLine ($"{{");
-						} else {
-							(_a, _b, _c) = CaseWhen[i] == null ? ("", "", "") : CaseWhen[i].GenerateCSharp (_indent, _check_cb);
-							if (_a != "" || _c != "")
-								throw new CodeException (CaseWhen[i].Token, "条件不允许带隐藏逻辑的表达式");
-							_sb.AppendLine ($"if ({_b}) {{");
-						}
-						(_a, _b, _c) = CaseCodes[i].GenerateCSharp (_indent + 1, _check_cb);
-						_sb.Append (_a).Append (_b).Append (_c);
-						_sb.Append ($"{_indent.Indent ()}}}");
-					}
-					_sb.AppendLine ();
+					var (_stmts2, _cond2) = CaseWhen[0].ExpandExpr ();
+					_stmts.AddRange (_stmts2);
+					_stmts.Add (new AstStmt_If {
+						Token = CaseWhen[0].Token,
+						Condition = _cond2,
+						IfTrueCodes = CaseCodes[0].ExpandStmt (),
+						IfFalseCodes = CaseCodes.Count switch {
+							1 => new List<IAstStmt> (),
+							_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (),
+							_ => new AstStmt_Switch {
+								Token = CaseWhen[1].Token,
+								CaseWhen = CaseWhen.Skip (1).ToList (),
+								CaseCodes = CaseCodes.Skip (1).ToList (),
+							}.ExpandStmt (),
+						},
+					});
 				}
 			}
-			return ("", _sb.ToString (), "");
+			return _stmts;
 		}
+
+		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 	}
 }

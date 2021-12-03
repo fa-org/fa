@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.ASTs.Stmts;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -20,5 +21,7 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) { }
+
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () => (new List<IAstStmt> (), this);
 	}
 }

@@ -39,25 +39,31 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override List<IAstStmt> ExpandStmt () {
+			var (_stmts, _expr) = Condition.ExpandExpr ();
+			Condition = _expr;
+			Contents = Contents.ExpandStmts ();
+			Contents.AddRange (_stmts);
+			if (IsDoWhile) {
+				return new List<IAstStmt> { this };
+			} else {
+				_stmts.Add (this);
+				return _stmts;
+			}
+		}
+
+		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
-			var _ec = new ExprChecker (null);
-			var (_a, _b, _c) = Condition.GenerateCSharp (IsDoWhile ? (_indent + 1) : _indent, _ec.CheckFunc);
-			string _d = "", _e = "";
 			if (IsDoWhile) {
-				_sb.AppendLine ($"{_indent.Indent ()}do {{");
+				_sb.Append ($"{_indent.Indent ()}do {{");
+				_sb.AppendStmts (Contents, _indent + 1);
+				_sb.Append ($"{_indent.Indent ()}}} while ({Condition.GenerateCSharp (_indent)});");
 			} else {
-				(_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Condition.Token);
-				_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}while ({_b}) {{");
+				_sb.Append ($"{_indent.Indent ()}while ({Condition.GenerateCSharp (_indent)}) {{");
+				_sb.AppendStmts (Contents, _indent + 1);
+				_sb.Append ($"{_indent.Indent ()}}}");
 			}
-			_sb.AppendStmts (Contents, _indent + 1);
-			if (IsDoWhile) {
-				(_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent + 1, Condition.Token);
-				_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}}} while ({_b});");
-			} else {
-				_sb.AppendLine ($"{_indent.Indent ()}}}");
-			}
-			return ("", _sb.ToString (), $"{_c}{_e}");
+			return _sb.ToString ();
 		}
 	}
 }

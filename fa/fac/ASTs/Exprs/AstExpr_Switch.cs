@@ -50,6 +50,10 @@ namespace fac.ASTs.Exprs {
 			return TypeFuncs.GetCompatibleType (true, (from p in CaseCodes select p._expr.GuessType ()).ToArray ());
 		}
 
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+
+		}
+
 		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
 			var _sb = new StringBuilder ();
 			string _tmp_var_name2 = Common.GetTempId ();

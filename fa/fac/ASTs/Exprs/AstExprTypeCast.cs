@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs.Names;
+using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -52,21 +53,22 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => Value.GuessType ();
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			if (Value.ExpectType is AstType_OptionalWrap && Value is AstExpr_Op2 _op2expr && _op2expr.Operator == "/") {
-				return Value.GenerateCSharp (_indent, _check_cb);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+			var (_stmts, _expr) = Value.ExpandExpr ();
+			Value = _expr;
+			return (_stmts, this);
+		}
+
+		public override string GenerateCSharp (int _indent) {
+			string _val = Value.GenerateCSharp (_indent);
+			if (Value.ExpectType is AstType_OptionalWrap _owrap && ExpectType.IsSame (_owrap.ItemType)) {
+				return $"{_val}.GetValue ()";
 			} else {
-				var _a = ExpectType.GenerateCSharp_Type ();
-				var (_d, _e, _f) = Value.GenerateCSharp (_indent, _check_cb);
-				if (ExpectType is AstType_OptionalWrap && Value.ExpectType is not AstType_OptionalWrap) {
-					return (_d, $"{_a}.FromValue ({_e})", _f);
-				} else if (ExpectType is not AstType_OptionalWrap && Value.ExpectType is AstType_OptionalWrap) {
-					var _tmp_var_name = Common.GetTempId ();
-					var _psb = new StringBuilder ().Append (_d).AppendLine ($"{_indent.Indent ()}{ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_e};");
-					//return (_psb.ToString (), $"{_tmp_var_name}.GetValue ()", _f);
-					return (_psb.ToString (), _tmp_var_name, _f);
+				string _type = ExpectType.GenerateCSharp (_indent);
+				if (ExpectType is AstType_OptionalWrap _owrap1 && Value.ExpectType.IsSame (_owrap1.ItemType)) {
+					return $"{_type}.FromValue ({_val})";
 				} else {
-					return (_d, $"({_a}) {_e}", _f);
+					return $"({_type}) {_val}";
 				}
 			}
 		}
