@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Types {
 	public class AstType_Any: IAstType {
 		public override string ToString () => "any";
-		public override string GenerateCSharp_Type () => "object";
+		public override string GenerateCSharp (int _indent) => "object";
 	}
 }

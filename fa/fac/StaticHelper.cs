@@ -23,14 +23,24 @@ namespace fac {
 
 		public static void Traversal (this List<IAstExpr> _exprs, int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
-				if (_exprs[i] != null)
-					_exprs[i] = _cb (_exprs[i], _deep, _group);
+				if (_exprs[i] != null) {
+					if (Info.TraversalFirst)
+						_exprs[i] = _cb (_exprs[i], _deep, _group);
+					_exprs[i].TraversalWrap (_deep, _group, (_expr1, _deep1, _group1) => _cb (_expr1, _deep1, _group1));
+					if (Info.TraversalLast)
+						_exprs[i] = _cb (_exprs[i], _deep, _group);
+				}
 			}
 		}
 
 		public static void Traversal (this List<IAstStmt> _stmts, int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			for (int i = 0; i < (_stmts?.Count ?? 0); ++i) {
-				if (_stmts[i] != null)
+				if (_stmts[i] == null)
+					continue;
+				if (Info.TraversalFirst)
+					_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
+				_stmts[i].TraversalWrap (_deep, _group, (_expr1, _deep1, _group1) => _cb (_expr1, _deep1, _group1));
+				if (Info.TraversalLast)
 					_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
 			}
 		}
@@ -65,8 +75,7 @@ namespace fac {
 			if (_stmts == null)
 				return;
 			foreach (var _stmt in _stmts) {
-				var (_a, _b, _c) = _stmt.GenerateCSharp (_indent, null);
-				_sb.Append (_a).Append (_b).Append (_c);
+				_sb.Append (_stmt.GenerateCSharp (_indent));
 			}
 		}
 

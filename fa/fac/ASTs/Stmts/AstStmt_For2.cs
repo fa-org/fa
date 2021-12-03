@@ -31,15 +31,20 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override List<IAstStmt> ExpandStmt () {
+			var (_stmts, _expr) = ListContainer.ExpandExpr ();
+			ListContainer = _expr;
+			BodyCodes = (from p in BodyCodes select p.ExpandStmt ()).CombileStmts ();
+			_stmts.Add (this);
+			return _stmts;
+		}
+
+		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
-			var _ec = new ExprChecker (null);
-			var (_a, _b, _c) = ListContainer.GenerateCSharp (_indent, _ec.CheckFunc);
-			_sb.AppendLine ($"{_a}{_indent.Indent ()}foreach ({Iterator.DataType.GenerateCSharp_Type ()} {Iterator.VarName} in {_b}) {{");
+			_sb.AppendLine ($"{_indent.Indent ()}foreach ({Iterator.DataType.GenerateCSharp (_indent)} {Iterator.VarName} in {ListContainer.GenerateCSharp (_indent)}) {{");
 			_sb.AppendStmts (BodyCodes, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			_sb.Append (_c);
-			return ("", _sb.ToString (), "");
+			return _sb.ToString ();
 		}
 	}
 }

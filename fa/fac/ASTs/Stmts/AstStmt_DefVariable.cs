@@ -17,6 +17,21 @@ namespace fac.ASTs.Stmts {
 
 
 
+		public static List<IAstStmt> FromCtx (FaParser.DefVarStmtContext _ctx) {
+			List<IAstStmt> _stmts = new List<IAstStmt> ();
+			var _type = IAstType.FromContext (_ctx.type ());
+			foreach (var _var_ctx in _ctx.idAssignExpr ()) {
+				var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start };
+				_varstmt.DataType = _type;
+				_varstmt.VarName = _var_ctx.id ().GetText ();
+				_varstmt.Expr = FromContext (_var_ctx.expr ());
+				if (_varstmt.Expr is AstExpr_Lambda _lambdaexpr)
+					_lambdaexpr.InitLambda (_type);
+				_stmts.Add (_varstmt);
+			}
+			return _stmts;
+		}
+
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			if (VarName == "_")
 				throw new CodeException (Token, "声明的变量名不能为“_”");
@@ -31,23 +46,15 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var _ec = new ExprChecker (new AstExprName_Variable { Token = Token, Var = this, ExpectType = DataType });
-			var _sb = new StringBuilder ();
-			_sb.AppendLine ($"{_indent.Indent ()}{DataType.GenerateCSharp_Type ()} {VarName};");
-			var _tmp_expr = new AstExpr_Op2 {
-				Token = Token,
-				Value1 = new AstExprName_Variable { Token = Token, ExpectType = DataType, Var = this },
-				Value2 = Expr,
-				Operator = "=",
-				ExpectType = DataType,
-			};
-			var (_a, _b, _c) = _tmp_expr.GenerateCSharp (_indent, _ec.CheckFunc);
-			var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Expr.Token);
-			_sb.Append (_a).Append (_d);
-			_sb.AppendLine ($"{_indent.Indent ()}{_b};");
-			_sb.Append (_e).Append (_c);
-			return ("", _sb.ToString (), "");
+		public override List<IAstStmt> ExpandStmt () {
+			var (_stmts, _expr) = Expr.ExpandExpr ();
+			Expr = _expr;
+			_stmts.Add (this);
+			return _stmts;
+		}
+
+		public override string GenerateCSharp (int _indent) {
+			return $"{_indent.Indent ()}{DataType.GenerateCSharp (_indent)} {VarName} = {Expr.GenerateCSharp (_indent)};";
 		}
 	}
 }

@@ -86,8 +86,8 @@ namespace fac.ASTs.Exprs {
 			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
 			string _a, _b, _c;
 			if (Operator == "[]") {
-				(_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
-				if (Value.ExpectType is AstType_ArrayWrap && Arguments.Count == 1 && Arguments[0].ExpectType is AstType_Integer && _Judge) {
+				var _stmts = new List<IAstStmt> ();
+				if (Value.ExpectType is AstType_ArrayWrap && Arguments.Count == 1 && Arguments[0].ExpectType is AstType_Integer && _GenCSharpLevel == _GenLevel.NeedVarWrap) {
 					// TODO: 生成新的expr对象，_Judge设置为false
 					/* val [3+4+6]
 					 * int a = 3+4+6;
@@ -99,25 +99,37 @@ namespace fac.ASTs.Exprs {
 					 *     // check_cb
 					 * val [a]
 					 */
-					var _stmts = new List<IAstStmt> ();
-					var _index_id = Common.GetTempId ();
-					var _index_obj = new AstExprName_Variable { Token = Token, Var = new AstStmt_DefVariable { Token = Token, DataType = Arguments[0].ExpectType, VarName = _index_id, Expr = Arguments[0] }, ExpectType = Arguments[0].ExpectType };
-					var _length = new AstExpr_AccessBuildIn { Token = Token, Value = Value, MemberName = "Length", ExpectType = IAstType.FromName ("int") };
+					var _item_id = Common.GetTempId ();
+					var _item_type = new AstType_OptionalWrap { Token = Token, ItemType = Arguments[0].ExpectType };
+					var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = _item_type, VarName = _item_id, Expr = AstExprTypeCast.Make (this, _item_type) };
+					var _item_obj = new AstExprName_Variable { Token = Token, Var = _item_defvar, ExpectType = _item_type };
+					_stmts.Add (_item_defvar);
 					//
-					_stmts.Add (_index_obj.Var);
+					_GenCSharpLevel = _GenLevel.NeedCompare;
+					_psb.AppendStmts (_stmts, _indent);
+					(_a, _b, _c) = _item_obj.GenerateCSharp (_indent, _check_cb);
+					_psb.Append (_a);
+					_sb.Append (_b);
+					_ssb.Append (_c);
+				} else if (_GenCSharpLevel == _GenLevel.NeedCompare) {
+					var _index_id = Common.GetTempId ();
+					var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = Arguments[0].ExpectType, VarName = _index_id, Expr = Arguments[0] };
+					var _index_obj = new AstExprName_Variable { Token = Token, Var = _index_defvar, ExpectType = Arguments[0].ExpectType };
+					var _length = new AstExpr_AccessBuildIn { Token = Token, Value = Value, MemberName = "Length", ExpectType = IAstType.FromName ("int") };
+					_stmts.Add (_index_defvar);
 					_stmts.Add (new AstStmt_If {
 						Token = Token,
 						Condition = new AstExpr_Op2 { Token = Token, Value1 = _index_obj, Value2 = IAstExpr.FromValue ("int", "0"), Operator = "<", ExpectType = IAstType.FromName ("bool") },
 						IfTrueCodes = new List<IAstStmt> { new AstStmt_ExprWrap { Token = Token, Expr = new AstExpr_Op2 { Token = Token, Value1 = _index_obj, Value2 = _length, Operator = "+=", ExpectType = _index_obj.ExpectType } } },
 						IfFalseCodes = new List<IAstStmt> { },
 					});
-					_check_cb ($"{_index_id} < 0", "\"数组随机访问范围超限\"");
-					_check_cb ($"{_index_id} >= {_length.GenerateCSharp (_indent, _check_cb).Item2}", "\"数组随机访问范围超限\"");
 					_psb.AppendStmts (_stmts, _indent);
+					_check_cb ($"{_index_id} < 0 || {_index_id} >= {_length.GenerateCSharp (_indent, _check_cb).Item2}", "\"数组随机访问范围超限\"");
 					_psb.Append (_a);
 					_sb.Append ($"{_b} [{_index_id}]");
 					_ssb.Append (_c);
 				} else {
+					(_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
 					_psb.Append (_a);
 					_sb.Append ($"{_b} [");
 					var _items = (from p in Arguments select p.GenerateCSharp (_indent, _check_cb)).ToList ();
@@ -192,6 +204,7 @@ namespace fac.ASTs.Exprs {
 
 		public override bool AllowAssign () => Operator == "[]" ? Value.AllowAssign () : false;
 
-		private bool _Judge = true;
+		private _GenLevel _GenCSharpLevel = _GenLevel.NeedVarWrap;
 	}
+	enum _GenLevel { NeedVarWrap, NeedCompare, Direct }
 }

@@ -32,14 +32,14 @@ namespace fac.ASTs.Types {
 		//	return _functype;
 		//}
 
-		public override string GenerateCSharp_Type () {
+		public override string GenerateCSharp (int _indent) {
 			if (ReturnType is AstType_Void) {
-				return $"Action<{string.Join (", ", (from p in ArgumentTypes select p.GenerateCSharp_Type ()))}>";
+				return $"Action<{string.Join (", ", from p in ArgumentTypes select p.GenerateCSharp (_indent))}>";
 			} else {
 				var _list = new List<IAstType> ();
 				_list.AddRange (ArgumentTypes);
 				_list.Add (ReturnType);
-				return $"Func<{string.Join (", ", (from p in _list select p.GenerateCSharp_Type ()))}>";
+				return $"Func<{string.Join (", ", from p in _list select p.GenerateCSharp (_indent))}>";
 			}
 		}
 	}

@@ -30,15 +30,13 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			if (Expr == null)
-				return ("", "", "");
-			var _ec = new ExprChecker (null);
-			var (_a, _b, _c) = Expr.GenerateCSharp (_indent, _ec.CheckFunc);
-			var _sb = new StringBuilder ();
-			var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, Expr.Token);
-			_sb.AppendLine ($"{_d}{_a}{_indent.Indent ()}{_b};");
-			return ("", _sb.ToString (), $"{_c}{_e}");
+		public override List<IAstStmt> ExpandStmt () {
+			var (_stmts, _expr) = Expr.ExpandExpr ();
+			Expr = _expr;
+			_stmts.Add (this);
+			return _stmts;
 		}
+
+		public override string GenerateCSharp (int _indent) => $"{_indent.Indent ()}{Expr.GenerateCSharp (_indent)}";
 	}
 }

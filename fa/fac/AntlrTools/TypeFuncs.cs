@@ -67,16 +67,14 @@ namespace fac.AntlrTools {
 			if (_stmts.Count == 0) {
 				if (_ret_type != "void" && _ret_type != "void?")
 					throw new CodeException (_token, $"方法需返回 {_return_type} 类型结果");
-				_stmts.Add (new AstStmt_Return { Token = null, Expr = _ret_type == "void" ? null : AstExprTypeCast.ForceMake (new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName ("int"), Value = "0" }, IAstType.FromName ("int?")) });
-			} else if (_stmts[^1] is AstStmt_Return) {
-				return;
+				_stmts.Add (new AstStmt_Return { Token = null, Expr = null });
 			} else if (_stmts[^1] is AstStmt_If _ifstmt) {
 				_make_sure_return (_token, _return_type, _ifstmt.IfTrueCodes);
 				_make_sure_return (_token, _return_type, _ifstmt.IfFalseCodes);
-			} else {
+			} else if (_stmts[^1] is not AstStmt_Return) {
 				if (_ret_type != "void" && _ret_type != "void?")
 					throw new CodeException (_token, $"方法需返回 {_return_type} 类型结果");
-				_stmts.Add (new AstStmt_Return { Token = null, Expr = _ret_type == "void" ? null : AstExprTypeCast.ForceMake (new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName ("int"), Value = "0" }, IAstType.FromName ("int?")) });
+				_stmts.Add (new AstStmt_Return { Token = null, Expr = null });
 			}
 		}
 	}

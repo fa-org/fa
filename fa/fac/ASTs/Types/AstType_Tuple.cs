@@ -11,6 +11,6 @@ namespace fac.ASTs.Types {
 
 
 		public override string ToString () => $"({string.Join (", ", from p in TupleTypes select $"{p._type} {p._name}")})";
-		public override string GenerateCSharp_Type () => $"({string.Join (", ", from p in TupleTypes select p._type.GenerateCSharp_Type ())})";
+		public override string GenerateCSharp (int _indent) => $"({string.Join (", ", from p in TupleTypes select p._type.GenerateCSharp (_indent))})";
 	}
 }

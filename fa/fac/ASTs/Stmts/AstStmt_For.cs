@@ -42,31 +42,30 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var _sb = new StringBuilder ();
-			_sb.AppendLine ($"{_indent.Indent ()}{{");
-			string _a, _b, _c;
-			foreach (var _initlize in Initializes) {
-				(_a, _b, _c) = _initlize.GenerateCSharp (_indent + 1, Common.NoCheck (_initlize.Token));
-				_sb.Append ($"{_a}{_b}{_c}");
-			}
-			(_a, _b, _c) = Condition.GenerateCSharp (_indent + 1, Common.NoCheck (Condition.Token));
-			if (_a != "" || _c != "")
-				throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");
-			_sb.Append ($"{(_indent + 1).Indent ()}for (; {_b}; ");
+		public override List<IAstStmt> ExpandStmt () {
+			var _stmts = (from p in Initializes select p.ExpandStmt ()).CombileStmts ();
+			(Initializes, Condition) = Condition.ExpandExpr ();
 			for (int i = 0; i < Increment.Count; ++i) {
-				(_a, _b, _c) = Increment[i].GenerateCSharp (_indent + 1, Common.NoCheck (Condition.Token));
-				if (_a != "" || _c != "")
-					throw new CodeException (Condition.Token, "条件不允许带隐藏逻辑的表达式");
-				_sb.Append (_b);
-				if (i < Increment.Count - 1)
-					_sb.Append (", ");
+				var (_inc_stmts, _inc_expr) = Increment[i].ExpandExpr ();
+				if (_inc_stmts.Count > 0)
+					throw new CodeException (Increment[i].Token, $"此处不支持复合逻辑表达式");
+				Increment[i] = _inc_expr;
 			}
-			_sb.AppendLine ($") {{");
-			_sb.AppendStmts (BodyCodes, _indent + 2);
-			_sb.AppendLine ($"{(_indent + 1).Indent ()}}}");
+			BodyCodes = (from p in BodyCodes select p.ExpandStmt ()).CombileStmts ();
+			_stmts.Add (this);
+			return new List<IAstStmt> { new AstStmt_HuaQuotWrap { Token = _stmts[0].Token, Stmts = _stmts } };
+		}
+
+		public override string GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
+			// 此处 Initializes 每次判断前执行一遍
+			_sb.AppendStmts (Initializes, _indent);
+			var _inc_str = string.Join (", ", from p in Increment select p.GenerateCSharp (_indent));
+			_sb.AppendLine ($"{_indent.Indent ()}for (; {Condition.GenerateCSharp (_indent)}; {_inc_str}) {{");
+			_sb.AppendStmts (BodyCodes, _indent + 1);
+			_sb.AppendStmts (Initializes, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return ("", _sb.ToString (), "");
+			return _sb.ToString ();
 		}
 	}
 }

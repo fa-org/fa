@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public abstract class IAstStmt: IAstExpr {
-		public override IAstType GuessType () => throw new NotImplementedException ();
+		public abstract List<IAstStmt> ExpandStmt ();
 
 		public static IAstStmt FromExpr (FaParser.ExprContext _ctx, bool _return) {
 			if (_return) {
@@ -20,29 +20,11 @@ namespace fac.ASTs.Stmts {
 			}
 		}
 
-		private static IAstStmt FromIfStmt (List<FaParser.ExprContext> _conditions, List<FaParser.QuotStmtPartContext> _contents) {
-			var _ifexpr = new AstStmt_If { Token = _conditions[0].Start };
-			_ifexpr.Condition = FromContext (_conditions[0]);
-			_ifexpr.IfTrueCodes = FromStmts (_contents[0].stmt ());
-			if (_conditions.Count == 1) {
-				if (_contents.Count > 1) {
-					_ifexpr.IfFalseCodes = FromStmts (_contents[1].stmt ());
-				} else {
-					_ifexpr.IfFalseCodes = new List<IAstStmt> ();
-				}
-			} else {
-				_ifexpr.IfFalseCodes = new List<IAstStmt> { FromIfStmt (_conditions.Skip (1).ToList (), _contents.Skip (1).ToList ()) };
-			}
-			return _ifexpr;
-		}
-
 		public static List<IAstStmt> FromStmt (FaParser.StmtContext _ctx) {
 			var _stmts = new List<IAstStmt> ();
 			if (_ctx == null) {
 			} else if (_ctx.ifStmt () != null) {
-				var _conditions = _ctx.ifStmt ().expr ().ToList ();
-				var _contents = _ctx.ifStmt ().quotStmtPart ().ToList ();
-				_stmts.Add (FromIfStmt (_conditions, _contents));
+				return AstStmt_If.FromCtx (_ctx.ifStmt ());
 			} else if (_ctx.whileStmt () != null) {
 				var _whilestmt = new AstStmt_While { Token = _ctx.Start, IsDoWhile = false };
 				_whilestmt.Condition = FromContext (_ctx.whileStmt ().expr ());
@@ -99,16 +81,7 @@ namespace fac.ASTs.Stmts {
 					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) });
 				}
 			} else if (_ctx.defVarStmt () != null) {
-				var _type = IAstType.FromContext (_ctx.defVarStmt ().type ());
-				foreach (var _var_ctx in _ctx.defVarStmt ().idAssignExpr ()) {
-					var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start };
-					_varstmt.DataType = _type;
-					_varstmt.VarName = _var_ctx.id ().GetText ();
-					_varstmt.Expr = FromContext (_var_ctx.expr ());
-					if (_varstmt.Expr is AstExpr_Lambda _lambdaexpr)
-						_lambdaexpr.InitLambda (_type);
-					_stmts.Add (_varstmt);
-				}
+				return AstStmt_DefVariable.FromCtx (_ctx.defVarStmt ());
 			} else {
 				throw new UnimplException (_ctx.Start);
 			}
@@ -116,9 +89,9 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public static List<IAstExpr> FromExprs (FaParser.ExprContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
-
 		public static List<IAstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select FromStmt (p)).CombileStmts ();
-
-		public override bool AllowAssign () => false;
+		public override IAstType GuessType () => throw new Exception ("不应执行此处代码");
+		public override bool AllowAssign () => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () => throw new Exception ("不应执行此处代码");
 	}
 }

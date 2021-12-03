@@ -27,12 +27,17 @@ namespace fac.ASTs.Exprs {
 			if (Info.TraversalLast)
 				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
 		}
+
 		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);
 		public abstract IAstType GuessType ();
 		public abstract bool AllowAssign ();
+		public abstract (List<IAstStmt>, IAstExpr) ExpandExpr ();
 
 
 
+		public bool IsSimpleExpr {
+			get => this is IAstExprName || this is AstExpr_AccessBuildIn || this is AstExpr_BaseId || this is AstExpr_BaseValue;
+		}
 
 		public static IAstExpr FromContext (FaParser.ExprContext _ctx) {
 			if (_ctx == null)

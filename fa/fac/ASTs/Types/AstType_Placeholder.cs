@@ -11,7 +11,7 @@ namespace fac.ASTs.Types {
 
 
 		public override string ToString () => Name;
-		public override string GenerateCSharp_Type () => throw new NotImplementedException ();
+		public override string GenerateCSharp (int _indent) => throw new NotImplementedException ();
 		// TODO 泛型约束
 	}
 }

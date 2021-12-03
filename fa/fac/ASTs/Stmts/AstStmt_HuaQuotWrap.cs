@@ -21,12 +21,17 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override List<IAstStmt> ExpandStmt () {
+			Stmts = (from p in Stmts select p.ExpandStmt ()).CombileStmts ();
+			return new List<IAstStmt> { this };
+		}
+
+		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{{");
 			_sb.AppendStmts (Stmts, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return ("", _sb.ToString (), "");
+			return _sb.ToString ();
 		}
 	}
 }

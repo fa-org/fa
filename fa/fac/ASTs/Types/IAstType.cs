@@ -13,10 +13,6 @@ namespace fac.ASTs.Types {
 
 
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => ("", GenerateCSharp_Type (), "");
-
-		public abstract string GenerateCSharp_Type ();
-
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) { }
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -27,6 +23,8 @@ namespace fac.ASTs.Types {
 		public override IAstType GuessType () => throw new NotImplementedException ();
 
 		public override bool AllowAssign () => false;
+
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () => throw new Exception ("不应执行此处代码");
 
 		public static IAstType FromContext (FaParser.TypeContext _ctx) {
 			if (_ctx.Params () != null) {
@@ -50,7 +48,9 @@ namespace fac.ASTs.Types {
 					if (_inttype != null)
 						_ret = _inttype;
 					//
-					if (_type_str == "any") {
+					if (_type_str == "var") {
+						return null;
+					} else if (_type_str == "any") {
 						_ret = new AstType_Any { Token = _ctx.Start, Mut = _mut };
 					} else if (_type_str == "bool") {
 						_ret = new AstType_Bool { Token = _ctx.Start, Mut = _mut };
