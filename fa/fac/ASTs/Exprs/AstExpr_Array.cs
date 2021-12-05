@@ -1,4 +1,6 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Exprs.Names;
+using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -47,17 +49,22 @@ namespace fac.ASTs.Exprs {
 			return new AstType_ArrayWrap { Token = Token, ItemType = _item_type };
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			StringBuilder _psb = new StringBuilder (), _ssb = new StringBuilder ();
-			var _tmp_var_name = Common.GetTempId ();
-			_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{ItemDataType.GenerateCSharp_Type ()}> ();");
-			foreach (var _init_val in InitValues) {
-				var (_a, _b, _c) = _init_val.GenerateCSharp (_indent, ItemDataType is AstType_OptionalWrap ? null : _check_cb);
-				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{_tmp_var_name}.Add ({_b});");
-				_ssb.Append (_c);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+			var _stmts = new List<IAstStmt> ();
+			var _var_id = Common.GetTempId ();
+			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _var_id };
+			_stmts.Add (_defvar_stmt);
+			var _var_expr = new AstExprName_Variable { Token = Token, Var = _defvar_stmt, ExpectType = _defvar_stmt.DataType };
+			foreach (var _val in InitValues) {
+				var (_stmts1, _val1) = _val.ExpandExpr ();
+				_stmts.AddRange (_stmts1);
+				_stmts1 = new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_AccessBuildIn.Array_Add (_var_expr, _val1) }.ExpandStmt ();
+				_stmts.AddRange (_stmts1);
 			}
-			return (_psb.ToString (), _tmp_var_name, _ssb.ToString ());
+			return (_stmts, _var_expr);
 		}
+
+		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
 		public override bool AllowAssign () => false;
 	}

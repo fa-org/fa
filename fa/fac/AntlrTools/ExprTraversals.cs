@@ -170,7 +170,7 @@ namespace fac.AntlrTools {
 					Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
 						return _typeexpr switch {
 							AstType_Class _classexpr => _access_func (_obj, _classexpr.Class),
-							AstType_ArrayWrap _arrexpr when _access_name == "Length" => new AstExpr_AccessBuildIn { Token = _typeexpr.Token, Value = _obj, MemberName = "Length", ExpectType = IAstType.FromName ("int") },
+							AstType_ArrayWrap _arrexpr when _access_name == "Length" => AstExpr_AccessBuildIn.Array_Length (_typeexpr.Token, _obj),
 							_ => throw new UnimplException (_typeexpr.Token),
 						};
 					};

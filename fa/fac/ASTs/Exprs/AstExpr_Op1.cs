@@ -1,4 +1,5 @@
 ﻿using fac.ASTs.Exprs.Names;
+using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -64,18 +65,29 @@ namespace fac.ASTs.Exprs {
 			throw new UnimplException (Token);
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var (_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+			var (_stmts, _val) = Value.ExpandExpr ();
 			if ((!IsPrefix) && Operator == "?") {
-				var _tmp_var_name = Common.GetTempId ();
-				var _psb = new StringBuilder ();
-				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{Value.ExpectType.GenerateCSharp_Type ()} {_tmp_var_name} = {_b};");
-				_check_cb ($"!{_tmp_var_name}.HasValue ()", $"{_tmp_var_name}.GetError ()");
-				return (_psb.ToString (), $"{_tmp_var_name}.GetValue ()", "");
+				// 新增代码：如果前者为空那么 return
+				// 返回 _val.GetValue ()
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_AccessBuildIn.Optional_NotHasValue (_val),
+					IfTrueCodes = new List<IAstStmt> {
+						new AstStmt_Return { Token = _val.Token, Expr = AstExpr_AccessBuildIn.Optional_FromError (Info.CurrentReturnType (), AstExpr_AccessBuildIn.Optional_GetError (_val)) }
+					},
+				});
+				return (_stmts, AstExpr_AccessBuildIn.Optional_GetValue (_val));
 			} else {
-				_b = Value is IAstExprName ? _b : $"({_b})";
-				return (_a, (IsPrefix ? $"{Operator}{_b}" : $"{_b}{Operator}"), _c);
+				// 直接访问
+				Value = _val;
+				return (_stmts, this);
 			}
+		}
+
+		public override string GenerateCSharp (int _indent) {
+			var _b = Value.GenerateCSharp (_indent);
+			return IsPrefix ? $"{Operator}{_b}" : $"{_b}{Operator}";
 		}
 
 		public override bool AllowAssign () => Value.AllowAssign ();

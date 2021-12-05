@@ -68,12 +68,17 @@ namespace fac.ASTs.Exprs {
 			return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList () };
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+			BodyCodes = BodyCodes.ExpandStmts ();
+			return (new List<IAstStmt> (), this);
+		}
+
+		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			_sb.Append ("(").Append (string.Join (", ", from p in Arguments select p._name)).AppendLine (") => {");
 			_sb.AppendStmts (BodyCodes, _indent + 1);
 			_sb.Append ($"{_indent.Indent ()}}}");
-			return ("", _sb.ToString (), "");
+			return _sb.ToString ();
 		}
 
 		public override bool AllowAssign () => false;

@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -31,20 +32,25 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => IAstType.FromName ("bool");
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
-			_sb.Append ("(");
-			for (int i = 0; i < Operators.Count; ++i) {
-				var (_a, _b, _c) = Values[i].GenerateCSharp (_indent, _check_cb);
-				var (_d, _e, _f) = Values[i + 1].GenerateCSharp (_indent, _check_cb);
-				_psb.Append (_a).Append (_d);
-				_sb.Append ($"({_b} {Operators[i]} {_e}) && ");
-				_ssb.Append (_c).Append (_f);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+			var _stmts = new List<IAstStmt> ();
+			for (int i = 0; i < Values.Count; ++i) {
+				var (_stmts1, _val1) = Values[i].ExpandExpr ();
+				_stmts.AddRange (_stmts1);
+				Values[i] = _val1;
+				if (i > 0) {
+					Values[i] = new AstExpr_Op2 { Token = Values[i - i].Token, Value1 = Values[i - 1], Value2 = Values[i], Operator = Operators[i - 1], ExpectType = IAstType.FromName ("bool") };
+				}
 			}
-			_sb.Remove (_sb.Length - 4, 4);
-			_sb.Append (")");
-			return (_psb.ToString (), _sb.ToString (), _ssb.ToString ());
+			Values.RemoveAt (0);
+			while (Values.Count > 1) {
+				Values [0] = new AstExpr_Op2 { Token = Values[0].Token, Value1 = Values[0], Value2 = Values[1], Operator = "&&", ExpectType = IAstType.FromName ("bool") };
+				Values.RemoveAt (1);
+			}
+			return (_stmts, Values[0]);
 		}
+
+		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
 		private static HashSet<string> sComare = new HashSet<string> { ">", ">=", "<", "<=" };
 

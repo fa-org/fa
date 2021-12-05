@@ -107,7 +107,7 @@ namespace fac.ASTs.Exprs {
 
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			if (Operator == "=" && Value1 is AstExprName_Ignore)
 				return Value2.GenerateCSharp (_indent, _check_cb);
 			string _a, _b, _c, _d, _e, _f;

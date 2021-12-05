@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Types;
+﻿using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,9 @@ namespace fac.ASTs.Exprs {
 			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => throw new UnimplException (Token);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () => throw new Exception ("不应执行此处代码");
+
+		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
 		public override bool AllowAssign () => throw new UnimplException (Token);
 	}

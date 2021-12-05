@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
@@ -43,26 +44,19 @@ namespace fac.ASTs.Exprs {
 			return TypeFuncs.GetCompatibleType (true, IfTrue.GuessType (), IfFalse.GuessType ());
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			var (_a, _b, _c) = Condition.GenerateCSharp (_indent, _check_cb);
-			var (_d, _e, _f) = IfTrue.GenerateCSharp (_indent + 1, _check_cb);
-			var (_g, _h, _i) = IfFalse.GenerateCSharp (_indent + 1, _check_cb);
-			if (_a == "" && _c == "" && _d == "" && _f == "" && _g== "" && _i == "" && (IfTrueCodes?.Count ?? 0) == 0 && (IfFalseCodes?.Count ?? 0) == 0) {
-				return ("", $"(({_b}) ? ({_e}) : ({_h}))", "");
-			} else {
-				StringBuilder _psb = new StringBuilder ();
-				var _tmp_var_name = Common.GetTempId ();
-				_psb.Append (_a).AppendLine ($"{_indent.Indent ()}{ExpectType.GenerateCSharp_Type ()} {_tmp_var_name};");
-				_psb.AppendLine ($"{_indent.Indent ()}if ({_b}) {{");
-				_psb.AppendStmts (IfTrueCodes, _indent + 1);
-				_psb.Append (_d).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_e};").Append (_f);
-				_psb.AppendLine ($"{_indent.Indent ()}}} else {{");
-				_psb.AppendStmts (IfFalseCodes, _indent + 1);
-				_psb.Append (_g).AppendLine ($"{(_indent + 1).Indent ()}{_tmp_var_name} = {_h};").Append (_i);
-				_psb.AppendLine ($"{_indent.Indent ()}}}");
-				return (_psb.ToString (), _tmp_var_name, _c);
-			}
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+			var _temp_id = Common.GetTempId ();
+			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
+			var _temp_expr = new AstExprName_Variable { Token = Token, ExpectType = ExpectType, Var = _defvar_stmt };
+			var _stmt_if = new AstStmt_If { Token = Token, Condition = Condition, IfTrueCodes = IfTrueCodes, IfFalseCodes = IfFalseCodes };
+			_stmt_if.IfTrueCodes.Add (new AstStmt_ExprWrap { Token = IfTrue.Token, Expr = new AstExpr_Op2 { Token = IfTrue.Token, Value1 = _temp_expr, Value2 = IfTrue, Operator = "=", ExpectType = ExpectType } });
+			_stmt_if.IfFalseCodes.Add (new AstStmt_ExprWrap { Token = IfFalse.Token, Expr = new AstExpr_Op2 { Token = IfFalse.Token, Value1 = _temp_expr, Value2 = IfFalse, Operator = "=", ExpectType = ExpectType } });
+			var _stmts = _stmt_if.ExpandStmt ();
+			_stmts.Insert (0, _defvar_stmt);
+			return (_stmts, _temp_expr);
 		}
+
+		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
 		public override bool AllowAssign () => false;
 	}

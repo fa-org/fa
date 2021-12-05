@@ -82,9 +82,61 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
-			StringBuilder _psb = new StringBuilder (), _sb = new StringBuilder (), _ssb = new StringBuilder ();
-			string _a, _b, _c;
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+			var (_stmts, _val) = Value.ExpandExpr ();
+			Value = _val;
+			for (int i = 0; i < Arguments.Count; ++i) {
+				var (_stmts1, _val1) = Arguments[i].ExpandExpr ();
+				_stmts.AddRange (_stmts1);
+				Arguments[i] = _val1;
+			}
+			if (Operator == "[]") {
+				if (Arguments.Count != 1)
+					throw new CodeException (Token, "随机访问操作仅支持一个参数");
+				/* 生成逻辑： val [n]
+				 * var _tmpval000;
+				 * var idx = n;
+				 * if (idx < 0)
+				 *     idx += val.Length;
+				 * if (idx < 0 || idx >= val.Length) {
+				 *     _tmpval000 = err 数组随机访问超限;
+				 * } else {
+				 *     _tmpval000 = val [idx];
+				 * }
+				 * _tmpval000
+				 */
+				// var _tmpval000;
+				var _item_id = Common.GetTempId ();
+				var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _item_id, Expr = null };
+				var _item_obj = new AstExprName_Variable { Token = Token, Var = _item_defvar, ExpectType = ExpectType };
+				_stmts.AddRange (_item_defvar.ExpandStmt ());
+
+				// var idx = n;
+				var _index_id = Common.GetTempId ();
+				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), VarName = _index_id, Expr = AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int")) };
+				_stmts.AddRange (_index_defvar.ExpandStmt ());
+
+				// if (idx < 0)
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = new AstExpr_Op2 { Token = Token, Value1 = Arguments[0], Value2 = IAstExpr.FromValue ("int", "0"), Operator = "<", ExpectType = IAstType.FromName ("bool") },
+					IfTrueCodes = new List<IAstStmt> {
+						// idx += val.Length;
+						new ast
+					},
+				});
+				//if (idx < 0 || idx >= val.Length) {
+				//	_tmpval000 = err 数组随机访问超限;
+				//} else {
+				//	_tmpval000 = val[idx];
+				//}
+			} else {
+				return (_stmts, this);
+			}
+		}
+
+		public override string GenerateCSharp (int _indent) {
+			var _sb = new StringBuilder ();
 			if (Operator == "[]") {
 				var _stmts = new List<IAstStmt> ();
 				if (Value.ExpectType is AstType_ArrayWrap && Arguments.Count == 1 && Arguments[0].ExpectType is AstType_Integer && _GenCSharpLevel == _GenLevel.NeedVarWrap) {
@@ -115,7 +167,7 @@ namespace fac.ASTs.Exprs {
 					var _index_id = Common.GetTempId ();
 					var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = Arguments[0].ExpectType, VarName = _index_id, Expr = Arguments[0] };
 					var _index_obj = new AstExprName_Variable { Token = Token, Var = _index_defvar, ExpectType = Arguments[0].ExpectType };
-					var _length = new AstExpr_AccessBuildIn { Token = Token, Value = Value, MemberName = "Length", ExpectType = IAstType.FromName ("int") };
+					var _length = new AstExpr_AccessBuildIn { Token = Token, Value = Value, AccessType = AccessBuildInType.ARR_Length, ExpectType = IAstType.FromName ("int") };
 					_stmts.Add (_index_defvar);
 					_stmts.Add (new AstStmt_If {
 						Token = Token,

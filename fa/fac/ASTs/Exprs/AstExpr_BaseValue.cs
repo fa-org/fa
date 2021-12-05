@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -32,11 +33,13 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => DataType;
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr () => (new List<IAstStmt> (), this);
+
+		public override string GenerateCSharp (int _indent) {
 			if (DataType is AstType_String) {
-				return ("", Common.WrapStringValue (Value), "");
+				return Common.WrapStringValue (Value);
 			} else {
-				return ("", Value, "");
+				return Value;
 			}
 		}
 
