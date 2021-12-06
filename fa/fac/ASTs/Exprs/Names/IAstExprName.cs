@@ -22,6 +22,6 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) { }
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () => (new List<IAstStmt> (), this);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) => (new List<IAstStmt> (), this);
 	}
 }

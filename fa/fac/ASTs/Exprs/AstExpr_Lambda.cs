@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
@@ -68,8 +69,8 @@ namespace fac.ASTs.Exprs {
 			return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList () };
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
-			BodyCodes = BodyCodes.ExpandStmts ();
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+			BodyCodes = BodyCodes.ExpandStmts (_cache_err);
 			return (new List<IAstStmt> (), this);
 		}
 

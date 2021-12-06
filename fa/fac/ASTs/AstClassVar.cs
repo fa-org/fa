@@ -45,12 +45,12 @@ namespace fac.ASTs {
 			}
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			//if (DefaultValue != null) {
 			//	var (_a, _b) = DefaultValue.GenerateCSharp (_indent, "");
 			//	return ("", $"{_a}{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType} {Name} = {_b};");
 			//} else {
-			return ("", $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType.GenerateCSharp_Type ()} {Name};\r\n", "");
+			return $"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {DataType.GenerateCSharp (_indent)} {Name};\r\n";
 			//}
 		}
 

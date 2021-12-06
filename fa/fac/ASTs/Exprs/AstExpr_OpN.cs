@@ -82,11 +82,11 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
-			var (_stmts, _val) = Value.ExpandExpr ();
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
 			Value = _val;
 			for (int i = 0; i < Arguments.Count; ++i) {
-				var (_stmts1, _val1) = Arguments[i].ExpandExpr ();
+				var (_stmts1, _val1) = Arguments[i].ExpandExpr (_cache_err, _check_cb);
 				_stmts.AddRange (_stmts1);
 				Arguments[i] = _val1;
 			}
@@ -106,10 +106,10 @@ namespace fac.ASTs.Exprs {
 				 * _tmpval000
 				 */
 				// var _tmpval000;
+#warning TODO: 此处不用传递参数，主要以生成逻辑为主
 				var _item_id = Common.GetTempId ();
 				var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _item_id, Expr = null };
-				var _item_obj = new AstExprName_Variable { Token = Token, Var = _item_defvar, ExpectType = ExpectType };
-				_stmts.AddRange (_item_defvar.ExpandStmt ());
+				_stmts.Add (_item_defvar);
 
 				// var idx = n;
 				var _index_id = Common.GetTempId ();
@@ -154,25 +154,23 @@ namespace fac.ASTs.Exprs {
 					var _item_id = Common.GetTempId ();
 					var _item_type = new AstType_OptionalWrap { Token = Token, ItemType = Arguments[0].ExpectType };
 					var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = _item_type, VarName = _item_id, Expr = AstExprTypeCast.Make (this, _item_type) };
-					var _item_obj = new AstExprName_Variable { Token = Token, Var = _item_defvar, ExpectType = _item_type };
 					_stmts.Add (_item_defvar);
 					//
 					_GenCSharpLevel = _GenLevel.NeedCompare;
 					_psb.AppendStmts (_stmts, _indent);
-					(_a, _b, _c) = _item_obj.GenerateCSharp (_indent, _check_cb);
+					(_a, _b, _c) = _item_defvar.GetRef ().GenerateCSharp (_indent, _check_cb);
 					_psb.Append (_a);
 					_sb.Append (_b);
 					_ssb.Append (_c);
 				} else if (_GenCSharpLevel == _GenLevel.NeedCompare) {
 					var _index_id = Common.GetTempId ();
 					var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = Arguments[0].ExpectType, VarName = _index_id, Expr = Arguments[0] };
-					var _index_obj = new AstExprName_Variable { Token = Token, Var = _index_defvar, ExpectType = Arguments[0].ExpectType };
 					var _length = new AstExpr_AccessBuildIn { Token = Token, Value = Value, AccessType = AccessBuildInType.ARR_Length, ExpectType = IAstType.FromName ("int") };
 					_stmts.Add (_index_defvar);
 					_stmts.Add (new AstStmt_If {
 						Token = Token,
-						Condition = new AstExpr_Op2 { Token = Token, Value1 = _index_obj, Value2 = IAstExpr.FromValue ("int", "0"), Operator = "<", ExpectType = IAstType.FromName ("bool") },
-						IfTrueCodes = new List<IAstStmt> { new AstStmt_ExprWrap { Token = Token, Expr = new AstExpr_Op2 { Token = Token, Value1 = _index_obj, Value2 = _length, Operator = "+=", ExpectType = _index_obj.ExpectType } } },
+						Condition = new AstExpr_Op2 { Token = Token, Value1 = _index_defvar.GetRef (), Value2 = IAstExpr.FromValue ("int", "0"), Operator = "<", ExpectType = IAstType.FromName ("bool") },
+						IfTrueCodes = new List<IAstStmt> { new AstStmt_ExprWrap { Token = Token, Expr = new AstExpr_Op2 { Token = Token, Value1 = _index_defvar.GetRef (), Value2 = _length, Operator = "+=", ExpectType = _index_defvar.GetRef ().ExpectType } } },
 						IfFalseCodes = new List<IAstStmt> { },
 					});
 					_psb.AppendStmts (_stmts, _indent);

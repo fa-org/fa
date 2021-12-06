@@ -26,8 +26,8 @@ namespace fac.ASTs.Exprs {
 				return _dest;
 			} else if (_to_type is AstType_OptionalWrap _owrap2 && _dest.ExpectType.IsSame (_owrap2.ItemType)) {
 				return AstExpr_AccessBuildIn.Optional_FromValue (_dest);
-			} else if (_dest.ExpectType is AstType_OptionalWrap _otype1 && _to_type is AstType_OptionalWrap _otype2 && TypeFuncs.AllowTypeCast (_otype1.ItemType, _otype2.ItemType)) {
-				return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
+			//} else if (_dest.ExpectType is AstType_OptionalWrap _otype1 && _to_type is AstType_OptionalWrap _otype2 && TypeFuncs.AllowTypeCast (_otype1.ItemType, _otype2.ItemType)) {
+			//	return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
 			} else if (TypeFuncs.AllowTypeCast (_dest.ExpectType, _to_type)) {
 				return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
 			} else {
@@ -47,26 +47,13 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => Value.GuessType ();
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
-			var (_stmts, _expr) = Value.ExpandExpr ();
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+			var (_stmts, _expr) = Value.ExpandExpr (_cache_err, _check_cb);
 			Value = _expr;
 			return (_stmts, this);
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			//string _val = Value.GenerateCSharp (_indent);
-			//if (Value.ExpectType is AstType_OptionalWrap _owrap && ExpectType.IsSame (_owrap.ItemType)) {
-			//	return $"{_val}.GetValue ()";
-			//} else {
-			//	string _type = ExpectType.GenerateCSharp (_indent);
-			//	if (ExpectType is AstType_OptionalWrap _owrap1 && Value.ExpectType.IsSame (_owrap1.ItemType)) {
-			//		return $"{_type}.FromValue ({_val})";
-			//	} else {
-			//		return $"({_type}) {_val}";
-			//	}
-			//}
-			return $"({ExpectType.GenerateCSharp (_indent)}) {Value.GenerateCSharp (_indent)}";
-		}
+		public override string GenerateCSharp (int _indent) => $"({ExpectType.GenerateCSharp (_indent)}) {Value.GenerateCSharp (_indent)}";
 
 		public override bool AllowAssign () => false;
 	}

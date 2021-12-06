@@ -50,18 +50,17 @@ namespace fac.ASTs.Exprs {
 			return TypeFuncs.GetCompatibleType (true, (from p in CaseCodes select p._expr.GuessType ()).ToArray ());
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var _temp_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
-			var _var_expr = new AstExprName_Variable { Token = Token, ExpectType = ExpectType, Var = _defvar_stmt };
 			var _switch_stmt = new AstStmt_Switch { Token = Token, Condition = Condition, CaseValues = CaseValues, CaseWhen = CaseWhen, CaseCodes = new List<IAstStmt> () };
 			foreach (var (_stmts1, _expr1) in CaseCodes) {
-				_stmts1.Add (new AstStmt_ExprWrap { Token = _expr1.Token, Expr = new AstExpr_Op2 { Token = _expr1.Token, Value1 = _var_expr, Value2 = _expr1, Operator = "=", ExpectType = ExpectType } });
+				_stmts1.Add (new AstStmt_ExprWrap { Token = _expr1.Token, Expr = new AstExpr_Op2 { Token = _expr1.Token, Value1 = _defvar_stmt.GetRef (), Value2 = _expr1, Operator = "=", ExpectType = ExpectType } });
 				_switch_stmt.CaseCodes.Add (_stmts1.Count == 1 ? _stmts1[0] : new AstStmt_HuaQuotWrap { Token = _expr1.Token, Stmts = _stmts1 });
 			}
 			var _stmts = new List<IAstStmt> { _defvar_stmt };
-			_stmts.AddRange (_switch_stmt.ExpandStmt ());
-			return (_stmts, _var_expr);
+			_stmts.AddRange (_switch_stmt.ExpandStmt (_cache_err));
+			return (_stmts, _defvar_stmt.GetRef ());
 		}
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");

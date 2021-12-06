@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -11,6 +12,12 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Stmts {
 	public class AstStmt_ExprWrap: IAstStmt {
 		public IAstExpr Expr { get; set; }
+
+
+
+		public static AstStmt_ExprWrap MakeAssign (IAstExprName _dest, IAstExpr _src) {
+			return new AstStmt_ExprWrap { Token = _src.Token, Expr = new AstExpr_Op2 { Token = _src.Token, Value1 = _dest, Value2 = _src, Operator = "=", ExpectType = _dest.ExpectType } };
+		}
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			if (Expr != null)
@@ -30,11 +37,13 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt () {
-			var (_stmts, _expr) = Expr.ExpandExpr ();
-			Expr = _expr;
-			_stmts.Add (this);
-			return _stmts;
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			return ExpandStmtHelper (_cache_err, (_check_cb) => {
+				var (_stmts, _expr) = Expr.ExpandExpr (_cache_err, _check_cb);
+				Expr = _expr;
+				_stmts.Add (this);
+				return _stmts;
+			});
 		}
 
 		public override string GenerateCSharp (int _indent) => $"{_indent.Indent ()}{Expr.GenerateCSharp (_indent)}";

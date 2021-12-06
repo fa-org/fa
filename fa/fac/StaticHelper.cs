@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using System;
@@ -59,18 +60,6 @@ namespace fac {
 			}
 		}
 
-		public static void AppendExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {
-			if (_exprs == null)
-				return;
-			foreach (var _expr in _exprs) {
-				var _ec = new ExprChecker (null);
-				var (_a, _b, _c) = _expr.GenerateCSharp (_indent, _ec.CheckFunc);
-				//_sb.Append (_a).AppendLine ($"{_indent.Indent ()}{_b};");
-				var (_d, _e) = _ec.GenerateCSharpPrefixSuffix (_indent, _expr.Token);
-				_sb.Append (_d).Append (_a).AppendLine ($"{_indent.Indent ()}{_b};").Append (_c).Append (_e);
-			}
-		}
-
 		public static void AppendStmts (this StringBuilder _sb, List<IAstStmt> _stmts, int _indent) {
 			if (_stmts == null)
 				return;
@@ -96,8 +85,8 @@ namespace fac {
 			}
 		}
 
-		public static List<IAstStmt> ExpandStmts (this List<IAstStmt> _stmts) {
-			return (from p in _stmts select p.ExpandStmt ()).CombileStmts ();
+		public static List<IAstStmt> ExpandStmts (this List<IAstStmt> _stmts, (IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			return (from p in _stmts select p.ExpandStmt (_cache_err)).CombileStmts ();
 		}
 	}
 }

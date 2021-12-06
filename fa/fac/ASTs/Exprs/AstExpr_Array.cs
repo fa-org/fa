@@ -49,19 +49,18 @@ namespace fac.ASTs.Exprs {
 			return new AstType_ArrayWrap { Token = Token, ItemType = _item_type };
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var _stmts = new List<IAstStmt> ();
 			var _var_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _var_id };
 			_stmts.Add (_defvar_stmt);
-			var _var_expr = new AstExprName_Variable { Token = Token, Var = _defvar_stmt, ExpectType = _defvar_stmt.DataType };
 			foreach (var _val in InitValues) {
-				var (_stmts1, _val1) = _val.ExpandExpr ();
+				var (_stmts1, _val1) = _val.ExpandExpr (_cache_err, _check_cb);
 				_stmts.AddRange (_stmts1);
-				_stmts1 = new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_AccessBuildIn.Array_Add (_var_expr, _val1) }.ExpandStmt ();
+				_stmts1 = new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_AccessBuildIn.Array_Add (_defvar_stmt.GetRef (), _val1) }.ExpandStmt (_cache_err);
 				_stmts.AddRange (_stmts1);
 			}
-			return (_stmts, _var_expr);
+			return (_stmts, _defvar_stmt.GetRef ());
 		}
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");

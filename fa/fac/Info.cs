@@ -155,7 +155,7 @@ namespace fac {
 					}
 				} else {
 					if (_item.Vars.ContainsKey (_name))
-						return new AstExprName_Variable { Token = _token, Var = _item.Vars[_name] };
+						return _item.Vars[_name].GetRef ();
 				}
 			}
 			return null;
@@ -201,18 +201,16 @@ namespace fac {
 			_sb.AppendLine ("    public string GetError () => err;");
 			_sb.AppendLine ("    public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
 			_sb.AppendLine ("    public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
-			_sb.AppendLine ("    public static T operator | (Optional<T> t1, T t2) => t1.HasValue () ? t1.GetValue () : t2; // operator ??");
-			_sb.AppendLine ("    public static Optional<T> operator | (Optional<T> t1, Optional<T> t2) => t1.HasValue () ? t1 : t2; // operator ??");
+			//_sb.AppendLine ("    public static T operator | (Optional<T> t1, T t2) => t1.HasValue () ? t1.GetValue () : t2; // operator ??");
+			//_sb.AppendLine ("    public static Optional<T> operator | (Optional<T> t1, Optional<T> t2) => t1.HasValue () ? t1 : t2; // operator ??");
 			// FIXME: 支持“?? 异常”用法，但传字符串不对，假如出现 string? 类型的 ?? 就尴尬了
 			_sb.AppendLine ("}");
 			_sb.AppendLine ("}");
 			_sb.AppendLine ();
 			_sb.AppendLine ();
 			_sb.AppendLine ();
-			foreach (var _program in Programs) {
-				var (_a, _b, _c) = _program.GenerateCSharp (0, null);
-				_sb.Append (_a).Append (_b).Append (_c);
-			}
+			foreach (var _program in Programs)
+				_sb.Append (_program.GenerateCSharp (0));
 			return _sb.ToString ();
 		}
 	}

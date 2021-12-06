@@ -12,7 +12,7 @@ namespace fac.ASTs {
 		List<AstClassFunc> ClassFuncs { get; }
 
 		void Compile ();
-		(string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb);
+		string GenerateCSharp (int _indent);
 
 		// 计算枚举类型所对应的附加变量的实际映射变量位置
 		public int GetRealAttachVarPos (int _enum_index) => -1;

@@ -103,8 +103,10 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+			if (Operator == "??") {
 
+			}
 		}
 
 		public override string GenerateCSharp (int _indent) {
@@ -114,7 +116,7 @@ namespace fac.ASTs.Exprs {
 			if (Operator == "??" && Value1 is not IAstExprName) {
 				var _temp_id = Common.GetTempId ();
 				var _val = new AstStmt_DefVariable { Token = Token, DataType = Value1.ExpectType, ExpectType = Value1.ExpectType, VarName = _temp_id, Expr = Value1 };
-				Value1 = new AstExprName_Variable { Token = Token, ExpectType = _val.DataType, Var = _val };
+				//Value1 = new AstExprName_Variable { Token = Token, ExpectType = _val.DataType, Var = _val }; _defvar_stmt.GetRef ()
 				(_a, _b, _c) = _val.GenerateCSharp (_indent, null);
 				(_d, _e, _f) = GenerateCSharp (_indent, _check_cb);
 				return ($"{_a}{_b}{_c}{_d}", _e, _f);

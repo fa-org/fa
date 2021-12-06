@@ -22,6 +22,6 @@ namespace fac.ASTs {
 				AttachType = IAstType.FromContext (_ctx.type ());
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) => throw new NotImplementedException ();
+		public override string GenerateCSharp (int _indent) => throw new NotImplementedException ();
 	}
 }

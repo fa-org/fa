@@ -1,4 +1,5 @@
 ﻿using fac.ASTs.Exprs;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -21,9 +22,11 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt () {
-			Stmts = (from p in Stmts select p.ExpandStmt ()).CombileStmts ();
-			return new List<IAstStmt> { this };
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			return ExpandStmtHelper (_cache_err, (_check_cb) => {
+				Stmts = Stmts.ExpandStmts (_cache_err);
+				return new List<IAstStmt> { this };
+			});
 		}
 
 		public override string GenerateCSharp (int _indent) {

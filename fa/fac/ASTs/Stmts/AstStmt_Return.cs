@@ -37,14 +37,16 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt () {
-			if (Expr == null)
-				return new List<IAstStmt> { this };
-			var _temp_defvar = new AstStmt_DefVariable { Token = Token, DataType = Expr.ExpectType, VarName = Common.GetTempId (), Expr = Expr };
-			var _stmts = _temp_defvar.ExpandStmt ();
-			Expr = new AstExprName_Variable { Token = Token, ExpectType = _temp_defvar.DataType, Var = _temp_defvar };
-			_stmts.Add (this);
-			return _stmts;
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			return ExpandStmtHelper (_cache_err, (_check_cb) => {
+				if (Expr == null || Expr.IsSimpleExpr)
+					return new List<IAstStmt> { this };
+				var _temp_defvar = new AstStmt_DefVariable { Token = Token, DataType = Expr.ExpectType, VarName = Common.GetTempId (), Expr = Expr };
+				var _stmts = _temp_defvar.ExpandStmt (_cache_err);
+				Expr = _temp_defvar.GetRef ();
+				_stmts.Add (this);
+				return _stmts;
+			});
 		}
 
 		public override string GenerateCSharp (int _indent) {

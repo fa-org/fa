@@ -43,12 +43,13 @@ namespace fac.ASTs {
 
 		public void ToAST () {
 			BodyCodes = TypeFuncs.GetFuncBodyCodes (Token, ReturnType, BodyRaw.expr (), BodyRaw.stmt ());
+#warning TODO 此处及类似此处位置需扩展代码（ExpandStmt）
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			Info.CurrentFunc = this;
 			var _sb = new StringBuilder ();
-			var (_a, _b, _c) = ReturnType.GenerateCSharp (_indent, null);
+			var _b = ReturnType.GenerateCSharp (_indent);
 			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()}{(Static ? " static" : "")} {_b} {Name} (");
 			foreach (var _arg in Arguments) {
 				//if (_arg._type is AstType_ArrayWrap _awrap && _awrap.Params)
@@ -56,14 +57,14 @@ namespace fac.ASTs {
 				if (_arg._type.Mut) {
 					_sb.Append ("ref ");
 				}
-				_sb.Append ($"{_arg._type.GenerateCSharp_Type ()} {_arg._name}, ");
+				_sb.Append ($"{_arg._type.GenerateCSharp (_indent)} {_arg._name}, ");
 			}
 			if (Arguments.Any ())
 				_sb.Remove (_sb.Length - 2, 2);
 			_sb.AppendLine (") {");
 			_sb.AppendStmts (BodyCodes, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return (_a, _sb.ToString (), _c);
+			return _sb.ToString ();
 		}
 	}
 }

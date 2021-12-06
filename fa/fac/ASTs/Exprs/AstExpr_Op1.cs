@@ -65,18 +65,12 @@ namespace fac.ASTs.Exprs {
 			throw new UnimplException (Token);
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
-			var (_stmts, _val) = Value.ExpandExpr ();
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
 			if ((!IsPrefix) && Operator == "?") {
 				// 新增代码：如果前者为空那么 return
 				// 返回 _val.GetValue ()
-				_stmts.Add (new AstStmt_If {
-					Token = Token,
-					Condition = AstExpr_AccessBuildIn.Optional_NotHasValue (_val),
-					IfTrueCodes = new List<IAstStmt> {
-						new AstStmt_Return { Token = _val.Token, Expr = AstExpr_AccessBuildIn.Optional_FromError (Info.CurrentReturnType (), AstExpr_AccessBuildIn.Optional_GetError (_val)) }
-					},
-				});
+				_check_cb (AstExpr_AccessBuildIn.Optional_NotHasValue (_val), AstExpr_AccessBuildIn.Optional_GetError (_val));
 				return (_stmts, AstExpr_AccessBuildIn.Optional_GetValue (_val));
 			} else {
 				// 直接访问
@@ -86,6 +80,8 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override string GenerateCSharp (int _indent) {
+			if ((!IsPrefix) && Operator == "?")
+				throw new Exception ("不应执行此处代码");
 			var _b = Value.GenerateCSharp (_indent);
 			return IsPrefix ? $"{Operator}{_b}" : $"{_b}{Operator}";
 		}

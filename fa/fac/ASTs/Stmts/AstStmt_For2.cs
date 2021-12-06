@@ -31,12 +31,14 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt () {
-			var (_stmts, _expr) = ListContainer.ExpandExpr ();
-			ListContainer = _expr;
-			BodyCodes = (from p in BodyCodes select p.ExpandStmt ()).CombileStmts ();
-			_stmts.Add (this);
-			return _stmts;
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			return ExpandStmtHelper (_cache_err, (_check_cb) => {
+				var (_stmts, _expr) = ListContainer.ExpandExpr (_cache_err, _check_cb);
+				ListContainer = _expr;
+				BodyCodes = BodyCodes.ExpandStmts (_cache_err);
+				_stmts.Add (this);
+				return _stmts;
+			});
 		}
 
 		public override string GenerateCSharp (int _indent) {

@@ -55,13 +55,15 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt () {
-			var (_stmts, _expr) = Condition.ExpandExpr ();
-			Condition = _expr;
-			IfTrueCodes = (from p in IfTrueCodes select p.ExpandStmt ()).CombileStmts ();
-			IfFalseCodes = (from p in IfFalseCodes select p.ExpandStmt ()).CombileStmts ();
-			_stmts.Add (this);
-			return _stmts;
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			return ExpandStmtHelper (_cache_err, (_check_cb) => {
+				var (_stmts, _expr) = Condition.ExpandExpr (_cache_err, _check_cb);
+				Condition = _expr;
+				IfTrueCodes = IfTrueCodes.ExpandStmts (_cache_err);
+				IfFalseCodes = IfFalseCodes.ExpandStmts (_cache_err);
+				_stmts.Add (this);
+				return _stmts;
+			});
 		}
 
 		public override string GenerateCSharp (int _indent) {

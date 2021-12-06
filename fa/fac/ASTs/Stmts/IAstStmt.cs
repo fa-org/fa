@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public abstract class IAstStmt: IAstExpr {
-		public abstract List<IAstStmt> ExpandStmt ();
-
 		public static IAstStmt FromExpr (FaParser.ExprContext _ctx, bool _return) {
 			if (_return) {
 				return new AstStmt_Return { Token = _ctx?.Start ?? null, Expr = FromContext (_ctx) };
@@ -91,6 +89,32 @@ namespace fac.ASTs.Stmts {
 		public static List<IAstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select FromStmt (p)).CombileStmts ();
 		public override IAstType GuessType () => throw new Exception ("不应执行此处代码");
 		public override bool AllowAssign () => throw new Exception ("不应执行此处代码");
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) => throw new Exception ("不应执行此处代码");
+
+		/// <summary>
+		/// 分解语句
+		/// </summary>
+		/// <param name="_cache_err">用于缓存错误的变量</param>
+		/// <returns></returns>
+		public abstract List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err);
+
+		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) {
+			var _checks = new List<(IAstExpr, IAstExpr)> ();
+			var _stmts = _callback ((_cond, _err) => _checks.Add ((_cond, _err)));
+			//
+			var _stmts2 = new List<IAstStmt> ();
+			foreach (var (_cond, _err) in _checks) {
+				_stmts2.Add (new AstStmt_If {
+					Token = _cond.Token,
+					Condition = _cond,
+					IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_cache_err._var, AstExpr_AccessBuildIn.Optional_FromError (_cache_err._var.ExpectType, _err)),
+						_cache_err._pos.GetRef (),
+					},
+				});
+			}
+			_stmts2.AddRange (_stmts);
+			return _stmts2;
+		}
 	}
 }

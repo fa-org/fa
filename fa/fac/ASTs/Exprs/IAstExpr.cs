@@ -31,13 +31,18 @@ namespace fac.ASTs.Exprs {
 		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);
 		public abstract IAstType GuessType ();
 		public abstract bool AllowAssign ();
-		public abstract (List<IAstStmt>, IAstExpr) ExpandExpr ();
+
+		/// <summary>
+		/// 分解表达式
+		/// </summary>
+		/// <param name="_cache_err">用于缓存错误的变量</param>
+		/// <param name="_check_cb">前置?运算回调，当函数调用或数组随机访问参数带?运算符时，将可能为空的判断通过 _check_cb 回调传递出来</param>
+		/// <returns>执行此表达式前需执行的前置语句、简化后的表达式</returns>
+		public abstract (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb);
 
 
 
-		public bool IsSimpleExpr {
-			get => this is IAstExprName || this is AstExpr_AccessBuildIn || this is AstExpr_BaseId || this is AstExpr_BaseValue;
-		}
+		public bool IsSimpleExpr => this is IAstExprName || this is AstExpr_AccessBuildIn || this is AstExpr_BaseId || this is AstExpr_BaseValue;
 
 		public static IAstExpr FromContext (FaParser.ExprContext _ctx) {
 			if (_ctx == null)

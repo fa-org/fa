@@ -108,7 +108,7 @@ namespace fac.ASTs {
 			//}
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			Info.CurrentClass = this;
 			Info.CurrentFuncVariables = null;
 			//
@@ -118,16 +118,12 @@ namespace fac.ASTs {
 				_sb.Append ('<').Append (string.Join (", ", from p in Variants select p.Name)).Append ('>');
 			}
 			_sb.AppendLine ($" {{");
-			foreach (var _var in ClassVars) {
-				var (_a, _b, _c) = _var.GenerateCSharp (_indent + 1, null);
-				_sb.Append (_a).Append (_b).Append (_c);
-			}
-			foreach (var _func in ClassFuncs) {
-				var (_a, _b, _c) = _func.GenerateCSharp (_indent + 1, null);
-				_sb.Append (_a).Append (_b).Append (_c);
-			}
+			foreach (var _var in ClassVars)
+				_sb.Append (_var.GenerateCSharp (_indent + 1));
+			foreach (var _func in ClassFuncs)
+				_sb.Append (_func.GenerateCSharp (_indent + 1));
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
-			return ("", _sb.ToString (), "");
+			return _sb.ToString ();
 		}
 	}
 }

@@ -62,7 +62,7 @@ namespace fac.ASTs {
 				_class.Compile ();
 		}
 
-		public override (string, string, string) GenerateCSharp (int _indent, Action<string, string> _check_cb) {
+		public override string GenerateCSharp (int _indent) {
 			Info.CurrentFile = CurrentFile;
 			Info.CurrentSourceCode = CurrentSourceCode;
 			Info.CurrentNamespace = CurrentNamespace;
@@ -71,15 +71,13 @@ namespace fac.ASTs {
 			Log.Mark (LogMark.Build);
 			//
 			if (CurrentClasses.Count == 0)
-				return ("", "", "");
+				return "";
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"namespace {Info.CurrentNamespace} {{");
-			foreach (var _class in CurrentClasses) {
-				var (_a, _b, _c) = _class.GenerateCSharp (_indent, null);
-				_sb.Append (_a).Append (_b).Append  (_c);
-			}
+			foreach (var _class in CurrentClasses)
+				_sb.Append (_class.GenerateCSharp (_indent));
 			_sb.AppendLine ($"}}");
-			return ("", _sb.ToString (), "");
+			return _sb.ToString ();
 		}
 	}
 }

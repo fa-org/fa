@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
@@ -32,10 +33,10 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => IAstType.FromName ("bool");
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var _stmts = new List<IAstStmt> ();
 			for (int i = 0; i < Values.Count; ++i) {
-				var (_stmts1, _val1) = Values[i].ExpandExpr ();
+				var (_stmts1, _val1) = Values[i].ExpandExpr (_cache_err, _check_cb);
 				_stmts.AddRange (_stmts1);
 				Values[i] = _val1;
 				if (i > 0) {

@@ -44,16 +44,15 @@ namespace fac.ASTs.Exprs {
 			return TypeFuncs.GetCompatibleType (true, IfTrue.GuessType (), IfFalse.GuessType ());
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var _temp_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
-			var _temp_expr = new AstExprName_Variable { Token = Token, ExpectType = ExpectType, Var = _defvar_stmt };
 			var _stmt_if = new AstStmt_If { Token = Token, Condition = Condition, IfTrueCodes = IfTrueCodes, IfFalseCodes = IfFalseCodes };
-			_stmt_if.IfTrueCodes.Add (new AstStmt_ExprWrap { Token = IfTrue.Token, Expr = new AstExpr_Op2 { Token = IfTrue.Token, Value1 = _temp_expr, Value2 = IfTrue, Operator = "=", ExpectType = ExpectType } });
-			_stmt_if.IfFalseCodes.Add (new AstStmt_ExprWrap { Token = IfFalse.Token, Expr = new AstExpr_Op2 { Token = IfFalse.Token, Value1 = _temp_expr, Value2 = IfFalse, Operator = "=", ExpectType = ExpectType } });
-			var _stmts = _stmt_if.ExpandStmt ();
+			_stmt_if.IfTrueCodes.Add (new AstStmt_ExprWrap { Token = IfTrue.Token, Expr = new AstExpr_Op2 { Token = IfTrue.Token, Value1 = _defvar_stmt.GetRef (), Value2 = IfTrue, Operator = "=", ExpectType = ExpectType } });
+			_stmt_if.IfFalseCodes.Add (new AstStmt_ExprWrap { Token = IfFalse.Token, Expr = new AstExpr_Op2 { Token = IfFalse.Token, Value1 = _defvar_stmt.GetRef (), Value2 = IfFalse, Operator = "=", ExpectType = ExpectType } });
+			var _stmts = _stmt_if.ExpandStmt (_cache_err);
 			_stmts.Insert (0, _defvar_stmt);
-			return (_stmts, _temp_expr);
+			return (_stmts, _defvar_stmt.GetRef ());
 		}
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");

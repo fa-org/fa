@@ -119,7 +119,7 @@ namespace fac.AntlrTools {
 					return _nameexpr;
 			} else if (_expr is AstStmt_Return _retstmt) {
 				if (Info.CurrentReturnType ().ToString () == "void?" && _retstmt.Expr == null) {
-					_retstmt.Expr = AstExprTypeCast.ForceMake (new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName ("int"), Value = "0" }, IAstType.FromName ("int?"));
+					_retstmt.Expr = AstExpr_AccessBuildIn.Optional_FromValue (IAstExpr.FromValue ("int", "0"));
 				}
 			}
 			return _expr;
@@ -170,7 +170,7 @@ namespace fac.AntlrTools {
 					Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
 						return _typeexpr switch {
 							AstType_Class _classexpr => _access_func (_obj, _classexpr.Class),
-							AstType_ArrayWrap _arrexpr when _access_name == "Length" => AstExpr_AccessBuildIn.Array_Length (_typeexpr.Token, _obj),
+							AstType_ArrayWrap _arrexpr when _access_name == "Length" => AstExpr_AccessBuildIn.Array_Length (_obj),
 							_ => throw new UnimplException (_typeexpr.Token),
 						};
 					};

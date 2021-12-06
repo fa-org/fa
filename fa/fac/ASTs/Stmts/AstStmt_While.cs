@@ -1,5 +1,6 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -39,17 +40,19 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt () {
-			var (_stmts, _expr) = Condition.ExpandExpr ();
-			Condition = _expr;
-			Contents = Contents.ExpandStmts ();
-			Contents.AddRange (_stmts);
-			if (IsDoWhile) {
-				return new List<IAstStmt> { this };
-			} else {
-				_stmts.Add (this);
-				return _stmts;
-			}
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			return ExpandStmtHelper (_cache_err, (_check_cb) => {
+				var (_stmts, _expr) = Condition.ExpandExpr (_cache_err, _check_cb);
+				Condition = _expr;
+				Contents = Contents.ExpandStmts (_cache_err);
+				Contents.AddRange (_stmts);
+				if (IsDoWhile) {
+					return new List<IAstStmt> { this };
+				} else {
+					_stmts.Add (this);
+					return _stmts;
+				}
+			});
 		}
 
 		public override string GenerateCSharp (int _indent) {

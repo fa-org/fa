@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using System;
@@ -46,12 +47,12 @@ namespace fac.ASTs.Exprs {
 			return ExpectType;
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr () {
-			var (_stmts, _value) = Value?.ExpandExpr () ?? (new List<IAstStmt> (), null);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+			var (_stmts, _value) = Value?.ExpandExpr (_cache_err, _check_cb) ?? (new List<IAstStmt> (), null);
 			Value = _value;
 			if (AttachArgs != null) {
 				for (int i = 0; i < AttachArgs.Count; ++i) {
-					var (_stmts1, _value1) = AttachArgs[i].ExpandExpr ();
+					var (_stmts1, _value1) = AttachArgs[i].ExpandExpr (_cache_err, _check_cb);
 					_stmts.AddRange (_stmts1);
 					AttachArgs[i] = _value1;
 				}
