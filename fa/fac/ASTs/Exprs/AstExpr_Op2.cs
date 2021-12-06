@@ -17,6 +17,13 @@ namespace fac.ASTs.Exprs {
 
 
 
+		public static AstExpr_Op2 MakeOp2 (IAstExpr _val1, string _op, IAstExpr _val2, IAstType _expect_type) {
+			return new AstExpr_Op2 { Token = _val2.Token, Value1 = _val1, Value2 = _val2, Operator = _op, ExpectType = _expect_type };
+		}
+		public static AstExpr_Op2 MakeCondition (IAstExpr _val1, string _op, IAstExpr _val2) {
+			return MakeOp2 (_val1, _op, _val2, IAstType.FromName ("bool"));
+		}
+
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			Value1 = _cb (Value1, _deep, _group);
 			Value2 = _cb (Value2, _deep, _group);

@@ -282,5 +282,24 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public static IAstExpr FromValue (string _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName (_data_type), Value = _value };
+
+		//protected (List<IAstStmt>, IAstExpr) ExpandExprHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, (List<IAstStmt>, IAstExpr)> _callback) {
+		//	var _checks = new List<(IAstExpr, IAstExpr)> ();
+		//	var (_stmts, _expr) = _callback ((_cond, _err) => _checks.Add ((_cond, _err)));
+		//	//
+		//	var _stmts2 = new List<IAstStmt> ();
+		//	foreach (var (_cond, _err) in _checks) {
+		//		_stmts2.Add (new AstStmt_If {
+		//			Token = _cond.Token,
+		//			Condition = _cond,
+		//			IfTrueCodes = new List<IAstStmt> {
+		//				AstStmt_ExprWrap.MakeAssign (_cache_err._var, AstExpr_AccessBuildIn.Optional_FromError (_cache_err._var.ExpectType, _err)),
+		//				_cache_err._pos.GetRef (),
+		//			},
+		//		});
+		//	}
+		//	_stmts2.AddRange (_stmts);
+		//	return (_stmts2, _expr);
+		//}
 	}
 }

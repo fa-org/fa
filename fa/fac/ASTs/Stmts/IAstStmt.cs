@@ -98,6 +98,12 @@ namespace fac.ASTs.Stmts {
 		/// <returns></returns>
 		public abstract List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err);
 
+		/// <summary>
+		/// 分解语句辅助类，此类在函数最外层辅助return空值；在if、switch等表达式中辅助内部语句向外赋空值
+		/// </summary>
+		/// <param name="_cache_err"></param>
+		/// <param name="_callback"></param>
+		/// <returns></returns>
 		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) {
 			var _checks = new List<(IAstExpr, IAstExpr)> ();
 			var _stmts = _callback ((_cond, _err) => _checks.Add ((_cond, _err)));

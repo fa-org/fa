@@ -99,7 +99,14 @@ namespace fac.ASTs.Types {
 			return _ret;
 		}
 
-		public static IAstType FromName (string _name) => Common.ParseCode<IAstType> (_name);
+		public static IAstType FromName (string _name) {
+			if (sTypeNames.ContainsKey (_name))
+				return sTypeNames[_name];
+			var _type = Common.ParseCode<IAstType> (_name);
+			sTypeNames.Add (_name, _type);
+			return _type;
+		}
+		private static Dictionary<string, IAstType> sTypeNames = new Dictionary<string, IAstType> ();
 
 		public static List<IAstType> FromContexts (FaParser.TypeContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
 

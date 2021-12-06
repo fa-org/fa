@@ -94,43 +94,58 @@ namespace fac.ASTs.Exprs {
 				if (Arguments.Count != 1)
 					throw new CodeException (Token, "随机访问操作仅支持一个参数");
 				/* 生成逻辑： val [n]
-				 * var _tmpval000;
+				 * var _item_defvar;
 				 * var idx = n;
 				 * if (idx < 0)
 				 *     idx += val.Length;
 				 * if (idx < 0 || idx >= val.Length) {
-				 *     _tmpval000 = err 数组随机访问超限;
+				 *     _item_defvar = err 数组随机访问超限;
 				 * } else {
-				 *     _tmpval000 = val [idx];
+				 *     _item_defvar = val [idx];
 				 * }
-				 * _tmpval000
+				 * _item_defvar
 				 */
-				// var _tmpval000;
+
+
+				// var _item_defvar;
 #warning TODO: 此处不用传递参数，主要以生成逻辑为主
-				var _item_id = Common.GetTempId ();
-				var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _item_id, Expr = null };
+				var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, Expr = null };
 				_stmts.Add (_item_defvar);
 
-				// var idx = n;
-				var _index_id = Common.GetTempId ();
-				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), VarName = _index_id, Expr = AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int")) };
-				_stmts.AddRange (_index_defvar.ExpandStmt ());
+				// 给 _item_defvar 赋完值后的处理逻辑
+				// TODO: 最后添加
+				var _err_stmt = new AstStmt_Label { Token = null };
+				var _cache_error = (_var: _item_defvar.GetRef (), _pos: _err_stmt);
+
+				// var idx;
+				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int") };
+				_stmts.Add (_index_defvar);
+
+				// 赋值
+				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_index_defvar.GetRef (), AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int"))).ExpandStmt (_cache_error));
 
 				// if (idx < 0)
 				_stmts.Add (new AstStmt_If {
 					Token = Token,
-					Condition = new AstExpr_Op2 { Token = Token, Value1 = Arguments[0], Value2 = IAstExpr.FromValue ("int", "0"), Operator = "<", ExpectType = IAstType.FromName ("bool") },
+					Condition = AstExpr_Op2.MakeCondition (Arguments[0], "<", IAstExpr.FromValue ("int", "0")),
 					IfTrueCodes = new List<IAstStmt> {
 						// idx += val.Length;
-						new ast
+						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_AccessBuildIn.Array_Length (this), IAstType.FromName ("int")),
 					},
 				});
+
 				//if (idx < 0 || idx >= val.Length) {
 				//	_tmpval000 = err 数组随机访问超限;
 				//} else {
 				//	_tmpval000 = val[idx];
 				//}
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op2.MakeCondition (
+						),
+				});
 			} else {
+				// TODO
 				return (_stmts, this);
 			}
 		}
