@@ -132,5 +132,6 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeVar2 (FaParser.TypeVar2Context context) => throw new NotImplementedException ();
 		public IAst VisitTypeVar2List (FaParser.TypeVar2ListContext context) => throw new NotImplementedException ();
 		public IAst VisitLambdaExpr (FaParser.LambdaExprContext context) => throw new NotImplementedException ();
+		public IAst VisitQusQusOp (FaParser.QusQusOpContext context) => throw new NotImplementedException ();
 	}
 }

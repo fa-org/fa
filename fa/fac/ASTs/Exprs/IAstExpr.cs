@@ -281,7 +281,8 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public static IAstExpr FromValue (string _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = IAstType.FromName (_data_type), Value = _value };
+		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);
+		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
 
 		//protected (List<IAstStmt>, IAstExpr) ExpandExprHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, (List<IAstStmt>, IAstExpr)> _callback) {
 		//	var _checks = new List<(IAstExpr, IAstExpr)> ();

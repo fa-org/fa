@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public class AstStmt_DefVariable: IAstStmt {
-		public IAstType DataType { get; set; }
+		public IAstType DataType { init; get; }
 		public string VarName { init; get; } = Common.GetTempId ();
-		public IAstExpr Expr { get; set; }
+		public IAstExpr Expr { get; set; } = null;
 
 
 
@@ -47,26 +47,24 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-#warning TODO: 此处也许不用传递
-			return ExpandStmtHelper (_cache_err, (_check_cb) => {
-				var _stmts = new List<IAstStmt> { this };
-				if (Expr != null && (!Expr.IsSimpleExpr)) {
-					var (_stmts2, _expr) = Expr.ExpandExpr (_cache_err, _check_cb);
-					Expr = null;
-					_stmts.AddRange (_stmts2);
-					_stmts.Add (new AstStmt_ExprWrap {
-						Token = Token,
-						Expr = new AstExpr_Op2 {
-							Token = Token,
-							Value1 = GetRef (),
-							Value2 = _expr,
-							Operator = "=",
-							ExpectType = ExpectType,
-						},
-					});
-				}
+			var _stmts = new List<IAstStmt> { this };
+			if (Expr == null || Expr.IsSimpleExpr)
 				return _stmts;
-			});
+
+			AstStmt_Label _label = null;
+			if (DataType is AstType_OptionalWrap) {
+				_label = new AstStmt_Label { };
+				_cache_err = (_var: GetRef (), _pos: _label);
+			}
+			_stmts.AddRange (ExpandStmtHelper (_cache_err, (_check_cb) => {
+				var (_stmts2, _expr) = Expr.ExpandExpr (_cache_err, _check_cb);
+				Expr = null;
+				_stmts2.Add (AstStmt_ExprWrap.MakeAssign (GetRef (), _expr));
+				return _stmts2;
+			}));
+			if (_label != null)
+				_stmts.Add (_label);
+			return _stmts;
 		}
 
 		public override string GenerateCSharp (int _indent) {

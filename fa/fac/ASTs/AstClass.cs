@@ -92,20 +92,9 @@ namespace fac.ASTs {
 					}
 				}
 			}
-			//foreach (var _var in ClassVars) {
-			//	Info.CurrentFunc = null;
-			//	Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-			//	Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
-			//	if (_var.DefaultValue != null)
-			//		_var.DefaultValue = _var.DefaultValue.TraversalCalcType (_var.DataType);
-			//}
-			//foreach (var _func in ClassFuncs) {
-			//	Info.CurrentFunc = _func;
-			//	Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-			//	Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = -1, ClassFunc = Info.CurrentFunc });
-			//	Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
-			//	_func.BodyCodes.TraversalCalcType ();
-			//}
+
+			foreach (var _func in ClassFuncs)
+				_func.ExpandFunc ();
 		}
 
 		public override string GenerateCSharp (int _indent) {

@@ -42,8 +42,13 @@ namespace fac.ASTs {
 		}
 
 		public void ToAST () {
+			Info.CurrentFunc = this;
 			BodyCodes = TypeFuncs.GetFuncBodyCodes (Token, ReturnType, BodyRaw.expr (), BodyRaw.stmt ());
-#warning TODO 此处及类似此处位置需扩展代码（ExpandStmt）
+		}
+
+		public void ExpandFunc () {
+			Info.CurrentFunc = this;
+			BodyCodes = TypeFuncs.ExpandFuncCodes (ReturnType, BodyCodes);
 		}
 
 		public override string GenerateCSharp (int _indent) {

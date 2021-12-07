@@ -70,7 +70,7 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
-			BodyCodes = BodyCodes.ExpandStmts (_cache_err);
+			BodyCodes = TypeFuncs.ExpandFuncCodes (ReturnType, BodyCodes);
 			return (new List<IAstStmt> (), this);
 		}
 

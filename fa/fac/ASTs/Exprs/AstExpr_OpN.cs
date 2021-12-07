@@ -85,12 +85,8 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
 			Value = _val;
-			for (int i = 0; i < Arguments.Count; ++i) {
-				var (_stmts1, _val1) = Arguments[i].ExpandExpr (_cache_err, _check_cb);
-				_stmts.AddRange (_stmts1);
-				Arguments[i] = _val1;
-			}
 			if (Operator == "[]") {
+				// 随机访问
 				if (Arguments.Count != 1)
 					throw new CodeException (Token, "随机访问操作仅支持一个参数");
 				/* 生成逻辑： val [n]
@@ -106,170 +102,107 @@ namespace fac.ASTs.Exprs {
 				 * _item_defvar
 				 */
 
-
 				// var _item_defvar;
-#warning TODO: 此处不用传递参数，主要以生成逻辑为主
 				var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, Expr = null };
 				_stmts.Add (_item_defvar);
 
 				// 给 _item_defvar 赋完值后的处理逻辑
-				// TODO: 最后添加
 				var _err_stmt = new AstStmt_Label { Token = null };
 				var _cache_error = (_var: _item_defvar.GetRef (), _pos: _err_stmt);
 
 				// var idx;
-				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int") };
-				_stmts.Add (_index_defvar);
-
-				// 赋值
-				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_index_defvar.GetRef (), AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int"))).ExpandStmt (_cache_error));
+				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), Expr = AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int")) };
+				_stmts.AddRange (_index_defvar.ExpandStmt (_cache_error));
 
 				// if (idx < 0)
+				//     idx += val.Length;
+				var (_stmts1, _val1) = Arguments[0].ExpandExpr (_cache_err, _check_cb);
+				_stmts.AddRange (_stmts1);
 				_stmts.Add (new AstStmt_If {
 					Token = Token,
-					Condition = AstExpr_Op2.MakeCondition (Arguments[0], "<", IAstExpr.FromValue ("int", "0")),
+					Condition = AstExpr_Op2.MakeCondition (_val1, "<", IAstExpr.FromValue ("int", "0")),
 					IfTrueCodes = new List<IAstStmt> {
 						// idx += val.Length;
-						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_AccessBuildIn.Array_Length (this), IAstType.FromName ("int")),
+						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_AccessBuildIn.Array_Length (Value), IAstType.FromName ("int")),
 					},
 				});
 
-				//if (idx < 0 || idx >= val.Length) {
-				//	_tmpval000 = err 数组随机访问超限;
-				//} else {
-				//	_tmpval000 = val[idx];
-				//}
+				// if (idx < 0 || idx >= val.Length) {
+				//     _item_defvar = err 数组随机访问下标超过数组大小;
+				// } else {
+				//     _item_defvar = val[idx];
+				// }
 				_stmts.Add (new AstStmt_If {
 					Token = Token,
 					Condition = AstExpr_Op2.MakeCondition (
-						),
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
+						"||",
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_AccessBuildIn.Array_Length (Value))
+					),
+					IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_item_defvar.DataType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
+					},
+					IfFalseCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromValue (AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef ()))),
+					},
 				});
+
+				// 下标错误部分
+				_stmts.Add (_err_stmt);
+				return (_stmts, _item_defvar.GetRef ());
 			} else {
-				// TODO
+				// 
+				var (_stmts1, _val1) = Value.ExpandExpr (_cache_err, _check_cb);
+				_stmts.AddRange (_stmts1);
+				Value = _val;
+				for (int i = 0; i < Arguments.Count; ++i) {
+					(_stmts1, _val1) = Arguments[i].ExpandExpr (_cache_err, _check_cb);
+					_stmts.AddRange (_stmts1);
+					Arguments[i] = _val1;
+				}
+
+				var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;
+				if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
+					_arg_types = _arg_types.Skip (1).ToList ();
+				// 如果最后一个参数为params列表
+				if (_arg_types.Count > 0 && _arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params && Value is not AstExprName_BuildIn) {
+					bool _process_last = _arg_types.Count == Arguments.Count && Arguments[^1].ExpectType.IsSame (_awrap);
+					if (!_process_last) {
+						// 用户未处理
+						(_stmts1, _val1) = new AstExpr_Array { Token = Arguments[_arg_types.Count - 1].Token, ItemDataType = _awrap.ItemType, InitValues = Arguments.Skip (_arg_types.Count - 1).ToList (), ExpectType = _awrap }.ExpandExpr (_cache_err, _check_cb);
+						Arguments.RemoveRange (_arg_types.Count - 1, Arguments.Count - (_arg_types.Count - 1));
+						_stmts.AddRange (_stmts1);
+						Arguments.Add (_val1);
+					}
+				}
 				return (_stmts, this);
 			}
 		}
 
 		public override string GenerateCSharp (int _indent) {
-			var _sb = new StringBuilder ();
-			if (Operator == "[]") {
-				var _stmts = new List<IAstStmt> ();
-				if (Value.ExpectType is AstType_ArrayWrap && Arguments.Count == 1 && Arguments[0].ExpectType is AstType_Integer && _GenCSharpLevel == _GenLevel.NeedVarWrap) {
-					// TODO: 生成新的expr对象，_Judge设置为false
-					/* val [3+4+6]
-					 * int a = 3+4+6;
-					 * if (a < 0)
-					 *     a += val.Length;
-					 * if (a < 0)
-					 *     // check_cb
-					 * if (a >= val.Length)
-					 *     // check_cb
-					 * val [a]
-					 */
-					var _item_id = Common.GetTempId ();
-					var _item_type = new AstType_OptionalWrap { Token = Token, ItemType = Arguments[0].ExpectType };
-					var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = _item_type, VarName = _item_id, Expr = AstExprTypeCast.Make (this, _item_type) };
-					_stmts.Add (_item_defvar);
-					//
-					_GenCSharpLevel = _GenLevel.NeedCompare;
-					_psb.AppendStmts (_stmts, _indent);
-					(_a, _b, _c) = _item_defvar.GetRef ().GenerateCSharp (_indent, _check_cb);
-					_psb.Append (_a);
-					_sb.Append (_b);
-					_ssb.Append (_c);
-				} else if (_GenCSharpLevel == _GenLevel.NeedCompare) {
-					var _index_id = Common.GetTempId ();
-					var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = Arguments[0].ExpectType, VarName = _index_id, Expr = Arguments[0] };
-					var _length = new AstExpr_AccessBuildIn { Token = Token, Value = Value, AccessType = AccessBuildInType.ARR_Length, ExpectType = IAstType.FromName ("int") };
-					_stmts.Add (_index_defvar);
-					_stmts.Add (new AstStmt_If {
-						Token = Token,
-						Condition = new AstExpr_Op2 { Token = Token, Value1 = _index_defvar.GetRef (), Value2 = IAstExpr.FromValue ("int", "0"), Operator = "<", ExpectType = IAstType.FromName ("bool") },
-						IfTrueCodes = new List<IAstStmt> { new AstStmt_ExprWrap { Token = Token, Expr = new AstExpr_Op2 { Token = Token, Value1 = _index_defvar.GetRef (), Value2 = _length, Operator = "+=", ExpectType = _index_defvar.GetRef ().ExpectType } } },
-						IfFalseCodes = new List<IAstStmt> { },
-					});
-					_psb.AppendStmts (_stmts, _indent);
-					_check_cb ($"{_index_id} < 0 || {_index_id} >= {_length.GenerateCSharp (_indent, _check_cb).Item2}", "\"数组随机访问范围超限\"");
-					_psb.Append (_a);
-					_sb.Append ($"{_b} [{_index_id}]");
-					_ssb.Append (_c);
-				} else {
-					(_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
-					_psb.Append (_a);
-					_sb.Append ($"{_b} [");
-					var _items = (from p in Arguments select p.GenerateCSharp (_indent, _check_cb)).ToList ();
-					foreach (var _item in from p in _items select p.Item1)
-						_psb.Append (_item);
-					foreach (var _item in from p in _items select p.Item2)
-						_sb.Append ($"{_item}, ");
-					foreach (var _item in (from p in _items select p.Item3).Reverse ())
-						_ssb.Append (_item);
-					_sb.Remove (_sb.Length - 2, 2);
-					_sb.Append ("]");
-					_ssb.Append (_c);
-				}
-				return (_psb.ToString (), _sb.ToString (), _ssb.ToString ());
-			}
+			if (Operator != "()")
+				throw new Exception ("不应执行此处代码");
 
+			var _sb = new StringBuilder ();
 			var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;
 			if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
 				_arg_types = _arg_types.Skip (1).ToList ();
-			(_a, _b, _c) = Value.GenerateCSharp (_indent, _check_cb);
-			_psb.Append (_a);
-			_ssb.Append (_c);
-			_sb.Append ($"{_b} {Operator[0]}");
-			// 如果最后一个参数为params列表
-			if (_arg_types.Count > 0 && _arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params && Value is not AstExprName_BuildIn) {
-				bool _process_last = false;
-				for (int i = 0; i < _arg_types.Count; ++i) {
-					if (i == _arg_types.Count - 1) {
-						if (!Arguments[^1].ExpectType.IsSame (_awrap))
-							break;
-						// 用户传了数组的情况
-						_process_last = true;
-					}
-					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-					_psb.Append (_a);
-					_ssb.Append (_c);
-					if (_arg_types[i].Mut)
-						_sb.Append ($"ref ");
-					_sb.Append ($"{_b}, ");
-				}
-				if (!_process_last) {
-					// 用户没传数组，手动拼接剩余项
-					var _tmp_var_name = Common.GetTempId ();
-					_psb.AppendLine ($"{_indent.Indent ()}var {_tmp_var_name} = new List<{_awrap.ItemType.GenerateCSharp_Type ()}> ();");
-					StringBuilder _psb1 = new StringBuilder (), _psb2 = new StringBuilder ();
-					for (int i = _arg_types.Count - 1; i < Arguments.Count; ++i) {
-						(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-						_psb.Append (_a);
-						_psb1.AppendLine ($"{_indent.Indent ()}{_tmp_var_name}.Add ({_b});");
-						_psb2.Append (_c);
-					}
-					_psb.Append (_psb1).Append (_psb2);
-					_sb.Append ($"{_tmp_var_name}, ");
-				}
-			} else {
-				for (int i = 0; i < Arguments.Count; ++i) {
-					(_a, _b, _c) = Arguments[i].GenerateCSharp (_indent, _check_cb);
-					_psb.Append (_a);
-					_ssb.Append (_c);
-					if (_arg_types[i].Mut)
-						_sb.Append ($"ref ");
-					_sb.Append ($"{_b}, ");
-				}
+			var _b = Value.GenerateCSharp (_indent);
+			_sb.Append ($"{_b} (");
+			for (int i = 0; i < Arguments.Count; ++i) {
+				_b = Arguments[i].GenerateCSharp (_indent);
+				if (_arg_types[i].Mut)
+					_sb.Append ($"ref ");
+				_sb.Append ($"{_b}, ");
 			}
 			if (Value is AstExprName_BuildIn _biexpr && _biexpr.Name.EndsWith ("AllText"))
 				_sb.Append ($"Encoding.UTF8, ");
 			if (Arguments.Any ())
 				_sb.Remove (_sb.Length - 2, 2);
 			_sb.Append (Operator[1]);
-			return (_psb.ToString (), _sb.ToString (), _ssb.ToString ());
+			return _sb.ToString ();
 		}
 
 		public override bool AllowAssign () => Operator == "[]" ? Value.AllowAssign () : false;
-
-		private _GenLevel _GenCSharpLevel = _GenLevel.NeedVarWrap;
 	}
-	enum _GenLevel { NeedVarWrap, NeedCompare, Direct }
 }

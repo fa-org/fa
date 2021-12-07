@@ -94,7 +94,7 @@ namespace fac.ASTs.Exprs {
 			if (sCompareOp2s.Contains (Operator) || sLogicOp2s.Contains (Operator)) {
 				return IAstType.FromName ("bool");
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
-				bool _opt = Operator == "/" && Info.CurrentFunc.ReturnType is not AstType_OptionalWrap;
+				bool _opt = Operator == "/" && Info.CurrentReturnType () is not AstType_OptionalWrap;
 				var _type = TypeFuncs.GetCompatibleType (true, Value1.GuessType (), Value2.GuessType ());
 				if (_opt)
 					_type = _type is AstType_OptionalWrap ? _type : new AstType_OptionalWrap { Token = Token, ItemType = _type };
@@ -111,38 +111,73 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
-			if (Operator == "??") {
-
+			var _tmp_stmt = new AstStmt_DefVariable { DataType = ExpectType };
+			var _stmts = new List<IAstStmt> { _tmp_stmt };
+			if (Value1 is AstExprName_Ignore && Operator == "=") {
+				var _label = new AstStmt_Label { };
+				_cache_err = (null, _label);
+				var _checks = new List<(IAstExpr, IAstExpr)> ();
+				_check_cb = (_cond, _err) => _checks.Add ((_cond, _err));
+				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err, _check_cb);
+				_stmts.AddRange (_stmts1);
+				Value2 = _val1;
+				//
+				var _stmts2 = new List<IAstStmt> ();
+				foreach (var (_cond, _err) in _checks) {
+					_stmts2.Add (new AstStmt_If {
+						Token = _cond.Token,
+						Condition = _cond,
+						IfTrueCodes = new List<IAstStmt> {
+							_cache_err._pos.GetRef (),
+						},
+					});
+				}
+				_stmts2.AddRange (_stmts);
+				return (_stmts2, Value2);
+			} else {
+				var (_stmts1, _val1) = Value1.ExpandExpr (_cache_err, _check_cb);
+				_stmts.AddRange (_stmts1);
+				Value1 = _val1;
+				(_stmts1, _val1) = Value2.ExpandExpr (_cache_err, _check_cb);
+				_stmts.AddRange (_stmts1);
+				Value2 = _val1;
+				//
+				if (Operator == "??") {
+					bool _val_is_optional = ExpectType is AstType_OptionalWrap;
+					_stmts.Add (new AstStmt_If {
+						Condition = AstExpr_AccessBuildIn.Optional_HasValue (Value1),
+						IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val_is_optional ? Value1 : AstExpr_AccessBuildIn.Optional_GetValue (Value1)),
+					},
+						IfFalseCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2),
+					},
+					});
+				} else if (Operator == "/") {
+					ExpectType = (ExpectType as AstType_OptionalWrap)?.ItemType ?? ExpectType;
+					_stmts.Add (new AstStmt_If {
+						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
+						IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType, "除数不能为0")),
+					},
+						IfFalseCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this),
+					},
+					});
+				} else {
+					_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this));
+				}
 			}
+			return (_stmts, _tmp_stmt.GetRef ());
 		}
 
 		public override string GenerateCSharp (int _indent) {
+			if (Operator == "??")
+				throw new Exception ("不应执行此处代码");
 			if (Operator == "=" && Value1 is AstExprName_Ignore)
-				return Value2.GenerateCSharp (_indent, _check_cb);
-			string _a, _b, _c, _d, _e, _f;
-			if (Operator == "??" && Value1 is not IAstExprName) {
-				var _temp_id = Common.GetTempId ();
-				var _val = new AstStmt_DefVariable { Token = Token, DataType = Value1.ExpectType, ExpectType = Value1.ExpectType, VarName = _temp_id, Expr = Value1 };
-				//Value1 = new AstExprName_Variable { Token = Token, ExpectType = _val.DataType, Var = _val }; _defvar_stmt.GetRef ()
-				(_a, _b, _c) = _val.GenerateCSharp (_indent, null);
-				(_d, _e, _f) = GenerateCSharp (_indent, _check_cb);
-				return ($"{_a}{_b}{_c}{_d}", _e, _f);
-			}
+				return Value2.GenerateCSharp (_indent);
 
-			string _oper = Operator != "??" ? Operator : "|";
-			(_a, _b, _c) = Value1.GenerateCSharp (_indent, _check_cb);
-			(_d, _e, _f) = Value2.GenerateCSharp (_indent, _check_cb);
-			if (Operator == "/") {
-				_check_cb ($"{_e} == 0", "\"除数不能为0\"");
-				return ($"{_a}{_d}", $"{ExpectType.GenerateCSharp_Type ()}.FromValue ({_b} {_oper} {_e})", $"{_c}{_f}");
-			}
-			if (sAssignOp2s.Contains (Operator)) {
-				if (!Value1.AllowAssign ())
-					throw new CodeException (Value1.Token, "赋值运算符左侧必须为可赋值的变量或参数名称");
-				return ($"{_a}{_d}", $"{_b} {_oper} {_e}", $"{_c}{_f}");
-			} else {
-				return ($"{_a}{_d}", $"({_b} {_oper} {_e})", $"{_c}{_f}");
-			}
+			return $"{Value1.GenerateCSharp (_indent)} {Operator} {Value2.GenerateCSharp (_indent)}";
 		}
 
 		public override bool AllowAssign () => false;

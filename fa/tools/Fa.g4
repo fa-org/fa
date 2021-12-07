@@ -63,7 +63,7 @@ modAssign:					ModOp Assign;
 orAssign:					OrOp Assign;
 andAssign:					AndOp Assign;
 xorAssign:					XorOp Assign;
-qusQusAssign:				QusQusOp Assign;
+qusQusAssign:				qusQusOp Assign;
 starStarAssign:				starStarOp Assign;
 andAndAssign:				andAndOp Assign;
 orOrAssign:					orOrOp Assign;
@@ -88,7 +88,7 @@ ModOp:						'%';
 OrOp:						'|';
 AndOp:						'&';
 XorOp:						'^';
-QusQusOp:					Qus Qus;
+qusQusOp:					Qus Qus;
 starStarOp:					StarOp StarOp;
 andAndOp:					AndOp AndOp;
 orOrOp:						OrOp OrOp;
@@ -125,7 +125,7 @@ exprFuncDef:				Assign QuotJianR;
 
 selfOp2:					AddOp | SubOp | StarOp | DivOp | starStarOp | ModOp | AndOp | OrOp | XorOp | andAndOp | orOrOp | shiftLOp | shiftROp;
 compareOp2:					ltOp | ltEqualOp | gtOp | gtEqualOp | equalOp | notEqualOp;
-changeOp2:					QusQusOp | compareOp2;
+changeOp2:					qusQusOp | compareOp2;
 allOp2:						selfOp2 | changeOp2;
 
 
@@ -206,12 +206,12 @@ quotStmtExprWrap:			quotStmtExpr | expr;
 switchExprPartLast:			Underline exprFuncDef quotStmtExprWrap Comma;
 //
 switchStmtPart:				expr (When expr)? exprFuncDef stmt;
-switchStmt:					Switch expr QuotHuaL switchStmtPart* QuotHuaR;
+switchStmt:					Switch QuotYuanL expr QuotYuanR QuotHuaL switchStmtPart* QuotHuaR;
 switchStmtPart2:			When expr exprFuncDef stmt;
 switchStmt2:				Switch QuotHuaL switchStmtPart2* switchStmtPart2Last QuotHuaR;
 //
 switchExprPart:				expr (When expr)? exprFuncDef quotStmtExprWrap Comma;
-switchExpr:					Switch expr QuotHuaL switchExprPart* switchExprPartLast QuotHuaR;
+switchExpr:					Switch QuotYuanL expr QuotYuanR QuotHuaL switchExprPart* switchExprPartLast QuotHuaR;
 switchExprPart2:			When expr exprFuncDef quotStmtExprWrap Comma;
 switchExpr2:				Switch QuotHuaL switchExprPart2* switchExprPartLast QuotHuaR;
 
@@ -256,8 +256,7 @@ defVarStmt:					type idAssignExpr (Comma idAssignExpr)* Semi;
 // stmt
 //
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
-							// void? ×¨Êô
-stmt:						(middleExpr QusQusOp)? ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
+stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
 
 
 

@@ -27,7 +27,7 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap) {
+			if (Info.CurrentReturnType () is AstType_OptionalWrap) {
 				try {
 					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
 				} catch (Exception) {

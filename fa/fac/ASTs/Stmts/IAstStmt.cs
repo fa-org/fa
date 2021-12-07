@@ -12,7 +12,7 @@ namespace fac.ASTs.Stmts {
 	public abstract class IAstStmt: IAstExpr {
 		public static IAstStmt FromExpr (FaParser.ExprContext _ctx, bool _return) {
 			if (_return) {
-				return new AstStmt_Return { Token = _ctx?.Start ?? null, Expr = FromContext (_ctx) };
+				return new AstStmt_Return { Token = _ctx?.Start ?? null, ReturnType = Info.CurrentFunc.ReturnType, Expr = FromContext (_ctx) };
 			} else {
 				return new AstStmt_ExprWrap { Token = _ctx?.Start ?? null, Expr = FromContext (_ctx) };
 			}
@@ -73,7 +73,7 @@ namespace fac.ASTs.Stmts {
 				} else if (_ctx.normalStmt ().Break () != null) {
 					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("break") });
 				} else if (_ctx.normalStmt ().Return () != null) {
-					_stmts.Add (new AstStmt_Return { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) });
+					_stmts.Add (new AstStmt_Return { Token = _ctx.Start, ReturnType = Info.CurrentFunc.ReturnType, Expr = FromContext (_ctx.normalStmt ().expr ()) });
 				} else {
 					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) });
 				}
@@ -106,7 +106,11 @@ namespace fac.ASTs.Stmts {
 		/// <returns></returns>
 		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) {
 			var _checks = new List<(IAstExpr, IAstExpr)> ();
-			var _stmts = _callback ((_cond, _err) => _checks.Add ((_cond, _err)));
+			var _stmts = _callback ((_cond, _err) => {
+				if (_cache_err == (null, null))
+					throw new CodeException (Token, "函数返回值必须为可空才能自动返回错误");
+				_checks.Add ((_cond, _err));
+			});
 			//
 			var _stmts2 = new List<IAstStmt> ();
 			foreach (var (_cond, _err) in _checks) {

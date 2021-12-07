@@ -62,7 +62,7 @@ namespace fac.ASTs.Stmts {
 						var _cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond1, Value2 = _cond2, Operator = "==", ExpectType = IAstType.FromName ("bool") };
 						if (_cond3 != null)
 							_cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond_expr, Value2 = _cond3, Operator = "&&", ExpectType = IAstType.FromName ("bool") };
-						var (_stmts4, _cond4) = _cond_expr.ExpandExpr ();
+						var (_stmts4, _cond4) = _cond_expr.ExpandExpr (_cache_err, _check_cb);
 						_stmts.AddRange (_stmts4);
 						_stmts.Add (new AstStmt_If {
 							Token = CaseValues[0].Token,

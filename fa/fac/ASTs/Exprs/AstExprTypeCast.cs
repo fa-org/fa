@@ -26,8 +26,8 @@ namespace fac.ASTs.Exprs {
 				return _dest;
 			} else if (_to_type is AstType_OptionalWrap _owrap2 && _dest.ExpectType.IsSame (_owrap2.ItemType)) {
 				return AstExpr_AccessBuildIn.Optional_FromValue (_dest);
-			//} else if (_dest.ExpectType is AstType_OptionalWrap _otype1 && _to_type is AstType_OptionalWrap _otype2 && TypeFuncs.AllowTypeCast (_otype1.ItemType, _otype2.ItemType)) {
-			//	return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
+			} else if (_dest.ExpectType is AstType_OptionalWrap _otype1 && _to_type is AstType_OptionalWrap _otype2 && TypeFuncs.AllowTypeCast (_otype1.ItemType, _otype2.ItemType)) {
+				return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
 			} else if (TypeFuncs.AllowTypeCast (_dest.ExpectType, _to_type)) {
 				return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
 			} else {

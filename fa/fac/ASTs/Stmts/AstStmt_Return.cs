@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public class AstStmt_Return: IAstStmt {
+		public IAstType ReturnType { get; set; }
 		public IAstExpr Expr { get; set; }
 
 
@@ -23,7 +24,9 @@ namespace fac.ASTs.Stmts {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			if (Expr != null) {
-				if (Info.CurrentFunc.ReturnType is AstType_OptionalWrap _otype) {
+				if (ReturnType is AstType_OptionalWrap _otype) {
+					if (_otype.ItemType is AstType_Void)
+						_otype = new AstType_OptionalWrap { ItemType = new AstType_Integer { BitWidth = 32, IsSign = true } };
 					try {
 						Expr = Expr.TraversalCalcType (_otype.ItemType);
 						Expr = AstExprTypeCast.Make (Expr, _otype);
@@ -31,7 +34,7 @@ namespace fac.ASTs.Stmts {
 						Expr = Expr.TraversalCalcType (_otype);
 					}
 				} else {
-					Expr = Expr.TraversalCalcType (Info.CurrentReturnType ());
+					Expr = Expr.TraversalCalcType (ReturnType);
 				}
 			}
 			return this;
@@ -50,12 +53,12 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override string GenerateCSharp (int _indent) {
-			if (Expr == null && Info.CurrentReturnType ().ToString () == "void?") {
-				return $"return fa.Optional<int>.FromValue (0);";
+			if (Expr == null && ReturnType.ToString () == "void?") {
+				return $"{_indent.Indent ()}return fa.Optional<int>.FromValue (0);\r\n";
 			} else if (Expr != null) {
-				return $"return {Expr.GenerateCSharp (_indent)};";
+				return $"{_indent.Indent ()}return {Expr.GenerateCSharp (_indent)};\r\n";
 			} else {
-				return $"return;";
+				return $"{_indent.Indent ()}return;\r\n";
 			}
 		}
 	}

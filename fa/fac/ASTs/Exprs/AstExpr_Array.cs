@@ -52,7 +52,7 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var _stmts = new List<IAstStmt> ();
 			var _var_id = Common.GetTempId ();
-			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _var_id };
+			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _var_id, Expr = AstExpr_AccessBuildIn.Array_New (ExpectType) };
 			_stmts.Add (_defvar_stmt);
 			foreach (var _val in InitValues) {
 				var (_stmts1, _val1) = _val.ExpandExpr (_cache_err, _check_cb);

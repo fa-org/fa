@@ -70,7 +70,7 @@ namespace fac.ASTs.Stmts {
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}if ({Condition.GenerateCSharp (_indent)}) {{");
 			_sb.AppendStmts (IfTrueCodes, _indent + 1);
-			if (IfFalseCodes.Any ()) {
+			if (IfFalseCodes?.Any () ?? false) {
 				_sb.AppendLine ($"{_indent.Indent ()}}} else {{");
 				_sb.AppendStmts (IfFalseCodes, _indent + 1);
 			}
