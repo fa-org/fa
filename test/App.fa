@@ -4,10 +4,10 @@ class Program {
 	public static void Main () {
 		int n = 10, o = 12;
 		switch (n) {
-			3              => Console.Write (""error"");
-			10 when o == 7 => Console.Write (""error"");
-			10             => Console.Write (""TestSwitch1"");
-			_              => Console.Write (""error"");
+			3              => Console.Write ("error");
+			10 when o == 7 => Console.Write ("error");
+			10             => Console.Write ("TestSwitch1");
+			_              => Console.Write ("error");
 		}
 	}
 }

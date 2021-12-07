@@ -183,18 +183,18 @@ typeVar2List:				typeVar2 (Comma typeVar2)*;
 //
 quotStmtPart:				QuotHuaL stmt* QuotHuaR;
 quotStmtExpr:				QuotHuaL stmt* expr QuotHuaR;
-ifStmt:						If expr quotStmtPart (Else If expr quotStmtPart)* (Else quotStmtPart)?;
-ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr;
+ifStmt:						If QuotYuanL expr QuotYuanR quotStmtPart (Else If expr quotStmtPart)* (Else quotStmtPart)?;
+ifExpr:						If QuotYuanL expr QuotYuanR quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr;
 
 
 
 //
 // loop
 //
-whileStmt:					While expr QuotHuaL stmt* QuotHuaR;
-whileStmt2:					Do QuotHuaL stmt* QuotHuaR While expr;
-forStmt:					For stmt expr Semi (expr (Comma expr)*)? QuotHuaL stmt* QuotHuaR;
-forStmt2:					For type id Colon expr QuotHuaL stmt* QuotHuaR;
+whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
+whileStmt2:					Do QuotHuaL stmt* QuotHuaR While QuotYuanL expr QuotYuanR;
+forStmt:					For QuotYuanL stmt expr Semi (expr (Comma expr)*)? QuotYuanR QuotHuaL stmt* QuotHuaR;
+forStmt2:					For QuotYuanL type id Colon expr QuotYuanR QuotHuaL stmt* QuotHuaR;
 
 
 
