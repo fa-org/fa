@@ -45,20 +45,12 @@ namespace fac {
 			var _parser = new FaParser (_token_stream);
 			//
 			Info.Visitor = new FaVisitorImpl ();
-			var _type = typeof (T);
-			string _name = _type.FullName;
-			if (_name.Contains ('.'))
-				_name = _name.Substring (_name.LastIndexOf ('.') + 1);
-			if (_name.StartsWith ("Ast"))
-				_name = _name[3..];
-			if (_name.StartsWith ("IAst"))
-				_name = _name[4..];
-			_name = _name.ToLower ();
-			var _methods = (from p in typeof (FaParser).GetMethods () where p.Name.ToLower () == _name select p).ToList ();
-			if (_methods.Count != 1)
-				throw new Exception ($"Program.ParseCode<T>: 使用到了 {_type.FullName} 类型，但 {_name} 方法{(_methods.Any () ? "数量大于1" : "不存在")}");
-			var _tree = (IParseTree) _methods[0].Invoke (_parser, null);
-			return Info.Visitor.Visit (_tree) as T;
+			return Info.Visitor.Visit (typeof (T).FullName switch {
+				"fac.ASTs.AstProgram" => _parser.program (),
+				"fac.ASTs.AstClassFunc" => _parser.classFunc (),
+				"fac.ASTs.Types.IAstType" => _parser.type (),
+				_ => throw new NotImplementedException (),
+			}) as T;
 		}
 
 		public static string GetStringLiterialText (ITerminalNode _node) {
