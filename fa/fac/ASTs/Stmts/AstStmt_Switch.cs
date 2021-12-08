@@ -34,7 +34,7 @@ namespace fac.ASTs.Stmts {
 			if (Condition != null)
 				Condition = Condition.TraversalCalcType (null);
 			if (CaseValues != null)
-				CaseValues.TraversalCalcType ();
+				CaseValues.TraversalCalcType (Condition.ExpectType);
 			for (int i = 0; i < CaseWhen.Count; ++i) {
 				if (CaseWhen[i] != null)
 					CaseWhen[i] = CaseWhen[i].TraversalCalcType (CaseWhen[i] is AstExprName_Ignore ? null : IAstType.FromName ("bool"));
@@ -72,7 +72,7 @@ namespace fac.ASTs.Stmts {
 								1 => new List<IAstStmt> (),
 								_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (_cache_err),
 								_ => new AstStmt_Switch {
-									Token = CaseWhen[1].Token,
+									Token = CaseValues[1]?.Token ?? CaseWhen[1]?.Token ?? null,
 									Condition = _cond1,
 									CaseValues = CaseValues.Skip (1).ToList (),
 									CaseWhen = CaseWhen.Skip (1).ToList (),
@@ -83,9 +83,9 @@ namespace fac.ASTs.Stmts {
 					}
 				} else {
 					// 不带val match
-					if (CaseValues.Count == 0) {
+					if (CaseWhen.Count == 0) {
 						// do nothing
-					} else if (CaseWhen[0] is AstExprName_Ignore) {
+					} else if (CaseWhen[0] == null) {
 						_stmts.AddRange (CaseCodes[0].ExpandStmt (_cache_err));
 					} else {
 						var (_stmts2, _cond2) = CaseWhen[0].ExpandExpr (_cache_err, _check_cb);
@@ -98,7 +98,7 @@ namespace fac.ASTs.Stmts {
 								1 => new List<IAstStmt> (),
 								_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (_cache_err),
 								_ => new AstStmt_Switch {
-									Token = CaseWhen[1].Token,
+									Token = CaseWhen[1]?.Token ?? null,
 									CaseWhen = CaseWhen.Skip (1).ToList (),
 									CaseCodes = CaseCodes.Skip (1).ToList (),
 								}.ExpandStmt (_cache_err),

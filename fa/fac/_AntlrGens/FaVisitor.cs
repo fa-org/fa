@@ -32,78 +32,6 @@ using IToken = Antlr4.Runtime.IToken;
 [System.CLSCompliant(false)]
 public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.addAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAddAssign([NotNull] FaParser.AddAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.subAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitSubAssign([NotNull] FaParser.SubAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.starAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitStarAssign([NotNull] FaParser.StarAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.divAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitDivAssign([NotNull] FaParser.DivAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.modAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitModAssign([NotNull] FaParser.ModAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.orAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitOrAssign([NotNull] FaParser.OrAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.andAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAndAssign([NotNull] FaParser.AndAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.xorAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitXorAssign([NotNull] FaParser.XorAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.qusQusAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitQusQusAssign([NotNull] FaParser.QusQusAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.starStarAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitStarStarAssign([NotNull] FaParser.StarStarAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.andAndAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAndAndAssign([NotNull] FaParser.AndAndAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.orOrAssign"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitOrOrAssign([NotNull] FaParser.OrOrAssignContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.shiftLAssign"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -121,30 +49,6 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAllAssign([NotNull] FaParser.AllAssignContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.qusQusOp"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitQusQusOp([NotNull] FaParser.QusQusOpContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.starStarOp"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitStarStarOp([NotNull] FaParser.StarStarOpContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.andAndOp"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAndAndOp([NotNull] FaParser.AndAndOpContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.orOrOp"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitOrOrOp([NotNull] FaParser.OrOrOpContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.shiftLOp"/>.
 	/// </summary>

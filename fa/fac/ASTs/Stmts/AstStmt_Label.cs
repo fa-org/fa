@@ -10,10 +10,14 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Stmts {
 	public class AstStmt_Label: IAstStmt {
 		public string LabelName { get; } = Common.GetTempId ();
+		private bool m_used = false;
 
 
 
-		public AstStmt_Goto GetRef () => new AstStmt_Goto { Token = Token, Label = this };
+		public AstStmt_Goto GetRef () {
+			m_used = true;
+			return new AstStmt_Goto { Token = Token, Label = this };
+		}
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {}
 
@@ -21,6 +25,6 @@ namespace fac.ASTs.Stmts {
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) => new List<IAstStmt> { this };
 
-		public override string GenerateCSharp (int _indent) => $"{(_indent - 1).Indent ()}{LabelName}:\r\n";
+		public override string GenerateCSharp (int _indent) => m_used ? $"{(_indent - 1).Indent ()}{LabelName}:\r\n" : "";
 	}
 }

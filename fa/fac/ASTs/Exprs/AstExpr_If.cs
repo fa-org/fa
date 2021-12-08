@@ -47,11 +47,11 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var _temp_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
+			var _stmts = new List<IAstStmt> { _defvar_stmt };
 			var _stmt_if = new AstStmt_If { Token = Token, Condition = Condition, IfTrueCodes = IfTrueCodes, IfFalseCodes = IfFalseCodes };
-			_stmt_if.IfTrueCodes.Add (new AstStmt_ExprWrap { Token = IfTrue.Token, Expr = new AstExpr_Op2 { Token = IfTrue.Token, Value1 = _defvar_stmt.GetRef (), Value2 = IfTrue, Operator = "=", ExpectType = ExpectType } });
-			_stmt_if.IfFalseCodes.Add (new AstStmt_ExprWrap { Token = IfFalse.Token, Expr = new AstExpr_Op2 { Token = IfFalse.Token, Value1 = _defvar_stmt.GetRef (), Value2 = IfFalse, Operator = "=", ExpectType = ExpectType } });
-			var _stmts = _stmt_if.ExpandStmt (_cache_err);
-			_stmts.Insert (0, _defvar_stmt);
+			_stmt_if.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_defvar_stmt.GetRef (), IfTrue));
+			_stmt_if.IfFalseCodes.Add (AstStmt_ExprWrap.MakeAssign (_defvar_stmt.GetRef (), IfFalse));
+			_stmts.AddRange (_stmt_if.ExpandStmt (_cache_err));
 			return (_stmts, _defvar_stmt.GetRef ());
 		}
 

@@ -113,31 +113,32 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var _tmp_stmt = new AstStmt_DefVariable { DataType = ExpectType };
 			var _stmts = new List<IAstStmt> { _tmp_stmt };
+			var (_stmts1, _val1) = Value1.ExpandExpr (_cache_err, _check_cb);
+			_stmts.AddRange (_stmts1);
+			Value1 = _val1;
 			if (Value1 is AstExprName_Ignore && Operator == "=") {
-				var _label = new AstStmt_Label { };
-				_cache_err = (null, _label);
-				var _checks = new List<(IAstExpr, IAstExpr)> ();
-				_check_cb = (_cond, _err) => _checks.Add ((_cond, _err));
-				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err, _check_cb);
-				_stmts.AddRange (_stmts1);
-				Value2 = _val1;
-				//
-				var _stmts2 = new List<IAstStmt> ();
-				foreach (var (_cond, _err) in _checks) {
-					_stmts2.Add (new AstStmt_If {
-						Token = _cond.Token,
-						Condition = _cond,
-						IfTrueCodes = new List<IAstStmt> {
-							_cache_err._pos.GetRef (),
-						},
-					});
-				}
-				_stmts2.AddRange (_stmts);
-				return (_stmts2, Value2);
+				throw new Exception ("不应执行此处代码");
+				//var _label = new AstStmt_Label { };
+				//_cache_err = (null, _label);
+				//var _checks = new List<(IAstExpr, IAstExpr)> ();
+				//_check_cb = (_cond, _err) => _checks.Add ((_cond, _err));
+				//(_stmts1, _val1) = Value2.ExpandExpr (_cache_err, _check_cb);
+				//_stmts.AddRange (_stmts1);
+				//Value2 = _val1;
+				////
+				//var _stmts2 = new List<IAstStmt> ();
+				//foreach (var (_cond, _err) in _checks) {
+				//	_stmts2.Add (new AstStmt_If {
+				//		Token = _cond.Token,
+				//		Condition = _cond,
+				//		IfTrueCodes = new List<IAstStmt> {
+				//			_cache_err._pos.GetRef (),
+				//		},
+				//	});
+				//}
+				//_stmts2.AddRange (_stmts);
+				//return (_stmts2, Value2);
 			} else {
-				var (_stmts1, _val1) = Value1.ExpandExpr (_cache_err, _check_cb);
-				_stmts.AddRange (_stmts1);
-				Value1 = _val1;
 				(_stmts1, _val1) = Value2.ExpandExpr (_cache_err, _check_cb);
 				_stmts.AddRange (_stmts1);
 				Value2 = _val1;
@@ -164,6 +165,14 @@ namespace fac.ASTs.Exprs {
 						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this),
 					},
 					});
+				} else if (Operator == "=") {
+					_stmts.RemoveAt (0);
+					if (Value1 is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType == AccessBuildInType.OPT_GetValue) {
+						_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (AstExpr_AccessBuildIn.Optional_FromValue (_biexpr.Value)));
+					} else {
+						_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (this));
+					}
+					return (_stmts, Value1);
 				} else {
 					_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this));
 				}

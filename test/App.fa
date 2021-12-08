@@ -2,23 +2,13 @@ use fa;
 
 class Program {
 	public static void Main () {
-		int n = 10, o = 12;
-		switch (n) {
-			3              => Console.Write ("error");
-			10 when o == 7 => Console.Write ("error");
-			10             => Console.Write ("TestSwitch1");
-			_              => Console.Write ("error");
-		}
+		int[] n = [45, 4123, 213, 42];
+		_ = n [3]? = 1234;
+		//Console.WriteLine ("{0}".Format (n [3] ?? -1));
 	}
 }
 
-//class Program {
-//	public static void Main () {
-//		int[] n = [45, 4123, 213, 42];
-//		//_ = n [3]? = 1234;
-//		//Console.WriteLine ("{0}".Format (n [3] ?? -1));
-//	}
-//}
+
 
 //class Program {
 //	public static void Sort (mut int[] numbers) {

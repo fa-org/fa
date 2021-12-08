@@ -151,14 +151,10 @@ namespace fac.ASTs.Exprs {
 				_stmts.Add (_err_stmt);
 				return (_stmts, _item_defvar.GetRef ());
 			} else {
-				// 
-				var (_stmts1, _val1) = Value.ExpandExpr (_cache_err, _check_cb);
-				_stmts.AddRange (_stmts1);
-				Value = _val;
 				for (int i = 0; i < Arguments.Count; ++i) {
-					(_stmts1, _val1) = Arguments[i].ExpandExpr (_cache_err, _check_cb);
-					_stmts.AddRange (_stmts1);
-					Arguments[i] = _val1;
+					(_stmts, _val) = Arguments[i].ExpandExpr (_cache_err, _check_cb);
+					_stmts.AddRange (_stmts);
+					Arguments[i] = _val;
 				}
 
 				var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;
@@ -169,10 +165,10 @@ namespace fac.ASTs.Exprs {
 					bool _process_last = _arg_types.Count == Arguments.Count && Arguments[^1].ExpectType.IsSame (_awrap);
 					if (!_process_last) {
 						// 用户未处理
-						(_stmts1, _val1) = new AstExpr_Array { Token = Arguments[_arg_types.Count - 1].Token, ItemDataType = _awrap.ItemType, InitValues = Arguments.Skip (_arg_types.Count - 1).ToList (), ExpectType = _awrap }.ExpandExpr (_cache_err, _check_cb);
+						(_stmts, _val) = new AstExpr_Array { Token = Arguments[_arg_types.Count - 1].Token, ItemDataType = _awrap.ItemType, InitValues = Arguments.Skip (_arg_types.Count - 1).ToList (), ExpectType = _awrap }.ExpandExpr (_cache_err, _check_cb);
 						Arguments.RemoveRange (_arg_types.Count - 1, Arguments.Count - (_arg_types.Count - 1));
-						_stmts.AddRange (_stmts1);
-						Arguments.Add (_val1);
+						_stmts.AddRange (_stmts);
+						Arguments.Add (_val);
 					}
 				}
 				return (_stmts, this);

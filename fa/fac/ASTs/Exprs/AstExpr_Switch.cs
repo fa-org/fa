@@ -35,8 +35,10 @@ namespace fac.ASTs.Exprs {
 			if (Condition != null)
 				Condition = Condition.TraversalCalcType (null);
 			if (CaseValues != null)
-				CaseValues.TraversalCalcType ();
+				CaseValues.TraversalCalcType (Condition.ExpectType);
 			CaseWhen.TraversalCalcType (IAstType.FromName ("bool"));
+			if (_expect_type == null)
+				_expect_type = TypeFuncs.GetCompatibleType (true, (from p in CaseCodes select p._expr.GuessType ()).ToArray ());
 			for (int i = 0; i < CaseCodes.Count; ++i) {
 				for (int j = 0; j < CaseCodes[i]._stmts.Count; ++j)
 					CaseCodes[i]._stmts[j] = CaseCodes[i]._stmts[j].TraversalCalcType (null) as IAstStmt;
@@ -55,7 +57,7 @@ namespace fac.ASTs.Exprs {
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
 			var _switch_stmt = new AstStmt_Switch { Token = Token, Condition = Condition, CaseValues = CaseValues, CaseWhen = CaseWhen, CaseCodes = new List<IAstStmt> () };
 			foreach (var (_stmts1, _expr1) in CaseCodes) {
-				_stmts1.Add (new AstStmt_ExprWrap { Token = _expr1.Token, Expr = new AstExpr_Op2 { Token = _expr1.Token, Value1 = _defvar_stmt.GetRef (), Value2 = _expr1, Operator = "=", ExpectType = ExpectType } });
+				_stmts1.Add (AstStmt_ExprWrap.MakeAssign (_defvar_stmt.GetRef (), _expr1));
 				_switch_stmt.CaseCodes.Add (_stmts1.Count == 1 ? _stmts1[0] : new AstStmt_HuaQuotWrap { Token = _expr1.Token, Stmts = _stmts1 });
 			}
 			var _stmts = new List<IAstStmt> { _defvar_stmt };

@@ -40,10 +40,10 @@ namespace fac.ASTs.Exprs {
 				_stmts.AddRange (_stmts1);
 				Values[i] = _val1;
 				if (i > 0) {
-					Values[i] = new AstExpr_Op2 { Token = Values[i - i].Token, Value1 = Values[i - 1], Value2 = Values[i], Operator = Operators[i - 1], ExpectType = IAstType.FromName ("bool") };
+					Values[i - 1] = new AstExpr_Op2 { Token = Values[i - i].Token, Value1 = Values[i - 1], Value2 = Values[i], Operator = Operators[i - 1], ExpectType = IAstType.FromName ("bool") };
 				}
 			}
-			Values.RemoveAt (0);
+			Values.RemoveAt (Values.Count - 1);
 			while (Values.Count > 1) {
 				Values [0] = new AstExpr_Op2 { Token = Values[0].Token, Value1 = Values[0], Value2 = Values[1], Operator = "&&", ExpectType = IAstType.FromName ("bool") };
 				Values.RemoveAt (1);

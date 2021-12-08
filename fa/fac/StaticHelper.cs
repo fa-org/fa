@@ -48,7 +48,7 @@ namespace fac {
 
 		public static void TraversalCalcType (this List<IAstExpr> _exprs, IAstType _expect_type = null) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
-				if (_exprs[i] != null)
+				if (_exprs[i] != null && _exprs[i] is not AstExprName_Ignore)
 					_exprs[i] = _exprs[i].TraversalCalcType (_expect_type);
 			}
 		}
@@ -77,7 +77,7 @@ namespace fac {
 
 		public static IAstStmt ToSingleStmt (this List<IAstStmt> _stmts) {
 			if ((_stmts?.Count ?? 0) == 0) {
-				return new AstStmt_ExprWrap { Token = null, Expr = null };
+				return AstStmt_ExprWrap.MakeFromExpr (null);
 			} else if (_stmts.Count == 1) {
 				return _stmts[0];
 			} else {

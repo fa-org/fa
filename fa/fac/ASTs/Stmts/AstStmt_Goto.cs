@@ -19,6 +19,6 @@ namespace fac.ASTs.Stmts {
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) => new List<IAstStmt> { this };
 
-		public override string GenerateCSharp (int _indent) => $"{_indent.Indent ()}goto {Label};\r\n";
+		public override string GenerateCSharp (int _indent) => $"{_indent.Indent ()}goto {Label.LabelName};\r\n";
 	}
 }

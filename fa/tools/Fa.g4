@@ -55,21 +55,21 @@ While:						'while';
 
 // 赋值运算
 Assign:						'=';
-addAssign:					AddOp Assign;
-subAssign:					SubOp Assign;
-starAssign:					StarOp Assign;
-divAssign:					DivOp Assign;
-modAssign:					ModOp Assign;
-orAssign:					OrOp Assign;
-andAssign:					AndOp Assign;
-xorAssign:					XorOp Assign;
-qusQusAssign:				qusQusOp Assign;
-starStarAssign:				starStarOp Assign;
-andAndAssign:				andAndOp Assign;
-orOrAssign:					orOrOp Assign;
-shiftLAssign:				shiftLOp Assign;
+AddAssign:					AddOp Assign;
+SubAssign:					SubOp Assign;
+StarAssign:					StarOp Assign;
+DivAssign:					DivOp Assign;
+ModAssign:					ModOp Assign;
+OrAssign:					OrOp Assign;
+AndAssign:					AndOp Assign;
+XorAssign:					XorOp Assign;
+QusQusAssign:				QusQusOp Assign;
+StarStarAssign:				StarStarOp Assign;
+AndAndAssign:				AndAndOp Assign;
+OrOrAssign:					OrOrOp Assign;
+shiftLAssign:				shiftLOp Assign; // 可能是
 shiftRAssign:				shiftROp Assign;
-allAssign:					Assign | qusQusAssign | addAssign | subAssign | starAssign | starStarAssign | divAssign | modAssign | andAssign | orAssign | xorAssign | andAndAssign | orOrAssign | shiftLAssign | shiftRAssign;
+allAssign:					Assign | QusQusAssign | AddAssign | SubAssign | StarAssign | StarStarAssign | DivAssign | ModAssign | AndAssign | OrAssign | XorAssign | AndAndAssign | OrOrAssign | shiftLAssign | shiftRAssign;
 
 // 一元计算
 ReverseOp:					'~';
@@ -88,10 +88,10 @@ ModOp:						'%';
 OrOp:						'|';
 AndOp:						'&';
 XorOp:						'^';
-qusQusOp:					Qus Qus;
-starStarOp:					StarOp StarOp;
-andAndOp:					AndOp AndOp;
-orOrOp:						OrOp OrOp;
+QusQusOp:					Qus Qus;
+StarStarOp:					StarOp StarOp;
+AndAndOp:					AndOp AndOp;
+OrOrOp:						OrOp OrOp;
 shiftLOp:					QuotJianL QuotJianL;
 shiftROp:					QuotJianR QuotJianR;
 
@@ -123,9 +123,9 @@ notEqualOp:					Exclam Assign;
 exprFuncDef:				Assign QuotJianR;
 
 
-selfOp2:					AddOp | SubOp | StarOp | DivOp | starStarOp | ModOp | AndOp | OrOp | XorOp | andAndOp | orOrOp | shiftLOp | shiftROp;
+selfOp2:					AddOp | SubOp | StarOp | DivOp | StarStarOp | ModOp | AndOp | OrOp | XorOp | AndAndOp | OrOrOp | shiftLOp | shiftROp;
 compareOp2:					ltOp | ltEqualOp | gtOp | gtEqualOp | equalOp | notEqualOp;
-changeOp2:					qusQusOp | compareOp2;
+changeOp2:					QusQusOp | compareOp2;
 allOp2:						selfOp2 | changeOp2;
 
 
@@ -183,18 +183,18 @@ typeVar2List:				typeVar2 (Comma typeVar2)*;
 //
 quotStmtPart:				QuotHuaL stmt* QuotHuaR;
 quotStmtExpr:				QuotHuaL stmt* expr QuotHuaR;
-ifStmt:						If QuotYuanL expr QuotYuanR quotStmtPart (Else If expr quotStmtPart)* (Else quotStmtPart)?;
-ifExpr:						If QuotYuanL expr QuotYuanR quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr;
+ifStmt:						If expr quotStmtPart (Else If expr quotStmtPart)* (Else quotStmtPart)?;
+ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr;
 
 
 
 //
 // loop
 //
-whileStmt:					While QuotYuanL expr QuotYuanR QuotHuaL stmt* QuotHuaR;
-whileStmt2:					Do QuotHuaL stmt* QuotHuaR While QuotYuanL expr QuotYuanR;
-forStmt:					For QuotYuanL stmt expr Semi (expr (Comma expr)*)? QuotYuanR QuotHuaL stmt* QuotHuaR;
-forStmt2:					For QuotYuanL type id Colon expr QuotYuanR QuotHuaL stmt* QuotHuaR;
+whileStmt:					While expr QuotHuaL stmt* QuotHuaR;
+whileStmt2:					Do QuotHuaL stmt* QuotHuaR While expr;
+forStmt:					For stmt expr Semi (expr (Comma expr)*)? QuotHuaL stmt* QuotHuaR;
+forStmt2:					For type id Colon expr QuotHuaL stmt* QuotHuaR;
 
 
 
@@ -206,12 +206,12 @@ quotStmtExprWrap:			quotStmtExpr | expr;
 switchExprPartLast:			Underline exprFuncDef quotStmtExprWrap Comma;
 //
 switchStmtPart:				expr (When expr)? exprFuncDef stmt;
-switchStmt:					Switch QuotYuanL expr QuotYuanR QuotHuaL switchStmtPart* QuotHuaR;
+switchStmt:					Switch expr QuotHuaL switchStmtPart* QuotHuaR;
 switchStmtPart2:			When expr exprFuncDef stmt;
 switchStmt2:				Switch QuotHuaL switchStmtPart2* switchStmtPart2Last QuotHuaR;
 //
 switchExprPart:				expr (When expr)? exprFuncDef quotStmtExprWrap Comma;
-switchExpr:					Switch QuotYuanL expr QuotYuanR QuotHuaL switchExprPart* switchExprPartLast QuotHuaR;
+switchExpr:					Switch expr QuotHuaL switchExprPart* switchExprPartLast QuotHuaR;
 switchExprPart2:			When expr exprFuncDef quotStmtExprWrap Comma;
 switchExpr2:				Switch QuotHuaL switchExprPart2* switchExprPartLast QuotHuaR;
 

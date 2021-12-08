@@ -1,4 +1,5 @@
-﻿using fac.AntlrTools;
+﻿using Antlr4.Runtime;
+using fac.AntlrTools;
 using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Types;
@@ -12,20 +13,23 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Stmts {
 	public class AstStmt_ExprWrap: IAstStmt {
 		public IAstExpr Expr { get; set; }
+		public bool IgnoreError { get; set; } = false;
 
 
 
-		public static AstStmt_ExprWrap MakeAssign (IAstExprName _dest, IAstExpr _src) {
-			return new AstStmt_ExprWrap { Token = _src.Token, Expr = new AstExpr_Op2 { Token = _src.Token, Value1 = _dest, Value2 = _src, Operator = "=", ExpectType = _dest.ExpectType } };
+		private AstStmt_ExprWrap () { }
+		public static AstStmt_ExprWrap MakeAssign (IAstExprName _dest, IAstExpr _src) => new AstStmt_ExprWrap { Token = _src.Token, Expr = new AstExpr_Op2 { Token = _src.Token, Value1 = _dest, Value2 = _src, Operator = "=", ExpectType = _dest.ExpectType } };
+		public static AstStmt_ExprWrap MakeOp2 (IAstExpr _val1, string _op, IAstExpr _val2, IAstType _expect_type) => new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeOp2 (_val1, _op, _val2, _expect_type) };
+		public static AstStmt_ExprWrap MakeCondition (IAstExpr _val1, string _op, IAstExpr _val2) => new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeCondition (_val1, _op, _val2) };
+		public static AstStmt_ExprWrap MakeFromExpr (IAstExpr _val) {
+			if (_val is AstExpr_Op2 _op2expr && (_op2expr.Value1 is AstExprName_Ignore || (_op2expr.Value1 is AstExpr_BaseId _idexpr && _idexpr.Id == "_")) && _op2expr.Operator == "=") {
+				return new AstStmt_ExprWrap { Token = _val.Token, Expr = _op2expr.Value2, IgnoreError = true };
+			} else {
+				return new AstStmt_ExprWrap { Token = _val?.Token ?? null, Expr = _val };
+			}
 		}
-
-		public static AstStmt_ExprWrap MakeOp2 (IAstExpr _val1, string _op, IAstExpr _val2, IAstType _expect_type) {
-			return new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeOp2 (_val1, _op, _val2, _expect_type) };
-		}
-
-		public static AstStmt_ExprWrap MakeCondition (IAstExpr _val1, string _op, IAstExpr _val2) {
-			return new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeCondition (_val1, _op, _val2) };
-		}
+		public static AstStmt_ExprWrap MakeContinue (IToken _token) => new AstStmt_ExprWrap { Token = _token, Expr = AstExprName_BuildIn.FindFromName ("continue") };
+		public static AstStmt_ExprWrap MakeBreak (IToken _token) => new AstStmt_ExprWrap { Token = _token, Expr = AstExprName_BuildIn.FindFromName ("break") };
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			if (Expr != null)
@@ -46,8 +50,15 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			return ExpandStmtHelper (_cache_err, (_check_cb) => {
+			if (Expr == null)
+				return new List<IAstStmt> ();
+			return ExpandStmtHelper (_cache_err, IgnoreError, (_check_cb) => {
 				var (_stmts, _expr) = Expr.ExpandExpr (_cache_err, _check_cb);
+				if (_expr.IsSimpleExpr)
+					return _stmts;
+				if (_expr is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType != AccessBuildInType.ARR_Add)
+					return _stmts;
+
 				Expr = _expr;
 				_stmts.Add (this);
 				return _stmts;

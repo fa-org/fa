@@ -14,7 +14,7 @@ namespace fac.ASTs.Stmts {
 			if (_return) {
 				return new AstStmt_Return { Token = _ctx?.Start ?? null, ReturnType = Info.CurrentFunc.ReturnType, Expr = FromContext (_ctx) };
 			} else {
-				return new AstStmt_ExprWrap { Token = _ctx?.Start ?? null, Expr = FromContext (_ctx) };
+				return AstStmt_ExprWrap.MakeFromExpr (FromContext (_ctx));
 			}
 		}
 
@@ -69,13 +69,13 @@ namespace fac.ASTs.Stmts {
 				_stmts.Add (_t);
 			} else if (_ctx.normalStmt () != null) {
 				if (_ctx.normalStmt ().Continue () != null) {
-					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("continue") });
+					_stmts.Add (AstStmt_ExprWrap.MakeContinue (_ctx.Start));
 				} else if (_ctx.normalStmt ().Break () != null) {
-					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = AstExprName_BuildIn.FindFromName ("break") });
+					_stmts.Add (AstStmt_ExprWrap.MakeBreak (_ctx.Start));
 				} else if (_ctx.normalStmt ().Return () != null) {
 					_stmts.Add (new AstStmt_Return { Token = _ctx.Start, ReturnType = Info.CurrentFunc.ReturnType, Expr = FromContext (_ctx.normalStmt ().expr ()) });
 				} else {
-					_stmts.Add (new AstStmt_ExprWrap { Token = _ctx.Start, Expr = FromContext (_ctx.normalStmt ().expr ()) });
+					_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (FromContext (_ctx.normalStmt ().expr ())));
 				}
 			} else if (_ctx.defVarStmt () != null) {
 				return AstStmt_DefVariable.FromCtx (_ctx.defVarStmt ());
@@ -104,13 +104,16 @@ namespace fac.ASTs.Stmts {
 		/// <param name="_cache_err"></param>
 		/// <param name="_callback"></param>
 		/// <returns></returns>
-		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) {
+		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) => ExpandStmtHelper (_cache_err, false, _callback);
+		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, bool _ignore_error, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) {
 			var _checks = new List<(IAstExpr, IAstExpr)> ();
 			var _stmts = _callback ((_cond, _err) => {
-				if (_cache_err == (null, null))
+				if (_cache_err == (null, null) && (!_ignore_error))
 					throw new CodeException (Token, "函数返回值必须为可空才能自动返回错误");
 				_checks.Add ((_cond, _err));
 			});
+			if (_ignore_error)
+				return _stmts;
 			//
 			var _stmts2 = new List<IAstStmt> ();
 			foreach (var (_cond, _err) in _checks) {
