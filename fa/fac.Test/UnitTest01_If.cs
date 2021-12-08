@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace fac.Test {
 	[TestClass]
-	public class UnitTest_If {
+	public class UnitTest01_If {
 		// if语句嵌套，命中及未命中
 		[TestMethod]
 		public void TestIf1 () {

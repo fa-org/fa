@@ -33,6 +33,15 @@ namespace fac.ASTs.Exprs {
 		public abstract bool AllowAssign ();
 
 		/// <summary>
+		/// 赋值方式分解表达式
+		/// </summary>
+		/// <param name="_rval">待赋的值</param>
+		/// <param name="_cache_err">用于缓存错误的变量</param>
+		/// <param name="_check_cb">前置?运算回调，当函数调用或数组随机访问参数带?运算符时，将可能为空的判断通过 _check_cb 回调传递出来</param>
+		/// <returns>执行此表达式前需执行的前置语句、简化后的表达式</returns>
+		public virtual (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) => throw new NotImplementedException ();
+
+		/// <summary>
 		/// 分解表达式
 		/// </summary>
 		/// <param name="_cache_err">用于缓存错误的变量</param>
@@ -47,28 +56,20 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromContext (FaParser.ExprContext _ctx) {
 			if (_ctx == null)
 				return null;
-			//if (_ctx.Qus () != null) {
-			//	var _ifexpr = new AstExpr_If { Token = _ctx.Start };
-			//	_ifexpr.Condition = FromContext (_ctx.middleExpr ()[0]);
-			//	_ifexpr.IfTrue = FromContext (_ctx.strongExprBase ()[0]);
-			//	_ifexpr.IfFalse = FromContext (_ctx.strongExprBase ()[1]);
-			//	return _ifexpr;
-			//} else {
-				var _expr_ctxs = _ctx.middleExpr ();
-				var _op2_ctxs = _ctx.allAssign ();
-				if (_expr_ctxs.Length == 0)
-					throw new UnimplException (_ctx);
-				//
-				var _expr = FromContext (_expr_ctxs[_expr_ctxs.Length - 1]);
-				for (int i = _expr_ctxs.Length - 2; i >= 0; --i) {
-					var _expr2 = new AstExpr_Op2 { Token = _ctx.Start };
-					_expr2.Value1 = FromContext (_expr_ctxs[i]);
-					_expr2.Value2 = _expr;
-					_expr2.Operator = _op2_ctxs[i].GetText ();
-					_expr = _expr2;
-				}
-				return _expr;
-			//}
+			var _expr_ctxs = _ctx.middleExpr ();
+			var _op2_ctxs = _ctx.allAssign ();
+			if (_expr_ctxs.Length == 0)
+				throw new UnimplException (_ctx);
+			//
+			var _expr = FromContext (_expr_ctxs[_expr_ctxs.Length - 1]);
+			for (int i = _expr_ctxs.Length - 2; i >= 0; --i) {
+				var _expr2 = new AstExpr_Op2 { Token = _ctx.Start };
+				_expr2.Value1 = FromContext (_expr_ctxs[i]);
+				_expr2.Value2 = _expr;
+				_expr2.Operator = _op2_ctxs[i].GetText ();
+				_expr = _expr2;
+			}
+			return _expr;
 		}
 
 		public static IAstExpr FromContext (FaParser.MiddleExprContext _ctx) {
@@ -283,24 +284,5 @@ namespace fac.ASTs.Exprs {
 
 		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
-
-		//protected (List<IAstStmt>, IAstExpr) ExpandExprHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, (List<IAstStmt>, IAstExpr)> _callback) {
-		//	var _checks = new List<(IAstExpr, IAstExpr)> ();
-		//	var (_stmts, _expr) = _callback ((_cond, _err) => _checks.Add ((_cond, _err)));
-		//	//
-		//	var _stmts2 = new List<IAstStmt> ();
-		//	foreach (var (_cond, _err) in _checks) {
-		//		_stmts2.Add (new AstStmt_If {
-		//			Token = _cond.Token,
-		//			Condition = _cond,
-		//			IfTrueCodes = new List<IAstStmt> {
-		//				AstStmt_ExprWrap.MakeAssign (_cache_err._var, AstExpr_AccessBuildIn.Optional_FromError (_cache_err._var.ExpectType, _err)),
-		//				_cache_err._pos.GetRef (),
-		//			},
-		//		});
-		//	}
-		//	_stmts2.AddRange (_stmts);
-		//	return (_stmts2, _expr);
-		//}
 	}
 }

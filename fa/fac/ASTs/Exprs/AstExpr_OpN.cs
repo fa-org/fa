@@ -82,6 +82,80 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
+		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
+			Value = _val;
+			if (Operator == "[]") {
+				if (Arguments.Count != 1)
+					throw new CodeException (Token, "随机访问操作仅支持一个参数");
+				/* 生成逻辑： val [n]
+				 * var idx = n;
+				 * if (idx < 0)
+				 *     idx += val.Length;
+				 * if (idx < 0 || idx >= val.Length) {
+				 *     var _item_defvar;
+				 *     _item_defvar = err 数组随机访问超限;
+				 *     _item_defvar
+				 * } else {
+				 *     val [idx] = _rval;
+				 *     val [idx]
+				 * }
+				 */
+
+				//// var _item_defvar;
+				//var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, Expr = null };
+				//_stmts.Add (_item_defvar);
+
+				//// 给 _item_defvar 赋完值后的处理逻辑
+				//var _err_stmt = new AstStmt_Label { Token = null };
+				//var _cache_error = (_var: _item_defvar.GetRef (), _pos: _err_stmt);
+				TODO ();
+
+				// var idx;
+				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), Expr = AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int")) };
+				_stmts.AddRange (_index_defvar.ExpandStmt (_cache_err));
+
+				// if (idx < 0)
+				//     idx += val.Length;
+				var (_stmts1, _val1) = Arguments[0].ExpandExpr (_cache_err, _check_cb);
+				_stmts.AddRange (_stmts1);
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op2.MakeCondition (_val1, "<", IAstExpr.FromValue ("int", "0")),
+					IfTrueCodes = new List<IAstStmt> {
+						// idx += val.Length;
+						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_AccessBuildIn.Array_Length (Value), IAstType.FromName ("int")),
+					},
+				});
+
+				// if (idx < 0 || idx >= val.Length) {
+				//     _item_defvar = err 数组随机访问下标超过数组大小;
+				// } else {
+				//     _item_defvar = val[idx];
+				// }
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op2.MakeCondition (
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
+						"||",
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_AccessBuildIn.Array_Length (Value))
+					),
+					IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_item_defvar.DataType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
+					},
+					IfFalseCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromValue (AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef ()))),
+					},
+				});
+
+				// 下标错误部分
+				_stmts.Add (_err_stmt);
+				return (_stmts, _item_defvar.GetRef ());
+			} else {
+				throw new CodeException (Token, $"方法调用表达式无法赋值");
+			}
+		}
+
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
 			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
 			Value = _val;
@@ -108,11 +182,11 @@ namespace fac.ASTs.Exprs {
 
 				// 给 _item_defvar 赋完值后的处理逻辑
 				var _err_stmt = new AstStmt_Label { Token = null };
-				var _cache_error = (_var: _item_defvar.GetRef (), _pos: _err_stmt);
+				_cache_err = (_var: _item_defvar.GetRef (), _pos: _err_stmt);
 
 				// var idx;
 				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), Expr = AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int")) };
-				_stmts.AddRange (_index_defvar.ExpandStmt (_cache_error));
+				_stmts.AddRange (_index_defvar.ExpandStmt (_cache_err));
 
 				// if (idx < 0)
 				//     idx += val.Length;

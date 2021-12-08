@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace fac.Test {
 	[TestClass]
-	public class UnitTest1 {
+	public class UnitTest00_hello {
 		[TestMethod]
 		public void TestMethod1 () {
 			string _code = @"

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace fac.Test {
 	[TestClass]
-	public class UnitTest_Switch {
+	public class UnitTest02_Switch {
 		/// <summary>
 		/// switch value 语句，跳过when
 		/// </summary>
