@@ -21,7 +21,11 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr Array_New (IAstType _type) => new AstExpr_AccessBuildIn { AccessType = AccessBuildInType.ARR_New, ExpectType = _type };
 		public static IAstExpr Array_Length (IAstExpr _array) => new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_Length, ExpectType = IAstType.FromName ("int") };
 		public static IAstExpr Array_Add (IAstExpr _array, IAstExpr _item) => new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_Add, AttachArgs = new List<IAstExpr> { _item } };
-		public static IAstExpr Array_AccessItem (IAstExpr _array, IAstExpr _index) => new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = (_array.ExpectType as AstType_ArrayWrap).ItemType };
+		public static IAstExpr Array_AccessItem (IAstExpr _array, IAstExpr _index, bool _pre_expand) {
+			var _item_type = (_array.ExpectType as AstType_ArrayWrap).ItemType;
+			_item_type = _pre_expand ? _item_type.Optional : _item_type;
+			return new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
+		}
 		public static IAstExpr Optional_HasValue (IAstExpr _opt) => new AstExpr_AccessBuildIn { Token = _opt.Token, AccessType = AccessBuildInType.OPT_HasValue, Value = _opt, ExpectType = IAstType.FromName ("bool") };
 		public static IAstExpr Optional_NotHasValue (IAstExpr _opt) => new AstExpr_Op1 { Token = _opt.Token, Value = Optional_HasValue (_opt), IsPrefix = true, Operator = "!", ExpectType = IAstType.FromName ("bool") };
 		public static IAstExpr Optional_GetValue (IAstExpr _opt) => new AstExpr_AccessBuildIn { Token = _opt.Token, Value = _opt, AccessType = AccessBuildInType.OPT_GetValue, ExpectType = (_opt.ExpectType as AstType_OptionalWrap).ItemType };
@@ -49,16 +53,17 @@ namespace fac.ASTs.Exprs {
 			return ExpectType;
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
-			var (_stmts, _value) = Value?.ExpandExpr (_cache_err, _check_cb) ?? (new List<IAstStmt> (), null);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var (_stmts, _value) = Value?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
 			Value = _value;
 			if (AttachArgs != null) {
 				for (int i = 0; i < AttachArgs.Count; ++i) {
-					var (_stmts1, _value1) = AttachArgs[i].ExpandExpr (_cache_err, _check_cb);
+					var (_stmts1, _value1) = AttachArgs[i].ExpandExpr (_cache_err);
 					_stmts.AddRange (_stmts1);
 					AttachArgs[i] = _value1;
 				}
 			}
+			TODO ();
 			return (_stmts, this);
 		}
 

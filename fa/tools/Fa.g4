@@ -231,7 +231,7 @@ arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
 lambdaExpr:					QuotYuanL typeVar2List? QuotYuanR exprFuncDef (expr | (QuotHuaL stmt* QuotHuaR));
 strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// Ç°×º - ++ -- ~ !
-strongExprSuffix			: AddAddOp | SubSubOp | Qus														// ºó×º ++ -- ?
+strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
 							| (PointOp id)																	//     wnd.Name

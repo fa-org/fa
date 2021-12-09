@@ -89,7 +89,7 @@ namespace fac.ASTs.Stmts {
 		public static List<IAstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select FromStmt (p)).CombileStmts ();
 		public override IAstType GuessType () => throw new Exception ("不应执行此处代码");
 		public override bool AllowAssign () => throw new Exception ("不应执行此处代码");
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) => throw new Exception ("不应执行此处代码");
 
 		/// <summary>
 		/// 分解语句

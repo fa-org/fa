@@ -52,7 +52,7 @@ namespace fac.ASTs.Exprs {
 			return TypeFuncs.GetCompatibleType (true, (from p in CaseCodes select p._expr.GuessType ()).ToArray ());
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
 			var _temp_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
 			var _switch_stmt = new AstStmt_Switch { Token = Token, Condition = Condition, CaseValues = CaseValues, CaseWhen = CaseWhen, CaseCodes = new List<IAstStmt> () };

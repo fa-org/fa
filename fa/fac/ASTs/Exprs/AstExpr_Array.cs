@@ -49,7 +49,7 @@ namespace fac.ASTs.Exprs {
 			return new AstType_ArrayWrap { Token = Token, ItemType = _item_type };
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
 			var _stmts = new List<IAstStmt> ();
 			var _var_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _var_id, Expr = AstExpr_AccessBuildIn.Array_New (ExpectType) };

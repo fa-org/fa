@@ -110,7 +110,7 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
 			var _stmts = new List<IAstStmt> { };
 			var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err, _check_cb);
 			_stmts.AddRange (_stmts1);

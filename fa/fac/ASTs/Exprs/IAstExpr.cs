@@ -39,15 +39,14 @@ namespace fac.ASTs.Exprs {
 		/// <param name="_cache_err">用于缓存错误的变量</param>
 		/// <param name="_check_cb">前置?运算回调，当函数调用或数组随机访问参数带?运算符时，将可能为空的判断通过 _check_cb 回调传递出来</param>
 		/// <returns>执行此表达式前需执行的前置语句、简化后的表达式</returns>
-		public virtual (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) => throw new NotImplementedException ();
+		public virtual (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new NotImplementedException ();
 
 		/// <summary>
 		/// 分解表达式
 		/// </summary>
-		/// <param name="_cache_err">用于缓存错误的变量</param>
-		/// <param name="_check_cb">前置?运算回调，当函数调用或数组随机访问参数带?运算符时，将可能为空的判断通过 _check_cb 回调传递出来</param>
+		/// <param name="_cache_err">用于缓存错误的变量，null代表不处理空判断，(null, null)代表当前方法返回类型不可空</param>
 		/// <returns>执行此表达式前需执行的前置语句、简化后的表达式</returns>
-		public abstract (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb);
+		public abstract (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err);
 
 
 
@@ -137,7 +136,7 @@ namespace fac.ASTs.Exprs {
 			var _prefix_ctxs = _ctx.strongExprPrefix ();
 			var _suffix_ctxs = _ctx.strongExprSuffix ();
 			foreach (var _suffix_ctx in _suffix_ctxs) {
-				if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.Qus () != null || _suffix_ctx.id () != null) {
+				if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.id () != null) {
 					var _tmp_expr = new AstExpr_Op1 { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;
 					_tmp_expr.Operator = _suffix_ctx.GetText ();

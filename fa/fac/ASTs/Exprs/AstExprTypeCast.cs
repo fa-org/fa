@@ -19,20 +19,28 @@ namespace fac.ASTs.Exprs {
 
 		public static IAstExpr Make (IAstExpr _dest, IAstType _to_type) {
 			if (_dest.ExpectType == null) {
-				if (_dest is AstExprName_BuildIn)
-					return _dest;
 				throw new Exception ("应识别类型后做转换处理");
-			} else if (_to_type == null || _to_type is AstType_Any || _dest.ExpectType.IsSame (_to_type)) {
+			} else if (AllowDirectReturn (_dest.ExpectType, _to_type)) {
 				return _dest;
-			} else if (_to_type is AstType_OptionalWrap _owrap2 && _dest.ExpectType.IsSame (_owrap2.ItemType)) {
-				return AstExpr_AccessBuildIn.Optional_FromValue (_dest);
-			} else if (_dest.ExpectType is AstType_OptionalWrap _otype1 && _to_type is AstType_OptionalWrap _otype2 && TypeFuncs.AllowTypeCast (_otype1.ItemType, _otype2.ItemType)) {
-				return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
-			} else if (TypeFuncs.AllowTypeCast (_dest.ExpectType, _to_type)) {
+			} else if (AllowTypeCast (_dest.ExpectType, _to_type)) {
 				return new AstExprTypeCast { Token = _dest.Token, ExpectType = _to_type, Value = _dest };
 			} else {
 				throw new CodeException (_dest.Token, $"类型 {_dest.ExpectType} 无法转为类型 {_to_type}");
 			}
+		}
+
+		private static bool AllowDirectReturn (IAstType _src, IAstType _dest) {
+			if (_dest == null || _dest is AstType_Any || _src.IsSame (_dest))
+				return true;
+			return false;
+		}
+
+		private static bool AllowTypeCast (IAstType _src, IAstType _dest) {
+			if (_src is AstType_OptionalWrap _owrap1)
+				_src = _owrap1.ItemType;
+			if (_dest is AstType_OptionalWrap _owrap2)
+				_dest = _owrap2.ItemType;
+			return AllowDirectReturn (_src, _dest);
 		}
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) => Value = _cb (Value, _deep, _group);
@@ -47,8 +55,28 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => Value.GuessType ();
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
-			var (_stmts, _expr) = Value.ExpandExpr (_cache_err, _check_cb);
+		public virtual (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+			var (_stmts, _expr) = Value.ExpandExprAssign (_rval, _cache_err);
+			Value = _expr;
+			if (NeedIntoOptional ()) {
+				if (_cache_err._var == null)
+					throw new CodeException (Value.Token, $"此处代码可能为空，需手动处理，或将所在函数返回值类型改为可空类型");
+				_stmts.Add (new AstStmt_If {
+					Token = Value.Token,
+					Condition = AstExpr_AccessBuildIn.Optional_NotHasValue (Value),
+					IfTrueCodes = new List<IAstStmt> {
+					},
+					IfFalseCodes = new List<IAstStmt> {
+					},
+				});
+			} else if (NeedOutoOptional ()) {
+
+			}
+			return (_stmts, this);
+		}
+
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var (_stmts, _expr) = Value.ExpandExpr (_cache_err);
 			Value = _expr;
 			return (_stmts, this);
 		}
@@ -56,5 +84,13 @@ namespace fac.ASTs.Exprs {
 		public override string GenerateCSharp (int _indent) => $"({ExpectType.GenerateCSharp (_indent)}) {Value.GenerateCSharp (_indent)}";
 
 		public override bool AllowAssign () => false;
+
+		private bool NeedIntoOptional () {
+			return Value.ExpectType is AstType_OptionalWrap _owrap1 && AllowDirectReturn (_owrap1.ExpectType, ExpectType);
+		}
+
+		private bool NeedOutoOptional () {
+			return ExpectType is AstType_OptionalWrap _owrap1 && AllowDirectReturn (Value.ExpectType, _owrap1.ExpectType);
+		}
 	}
 }

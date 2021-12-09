@@ -21,24 +21,9 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			if ((!IsPrefix) && Operator == "?") {
-				if (_expect_type != null) {
-					Value = Value.TraversalCalcType (new AstType_OptionalWrap { Token = Token, Mut = false, ItemType = _expect_type });
-					ExpectType = _expect_type;
-				} else {
-					Value = Value.TraversalCalcType (null);
-					if (Value.ExpectType is AstType_OptionalWrap _otype) {
-						ExpectType = _otype.ItemType;
-					} else {
-						throw new CodeException (Token, "? 运算符只能用于可空类型的值的计算");
-					}
-				}
-				return this;
-			} else {
-				Value = Value.TraversalCalcType (_expect_type);
-				ExpectType = Value.ExpectType;
-				return AstExprTypeCast.Make (this, _expect_type);
-			}
+			Value = Value.TraversalCalcType (_expect_type);
+			ExpectType = Value.ExpectType;
+			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
 		public override IAstType GuessType () {
@@ -54,29 +39,14 @@ namespace fac.ASTs.Exprs {
 					if (_expect != null)
 						return _expect;
 				}
-			} else if (Operator == "?") {
-				var _type = Value.GuessType ();
-				if (_type is AstType_OptionalWrap _otype) {
-					return _otype.ItemType;
-				} else {
-					return _type;
-				}
 			}
 			throw new UnimplException (Token);
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
 			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
-			if ((!IsPrefix) && Operator == "?") {
-				// 新增代码：如果前者为空那么 return
-				// 返回 _val.GetValue ()
-				_check_cb (AstExpr_AccessBuildIn.Optional_NotHasValue (_val), AstExpr_AccessBuildIn.Optional_GetError (_val));
-				return (_stmts, AstExpr_AccessBuildIn.Optional_GetValue (_val));
-			} else {
-				// 直接访问
-				Value = _val;
-				return (_stmts, this);
-			}
+			Value = _val;
+			return (_stmts, this);
 		}
 
 		public override string GenerateCSharp (int _indent) {

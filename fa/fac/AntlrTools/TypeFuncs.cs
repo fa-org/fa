@@ -34,16 +34,6 @@ namespace fac.AntlrTools {
 			}
 		}
 
-		public static bool AllowTypeCast (IAstType _src, IAstType _dest) {
-			if (_src == null || _dest == null || _src.IsSame (_dest) || _dest is AstType_Any) {
-				return true;
-			} else {
-				if (_dest is AstType_OptionalWrap _op1)
-					_src.IsSame (_op1.ItemType);
-				return false;
-			}
-		}
-
 		// 获取函数语句代码列表
 		public static List<IAstStmt> GetFuncBodyCodes (IToken _token, IAstType _return_type, FaParser.ExprContext _expr_ctx, FaParser.StmtContext[] _stmt_ctxs) {
 			List<IAstStmt> _body_codes;

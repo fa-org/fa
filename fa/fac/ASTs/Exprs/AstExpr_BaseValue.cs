@@ -34,7 +34,7 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => DataType;
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) => (new List<IAstStmt> (), this);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) => (new List<IAstStmt> (), this);
 
 		public override string GenerateCSharp (int _indent) {
 			if (DataType is AstType_String) {

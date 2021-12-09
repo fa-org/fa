@@ -3,7 +3,7 @@ use fa;
 class Program {
 	public static void Main () {
 		int[] n = [45, 4123, 213, 42];
-		_ = n [3]? = 1234;
+		_ = n [3] = 1234;
 		//Console.WriteLine ("{0}".Format (n [3] ?? -1));
 	}
 }

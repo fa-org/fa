@@ -82,7 +82,7 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos) _cache_err) {
 			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
 			Value = _val;
 			if (Operator == "[]") {
@@ -93,23 +93,13 @@ namespace fac.ASTs.Exprs {
 				 * if (idx < 0)
 				 *     idx += val.Length;
 				 * if (idx < 0 || idx >= val.Length) {
-				 *     var _item_defvar;
-				 *     _item_defvar = err 数组随机访问超限;
-				 *     _item_defvar
+				 *     _cache_err = err 数组随机访问下标超过数组大小;
+				 *     goto _cache_err;
 				 * } else {
 				 *     val [idx] = _rval;
 				 *     val [idx]
 				 * }
 				 */
-
-				//// var _item_defvar;
-				//var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, Expr = null };
-				//_stmts.Add (_item_defvar);
-
-				//// 给 _item_defvar 赋完值后的处理逻辑
-				//var _err_stmt = new AstStmt_Label { Token = null };
-				//var _cache_error = (_var: _item_defvar.GetRef (), _pos: _err_stmt);
-				TODO ();
 
 				// var idx;
 				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), Expr = AstExprTypeCast.Make (Arguments[0], IAstType.FromName ("int")) };
@@ -129,10 +119,12 @@ namespace fac.ASTs.Exprs {
 				});
 
 				// if (idx < 0 || idx >= val.Length) {
-				//     _item_defvar = err 数组随机访问下标超过数组大小;
+				//     _cache_err = err 数组随机访问下标超过数组大小;
+				//     goto _cache_err;
 				// } else {
-				//     _item_defvar = val[idx];
+				//     val[idx] = _rval;
 				// }
+				var _val_idx = AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef ());
 				_stmts.Add (new AstStmt_If {
 					Token = Token,
 					Condition = AstExpr_Op2.MakeCondition (
@@ -141,22 +133,19 @@ namespace fac.ASTs.Exprs {
 						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_AccessBuildIn.Array_Length (Value))
 					),
 					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_item_defvar.DataType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
+						AstStmt_ExprWrap.MakeAssign (_cache_err._var, AstExpr_AccessBuildIn.Optional_FromError (_cache_err._var.ExpectType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
 					},
 					IfFalseCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromValue (AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef ()))),
+						AstStmt_ExprWrap.MakeAssign (_val_idx, _rval),
 					},
 				});
-
-				// 下标错误部分
-				_stmts.Add (_err_stmt);
-				return (_stmts, _item_defvar.GetRef ());
+				return (_stmts, _val_idx);
 			} else {
 				throw new CodeException (Token, $"方法调用表达式无法赋值");
 			}
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
 			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
 			Value = _val;
 			if (Operator == "[]") {

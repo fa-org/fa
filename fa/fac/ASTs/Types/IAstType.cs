@@ -26,7 +26,7 @@ namespace fac.ASTs.Types {
 
 		public override bool AllowAssign () => false;
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Action<IAstExpr, IAstExpr> _check_cb) => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new Exception ("不应执行此处代码");
 
 		public static IAstType FromContext (FaParser.TypeContext _ctx) {
 			if (_ctx.Params () != null) {
@@ -159,5 +159,7 @@ namespace fac.ASTs.Types {
 				_ => false,
 			};
 		}
+
+		public AstType_OptionalWrap Optional { get => this is AstType_OptionalWrap _owrap ? _owrap : new AstType_OptionalWrap { Token = Token, ItemType = this }; }
 	}
 }
