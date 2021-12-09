@@ -42,8 +42,8 @@ namespace fac.ASTs.Stmts {
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			Condition = _cb (Condition, _deep, _group);
-			IfTrueCodes.Traversal (_deep + 1, 0, _cb);
-			IfFalseCodes.Traversal (_deep + 1, 1, _cb);
+			IfTrueCodes.Traversal (_deep + 1, Common.GetRandomInt (), _cb);
+			IfFalseCodes.Traversal (_deep + 1, Common.GetRandomInt (), _cb);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -55,15 +55,13 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			return ExpandStmtHelper (_cache_err, (_check_cb) => {
-				var (_stmts, _expr) = Condition.ExpandExpr (_cache_err, _check_cb);
-				Condition = _expr;
-				IfTrueCodes = IfTrueCodes.ExpandStmts (_cache_err);
-				IfFalseCodes = IfFalseCodes.ExpandStmts (_cache_err);
-				_stmts.Add (this);
-				return _stmts;
-			});
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var (_stmts, _expr) = Condition.ExpandExpr (_cache_err);
+			Condition = _expr;
+			IfTrueCodes = IfTrueCodes.ExpandStmts (_cache_err);
+			IfFalseCodes = IfFalseCodes.ExpandStmts (_cache_err);
+			_stmts.Add (this);
+			return _stmts;
 		}
 
 		public override string GenerateCSharp (int _indent) {

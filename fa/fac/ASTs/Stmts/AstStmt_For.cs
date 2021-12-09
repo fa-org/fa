@@ -22,7 +22,7 @@ namespace fac.ASTs.Stmts {
 			Initializes.Traversal (_deep, _group, _cb);
 			Condition = _cb (Condition, _deep, _group);
 			Increment.Traversal (_deep, _group, _cb);
-			BodyCodes.Traversal (_deep + 1, 0, _cb);
+			BodyCodes.Traversal (_deep + 1, Common.GetRandomInt (), _cb);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -43,20 +43,18 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			return ExpandStmtHelper (_cache_err, (_check_cb) => {
-				var _stmts = Initializes.ExpandStmts (_cache_err);
-				(Initializes, Condition) = Condition.ExpandExpr (_cache_err, _check_cb);
-				for (int i = 0; i < Increment.Count; ++i) {
-					var (_inc_stmts, _inc_expr) = Increment[i].ExpandExpr (_cache_err, _check_cb);
-					if (_inc_stmts.Count > 0)
-						throw new CodeException (Increment[i].Token, $"此处不支持复合逻辑表达式");
-					Increment[i] = _inc_expr;
-				}
-				BodyCodes = BodyCodes.ExpandStmts (_cache_err);
-				_stmts.Add (this);
-				return new List<IAstStmt> { new AstStmt_HuaQuotWrap { Token = _stmts[0].Token, Stmts = _stmts } };
-			});
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var _stmts = Initializes.ExpandStmts (_cache_err);
+			(Initializes, Condition) = Condition.ExpandExpr (_cache_err);
+			for (int i = 0; i < Increment.Count; ++i) {
+				var (_inc_stmts, _inc_expr) = Increment[i].ExpandExpr (_cache_err);
+				if (_inc_stmts.Count > 0)
+					throw new CodeException (Increment[i].Token, $"此处不支持复合逻辑表达式");
+				Increment[i] = _inc_expr;
+			}
+			BodyCodes = BodyCodes.ExpandStmts (_cache_err);
+			_stmts.Add (this);
+			return new List<IAstStmt> { new AstStmt_HuaQuotWrap { Token = _stmts[0].Token, Stmts = _stmts } };
 		}
 
 		public override string GenerateCSharp (int _indent) {

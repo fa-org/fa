@@ -25,9 +25,10 @@ namespace fac.ASTs.Exprs {
 				CaseValues.Traversal (_deep, _group, _cb);
 			CaseWhen.Traversal (_deep, _group, _cb);
 			for (int i = 0; i < CaseCodes.Count; ++i) {
+				var _temp_int = Common.GetRandomInt ();
 				for (int j = 0; j < CaseCodes[i]._stmts.Count; ++j)
-					CaseCodes[i]._stmts[j] = _cb (CaseCodes[i]._stmts[j],_deep + 1, i) as IAstStmt;
-				CaseCodes[i] = (_stmts: CaseCodes[i]._stmts, _expr: _cb (CaseCodes[i]._expr, _deep + 1, i));
+					CaseCodes[i]._stmts[j] = _cb (CaseCodes[i]._stmts[j],_deep + 1, _temp_int) as IAstStmt;
+				CaseCodes[i] = (_stmts: CaseCodes[i]._stmts, _expr: _cb (CaseCodes[i]._expr, _deep + 1, _temp_int));
 			}
 		}
 
@@ -52,7 +53,7 @@ namespace fac.ASTs.Exprs {
 			return TypeFuncs.GetCompatibleType (true, (from p in CaseCodes select p._expr.GuessType ()).ToArray ());
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _temp_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
 			var _switch_stmt = new AstStmt_Switch { Token = Token, Condition = Condition, CaseValues = CaseValues, CaseWhen = CaseWhen, CaseCodes = new List<IAstStmt> () };

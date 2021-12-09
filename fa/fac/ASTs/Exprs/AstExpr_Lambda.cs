@@ -49,7 +49,7 @@ namespace fac.ASTs.Exprs {
 			int _size = Info.CurrentFuncVariables.Count;
 			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = this });
 			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Vars = new Dictionary<string, AstStmt_DefVariable> (), Group = _group + 2 });
-			BodyCodes.Traversal (_deep + 2, 0, _cb);
+			BodyCodes.Traversal (_deep + 2, Common.GetRandomInt (), _cb);
 			Info.CurrentFuncVariables.RemoveRange (_size, Info.CurrentFuncVariables.Count - _size);
 		}
 
@@ -69,7 +69,7 @@ namespace fac.ASTs.Exprs {
 			return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList () };
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			BodyCodes = TypeFuncs.ExpandFuncCodes (ReturnType, BodyCodes);
 			return (new List<IAstStmt> (), this);
 		}

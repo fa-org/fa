@@ -89,45 +89,13 @@ namespace fac.ASTs.Stmts {
 		public static List<IAstStmt> FromStmts (FaParser.StmtContext[] _ctxs) => (from p in _ctxs select FromStmt (p)).CombileStmts ();
 		public override IAstType GuessType () => throw new Exception ("不应执行此处代码");
 		public override bool AllowAssign () => throw new Exception ("不应执行此处代码");
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new Exception ("不应执行此处代码");
 
 		/// <summary>
 		/// 分解语句
 		/// </summary>
 		/// <param name="_cache_err">用于缓存错误的变量</param>
 		/// <returns></returns>
-		public abstract List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err);
-
-		/// <summary>
-		/// 分解语句辅助类，此类在函数最外层辅助return空值；在if、switch等表达式中辅助内部语句向外赋空值
-		/// </summary>
-		/// <param name="_cache_err"></param>
-		/// <param name="_callback"></param>
-		/// <returns></returns>
-		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) => ExpandStmtHelper (_cache_err, false, _callback);
-		protected List<IAstStmt> ExpandStmtHelper ((IAstExprName _var, AstStmt_Label _pos) _cache_err, bool _ignore_error, Func<Action<IAstExpr, IAstExpr>, List<IAstStmt>> _callback) {
-			var _checks = new List<(IAstExpr, IAstExpr)> ();
-			var _stmts = _callback ((_cond, _err) => {
-				if (_cache_err == (null, null) && (!_ignore_error))
-					throw new CodeException (Token, "函数返回值必须为可空才能自动返回错误");
-				_checks.Add ((_cond, _err));
-			});
-			if (_ignore_error)
-				return _stmts;
-			//
-			var _stmts2 = new List<IAstStmt> ();
-			foreach (var (_cond, _err) in _checks) {
-				_stmts2.Add (new AstStmt_If {
-					Token = _cond.Token,
-					Condition = _cond,
-					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err._var, AstExpr_AccessBuildIn.Optional_FromError (_cache_err._var.ExpectType, _err)),
-						_cache_err._pos.GetRef (),
-					},
-				});
-			}
-			_stmts2.AddRange (_stmts);
-			return _stmts2;
-		}
+		public abstract List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err);
 	}
 }

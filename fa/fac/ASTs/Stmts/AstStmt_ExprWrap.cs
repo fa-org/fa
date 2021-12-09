@@ -49,20 +49,18 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			if (Expr == null)
 				return new List<IAstStmt> ();
-			return ExpandStmtHelper (_cache_err, IgnoreError, (_check_cb) => {
-				var (_stmts, _expr) = Expr.ExpandExpr (_cache_err, _check_cb);
-				if (_expr.IsSimpleExpr)
-					return _stmts;
-				if (_expr is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType != AccessBuildInType.ARR_Add)
-					return _stmts;
-
-				Expr = _expr;
-				_stmts.Add (this);
+			var (_stmts, _expr) = Expr.ExpandExpr (_cache_err);
+			if (_expr.IsSimpleExpr)
 				return _stmts;
-			});
+			if (_expr is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType != AccessBuildInType.ARR_Add)
+				return _stmts;
+
+			Expr = _expr;
+			_stmts.Add (this);
+			return _stmts;
 		}
 
 		public override string GenerateCSharp (int _indent) => $"{_indent.Indent ()}{Expr.GenerateCSharp (_indent)};\r\n";

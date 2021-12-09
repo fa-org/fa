@@ -17,9 +17,10 @@ namespace fac.ASTs.Stmts {
 
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Iterator = _cb (Iterator, _deep + 1, 0) as AstStmt_DefVariable;
-			ListContainer = _cb (ListContainer, _deep + 1, 0);
-			BodyCodes.Traversal (_deep + 1, 0, _cb);
+			var _rand_int = Common.GetRandomInt ();
+			Iterator = _cb (Iterator, _deep + 1, _rand_int) as AstStmt_DefVariable;
+			ListContainer = _cb (ListContainer, _deep + 1, _rand_int);
+			BodyCodes.Traversal (_deep + 1, _rand_int, _cb);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -31,14 +32,12 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			return ExpandStmtHelper (_cache_err, (_check_cb) => {
-				var (_stmts, _expr) = ListContainer.ExpandExpr (_cache_err, _check_cb);
-				ListContainer = _expr;
-				BodyCodes = BodyCodes.ExpandStmts (_cache_err);
-				_stmts.Add (this);
-				return _stmts;
-			});
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var (_stmts, _expr) = ListContainer.ExpandExpr (_cache_err);
+			ListContainer = _expr;
+			BodyCodes = BodyCodes.ExpandStmts (_cache_err);
+			_stmts.Add (this);
+			return _stmts;
 		}
 
 		public override string GenerateCSharp (int _indent) {

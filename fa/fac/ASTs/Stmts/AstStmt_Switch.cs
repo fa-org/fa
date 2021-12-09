@@ -25,7 +25,7 @@ namespace fac.ASTs.Stmts {
 				CaseValues.Traversal (_deep, _group, _cb);
 			CaseWhen.Traversal (_deep, _group, _cb);
 			for (int i = 0; i < CaseCodes.Count; ++i)
-				CaseCodes[i] = _cb (CaseCodes[i], _deep + 1, i) as IAstStmt;
+				CaseCodes[i] = _cb (CaseCodes[i], _deep + 1, Common.GetRandomInt ()) as IAstStmt;
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -43,71 +43,69 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			return ExpandStmtHelper (_cache_err, (_check_cb) => {
-				var _stmts = new List<IAstStmt> ();
-				if (CaseValues != null) {
-					// 带val match
-					var (_stmts1, _cond1) = Condition.ExpandExpr (_cache_err, _check_cb);
-					_stmts.AddRange (_stmts1);
-					if (CaseValues.Count == 0) {
-						// do nothing
-					} else if (CaseValues[0] is AstExprName_Ignore && CaseWhen[0] == null) {
-						_stmts.AddRange (CaseCodes[0].ExpandStmt (_cache_err));
-					} else {
-						var (_stmts2, _cond2) = CaseValues[0].ExpandExpr (_cache_err, _check_cb);
-						var (_stmts3, _cond3) = CaseWhen[0]?.ExpandExpr (_cache_err, _check_cb) ?? (new List<IAstStmt> (), null);
-						_stmts.AddRange (_stmts2);
-						_stmts.AddRange (_stmts3);
-						var _cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond1, Value2 = _cond2, Operator = "==", ExpectType = IAstType.FromName ("bool") };
-						if (_cond3 != null)
-							_cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond_expr, Value2 = _cond3, Operator = "&&", ExpectType = IAstType.FromName ("bool") };
-						var (_stmts4, _cond4) = _cond_expr.ExpandExpr (_cache_err, _check_cb);
-						_stmts.AddRange (_stmts4);
-						_stmts.Add (new AstStmt_If {
-							Token = CaseValues[0].Token,
-							Condition = _cond4,
-							IfTrueCodes = CaseCodes[0].ExpandStmt (_cache_err),
-							IfFalseCodes = CaseCodes.Count switch {
-								1 => new List<IAstStmt> (),
-								_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (_cache_err),
-								_ => new AstStmt_Switch {
-									Token = CaseValues[1]?.Token ?? CaseWhen[1]?.Token ?? null,
-									Condition = _cond1,
-									CaseValues = CaseValues.Skip (1).ToList (),
-									CaseWhen = CaseWhen.Skip (1).ToList (),
-									CaseCodes = CaseCodes.Skip (1).ToList (),
-								}.ExpandStmt (_cache_err),
-							},
-						});
-					}
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var _stmts = new List<IAstStmt> ();
+			if (CaseValues != null) {
+				// 带val match
+				var (_stmts1, _cond1) = Condition.ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				if (CaseValues.Count == 0) {
+					// do nothing
+				} else if (CaseValues[0] is AstExprName_Ignore && CaseWhen[0] == null) {
+					_stmts.AddRange (CaseCodes[0].ExpandStmt (_cache_err));
 				} else {
-					// 不带val match
-					if (CaseWhen.Count == 0) {
-						// do nothing
-					} else if (CaseWhen[0] == null) {
-						_stmts.AddRange (CaseCodes[0].ExpandStmt (_cache_err));
-					} else {
-						var (_stmts2, _cond2) = CaseWhen[0].ExpandExpr (_cache_err, _check_cb);
-						_stmts.AddRange (_stmts2);
-						_stmts.Add (new AstStmt_If {
-							Token = CaseWhen[0].Token,
-							Condition = _cond2,
-							IfTrueCodes = CaseCodes[0].ExpandStmt (_cache_err),
-							IfFalseCodes = CaseCodes.Count switch {
-								1 => new List<IAstStmt> (),
-								_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (_cache_err),
-								_ => new AstStmt_Switch {
-									Token = CaseWhen[1]?.Token ?? null,
-									CaseWhen = CaseWhen.Skip (1).ToList (),
-									CaseCodes = CaseCodes.Skip (1).ToList (),
-								}.ExpandStmt (_cache_err),
-							},
-						});
-					}
+					var (_stmts2, _cond2) = CaseValues[0].ExpandExpr (_cache_err);
+					var (_stmts3, _cond3) = CaseWhen[0]?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
+					_stmts.AddRange (_stmts2);
+					_stmts.AddRange (_stmts3);
+					var _cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond1, Value2 = _cond2, Operator = "==", ExpectType = IAstType.FromName ("bool") };
+					if (_cond3 != null)
+						_cond_expr = new AstExpr_Op2 { Token = CaseValues[0].Token, Value1 = _cond_expr, Value2 = _cond3, Operator = "&&", ExpectType = IAstType.FromName ("bool") };
+					var (_stmts4, _cond4) = _cond_expr.ExpandExpr (_cache_err);
+					_stmts.AddRange (_stmts4);
+					_stmts.Add (new AstStmt_If {
+						Token = CaseValues[0].Token,
+						Condition = _cond4,
+						IfTrueCodes = CaseCodes[0].ExpandStmt (_cache_err),
+						IfFalseCodes = CaseCodes.Count switch {
+							1 => new List<IAstStmt> (),
+							_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (_cache_err),
+							_ => new AstStmt_Switch {
+								Token = CaseValues[1]?.Token ?? CaseWhen[1]?.Token ?? null,
+								Condition = _cond1,
+								CaseValues = CaseValues.Skip (1).ToList (),
+								CaseWhen = CaseWhen.Skip (1).ToList (),
+								CaseCodes = CaseCodes.Skip (1).ToList (),
+							}.ExpandStmt (_cache_err),
+						},
+					});
 				}
-				return _stmts;
-			});
+			} else {
+				// 不带val match
+				if (CaseWhen.Count == 0) {
+					// do nothing
+				} else if (CaseWhen[0] == null) {
+					_stmts.AddRange (CaseCodes[0].ExpandStmt (_cache_err));
+				} else {
+					var (_stmts2, _cond2) = CaseWhen[0].ExpandExpr (_cache_err);
+					_stmts.AddRange (_stmts2);
+					_stmts.Add (new AstStmt_If {
+						Token = CaseWhen[0].Token,
+						Condition = _cond2,
+						IfTrueCodes = CaseCodes[0].ExpandStmt (_cache_err),
+						IfFalseCodes = CaseCodes.Count switch {
+							1 => new List<IAstStmt> (),
+							_ when CaseWhen[1] is AstExprName_Ignore => CaseCodes[1].ExpandStmt (_cache_err),
+							_ => new AstStmt_Switch {
+								Token = CaseWhen[1]?.Token ?? null,
+								CaseWhen = CaseWhen.Skip (1).ToList (),
+								CaseCodes = CaseCodes.Skip (1).ToList (),
+							}.ExpandStmt (_cache_err),
+						},
+					});
+				}
+			}
+			return _stmts;
 		}
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");

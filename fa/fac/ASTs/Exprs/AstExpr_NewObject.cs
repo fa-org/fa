@@ -57,18 +57,18 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => DataType;
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = new List<IAstStmt> ();
 			if (InitialValues != null) {
 				for (int i = 0; i < InitialValues.Count; ++i) {
-					var (_stmts1, _val1) = InitialValues[i]._value.ExpandExpr (_cache_err, _check_cb);
+					var (_stmts1, _val1) = InitialValues[i]._value.ExpandExpr (_cache_err);
 					_stmts.AddRange (_stmts1);
 					InitialValues[i] = (InitialValues[i]._name, _val1);
 				}
 			}
 			if (ConstructorArguments != null) {
 				for (int i = 0; i < ConstructorArguments.Count; ++i) {
-					var (_stmts1, _val1) = ConstructorArguments[i].ExpandExpr (_cache_err, _check_cb);
+					var (_stmts1, _val1) = ConstructorArguments[i].ExpandExpr (_cache_err);
 					_stmts.AddRange (_stmts1);
 					ConstructorArguments[i] = _val1;
 				}

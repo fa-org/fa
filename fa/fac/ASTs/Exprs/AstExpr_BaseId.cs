@@ -22,7 +22,7 @@ namespace fac.ASTs.Exprs {
 			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new Exception ("不应执行此处代码");
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 

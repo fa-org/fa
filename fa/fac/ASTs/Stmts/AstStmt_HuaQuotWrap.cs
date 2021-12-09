@@ -12,7 +12,7 @@ namespace fac.ASTs.Stmts {
 		public List<IAstStmt> Stmts { get; set; }
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Stmts.Traversal (_deep + 1, 0, _cb);
+			Stmts.Traversal (_deep + 1, Common.GetRandomInt (), _cb);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -22,11 +22,9 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			return ExpandStmtHelper (_cache_err, (_check_cb) => {
-				Stmts = Stmts.ExpandStmts (_cache_err);
-				return new List<IAstStmt> { this };
-			});
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			Stmts = Stmts.ExpandStmts (_cache_err);
+			return new List<IAstStmt> { this };
 		}
 
 		public override string GenerateCSharp (int _indent) {

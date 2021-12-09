@@ -46,7 +46,7 @@ namespace fac.ASTs.Stmts {
 			return this;
 		}
 
-		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = new List<IAstStmt> { this };
 			if (Expr == null || Expr.IsSimpleExpr)
 				return _stmts;
@@ -56,12 +56,10 @@ namespace fac.ASTs.Stmts {
 				_label = new AstStmt_Label { };
 				_cache_err = (_var: GetRef (), _pos: _label);
 			}
-			_stmts.AddRange (ExpandStmtHelper (_cache_err, (_check_cb) => {
-				var (_stmts2, _expr) = Expr.ExpandExpr (_cache_err, _check_cb);
-				Expr = null;
-				_stmts2.Add (AstStmt_ExprWrap.MakeAssign (GetRef (), _expr));
-				return _stmts2;
-			}));
+			var (_stmts2, _expr) = Expr.ExpandExpr (_cache_err);
+			_stmts.AddRange (_stmts2);
+			Expr = null;
+			_stmts.Add (AstStmt_ExprWrap.MakeAssign (GetRef (), _expr));
 			if (_label != null)
 				_stmts.Add (_label);
 			return _stmts;

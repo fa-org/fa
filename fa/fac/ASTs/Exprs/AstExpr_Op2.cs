@@ -110,21 +110,21 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = new List<IAstStmt> { };
-			var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err, _check_cb);
+			var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
 			_stmts.AddRange (_stmts1);
 			Value2 = _val1;
 			if (Operator == "=") {
 				if (Value1 is AstExprName_Ignore)
 					throw new Exception ("不应执行此处代码");
-				(_stmts1, _val1) = Value1.ExpandExprAssign (Value2, _cache_err, _check_cb);
+				(_stmts1, _val1) = Value1.ExpandExprAssign (Value2, _cache_err);
 				_stmts.AddRange (_stmts1);
 				return (_stmts, _val1);
 			}
 			var _tmp_stmt = new AstStmt_DefVariable { DataType = ExpectType };
 			_stmts.Add (_tmp_stmt);
-			(_stmts1, _val1) = Value1.ExpandExpr (_cache_err, _check_cb);
+			(_stmts1, _val1) = Value1.ExpandExpr (_cache_err);
 			_stmts.AddRange (_stmts1);
 			Value1 = _val1;
 			//

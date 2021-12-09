@@ -43,8 +43,8 @@ namespace fac.ASTs.Exprs {
 			throw new UnimplException (Token);
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			var (_stmts, _val) = Value.ExpandExpr (_cache_err, _check_cb);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var (_stmts, _val) = Value.ExpandExpr (_cache_err);
 			Value = _val;
 			return (_stmts, this);
 		}

@@ -36,8 +36,7 @@ namespace fac.ASTs.Exprs {
 		/// 赋值方式分解表达式
 		/// </summary>
 		/// <param name="_rval">待赋的值</param>
-		/// <param name="_cache_err">用于缓存错误的变量</param>
-		/// <param name="_check_cb">前置?运算回调，当函数调用或数组随机访问参数带?运算符时，将可能为空的判断通过 _check_cb 回调传递出来</param>
+		/// <param name="_cache_err">用于缓存错误的变量，null代表不处理空判断，(null, null)代表当前方法返回类型不可空</param>
 		/// <returns>执行此表达式前需执行的前置语句、简化后的表达式</returns>
 		public virtual (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new NotImplementedException ();
 
@@ -145,17 +144,14 @@ namespace fac.ASTs.Exprs {
 				} else if (_suffix_ctx.QuotYuanL () != null) {
 					var _tmp_expr = new AstExpr_OpN { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;
-					_tmp_expr.Operator = "()";
 					_tmp_expr.Arguments = (from p in _suffix_ctx.expr () select FromContext (p)).ToList ();
 					_expr = _tmp_expr;
 				} else if (_suffix_ctx.QuotFangL () != null) {
-					var _tmp_expr = new AstExpr_OpN { Token = _ctx.Start };
-					_tmp_expr.Value = _expr;
-					_tmp_expr.Operator = "[]";
-					_tmp_expr.Arguments = (from p in _suffix_ctx.exprOpt () select p.expr () != null ? FromContext (p.expr ()) : null).ToList ();
-					if (_tmp_expr.Arguments.Count == 1 && _tmp_expr.Arguments[0] == null)
-						_tmp_expr.Arguments.Clear ();
-					_expr = _tmp_expr;
+					//var _arr = _expr;
+					var _args = (from p in _suffix_ctx.exprOpt () select p.expr () != null ? FromContext (p.expr ()) : null).ToList ();
+					if (_args.Count != 1)
+						throw new CodeException (_args.Count > 0 ? _args[0].Token : _expr.Token, "数组随机访问下标只能传一个整数");
+					return AstExpr_AccessBuildIn.Array_AccessItem (_expr, _args[0], true);
 				} else {
 					throw new UnimplException (_suffix_ctx);
 				}

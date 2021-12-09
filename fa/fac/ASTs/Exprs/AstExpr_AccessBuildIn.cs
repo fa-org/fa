@@ -2,6 +2,7 @@
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,10 +19,24 @@ namespace fac.ASTs.Exprs {
 
 
 		private AstExpr_AccessBuildIn () { }
-		public static IAstExpr Array_New (IAstType _type) => new AstExpr_AccessBuildIn { AccessType = AccessBuildInType.ARR_New, ExpectType = _type };
-		public static IAstExpr Array_Length (IAstExpr _array) => new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_Length, ExpectType = IAstType.FromName ("int") };
-		public static IAstExpr Array_Add (IAstExpr _array, IAstExpr _item) => new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_Add, AttachArgs = new List<IAstExpr> { _item } };
+		public static IAstExpr Array_New (IAstType _type) {
+			if (_type is not AstType_ArrayWrap)
+				throw new CodeException (_type.Token, "类型必须指定为数组类型");
+			return new AstExpr_AccessBuildIn { AccessType = AccessBuildInType.ARR_New, ExpectType = _type };
+		}
+		public static IAstExpr Array_Length (IAstExpr _array) {
+			if (_array.ExpectType is not AstType_ArrayWrap)
+				throw new CodeException (_array.Token, "类型必须指定为数组类型");
+			return new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_Length, ExpectType = IAstType.FromName ("int") };
+		}
+		public static IAstExpr Array_Add (IAstExpr _array, IAstExpr _item) {
+			if (_array.ExpectType is not AstType_ArrayWrap)
+				throw new CodeException (_array.Token, "类型必须指定为数组类型");
+			return new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_Add, AttachArgs = new List<IAstExpr> { _item } };
+		}
 		public static IAstExpr Array_AccessItem (IAstExpr _array, IAstExpr _index, bool _pre_expand) {
+			if (_array.ExpectType is not AstType_ArrayWrap)
+				throw new CodeException (_array.Token, "类型必须指定为数组类型");
 			var _item_type = (_array.ExpectType as AstType_ArrayWrap).ItemType;
 			_item_type = _pre_expand ? _item_type.Optional : _item_type;
 			return new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
@@ -53,17 +68,134 @@ namespace fac.ASTs.Exprs {
 			return ExpectType;
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
-			var (_stmts, _value) = Value?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
-			Value = _value;
-			if (AttachArgs != null) {
-				for (int i = 0; i < AttachArgs.Count; ++i) {
-					var (_stmts1, _value1) = AttachArgs[i].ExpandExpr (_cache_err);
-					_stmts.AddRange (_stmts1);
-					AttachArgs[i] = _value1;
-				}
+		private List<IAstStmt> InitExpand ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var (_stmts, _val) = Value?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
+			Value = _val;
+			for (int i = 0; i < (AttachArgs?.Count ?? 0); ++i) {
+				var (_stmts1, _val1) = AttachArgs[i].ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				AttachArgs[i] = _val1;
 			}
-			TODO ();
+			return _stmts;
+		}
+
+		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var _stmts = InitExpand (_cache_err);
+			if (AccessType == AccessBuildInType.ARR_AccessItem) {
+				if (_cache_err == null)
+					throw new CodeException (Token, "数组随机访问可能为空值，需处理或忽略异常");
+
+				/* 生成逻辑： val [n]
+				 * var idx = n;
+				 * if (idx < 0)
+				 *     idx += val.Length;
+				 * if (idx < 0 || idx >= val.Length) {
+				 *     _cache_err = err 数组随机访问下标超过数组大小;
+				 * } else {
+				 *     val [idx] = _rval;
+				 *     val [idx]
+				 * }
+				 */
+
+				// var idx;
+				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), Expr = AstExprTypeCast.Make (AttachArgs[0], IAstType.FromName ("int")) };
+				_stmts.Add (_index_defvar);
+
+				// if (idx < 0)
+				//     idx += val.Length;
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op2.MakeCondition (AttachArgs[0], "<", IAstExpr.FromValue ("int", "0")),
+					IfTrueCodes = new List<IAstStmt> {
+						// idx += val.Length;
+						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_AccessBuildIn.Array_Length (Value), IAstType.FromName ("int")),
+					},
+				});
+
+				// if (idx < 0 || idx >= val.Length) {
+				//     _cache_err = err 数组随机访问下标超过数组大小;
+				// } else {
+				//     val[idx] = _rval;
+				// }
+				var _val_idx = AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef (), false);
+				var _if_stmt = new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op2.MakeCondition (
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
+						"||",
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_AccessBuildIn.Array_Length (Value))
+					),
+					IfTrueCodes = new List<IAstStmt> { /*用户可能忽略异常，后面判断处理异常后再添加错误处理逻辑*/ },
+					IfFalseCodes = new List<IAstStmt> { AstStmt_ExprWrap.MakeAssign (_val_idx, _rval), },
+				};
+				if (_cache_err?._var != null) {
+					_if_stmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_AccessBuildIn.Optional_FromError (_cache_err?._var.ExpectType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))));
+					_if_stmt.IfTrueCodes.Add (_cache_err?._pos.GetRef ());
+				}
+				_stmts.Add (_if_stmt);
+				return (_stmts, _val_idx);
+			}
+			return (_stmts, this);
+		}
+
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var _stmts = InitExpand (_cache_err);
+			if (AccessType == AccessBuildInType.ARR_AccessItem) {
+				/* 生成逻辑： val [n]
+				 * var _item_defvar;
+				 * var idx = n;
+				 * if (idx < 0)
+				 *     idx += val.Length;
+				 * if (idx < 0 || idx >= val.Length) {
+				 *     _item_defvar = err 数组随机访问超限;
+				 * } else {
+				 *     _item_defvar = val [idx];
+				 * }
+				 * _item_defvar
+				 */
+
+				// var _item_defvar;
+				var _item_defvar = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, Expr = null };
+				_stmts.Add (_item_defvar);
+
+				// var idx;
+				var _index_defvar = new AstStmt_DefVariable { Token = Token, DataType = IAstType.FromName ("int"), Expr = AstExprTypeCast.Make (AttachArgs[0], IAstType.FromName ("int")) };
+				_stmts.Add (_index_defvar);
+
+				// if (idx < 0)
+				//     idx += val.Length;
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op2.MakeCondition (AttachArgs[0], "<", IAstExpr.FromValue ("int", "0")),
+					IfTrueCodes = new List<IAstStmt> {
+						// idx += val.Length;
+						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_AccessBuildIn.Array_Length (Value), IAstType.FromName ("int")),
+					},
+				});
+
+				// if (idx < 0 || idx >= val.Length) {
+				//     _item_defvar = err 数组随机访问下标超过数组大小;
+				// } else {
+				//     _item_defvar = val[idx];
+				// }
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op2.MakeCondition (
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
+						"||",
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_AccessBuildIn.Array_Length (Value))
+					),
+					IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_item_defvar.DataType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
+					},
+					IfFalseCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_item_defvar.GetRef (), AstExpr_AccessBuildIn.Optional_FromValue (AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef (), false))),
+					},
+				});
+
+				// 下标错误部分
+				return (_stmts, _item_defvar.GetRef ());
+			}
 			return (_stmts, this);
 		}
 
@@ -85,6 +217,6 @@ namespace fac.ASTs.Exprs {
 			};
 		}
 
-		public override bool AllowAssign () => false;
+		public override bool AllowAssign () => AccessType == AccessBuildInType.ARR_AccessItem && Value.AllowAssign ();
 	}
 }

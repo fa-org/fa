@@ -76,6 +76,9 @@ namespace fac {
 
 		public static string GetTempId () => $"_{Guid.NewGuid ().ToString ("N")[..8]}";
 
+		public static int GetRandomInt () => s_rand.Next ();
+		private static Random s_rand = new Random ();
+
 		public static string WrapStringValue (string _s) {
 			var _sb = new StringBuilder ().Append ("\"");
 			foreach (var _ch in _s) {

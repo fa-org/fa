@@ -21,10 +21,12 @@ namespace fac.ASTs.Exprs {
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			Condition = _cb (Condition, _deep, _group);
-			IfTrueCodes.Traversal (_deep + 1, 0, _cb);
-			IfTrue = _cb (IfTrue, _deep + 1, 0);
-			IfFalseCodes.Traversal (_deep + 1, 1, _cb);
-			IfFalse = _cb (IfFalse, _deep + 1, 1);
+			var _temp_int = Common.GetRandomInt ();
+			IfTrueCodes.Traversal (_deep + 1, _temp_int, _cb);
+			IfTrue = _cb (IfTrue, _deep + 1, _temp_int);
+			_temp_int = Common.GetRandomInt ();
+			IfFalseCodes.Traversal (_deep + 1, _temp_int, _cb);
+			IfFalse = _cb (IfFalse, _deep + 1, _temp_int);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -44,7 +46,7 @@ namespace fac.ASTs.Exprs {
 			return TypeFuncs.GetCompatibleType (true, IfTrue.GuessType (), IfFalse.GuessType ());
 		}
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos) _cache_err) {
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _temp_id = Common.GetTempId ();
 			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _temp_id };
 			var _stmts = new List<IAstStmt> { _defvar_stmt };
