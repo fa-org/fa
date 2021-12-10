@@ -18,7 +18,11 @@ namespace fac.ASTs.Stmts {
 
 
 		private AstStmt_ExprWrap () { }
-		public static AstStmt_ExprWrap MakeAssign (IAstExpr _dest, IAstExpr _src) => new AstStmt_ExprWrap { Token = _src.Token, Expr = new AstExpr_Op2 { Token = _src.Token, Value1 = _dest, Value2 = _src, Operator = "=", ExpectType = _dest.ExpectType } };
+		public static AstStmt_ExprWrap MakeAssign (IAstExpr _dest, IAstExpr _src) {
+			if (_dest.ExpectType != _src.ExpectType && _dest.ExpectType == _src.ExpectType.Optional)
+				_src = AstExpr_AccessBuildIn.Optional_FromValue (_src);
+			return new AstStmt_ExprWrap { Token = _src.Token, Expr = new AstExpr_Op2 { Token = _src.Token, Value1 = _dest, Value2 = _src, Operator = "=", ExpectType = _dest.ExpectType } };
+		}
 		public static AstStmt_ExprWrap MakeOp2 (IAstExpr _val1, string _op, IAstExpr _val2, IAstType _expect_type) => new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeOp2 (_val1, _op, _val2, _expect_type) };
 		public static AstStmt_ExprWrap MakeCondition (IAstExpr _val1, string _op, IAstExpr _val2) => new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeCondition (_val1, _op, _val2) };
 		public static AstStmt_ExprWrap MakeFromExpr (IAstExpr _val) {
@@ -52,7 +56,7 @@ namespace fac.ASTs.Stmts {
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			if (Expr == null)
 				return new List<IAstStmt> ();
-			var (_stmts, _expr) = Expr.ExpandExpr (_cache_err);
+			var (_stmts, _expr) = Expr.ExpandExpr (IgnoreError ? (_var: null, _pos: null) : _cache_err);
 			if (_expr.IsSimpleExpr)
 				return _stmts;
 			if (_expr is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType != AccessBuildInType.ARR_Add)

@@ -56,29 +56,35 @@ namespace fac.ASTs.Exprs {
 		public override IAstType GuessType () => Value.GuessType ();
 
 		public virtual (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos) _cache_err) {
-			var (_stmts, _expr) = Value.ExpandExprAssign (_rval, _cache_err);
-			Value = _expr;
-			if (NeedIntoOptional ()) {
-				if (_cache_err._var == null)
-					throw new CodeException (Value.Token, $"此处代码可能为空，需手动处理，或将所在函数返回值类型改为可空类型");
-				_stmts.Add (new AstStmt_If {
-					Token = Value.Token,
-					Condition = AstExpr_AccessBuildIn.Optional_NotHasValue (Value),
-					IfTrueCodes = new List<IAstStmt> {
-					},
-					IfFalseCodes = new List<IAstStmt> {
-					},
-				});
-			} else if (NeedOutoOptional ()) {
-
+			if (NeedOptionalWrap ()) {
+				throw new UnimplException (Token);
+			} else if (NeedIntoOptional ()) {
+				throw new UnimplException (Token);
+			} else {
+				var (_stmts, _expr) = Value.ExpandExprAssign (_rval, _cache_err);
+				Value = _expr;
+				return (_stmts, this);
 			}
-			return (_stmts, this);
 		}
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
-			var (_stmts, _expr) = Value.ExpandExpr (_cache_err);
-			Value = _expr;
-			return (_stmts, this);
+			if (NeedOptionalWrap ()) {
+				var _stmt_defvar = new AstStmt_DefVariable { Token = Token, DataType = Value.ExpectType.Optional };
+				var _stmts = new List<IAstStmt> { _stmt_defvar };
+				var _pos = new AstStmt_Label ();
+				_cache_err = (_var: _stmt_defvar.GetRef (), _pos: _pos);
+				var (_stmts1, _expr) = Value.ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				_stmts.Add (AstStmt_ExprWrap.MakeAssign (_stmt_defvar.GetRef (), _expr));
+				_stmts.Add (_pos);
+				return (_stmts, _stmt_defvar.GetRef ());
+			} else if (NeedIntoOptional ()) {
+				throw new UnimplException (Token);
+			} else {
+				var (_stmts, _expr) = Value.ExpandExpr (_cache_err);
+				Value = _expr;
+				return (_stmts, this);
+			}
 		}
 
 		public override string GenerateCSharp (int _indent) => $"({ExpectType.GenerateCSharp (_indent)}) {Value.GenerateCSharp (_indent)}";
@@ -89,7 +95,7 @@ namespace fac.ASTs.Exprs {
 			return Value.ExpectType is AstType_OptionalWrap _owrap1 && AllowDirectReturn (_owrap1.ExpectType, ExpectType);
 		}
 
-		private bool NeedOutoOptional () {
+		private bool NeedOptionalWrap () {
 			return ExpectType is AstType_OptionalWrap _owrap1 && AllowDirectReturn (Value.ExpectType, _owrap1.ExpectType);
 		}
 	}

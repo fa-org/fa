@@ -82,7 +82,7 @@ namespace fac.AntlrTools {
 				_stmts.Add (_err_stmt);
 				return _stmts;
 			} else {
-				return _codes.ExpandStmts ((_var: null, _pos: null));
+				return _codes.ExpandStmts (null);
 			}
 		}
 	}

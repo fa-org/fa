@@ -124,7 +124,7 @@ namespace fac.ASTs.Exprs {
 			}
 			var _tmp_stmt = new AstStmt_DefVariable { DataType = ExpectType };
 			_stmts.Add (_tmp_stmt);
-			(_stmts1, _val1) = Value1.ExpandExpr (_cache_err);
+			(_stmts1, _val1) = Value1.ExpandExpr (Operator == "??" ? null : _cache_err);
 			_stmts.AddRange (_stmts1);
 			Value1 = _val1;
 			//

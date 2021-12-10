@@ -87,11 +87,9 @@ namespace fac {
 
 		public static List<IAstStmt> ExpandStmts (this List<IAstStmt> _stmts, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts1 = new List<IAstStmt> ();
-			foreach (var _stmt in _stmts) {
+			foreach (var _stmt in _stmts)
 				_stmts1.AddRange (_stmt.ExpandStmt (_cache_err));
-			}
 			return _stmts1;
-			//return (from p in _stmts select p.ExpandStmt (_cache_err)).CombileStmts ();
 		}
 	}
 }
