@@ -22,7 +22,7 @@ namespace fac.AntlrTools {
 		public static List<TraversalType> TraversalTypes { get; } = new List<TraversalType> {
 			TraversalType.Root2Leaf | TraversalType.CalcVar,
 			TraversalType.Leaf2Root,
-			TraversalType.Root2Leaf | TraversalType.Leaf2Root,
+			TraversalType.Leaf2Root,
 			TraversalType.Root2Leaf | TraversalType.CalcVar,
 		};
 

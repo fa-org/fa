@@ -17,15 +17,14 @@ namespace fac.ASTs.Exprs {
 		public abstract void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb);
 		public void TraversalWrap (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
 			if (Info.TraversalFirst)
-				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
+				Traversal (_deep, _group, _cb);
 			Traversal (_deep, _group, (_expr, _deep1, _group1) => {
-				if (_expr == null)
-					return null;
-				_expr.TraversalWrap (_deep1, _group1, _cb);
+				if (_expr != null)
+					_expr.TraversalWrap (_deep1, _group1, _cb);
 				return _expr;
 			});
 			if (Info.TraversalLast)
-				Traversal (_deep, _group, (_expr, _deep1, _group1) => _cb (_expr, _deep1, _group1));
+				Traversal (_deep, _group, _cb);
 		}
 
 		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);

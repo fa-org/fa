@@ -27,7 +27,7 @@ namespace fac {
 				if (_exprs[i] != null) {
 					if (Info.TraversalFirst)
 						_exprs[i] = _cb (_exprs[i], _deep, _group);
-					_exprs[i].TraversalWrap (_deep, _group, (_expr1, _deep1, _group1) => _cb (_expr1, _deep1, _group1));
+					_exprs[i].TraversalWrap (_deep, _group, _cb);
 					if (Info.TraversalLast)
 						_exprs[i] = _cb (_exprs[i], _deep, _group);
 				}
@@ -40,7 +40,7 @@ namespace fac {
 					continue;
 				if (Info.TraversalFirst)
 					_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
-				_stmts[i].TraversalWrap (_deep, _group, (_expr1, _deep1, _group1) => _cb (_expr1, _deep1, _group1));
+				_stmts[i].TraversalWrap (_deep, _group, _cb);
 				if (Info.TraversalLast)
 					_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
 			}

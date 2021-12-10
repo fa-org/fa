@@ -19,10 +19,11 @@ namespace fac.ASTs.Stmts {
 
 
 		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Initializes.Traversal (_deep, _group, _cb);
-			Condition = _cb (Condition, _deep, _group);
-			Increment.Traversal (_deep, _group, _cb);
-			BodyCodes.Traversal (_deep + 1, Common.GetRandomInt (), _cb);
+			int _rand_int = Common.GetRandomInt ();
+			Initializes.Traversal (_deep + 1, _rand_int, _cb);
+			Condition = _cb (Condition, _deep + 1, _rand_int);
+			Increment.Traversal (_deep + 1, _rand_int, _cb);
+			BodyCodes.Traversal (_deep + 1, _rand_int, _cb);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
