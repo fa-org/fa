@@ -16,11 +16,12 @@ namespace fac.ASTs.Stmts {
 
 
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			var _rand_int = Common.GetRandomInt ();
-			Iterator = _cb (Iterator, _deep + 1, _rand_int) as AstStmt_DefVariable;
-			ListContainer = _cb (ListContainer, _deep + 1, _rand_int);
-			BodyCodes.Traversal (_deep + 1, _rand_int, _cb);
+			var _trav1 = (_deep: _trav._deep + 1, _group: _rand_int, _cb: _trav._cb);
+			Iterator = Iterator.TraversalWrap (_trav1) as AstStmt_DefVariable;
+			ListContainer = ListContainer.TraversalWrap (_trav1);
+			BodyCodes.TraversalWraps (_trav1);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

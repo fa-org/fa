@@ -19,7 +19,7 @@ namespace fac.ASTs.Stmts {
 			return new AstStmt_Goto { Token = Token, Label = this };
 		}
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {}
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) => this;
 

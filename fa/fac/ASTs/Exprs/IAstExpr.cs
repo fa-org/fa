@@ -14,17 +14,20 @@ namespace fac.ASTs.Exprs {
 	public abstract class IAstExpr: IAst {
 		public IAstType ExpectType { get; set; } = null;
 
-		public abstract void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb);
-		public void TraversalWrap (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public abstract void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav);
+		public IAstExpr TraversalWrap ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+			var _obj = this;
 			if (Info.TraversalFirst)
-				Traversal (_deep, _group, _cb);
-			Traversal (_deep, _group, (_expr, _deep1, _group1) => {
+				_obj = _trav._cb (_obj, _trav._deep, _trav._group);
+			Func<IAstExpr, int, int, IAstExpr> _cb = (_expr, _deep1, _group1) => {
 				if (_expr != null)
-					_expr.TraversalWrap (_deep1, _group1, _cb);
+					_expr = _expr.TraversalWrap ((_deep: _deep1, _group: _group1, _trav._cb));
 				return _expr;
-			});
+			};
+			_obj.Traversal ((_deep: _trav._deep, _group: _trav._group, _cb: _cb));
 			if (Info.TraversalLast)
-				Traversal (_deep, _group, _cb);
+				_obj = _trav._cb (_obj, _trav._deep, _trav._group);
+			return _obj;
 		}
 
 		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);

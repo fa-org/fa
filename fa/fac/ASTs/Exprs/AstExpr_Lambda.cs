@@ -45,12 +45,8 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			int _size = Info.CurrentFuncVariables.Count;
-			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = this });
-			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Vars = new Dictionary<string, AstStmt_DefVariable> (), Group = _group + 2 });
-			BodyCodes.Traversal (_deep + 2, Common.GetRandomInt (), _cb);
-			Info.CurrentFuncVariables.RemoveRange (_size, Info.CurrentFuncVariables.Count - _size);
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+			BodyCodes.TraversalWraps ((_deep: _trav._deep + 2, _group: Common.GetRandomInt (), _cb: _trav._cb));
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

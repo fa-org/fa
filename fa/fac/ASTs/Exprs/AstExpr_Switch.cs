@@ -18,17 +18,16 @@ namespace fac.ASTs.Exprs {
 
 
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			if (Condition != null)
-				Condition = _cb (Condition, _deep, _group);
+				Condition = Condition.TraversalWrap (_trav);
 			if (CaseValues != null)
-				CaseValues.Traversal (_deep, _group, _cb);
-			CaseWhen.Traversal (_deep, _group, _cb);
+				CaseValues.TraversalWraps (_trav);
+			CaseWhen.TraversalWraps (_trav);
 			for (int i = 0; i < CaseCodes.Count; ++i) {
 				var _temp_int = Common.GetRandomInt ();
-				for (int j = 0; j < CaseCodes[i]._stmts.Count; ++j)
-					CaseCodes[i]._stmts[j] = _cb (CaseCodes[i]._stmts[j],_deep + 1, _temp_int) as IAstStmt;
-				CaseCodes[i] = (_stmts: CaseCodes[i]._stmts, _expr: _cb (CaseCodes[i]._expr, _deep + 1, _temp_int));
+				CaseCodes[i]._stmts.TraversalWraps ((_trav._deep + 1, _temp_int, _trav._cb));
+				CaseCodes[i] = (_stmts: CaseCodes[i]._stmts, CaseCodes[i]._expr.TraversalWrap ((_trav._deep + 1, _temp_int, _trav._cb)));
 			}
 		}
 

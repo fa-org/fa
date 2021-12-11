@@ -39,9 +39,11 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr Optional_FromError (IAstType _opt_type, IAstExpr _err) => new AstExpr_AccessBuildIn { Token = _err.Token, AccessType = AccessBuildInType.OPT_FromError, ExpectType = _opt_type, AttachArgs = new List<IAstExpr> { _err } };
 		public static IAstExpr Optional_FromError (IAstType _opt_type, string _err) => Optional_FromError (_opt_type, IAstExpr.FromValue ("string", _err));
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			if (Value != null)
-				Value = _cb (Value, _deep, _group);
+				Value = Value.TraversalWrap (_trav);
+			if (AttachArgs != null)
+				AttachArgs.TraversalWraps (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -73,6 +75,16 @@ namespace fac.ASTs.Exprs {
 		}
 
 		private List<IAstStmt> InitExpand ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			//while (Value != null) {
+			//	if (AccessType == AccessBuildInType.OPT_GetValue && Value is AstExpr_AccessBuildIn _biexpr1 && _biexpr1.AccessType == AccessBuildInType.OPT_FromValue) {
+			//		Value = _biexpr1.Value;
+			//	} else if (AccessType == AccessBuildInType.OPT_FromValue && Value is AstExpr_AccessBuildIn _biexpr2 && _biexpr2.AccessType == AccessBuildInType.OPT_GetValue) {
+			//		Value = _biexpr2.Value;
+			//	} else {
+			//		break;
+			//	}
+			//}
+			//
 			var (_stmts, _val) = Value?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
 			Value = _val;
 			for (int i = 0; i < (AttachArgs?.Count ?? 0); ++i) {

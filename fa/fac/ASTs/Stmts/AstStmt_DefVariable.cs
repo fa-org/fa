@@ -32,11 +32,11 @@ namespace fac.ASTs.Stmts {
 			return _stmts;
 		}
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			if (VarName == "_")
 				throw new CodeException (Token, "声明的变量名不能为“_”");
 			if (Expr != null)
-				Expr = _cb (Expr, _deep, _group);
+				Expr = Expr.TraversalWrap (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -66,8 +66,14 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override string GenerateCSharp (int _indent) {
-			string _code = $"{_indent.Indent ()}{DataType.GenerateCSharp (_indent)} {VarName}";
-			return $"{_code}{(Expr != null ? $" = {Expr.GenerateCSharp (_indent)}" : "")};\r\n";
+			if (m_init) {
+				m_init = false;
+				return $"{_indent.Indent ()}{DataType.GenerateCSharp (_indent)} {VarName}{(Expr != null ? $" = {Expr.GenerateCSharp (_indent)}" : "")};\r\n";
+			} else {
+				return Expr != null ? $"{_indent.Indent ()}{VarName} = {Expr.GenerateCSharp (_indent)};\r\n" : "";
+			}
 		}
+
+		private bool m_init = true;
 	}
 }

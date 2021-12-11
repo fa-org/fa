@@ -15,11 +15,11 @@ namespace fac.ASTs.Exprs.Names {
 
 
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			if (ThisObject != null)
-				ThisObject = _cb (ThisObject, _deep, _group);
+				ThisObject = ThisObject.TraversalWrap (_trav);
 			if (AttachExpr != null)
-				AttachExpr = _cb (AttachExpr, _deep, _group);
+				AttachExpr = AttachExpr.TraversalWrap (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

@@ -15,8 +15,8 @@ namespace fac.ASTs.Exprs.Names {
 
 
 		private static Dictionary<string, AstExprName_BuildIn> sBuildIn = new Dictionary<string, AstExprName_BuildIn> {
-			["continue"] = new AstExprName_BuildIn { Token = null, Name = "continue", NameType = "" },
-			["break"] = new AstExprName_BuildIn { Token = null, Name = "break", NameType = "" },
+			["continue"] = new AstExprName_BuildIn { Token = null, Name = "continue", NameType = "void" },
+			["break"] = new AstExprName_BuildIn { Token = null, Name = "break", NameType = "void" },
 			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Func<string, void>" },
 			["Console.Write"] = new AstExprName_BuildIn { Token = null, Name = "Console.Write", NameType = "Func<string, void>" },
 			["string.Format"] = new AstExprName_BuildIn { Token = null, Name = "string.Format", NameType = "Func<string, params any[], string>" },

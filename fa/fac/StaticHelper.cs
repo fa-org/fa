@@ -22,27 +22,17 @@ namespace fac {
 
 		public static string Indent (this int _indent) => new string (' ', _indent * 4);
 
-		public static void Traversal (this List<IAstExpr> _exprs, int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public static void TraversalWraps (this List<IAstExpr> _exprs, (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
-				if (_exprs[i] != null) {
-					if (Info.TraversalFirst)
-						_exprs[i] = _cb (_exprs[i], _deep, _group);
-					_exprs[i].TraversalWrap (_deep, _group, _cb);
-					if (Info.TraversalLast)
-						_exprs[i] = _cb (_exprs[i], _deep, _group);
-				}
+				if (_exprs[i] != null)
+					_exprs[i] = _exprs[i].TraversalWrap (_trav);
 			}
 		}
 
-		public static void Traversal (this List<IAstStmt> _stmts, int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public static void TraversalWraps (this List<IAstStmt> _stmts, (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			for (int i = 0; i < (_stmts?.Count ?? 0); ++i) {
-				if (_stmts[i] == null)
-					continue;
-				if (Info.TraversalFirst)
-					_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
-				_stmts[i].TraversalWrap (_deep, _group, _cb);
-				if (Info.TraversalLast)
-					_stmts[i] = _cb (_stmts[i], _deep, _group) as IAstStmt;
+				if (_stmts[i] != null)
+					_stmts[i] = _stmts[i].TraversalWrap (_trav) as IAstStmt;
 			}
 		}
 
@@ -65,6 +55,14 @@ namespace fac {
 				return;
 			foreach (var _stmt in _stmts) {
 				_sb.Append (_stmt.GenerateCSharp (_indent));
+			}
+		}
+
+		public static void AppendExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {
+			if (_exprs == null)
+				return;
+			foreach (var _expr in _exprs) {
+				_sb.Append ($"{_indent.Indent ()}{_expr.GenerateCSharp (_indent)};\r\n");
 			}
 		}
 

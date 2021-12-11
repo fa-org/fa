@@ -35,9 +35,9 @@ namespace fac.ASTs.Stmts {
 		public static AstStmt_ExprWrap MakeContinue (IToken _token) => new AstStmt_ExprWrap { Token = _token, Expr = AstExprName_BuildIn.FindFromName ("continue") };
 		public static AstStmt_ExprWrap MakeBreak (IToken _token) => new AstStmt_ExprWrap { Token = _token, Expr = AstExprName_BuildIn.FindFromName ("break") };
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			if (Expr != null)
-				Expr = _cb (Expr, _deep, _group);
+				Expr = Expr.TraversalWrap (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -47,7 +47,7 @@ namespace fac.ASTs.Stmts {
 				Expr = Expr.TraversalCalcType (null);
 
 				// 异常强制处理
-				if ((!(Expr is AstExpr_Op2 _op2expr && _op2expr.Operator == "=")) && Expr.ExpectType is AstType_OptionalWrap)
+				if (Expr.ExpectType is AstType_OptionalWrap && (!IgnoreError) && Info.CurrentReturnType () is not AstType_OptionalWrap)
 					throw new CodeException (Token, "此处未处理异常必须处理");
 			}
 			return this;

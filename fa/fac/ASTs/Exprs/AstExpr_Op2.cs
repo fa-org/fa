@@ -24,9 +24,9 @@ namespace fac.ASTs.Exprs {
 			return MakeOp2 (_val1, _op, _val2, IAstType.FromName ("bool"));
 		}
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			Value1 = _cb (Value1, _deep, _group);
-			Value2 = _cb (Value2, _deep, _group);
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+			Value1 = Value1.TraversalWrap (_trav);
+			Value2 = Value2.TraversalWrap (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

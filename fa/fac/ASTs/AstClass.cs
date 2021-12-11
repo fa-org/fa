@@ -69,11 +69,7 @@ namespace fac.ASTs {
 					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
-					if (Info.TraversalFirst)
-						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i, 0, 0);
-					ClassVars[j].DefaultValue.TraversalWrap (0, 0, (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group));
-					if (Info.TraversalLast)
-						ClassVars[j].DefaultValue = ExprTraversals.Traversal (ClassVars[j].DefaultValue, i, 0, 0);
+					ClassVars[j].DefaultValue = ClassVars[j].DefaultValue.TraversalWrap ((_deep: 0, _group: 0, _cb: (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group)));
 				}
 
 				// 类成员方法
@@ -84,11 +80,7 @@ namespace fac.ASTs {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
 					for (int k = 0; k < ClassFuncs[j].BodyCodes.Count; ++k) {
-						if (Info.TraversalFirst)
-							ClassFuncs[j].BodyCodes[k] = ExprTraversals.Traversal (ClassFuncs[j].BodyCodes[k], i, 1, 0) as IAstStmt;
-						ClassFuncs[j].BodyCodes[k].TraversalWrap (1, 0, (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group));
-						if (Info.TraversalLast)
-							ClassFuncs[j].BodyCodes[k] = ExprTraversals.Traversal (ClassFuncs[j].BodyCodes[k], i, 1, 0) as IAstStmt;
+						ClassFuncs[j].BodyCodes[k] = ClassFuncs[j].BodyCodes[k].TraversalWrap ((_deep: 1, _group: 0, _cb: (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group))) as IAstStmt;
 					}
 				}
 			}

@@ -16,13 +16,13 @@ namespace fac.ASTs.Stmts {
 
 
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			var _temp_int = Common.GetRandomInt ();
 			if (!IsDoWhile)
-				Condition = _cb (Condition, _deep + 1, _temp_int);
-			Contents.Traversal (_deep + 1, _temp_int, _cb);
+				Condition = Condition.TraversalWrap (_trav);
+			Contents.TraversalWraps (_trav);
 			if (IsDoWhile)
-				Condition = _cb (Condition, _deep + 1, _temp_int);
+				Condition = Condition.TraversalWrap (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

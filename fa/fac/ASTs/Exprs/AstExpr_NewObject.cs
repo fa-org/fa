@@ -17,11 +17,13 @@ namespace fac.ASTs.Exprs {
 
 
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
-			for (int i = 0; i < InitialValues.Count; ++i)
-				InitialValues[i] = (_name: InitialValues[i]._name, _value: _cb (InitialValues[i]._value, _deep, _group));
-			for (int i = 0; i < ConstructorArguments.Count; ++i)
-				ConstructorArguments[i] = _cb (ConstructorArguments[i], _deep, _group);
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+			if (InitialValues != null) {
+				for (int i = 0; i < InitialValues.Count; ++i)
+					InitialValues[i] = (_name: InitialValues[i]._name, _value: InitialValues[i]._value.TraversalWrap (_trav));
+			}
+			if (ConstructorArguments != null)
+				ConstructorArguments.TraversalWraps (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

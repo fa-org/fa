@@ -18,12 +18,13 @@ namespace fac.ASTs.Stmts {
 
 
 
-		public override void Traversal (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) {
+		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			int _rand_int = Common.GetRandomInt ();
-			Initializes.Traversal (_deep + 1, _rand_int, _cb);
-			Condition = _cb (Condition, _deep + 1, _rand_int);
-			Increment.Traversal (_deep + 1, _rand_int, _cb);
-			BodyCodes.Traversal (_deep + 1, _rand_int, _cb);
+			var _trav1 = (_deep: _trav._deep + 1, _group: _rand_int, _cb: _trav._cb);
+			Initializes.TraversalWraps (_trav1);
+			Condition = Condition.TraversalWrap (_trav1);
+			Increment.TraversalWraps (_trav1);
+			BodyCodes.TraversalWraps (_trav1);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
@@ -62,9 +63,10 @@ namespace fac.ASTs.Stmts {
 			var _sb = new StringBuilder ();
 			// 此处 Initializes 每次判断前执行一遍
 			_sb.AppendStmts (Initializes, _indent);
-			var _inc_str = string.Join (", ", from p in Increment select p.GenerateCSharp (_indent));
-			_sb.AppendLine ($"{_indent.Indent ()}for (; {Condition.GenerateCSharp (_indent)}; {_inc_str}) {{");
+			//var _inc_str = string.Join (", ", from p in Increment select p.GenerateCSharp (_indent));
+			_sb.AppendLine ($"{_indent.Indent ()}for (; {Condition.GenerateCSharp (_indent)}; ) {{");
 			_sb.AppendStmts (BodyCodes, _indent + 1);
+			_sb.AppendExprs (Increment, _indent + 1);
 			_sb.AppendStmts (Initializes, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();

@@ -39,7 +39,8 @@ namespace fac.AntlrTools {
 			// TODO 这一堆应该放到表达式或语句里去，放此处逻辑不对
 			if ((TraversalTypes[_index] & TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
 				if (_expr is AstExpr_Lambda _lambdaexpr) {
-					//Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = _lambdaexpr });
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = _lambdaexpr });
+					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 2, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 				} else if (_deep >= Info.CurrentFuncVariables.Count) {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group, Vars = new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> () });
 					//Info.CurrentFuncVariables.Add ((_vars: new Dictionary<string, ASTs.Stmts.AstStmt_DefVariable> (), _group));
@@ -77,6 +78,9 @@ namespace fac.AntlrTools {
 			if (_expr is AstExpr_BaseId _idexpr) {
 				if (_idexpr.Id == "_")
 					return new AstExprName_Ignore { Token = _expr.Token };
+
+				if (_idexpr.Id == "a")
+					_idexpr.Id = _idexpr.Id;
 
 				// 查找预定义名称
 				var _buildinexpr = AstExprName_BuildIn.FindFromName (_idexpr.Id);
