@@ -79,9 +79,9 @@ namespace fac.ASTs.Exprs {
 			var (_stmts, _val) = Value.ExpandExpr (_cache_err);
 			Value = _val;
 			for (int i = 0; i < Arguments.Count; ++i) {
-				(_stmts, _val) = Arguments[i].ExpandExpr (_cache_err);
-				_stmts.AddRange (_stmts);
-				Arguments[i] = _val;
+				var (_stmts1, _val1) = Arguments[i].ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				Arguments[i] = _val1;
 			}
 
 			var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;

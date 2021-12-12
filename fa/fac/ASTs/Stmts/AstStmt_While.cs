@@ -57,13 +57,13 @@ namespace fac.ASTs.Stmts {
 		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			if (IsDoWhile) {
-				_sb.Append ($"{_indent.Indent ()}do {{");
+				_sb.AppendLine ($"{_indent.Indent ()}do {{");
 				_sb.AppendStmts (Contents, _indent + 1);
-				_sb.Append ($"{_indent.Indent ()}}} while ({Condition.GenerateCSharp (_indent)});");
+				_sb.AppendLine ($"{_indent.Indent ()}}} while ({Condition.GenerateCSharp (_indent)});");
 			} else {
-				_sb.Append ($"{_indent.Indent ()}while ({Condition.GenerateCSharp (_indent)}) {{");
+				_sb.AppendLine ($"{_indent.Indent ()}while ({Condition.GenerateCSharp (_indent)}) {{");
 				_sb.AppendStmts (Contents, _indent + 1);
-				_sb.Append ($"{_indent.Indent ()}}}");
+				_sb.AppendLine ($"{_indent.Indent ()}}}");
 			}
 			return _sb.ToString ();
 		}

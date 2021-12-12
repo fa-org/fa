@@ -75,15 +75,15 @@ namespace fac.ASTs.Exprs {
 		}
 
 		private List<IAstStmt> InitExpand ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
-			//while (Value != null) {
-			//	if (AccessType == AccessBuildInType.OPT_GetValue && Value is AstExpr_AccessBuildIn _biexpr1 && _biexpr1.AccessType == AccessBuildInType.OPT_FromValue) {
-			//		Value = _biexpr1.Value;
-			//	} else if (AccessType == AccessBuildInType.OPT_FromValue && Value is AstExpr_AccessBuildIn _biexpr2 && _biexpr2.AccessType == AccessBuildInType.OPT_GetValue) {
-			//		Value = _biexpr2.Value;
-			//	} else {
-			//		break;
-			//	}
-			//}
+			while (Value != null) {
+				if (AccessType == AccessBuildInType.OPT_GetValue && Value is AstExpr_AccessBuildIn _biexpr1 && _biexpr1.AccessType == AccessBuildInType.OPT_FromValue) {
+					Value = _biexpr1.Value;
+				} else if (AccessType == AccessBuildInType.OPT_FromValue && Value is AstExpr_AccessBuildIn _biexpr2 && _biexpr2.AccessType == AccessBuildInType.OPT_GetValue) {
+					Value = _biexpr2.Value;
+				} else {
+					break;
+				}
+			}
 			//
 			var (_stmts, _val) = Value?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
 			Value = _val;
@@ -201,10 +201,9 @@ namespace fac.ASTs.Exprs {
 						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_AccessBuildIn.Optional_FromError (_cache_err?._var.ExpectType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
 						_cache_err?._pos.GetRef (),
 					},
-					IfFalseCodes = new List<IAstStmt> (),
 				});
 
-				return (_stmts, AstExpr_AccessBuildIn.Optional_FromValue (AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef (), false)));
+				return (_stmts, AstExpr_AccessBuildIn.Array_AccessItem (Value, _index_defvar.GetRef (), false));
 			}
 			return (_stmts, this);
 		}

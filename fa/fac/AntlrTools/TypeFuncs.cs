@@ -58,14 +58,14 @@ namespace fac.AntlrTools {
 			if (_stmts.Count == 0) {
 				if (_ret_type != "void" && _ret_type != "void?")
 					throw new CodeException (_token, $"方法需返回 {_return_type} 类型结果");
-				_stmts.Add (new AstStmt_Return { Token = null, ReturnType = _return_type, Expr = null });
+				_stmts.Add (AstStmt_Return.Make ());
 			} else if (_stmts[^1] is AstStmt_If _ifstmt) {
 				_make_sure_return (_token, _return_type, _ifstmt.IfTrueCodes);
 				_make_sure_return (_token, _return_type, _ifstmt.IfFalseCodes);
 			} else if (_stmts[^1] is not AstStmt_Return) {
 				if (_ret_type != "void" && _ret_type != "void?")
 					throw new CodeException (_token, $"方法需返回 {_return_type} 类型结果");
-				_stmts.Add (new AstStmt_Return { Token = null, ReturnType = _return_type, Expr = null });
+				_stmts.Add (AstStmt_Return.Make ());
 			}
 		}
 
@@ -74,12 +74,13 @@ namespace fac.AntlrTools {
 				var _stmts = new List<IAstStmt> ();
 
 				var _retvar_stmt = new AstStmt_DefVariable { DataType = _return_type };
-				var _err_stmt = new AstStmt_Label { };
-				var _cache_error = (_var: _retvar_stmt.GetRef (), _pos: _err_stmt);
+				var _pos_stmt = new AstStmt_Label { };
+				var _cache_error = (_var: _retvar_stmt.GetRef (), _pos: _pos_stmt);
 
 				_stmts.Add (_retvar_stmt);
 				_stmts.AddRange (_codes.ExpandStmts (_cache_error));
-				_stmts.Add (_err_stmt);
+				_stmts.Add (_pos_stmt);
+				_stmts.Add (AstStmt_Return.MakeFromExpr (_retvar_stmt.GetRef ()));
 				return _stmts;
 			} else {
 				return _codes.ExpandStmts (null);

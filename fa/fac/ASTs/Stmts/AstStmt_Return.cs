@@ -10,10 +10,14 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public class AstStmt_Return: IAstStmt {
-		public IAstType ReturnType { get; set; }
-		public IAstExpr Expr { get; set; }
+		public IAstType ReturnType { get; set; } = Info.CurrentFunc.ReturnType;
+		public IAstExpr Expr { get; set; } = null;
 
 
+
+		private AstStmt_Return () { }
+		public static AstStmt_Return Make () => new AstStmt_Return { Token = null };
+		public static AstStmt_Return MakeFromExpr (IAstExpr _val) => new AstStmt_Return { Token = _val?.Token ?? null, Expr = _val };
 
 		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			if (Expr != null)

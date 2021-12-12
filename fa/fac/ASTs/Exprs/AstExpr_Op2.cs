@@ -112,56 +112,65 @@ namespace fac.ASTs.Exprs {
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = new List<IAstStmt> { };
-			var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
-			_stmts.AddRange (_stmts1);
-			Value2 = _val1;
-			if (Operator == "=") {
-				if (Value1 is AstExprName_Ignore)
-					throw new Exception ("不应执行此处代码");
-				(_stmts1, _val1) = Value1.ExpandExprAssign (Value2, _cache_err);
-				_stmts.AddRange (_stmts1);
-				return (_stmts, _val1);
-			}
-			var _tmp_stmt = new AstStmt_DefVariable { DataType = ExpectType };
-			_stmts.Add (_tmp_stmt);
-			(_stmts1, _val1) = Value1.ExpandExpr (Operator == "??" ? null : _cache_err);
-			_stmts.AddRange (_stmts1);
-			Value1 = _val1;
-			//
 			if (Operator == "??") {
-				bool _val_is_optional = ExpectType is AstType_OptionalWrap;
-				_stmts.Add (new AstStmt_If {
-					Condition = AstExpr_AccessBuildIn.Optional_HasValue (Value1),
-					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val_is_optional ? Value1 : AstExpr_AccessBuildIn.Optional_GetValue (Value1)),
-					},
-					IfFalseCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2),
-					},
-				});
-			} else if (Operator == "/") {
-				ExpectType = (ExpectType as AstType_OptionalWrap)?.ItemType ?? ExpectType;
-				_stmts.Add (new AstStmt_If {
-					Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
-					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType, "除数不能为0")),
-					},
-					IfFalseCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this),
-					},
-				});
-			} else if (Operator == "=") {
-				_stmts.RemoveAt (0);
-				if (Value1 is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType == AccessBuildInType.OPT_GetValue) {
-					_stmts.Add (AstStmt_ExprWrap.MakeAssign (_biexpr.Value, AstExpr_AccessBuildIn.Optional_FromValue (Value2)));
-				} else {
-					_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (this));
-				}
-				return (_stmts, Value1);
+				var _tmp_stmt = new AstStmt_DefVariable { DataType = Value1.ExpectType };
+				_stmts.Add (_tmp_stmt);
+				var _err_pos = new AstStmt_Label { };
+				var _cache_err1 = (_var: _tmp_stmt.GetRef (), _pos: _err_pos);
+				var (_stmts1, _val1) = Value1.ExpandExpr (_cache_err1);
+				_stmts.AddRange (_stmts1);
+				_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
+				_stmts.Add (_err_pos);
+				var _ifstmt = new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_AccessBuildIn.Optional_NotHasValue (_tmp_stmt.GetRef ()),
+				};
+				(_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
+				_ifstmt.IfTrueCodes = _stmts1;
+				_ifstmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
+				_stmts.Add (_ifstmt);
+				return (_stmts, _tmp_stmt.GetRef ());
 			} else {
-				_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this));
+				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				Value2 = _val1;
+				if (Operator == "=") {
+					if (Value1 is AstExprName_Ignore)
+						throw new Exception ("不应执行此处代码");
+					(_stmts1, _val1) = Value1.ExpandExprAssign (Value2, _cache_err);
+					_stmts.AddRange (_stmts1);
+					return (_stmts, _val1);
+				}
+				var _tmp_stmt = new AstStmt_DefVariable { DataType = ExpectType };
+				_stmts.Add (_tmp_stmt);
+				(_stmts1, _val1) = Value1.ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				Value1 = _val1;
+				//
+				if (Operator == "/") {
+					ExpectType = (ExpectType as AstType_OptionalWrap)?.ItemType ?? ExpectType;
+					_stmts.Add (new AstStmt_If {
+						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
+						IfTrueCodes = new List<IAstStmt> {
+							AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType, "除数不能为0")),
+						},
+							IfFalseCodes = new List<IAstStmt> {
+							AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this),
+						},
+					});
+				} else if (Operator == "=") {
+					_stmts.RemoveAt (0);
+					if (Value1 is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType == AccessBuildInType.OPT_GetValue) {
+						_stmts.Add (AstStmt_ExprWrap.MakeAssign (_biexpr.Value, AstExpr_AccessBuildIn.Optional_FromValue (Value2)));
+					} else {
+						_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (this));
+					}
+					return (_stmts, Value1);
+				} else {
+					_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this));
+				}
+				return (_stmts, _tmp_stmt.GetRef ());
 			}
-			return (_stmts, _tmp_stmt.GetRef ());
 		}
 
 		public override string GenerateCSharp (int _indent) {

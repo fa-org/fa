@@ -12,7 +12,7 @@ namespace fac.ASTs.Stmts {
 	public abstract class IAstStmt: IAstExpr {
 		public static IAstStmt FromExpr (FaParser.ExprContext _ctx, bool _return) {
 			if (_return) {
-				return new AstStmt_Return { Token = _ctx?.Start ?? null, ReturnType = Info.CurrentFunc.ReturnType, Expr = FromContext (_ctx) };
+				return AstStmt_Return.MakeFromExpr (FromContext (_ctx));
 			} else {
 				return AstStmt_ExprWrap.MakeFromExpr (FromContext (_ctx));
 			}
@@ -73,7 +73,7 @@ namespace fac.ASTs.Stmts {
 				} else if (_ctx.normalStmt ().Break () != null) {
 					_stmts.Add (AstStmt_ExprWrap.MakeBreak (_ctx.Start));
 				} else if (_ctx.normalStmt ().Return () != null) {
-					_stmts.Add (new AstStmt_Return { Token = _ctx.Start, ReturnType = Info.CurrentFunc.ReturnType, Expr = FromContext (_ctx.normalStmt ().expr ()) });
+					_stmts.Add (AstStmt_Return.MakeFromExpr (FromContext (_ctx.normalStmt ().expr ())));
 				} else {
 					_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (FromContext (_ctx.normalStmt ().expr ())));
 				}
