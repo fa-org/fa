@@ -154,7 +154,7 @@ namespace fac.ASTs.Exprs {
 						IfTrueCodes = new List<IAstStmt> {
 							AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType, "除数不能为0")),
 						},
-							IfFalseCodes = new List<IAstStmt> {
+						IfFalseCodes = new List<IAstStmt> {
 							AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this),
 						},
 					});
@@ -179,7 +179,11 @@ namespace fac.ASTs.Exprs {
 			if (Operator == "=" && Value1 is AstExprName_Ignore)
 				return Value2.GenerateCSharp (_indent);
 
-			return $"{Value1.GenerateCSharp (_indent)} {Operator} {Value2.GenerateCSharp (_indent)}";
+			if (sAssignOp2s.Contains (Operator)) {
+				return $"{Value1.GenerateCSharp (_indent)} {Operator} {Value2.GenerateCSharp (_indent)}";
+			} else {
+				return $"({Value1.GenerateCSharp (_indent)} {Operator} {Value2.GenerateCSharp (_indent)})";
+			}
 		}
 
 		public override bool AllowAssign () => false;

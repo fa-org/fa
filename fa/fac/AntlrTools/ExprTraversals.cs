@@ -121,10 +121,6 @@ namespace fac.AntlrTools {
 				_nameexpr = IAstExprName.FindClass (_idexpr.Token, _idexpr.Id);
 				if (_nameexpr != null)
 					return _nameexpr;
-			} else if (_expr is AstStmt_Return _retstmt) {
-				if (Info.CurrentReturnType ().ToString () == "void?" && _retstmt.Expr == null) {
-					_retstmt.Expr = AstExpr_AccessBuildIn.Optional_FromValue (IAstExpr.FromValue ("int", "0"));
-				}
 			}
 			return _expr;
 		}
@@ -222,6 +218,11 @@ namespace fac.AntlrTools {
 
 		// 第四遍遍历
 		private static IAstExpr Traversal3 (IAstExpr _expr) {
+			if (_expr is AstStmt_Return _ret_stmt) {
+				if (Info.CurrentReturnType ().ToString () == "void?" && _ret_stmt.Expr == null) {
+					_ret_stmt.Expr = AstExpr_AccessBuildIn.Optional_FromValue (IAstExpr.FromValue ("int", "0"));
+				}
+			}
 			return _expr.TraversalCalcType (null);
 		}
 	}

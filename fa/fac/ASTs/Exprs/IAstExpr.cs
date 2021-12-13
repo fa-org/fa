@@ -51,7 +51,14 @@ namespace fac.ASTs.Exprs {
 
 
 
-		public bool IsSimpleExpr => this is IAstExprName || this is AstExpr_AccessBuildIn || this is AstExpr_BaseId || this is AstExpr_BaseValue;
+		public bool IsSimpleExpr {
+			get {
+				if (this is IAstExprName _nameexpr) {
+					return _nameexpr is not AstExprName_BuildIn;
+				}
+				return this is AstExpr_BaseId || this is AstExpr_BaseValue;
+			}
+		}
 
 		public static IAstExpr FromContext (FaParser.ExprContext _ctx) {
 			if (_ctx == null)

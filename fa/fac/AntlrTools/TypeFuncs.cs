@@ -39,7 +39,8 @@ namespace fac.AntlrTools {
 			List<IAstStmt> _body_codes;
 			if (_expr_ctx != null) {
 				_body_codes = new List<IAstStmt> ();
-				if (_return_type is not AstType_Void) {
+				string _rtype_str = _return_type.ToString ();
+				if (_rtype_str != "void" && _rtype_str != "void?") {
 					_body_codes.Add (IAstStmt.FromExpr (_expr_ctx, true));
 				} else {
 					_body_codes.Add (IAstStmt.FromExpr (_expr_ctx, false));

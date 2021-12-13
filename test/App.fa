@@ -11,7 +11,7 @@ class Program {
 		if left > right {
 			return;
 		}
-		int middle = numbers [((left + right) / 2)];
+		int middle = numbers [(left + right) / 2];
 		int i = left - 1;
 		int j = right + 1;
 		while true {
