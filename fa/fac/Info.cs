@@ -201,10 +201,14 @@ namespace fac {
 			_sb.AppendLine ("    public string GetError () => err;");
 			_sb.AppendLine ("    public static Optional<T> FromValue (T _t) => new Optional<T> { t = _t };");
 			_sb.AppendLine ("    public static Optional<T> FromError (string _err) => new Optional<T> { err = _err };");
-			//_sb.AppendLine ("    public static T operator | (Optional<T> t1, T t2) => t1.HasValue () ? t1.GetValue () : t2; // operator ??");
-			//_sb.AppendLine ("    public static Optional<T> operator | (Optional<T> t1, Optional<T> t2) => t1.HasValue () ? t1 : t2; // operator ??");
-			// FIXME: 支持“?? 异常”用法，但传字符串不对，假如出现 string? 类型的 ?? 就尴尬了
 			_sb.AppendLine ("}");
+			//_sb.AppendLine ("public class OptionalVoid {");
+			//_sb.AppendLine ("    public string err = \"\";");
+			//_sb.AppendLine ("    public bool HasValue () => err == \"\";");
+			//_sb.AppendLine ("    public string GetError () => err;");
+			//_sb.AppendLine ("    public static OptionalVoid FromValue () => new OptionalVoid {};");
+			//_sb.AppendLine ("    public static OptionalVoid FromError (string _err) => new OptionalVoid { err = _err };");
+			//_sb.AppendLine ("}");
 			_sb.AppendLine ("}");
 			_sb.AppendLine ();
 			_sb.AppendLine ();
