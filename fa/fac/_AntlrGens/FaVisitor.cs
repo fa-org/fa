@@ -440,17 +440,17 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitPublicLevel([NotNull] FaParser.PublicLevelContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.classTemplates"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitClassTemplates([NotNull] FaParser.ClassTemplatesContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.classParent"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitClassParent([NotNull] FaParser.ClassParentContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classType"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitClassType([NotNull] FaParser.ClassTypeContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.enumStmt"/>.
 	/// </summary>

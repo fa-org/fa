@@ -87,16 +87,6 @@ namespace fac.ASTs.Exprs {
 		}
 
 		private List<IAstStmt> InitExpand ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
-			//while (Value != null) {
-			//	if (AccessType == AccessBuildInType.OPT_GetValue && Value is AstExpr_AccessBuildIn _biexpr1 && _biexpr1.AccessType == AccessBuildInType.OPT_FromValue) {
-			//		Value = _biexpr1.Value;
-			//	} else if (AccessType == AccessBuildInType.OPT_FromValue && Value is AstExpr_AccessBuildIn _biexpr2 && _biexpr2.AccessType == AccessBuildInType.OPT_GetValue) {
-			//		Value = _biexpr2.Value;
-			//	} else {
-			//		break;
-			//	}
-			//}
-			//
 			var (_stmts, _val) = Value?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
 			Value = _val;
 			for (int i = 0; i < (AttachArgs?.Count ?? 0); ++i) {

@@ -51,10 +51,10 @@ namespace fac.ASTs {
 			CurrentExternApis = Info.CurrentExternApis = (from p in _ctx.importStmt () select new ExternApi (p)).ToList ();
 
 			// 处理枚举
-			CurrentClasses = (from p in _ctx.enumStmt () select (IAstClass) new AstEnum (p)).ToList ();
+			CurrentClasses = (from p in _ctx.enumStmt () select IAstClass.FromContext (p)).ToList ();
 
 			// 处理类
-			CurrentClasses.AddRange (from p in _ctx.classStmt () select (IAstClass) new AstClass (p));
+			CurrentClasses.AddRange (from p in _ctx.classStmt () select IAstClass.FromContext (p));
 		}
 
 		public void Compile () {

@@ -9,43 +9,23 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	public enum AstClassType { Class, Interface, Enum }
-
 	public class AstClass: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
-		public AstClassType ClassType { init; get; }
 		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
-		public List<AstType_Placeholder> Variants { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
 
 
 
-		public AstClass (FaParser.ClassStmtContext _ctx) {
-			Token = _ctx.Start;
-			//
-			FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}";
-			//
-			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
-			//
-			ClassType = Common.ParseEnum<AstClassType> (_ctx.classType ().GetText ()) ?? AstClassType.Class;
-			//
-			//if (_ctx.classVariant () != null) {
-			//	Variants = (from p in _ctx.classVariant ().id () select new AstType_Placeholder { Token = p.Symbol, Name = p.GetText () }).ToList ();
-			//	foreach (var _var in Variants) {
-			//		if (_var.Name[0] != 'T')
-			//			throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
-			//	}
-			//} else {
-			//	Variants = new List<AstType_Placeholder> ();
-			//}
-			//
-			ClassVars = (from p in _ctx.classVar () select new AstClassVar (p)).ToList ();
-			if (ClassType == AstClassType.Enum && ClassVars.Count > 0)
-				throw new CodeException (ClassVars[0].Token, $"{ClassType} 类型结构不允许出现成员变量");
-			//
-			ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (p)).ToList ();
+		public static AstClass FromContext (FaParser.ClassStmtContext _ctx) {
+			return new AstClass {
+				Token = _ctx.Start,
+				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
+				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
+				ClassVars = (from p in _ctx.classVar () select new AstClassVar (p)).ToList (),
+				ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (p)).ToList (),
+			};
 		}
 
 		public void Compile () {
@@ -92,10 +72,7 @@ namespace fac.ASTs {
 			Info.CurrentFuncVariables = null;
 			//
 			var _sb = new StringBuilder ();
-			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
-			if (Variants?.Count > 0) {
-				_sb.Append ('<').Append (string.Join (", ", from p in Variants select p.Name)).Append ('>');
-			}
+			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} class {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
 			_sb.AppendLine ($" {{");
 			foreach (var _var in ClassVars)
 				_sb.Append (_var.GenerateCSharp (_indent + 1));

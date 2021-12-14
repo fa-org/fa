@@ -28,7 +28,6 @@ Enum:						'enum';
 FaMain:						'FaMain';
 For:						'for';
 If:							'if';
-Interface:					'interface';
 Internal:					'internal';
 Mut:						'mut';
 Namespace:					'namespace';
@@ -264,11 +263,10 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 // class
 //
 publicLevel:				Public | Internal | Protected | Private;
+classTemplates:				QuotJianL type (Comma type)* QuotJianR;
 classParent:				Colon ids (Comma ids)*;
-classType:					Class | Interface;
-//classVariant:				QuotJianL id (Comma id)* QuotJianR;
 enumStmt:					publicLevel? Enum id QuotHuaL (classEnumItem (Comma classEnumItem)* Comma?)? QuotHuaR;
-classStmt:					publicLevel? classType id classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
+classStmt:					publicLevel? Class id classTemplates? classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
 							// classParent 由 class 和 struct 专属使用
 							// enumItems 由 enum 专属使用
 							// enum 的 classVar 不允许使用

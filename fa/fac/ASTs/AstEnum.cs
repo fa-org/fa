@@ -15,31 +15,28 @@ namespace fac.ASTs {
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
 
-		//public static bool operator == (AstEnum _l, AstEnum _r) {
-		//	return _l.FullName == _r.FullName;
-		//}
-		//public static bool operator != (AstEnum _l, AstEnum _r) => !(_l.FullName == _r.FullName);
 
-		public AstEnum (FaParser.EnumStmtContext _ctx) {
-			Token = _ctx.Start;
-			//
-			FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}";
-			//
-			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
-			//
-			ClassEnumItems = (from p in _ctx.classEnumItem () select new AstEnumItem (p)).ToList ();
-			//
-			var _types = (from p in ClassEnumItems where p.AttachType != null select p.AttachType).ToList ();
+
+		public static AstEnum FromContext (FaParser.EnumStmtContext _ctx) {
+			var _enum_items = (from p in _ctx.classEnumItem () select new AstEnumItem (p)).ToList ();
+			var _types = (from p in _enum_items where p.AttachType != null select p.AttachType).ToList ();
 			for (int i = 0; i < _types.Count - 1; ++i) {
 				for (int j = i + 1; j < _types.Count; ++j) {
 					if (_types[i].IsSame (_types[j]))
 						_types.RemoveAt (j--);
 				}
 			}
-			ClassVars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "@index" } };
-			ClassVars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
+			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "@index" } };
+			_vars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
 			//
-			ClassFuncs = new List<AstClassFunc> ();
+			return new AstEnum {
+				Token = _ctx.Start,
+				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
+				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
+				ClassEnumItems = _enum_items,
+				ClassVars = _vars,
+				ClassFuncs = new List<AstClassFunc> (),
+			};
 		}
 
 		public int GetRealAttachVarPos (int _enum_index) {
