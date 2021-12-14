@@ -18,6 +18,6 @@ namespace fac.ASTs {
 		public int GetRealAttachVarPos (int _enum_index) => -1;
 
 		public static IAstClass FromContext (FaParser.EnumStmtContext _ctx) => AstEnum.FromContext (_ctx);
-		public static IAstClass FromContext (FaParser.ClassStmtContext _ctx) => _ctx.classVariant () != null ? (IAstClass) AstTemplateClass.FromContext (_ctx) : AstClass.FromContext (_ctx);
+		public static IAstClass FromContext (FaParser.ClassStmtContext _ctx) => _ctx.classTemplates () != null ? (IAstClass) AstTemplateClass.FromContext (_ctx) : AstClass.FromContext (_ctx);
 	}
 }

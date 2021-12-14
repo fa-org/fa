@@ -16,6 +16,7 @@ namespace fac.ASTs {
 		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
+		private Dictionary<string, AstTemplateClassInst> Insts { get; set; } = new Dictionary<string, AstTemplateClassInst> ();
 
 
 

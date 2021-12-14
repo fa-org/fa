@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace fac.ASTs {
 	class AstTemplateClassInst: IAst, IAstClass {
 		private AstTemplateClass Class { init; get; }
-		private List<IAstType> TemplateValues { init; get; }
+		private List<IAstType> Templates { init; get; }
 
 
 
@@ -17,7 +17,7 @@ namespace fac.ASTs {
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
 
-		public void Compile () { }
+		public void Compile () => throw new Exception ("不应执行此处代码");
 		public override string GenerateCSharp (int _indent) => "";
 
 		public int GetRealAttachVarPos (int _enum_index) => -1;
