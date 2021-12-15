@@ -33,7 +33,7 @@ namespace fac.ASTs.Exprs.Names {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override IAstType GuessType () => new AstType_Class { Token = Token, Class = EnumClass, TemplateTypes = new List<IAstType> () };
+		public override IAstType GuessType () => AstType_Class.GetType (Token, EnumClass);
 
 		public override string GenerateCSharp (int _indent) {
 			bool _need_attach = EnumClass.ClassEnumItems[EnumItemIndex].AttachType != null;

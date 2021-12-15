@@ -25,19 +25,25 @@ namespace fac.ASTs {
 
 
 
+		public AstClassFunc (AstClassFunc _src, Func<string, IAstType> _get_impl_type) {
+			Token = _src.Token;
+			Level = _src.Level;
+			Static = _src.Static;
+			Name = _src.Name;
+			ReturnType = _src.ReturnType is AstType_Placeholder _phtype ? _get_impl_type (_phtype.Name) : _src.ReturnType;
+			Arguments = new List<(IAstType _type, string _name)> ();
+			foreach (var (_type, _name) in _src.Arguments) {
+				Arguments.Add ((_type: _type is AstType_Placeholder _phtype1 ? _get_impl_type (_phtype1.Name) : _type, _name: _name));
+			}
+			BodyRaw = _src.BodyRaw;
+		}
 		public AstClassFunc (FaParser.ClassFuncContext _ctx) {
 			Token = _ctx.Start;
-			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
-			//
 			Static = _ctx.Static () != null;
-			//
 			Name = _ctx.classFuncName ().GetText ();
-			//
 			ReturnType = IAstType.FromContext (_ctx.type ());
-			//
 			Arguments = AstElemParser.Parse (_ctx.typeVarList ());
-			//
 			BodyRaw = _ctx.classFuncBody ();
 		}
 

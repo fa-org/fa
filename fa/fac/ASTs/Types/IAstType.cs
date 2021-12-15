@@ -42,14 +42,13 @@ namespace fac.ASTs.Types {
 				string _type_str = _ctx.typeSingle ().id ().GetText ();
 				var _templates1 = FromContexts (_ctx.typeSingle ().type ());
 				if ((_templates1?.Count ?? 0) == 0) {
+					// 基本数据类型
 					var _floattype = AstType_Float.FromType (_type_str, _mut, _ctx.Start);
 					if (_floattype != null)
 						_ret = _floattype;
-					//
 					var _inttype = AstType_Integer.FromType (_type_str, _mut, _ctx.Start);
 					if (_inttype != null)
 						_ret = _inttype;
-					//
 					if (_type_str == "var") {
 						return null;
 					} else if (_type_str == "any") {
@@ -62,18 +61,31 @@ namespace fac.ASTs.Types {
 						_ret = new AstType_Void { Token = _ctx.Start, Mut = _mut };
 					}
 				} else {
+					// 函数
 					if (_type_str == "Func") {
 						_ret = new AstType_Func { Token = _ctx.Start, Mut = _mut, ReturnType = _templates1[^1], ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
 					}
 				}
+
+				// 类
 				if (_ret == null) {
 					var _classes = Info.GetClassFromName (_type_str);
 					if (_classes.Count == 1) {
-						_ret = new AstType_Class { Token = _ctx.Start, Mut = _mut, Class = _classes[0], TemplateTypes = _templates1 };
+						_ret = AstType_Class.GetType (_ctx.Start, _classes[0], _templates1, _mut);
 					} else if (_classes.Count > 1) {
 						throw new CodeException (_ctx.Start, $"不明确的符号 {_type_str}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
 					}
 				}
+
+				// 模板
+				if (_ret == null && _type_str[0] == 'T') {
+					if (Info.CurrentClass is AstTemplateClassInst _cls_inst) {
+						_ret = _cls_inst.GetImplType (_type_str);
+					} else if (Info.CurrentClass == null) {
+						_ret = new AstType_Placeholder { Token = _ctx.Start, Mut = _mut, Name = _type_str };
+					}
+				}
+
 				if (_ret == null)
 					throw new CodeException (_ctx.Start, $"无法识别的类型 {_type_str}");
 			} else if (_ctx.typeMulti () != null) {

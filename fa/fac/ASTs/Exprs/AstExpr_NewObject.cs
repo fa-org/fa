@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Exprs {
 	public class AstExpr_NewObject: IAstExpr {
 		public AstType_Class DataType { get; set; }
-		public List<IAstType> Variants { get; set; }
 		public List<(string _name, IAstExpr _value)> InitialValues { get; set; } = null; // 结构体初值，当有值时ConstructorArguments为空
 		public List<IAstExpr> ConstructorArguments { get; set; } = null;                 // 构造函数参数，当有值时InitialValues为空
 
@@ -81,9 +80,6 @@ namespace fac.ASTs.Exprs {
 		public override string GenerateCSharp (int _indent) {
 			StringBuilder _sb = new StringBuilder ();
 			_sb.Append ($"new {DataType}");
-			if (Variants.Count > 0)
-				_sb.Append ('<').Append (string.Join (", ", from p in Variants select p.GenerateCSharp (_indent))).Append ('>');
-
 			if (InitialValues != null) {
 				_sb.Append ($" {{ ");
 				foreach (var _init in InitialValues) {

@@ -212,7 +212,8 @@ namespace fac.ASTs.Exprs {
 				return FromContext (_ctx.quotExpr ().expr ());
 			} else if (_ctx.newExpr1 () != null) {
 				var _expr = new AstExpr_NewObject { Token = _ctx.Start };
-				_expr.DataType = IAstType.FromName (_ctx.newExpr1 ().ids ().GetText ()) as AstType_Class;
+				string _type_str = _ctx.newExpr1 ().ids ()?.GetText () ?? "";
+				_expr.DataType = _type_str != "" ? IAstType.FromName (_type_str) as AstType_Class : null;
 				_expr.InitialValues = (from p in _ctx.newExpr1 ().newExprItem () select (_name: p.id ().GetText (), _value: FromContext (p.middleExpr ()))).ToList ();
 				return _expr;
 			} else if (_ctx.newExpr2 () != null) {

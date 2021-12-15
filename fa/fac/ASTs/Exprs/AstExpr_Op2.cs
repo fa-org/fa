@@ -50,11 +50,7 @@ namespace fac.ASTs.Exprs {
 					_exp_type = _owrap.ItemType;
 				Value1 = Value1.TraversalCalcType (_exp_type);
 				Value2 = Value2.TraversalCalcType (_exp_type);
-				if (Operator != "/") {
-					ExpectType = _exp_type;
-				} else {
-					ExpectType = new AstType_OptionalWrap { Token = Token, ItemType = _exp_type };
-				}
+				ExpectType = _exp_type;
 				return AstExprTypeCast.Make (this, _expect_type);
 			} else if (sAssignOp2s.Contains (Operator)) {
 				// = += -=
@@ -148,11 +144,14 @@ namespace fac.ASTs.Exprs {
 				Value1 = _val1;
 				//
 				if (Operator == "/") {
+					if (_cache_err == (null, null))
+						throw new CodeException (Token, "除法结果可能为空，此处需使用");
 					ExpectType = (ExpectType as AstType_OptionalWrap)?.ItemType ?? ExpectType;
 					_stmts.Add (new AstStmt_If {
 						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
 						IfTrueCodes = new List<IAstStmt> {
-							AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType, "除数不能为0")),
+							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType, "除数不能为0")),
+							_cache_err?._pos.GetRef (),
 						},
 						IfFalseCodes = new List<IAstStmt> {
 							AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this),

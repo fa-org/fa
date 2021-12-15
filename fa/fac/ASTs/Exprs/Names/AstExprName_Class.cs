@@ -13,11 +13,11 @@ namespace fac.ASTs.Exprs.Names {
 
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			ExpectType = new AstType_Class { Token = Token, Class = Class };
+			ExpectType = AstType_Class.GetType (Token, Class);
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override IAstType GuessType () => new AstType_Class { Token = Token, Class = Class };
+		public override IAstType GuessType () => AstType_Class.GetType (Token, Class);
 
 		public override string GenerateCSharp (int _indent) => Class.FullName;
 

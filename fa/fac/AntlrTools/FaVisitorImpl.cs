@@ -43,7 +43,6 @@ namespace fac.AntlrTools {
 		public IAst VisitClassFuncBody (FaParser.ClassFuncBodyContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassFuncName (FaParser.ClassFuncNameContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassParent (FaParser.ClassParentContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassType (FaParser.ClassTypeContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassVarExt (FaParser.ClassVarExtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassVarExtFunc (FaParser.ClassVarExtFuncContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitCompareOp2 (FaParser.CompareOp2Context _ctx) => throw new NotImplementedException ();
@@ -117,5 +116,6 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeVar2 (FaParser.TypeVar2Context context) => throw new NotImplementedException ();
 		public IAst VisitTypeVar2List (FaParser.TypeVar2ListContext context) => throw new NotImplementedException ();
 		public IAst VisitLambdaExpr (FaParser.LambdaExprContext context) => throw new NotImplementedException ();
+		public IAst VisitClassTemplates (FaParser.ClassTemplatesContext context) => throw new NotImplementedException ();
 	}
 }

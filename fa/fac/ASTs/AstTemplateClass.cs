@@ -1,4 +1,5 @@
-﻿using fac.AntlrTools;
+﻿using Antlr4.Runtime;
+using fac.AntlrTools;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
@@ -9,16 +10,27 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs {
-	public class AstTemplateClass: IAst {
+	public class AstTemplateClass: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
 		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
-		private Dictionary<string, AstTemplateClassInst> Insts { get; set; } = new Dictionary<string, AstTemplateClassInst> ();
+		public Dictionary<string, AstTemplateClassInst> Insts { get; set; } = new Dictionary<string, AstTemplateClassInst> ();
 
 
+
+		public AstTemplateClassInst GetInst (IToken _token, List<IAstType> _templates) {
+			if (Templates.Count != _templates.Count)
+				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {_templates.Count} 个参数");
+			string _type_str = $"{FullName}__lt__{string.Join ("__comma__", from p in _templates select p.ToString ())}__gt__";
+			if (Insts.ContainsKey (_type_str))
+				return Insts[_type_str];
+			var _tcls_inst = new AstTemplateClassInst(Token, this, _templates, _type_str);
+			Insts[_type_str] = _tcls_inst;
+			return _tcls_inst;
+		}
 
 		public static AstTemplateClass FromContext (FaParser.ClassStmtContext _ctx) {
 			var _templates = (from p in _ctx.classTemplates ().type () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList ();
@@ -37,60 +49,12 @@ namespace fac.ASTs {
 		}
 
 		public void Compile () {
-			//Info.CurrentClass = this;
-
-			//// Antlr转AST
-			//foreach (var _var in ClassVars)
-			//	_var.ToAST ();
-			//foreach (var _func in ClassFuncs)
-			//	_func.ToAST ();
-
-			//// 处理AST
-			//for (int i = 0; i < ExprTraversals.TraversalTypes.Count; ++i) {
-			//	Info.CurrentTraversalType = ExprTraversals.TraversalTypes[i];
-
-			//	// 类成员变量默认初始化值
-			//	for (int j = 0; j < ClassVars.Count; ++j) {
-			//		if (ClassVars[j].DefaultValue == null)
-			//			continue;
-			//		Info.CurrentFunc = null;
-			//		Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-			//		Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
-			//		//
-			//		ClassVars[j].DefaultValue = ClassVars[j].DefaultValue.TraversalWrap ((_deep: 0, _group: 0, _cb: (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group)));
-			//	}
-
-			//	// 类成员方法
-			//	for (int j = 0; j < ClassFuncs.Count; ++j) {
-			//		Info.CurrentFunc = ClassFuncs[j];
-			//		Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-			//		Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
-			//		Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
-			//		//
-			//		ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _cb: (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group)));
-			//	}
-			//}
-
-			//foreach (var _func in ClassFuncs)
-			//	_func.ExpandFunc ();
+			foreach (var (_, _inst) in Insts)
+				_inst.Compile ();
 		}
 
 		public override string GenerateCSharp (int _indent) {
-			//Info.CurrentClass = this;
-			//Info.CurrentFuncVariables = null;
-			////
-			//var _sb = new StringBuilder ();
-			//_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} {ClassType.ToString ().ToLower ()} {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
-			//if (Variants?.Count > 0) {
-			//	_sb.Append ('<').Append (string.Join (", ", from p in Templates select p.Name)).Append ('>');
-			//}
-			//_sb.AppendLine ($" {{");
-			//foreach (var _var in ClassVars)
-			//	_sb.Append (_var.GenerateCSharp (_indent + 1));
-			//foreach (var _func in ClassFuncs)
-			//	_sb.Append (_func.GenerateCSharp (_indent + 1));
-			//_sb.AppendLine ($"{_indent.Indent ()}}}");
-			//return _sb.ToString ();
+			return string.Join ("", from p in Insts select p.Value.GenerateCSharp (_indent));
 		}
 	}
 }
