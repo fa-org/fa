@@ -1,5 +1,34 @@
 use fa;
 
+
+class Dic1<T1> {
+	public T1 s;
+	public T1 test (T1 t) {
+		T1 a = "{}   {}".Format (s, t);
+		return a;
+	}
+}
+
+class Program {
+	public static void Main () {
+		Dic1<string> d = new { s = "hello" };
+		string s = d.test ("world");
+		Console.WriteLine (d.s);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 //class Dic0 {
 //	public string s;
 //}
@@ -12,21 +41,6 @@ use fa;
 //}
 
 
-
-
-
-
-
-class Dic1<T1> {
-	public T1 s;
-}
-
-class Program {
-	public static void Main () {
-		Dic1<string> d = new { s = "hello" };
-		Console.WriteLine (d.s);
-	}
-}
 
 
 

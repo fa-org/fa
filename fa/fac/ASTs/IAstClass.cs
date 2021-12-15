@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fac.ASTs.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,8 @@ namespace fac.ASTs {
 		List<AstClassVar> ClassVars { get; }
 		List<AstClassFunc> ClassFuncs { get; }
 
-		void Compile ();
+		AstType_Class GetClassType () => AstType_Class.GetType (null, this);
+		bool Compile ();
 		string GenerateCSharp (int _indent);
 
 		// 计算枚举类型所对应的附加变量的实际映射变量位置

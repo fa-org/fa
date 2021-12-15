@@ -17,6 +17,7 @@ namespace fac.ASTs {
 		public List<AstEnumItem> ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
+		private bool m_compiled = false;
 
 
 
@@ -35,7 +36,7 @@ namespace fac.ASTs {
 			}
 			ClassFuncs = new List<AstClassFunc> ();
 			foreach (var _func in Class.ClassFuncs) {
-				ClassFuncs.Add (new AstClassFunc (_func, GetImplType));
+				ClassFuncs.Add (new AstClassFunc (this, _func, GetImplType));
 			}
 		}
 
@@ -47,7 +48,13 @@ namespace fac.ASTs {
 			return null;
 		}
 
-		public void Compile () {
+		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class, Templates);
+
+		public bool Compile () {
+			if (m_compiled)
+				return false;
+			m_compiled = true;
+
 			Info.CurrentClass = this;
 
 			// Antlr转AST
@@ -84,6 +91,7 @@ namespace fac.ASTs {
 
 			foreach (var _func in ClassFuncs)
 				_func.ExpandFunc ();
+			return true;
 		}
 
 		public override string GenerateCSharp (int _indent) {
@@ -91,8 +99,7 @@ namespace fac.ASTs {
 			Info.CurrentFuncVariables = null;
 			//
 			var _sb = new StringBuilder ();
-			_sb.Append ($"{_indent.Indent ()}{Class.Level.ToString ().ToLower ()} class {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
-			_sb.Append ('<').Append (string.Join (", ", from p in Templates select p.GenerateCSharp (_indent))).AppendLine ($"> {{");
+			_sb.AppendLine ($"{_indent.Indent ()}{Class.Level.ToString ().ToLower ()} class {FullName[(FullName.LastIndexOf ('.') + 1)..]} {{");
 			foreach (var _var in ClassVars)
 				_sb.Append (_var.GenerateCSharp (_indent + 1));
 			foreach (var _func in ClassFuncs)

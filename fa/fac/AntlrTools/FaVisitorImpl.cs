@@ -27,10 +27,10 @@ namespace fac.AntlrTools {
 
 		public IAst VisitProgram (FaParser.ProgramContext _ctx) => new AstProgram (_ctx);
 		public IAst VisitType (FaParser.TypeContext _ctx) => IAstType.FromContext (_ctx);
-		public IAst VisitClassFunc (FaParser.ClassFuncContext _ctx) => new AstClassFunc (_ctx);
 
 
 
+		public IAst VisitClassFunc (FaParser.ClassFuncContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassStmt (FaParser.ClassStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassEnumItem (FaParser.ClassEnumItemContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassVar (FaParser.ClassVarContext _ctx) => throw new NotImplementedException ();

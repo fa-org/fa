@@ -101,7 +101,7 @@ namespace fac.AntlrTools {
 						throw new CodeException (_idexpr.Token, $"{(_is_static ? "静态" : "动态")}方法内无法访问{(!_is_static ? "静态" : "动态")}成员变量");
 					var _cvarexpr = new AstExprName_ClassVar { Token = _idexpr.Token, Class = Info.CurrentClass, VariableIndex = i };
 					if (!_is_static)
-						_cvarexpr.ThisObject = new AstExprName_This { Token = _idexpr.Token, Class = Info.CurrentClass };
+						_cvarexpr.ThisObject = new AstExprName_This { Token = _idexpr.Token, Class = Info.CurrentClass, ExpectType = Info.CurrentClass.GetClassType () };
 					return _cvarexpr;
 				}
 
@@ -113,7 +113,7 @@ namespace fac.AntlrTools {
 						throw new CodeException (_idexpr.Token, $"{(_is_static ? "静态" : "动态")}方法内无法访问{(!_is_static ? "静态" : "动态")}成员方法");
 					var _cvarexpr = new AstExprName_ClassFunc { Token = _idexpr.Token, Class = Info.CurrentClass, FunctionIndex = i };
 					if (!_is_static)
-						_cvarexpr.ThisObject = new AstExprName_This { Token = _idexpr.Token, Class = Info.CurrentClass };
+						_cvarexpr.ThisObject = new AstExprName_This { Token = _idexpr.Token, Class = Info.CurrentClass, ExpectType = Info.CurrentClass.GetClassType () };
 					return _cvarexpr;
 				}
 
@@ -149,7 +149,7 @@ namespace fac.AntlrTools {
 					// 参数0为对象，当访问静态成员时传null
 					// 参数1为类对象
 					Func<IAstExpr, IAstClass, IAstExpr> _access_func = (_obj, _class) => {
-						for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
+						for (int i = 0; i < (_class.ClassEnumItems?.Count ?? 0); ++i) {
 							if (_class.ClassEnumItems[i].Name == _access_name)
 								return new AstExprName_ClassEnum { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i, AttachExpr = null };
 						}

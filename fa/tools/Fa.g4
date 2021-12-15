@@ -255,7 +255,7 @@ defVarStmt:					type idAssignExpr (Comma idAssignExpr)* Semi;
 // stmt
 //
 normalStmt:					((Return? expr?) | Break | Continue) Semi;
-stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | normalStmt | defVarStmt;
+stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | defVarStmt | normalStmt;
 
 
 

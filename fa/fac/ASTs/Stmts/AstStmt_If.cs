@@ -34,7 +34,7 @@ namespace fac.ASTs.Stmts {
 			return _stmts;
 		}
 
-		public static List<IAstStmt> FromCtx (FaParser.IfStmtContext _ctx) {
+		public static List<IAstStmt> FromContext (FaParser.IfStmtContext _ctx) {
 			var _conditions = _ctx.expr ().ToList ();
 			var _contents = (from p in _ctx.quotStmtPart () select p.stmt ()).ToList ();
 			return FromIfStmt (_conditions, _contents);

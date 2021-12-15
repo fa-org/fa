@@ -58,8 +58,13 @@ namespace fac.ASTs {
 		}
 
 		public void Compile () {
-			foreach (var _class in CurrentClasses)
-				_class.Compile ();
+			bool _b = true;
+			while (_b) {
+				_b = false;
+				foreach (var _class in CurrentClasses)
+					_b |= _class.Compile ();
+			}
+			
 		}
 
 		public override string GenerateCSharp (int _indent) {

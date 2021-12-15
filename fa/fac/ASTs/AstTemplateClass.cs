@@ -16,7 +16,7 @@ namespace fac.ASTs {
 		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
 		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
-		public List<AstClassFunc> ClassFuncs { init; get; }
+		public List<AstClassFunc> ClassFuncs { get; set; }
 		public Dictionary<string, AstTemplateClassInst> Insts { get; set; } = new Dictionary<string, AstTemplateClassInst> ();
 
 
@@ -38,19 +38,24 @@ namespace fac.ASTs {
 				if (_var.Name[0] != 'T')
 					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
 			}
-			return new AstTemplateClass {
+			var _ret = new AstTemplateClass {
 				Token = _ctx.Start,
 				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
 				Templates = _templates,
 				ClassVars = (from p in _ctx.classVar () select new AstClassVar (p)).ToList (),
-				ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (p)).ToList (),
 			};
+			_ret.ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (_ret, p)).ToList ();
+			return _ret;
 		}
 
-		public void Compile () {
+		public AstType_Class GetClassType () => throw new Exception ("不应执行此处代码");
+
+		public bool Compile () {
+			bool _b = false;
 			foreach (var (_, _inst) in Insts)
-				_inst.Compile ();
+				_b |= _inst.Compile ();
+			return _b;
 		}
 
 		public override string GenerateCSharp (int _indent) {

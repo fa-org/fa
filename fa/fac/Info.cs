@@ -109,22 +109,22 @@ namespace fac {
 		/// <summary>
 		/// 当前命名空间
 		/// </summary>
-		public static string CurrentNamespace = "";
+		public static string CurrentNamespace { set; get; } = "";
 
 		/// <summary>
 		/// 当前命名空间引用
 		/// </summary>
-		public static List<string> CurrentUses;
+		public static List<string> CurrentUses { set; get; } = null;
 
 		/// <summary>
 		/// 当前外部API
 		/// </summary>
-		public static List<ExternApi> CurrentExternApis;
+		public static List<ExternApi> CurrentExternApis { set; get; } = null;
 
 		/// <summary>
 		/// 当前AST节点迭代方式
 		/// </summary>
-		public static TraversalType CurrentTraversalType;
+		public static TraversalType CurrentTraversalType { set; get; } = TraversalType.Root2Leaf;
 		public static bool TraversalFirst { get => (CurrentTraversalType & TraversalType.Root2Leaf) > 0; }
 		public static bool TraversalLast { get => (CurrentTraversalType & TraversalType.Leaf2Root) > 0; }
 

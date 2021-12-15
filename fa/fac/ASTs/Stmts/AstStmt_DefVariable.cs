@@ -19,7 +19,7 @@ namespace fac.ASTs.Stmts {
 
 		public AstExprName_Variable GetRef () => new AstExprName_Variable { Token = Token, ExpectType = DataType, Var = this };
 
-		public static List<IAstStmt> FromCtx (FaParser.DefVarStmtContext _ctx) {
+		public static List<IAstStmt> FromContext (FaParser.DefVarStmtContext _ctx) {
 			List<IAstStmt> _stmts = new List<IAstStmt> ();
 			var _type = IAstType.FromContext (_ctx.type ());
 			foreach (var _var_ctx in _ctx.idAssignExpr ()) {

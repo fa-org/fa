@@ -1,4 +1,5 @@
 ﻿using fac;
+using fac.AntlrTools;
 using fac.ASTs;
 using fac.Exceptions;
 using System;
@@ -52,6 +53,14 @@ namespace fac.Test {
 			Info.SrcPath = Info.DestPath = Path.Combine (Path.GetTempPath (), Info.ProjectName);
 			if (!Directory.Exists (Info.DestPath))
 				Directory.CreateDirectory (Info.DestPath);
+			Info.Visitor = null;
+			Info.CurrentNamespace = "";
+			Info.CurrentUses = null;
+			Info.CurrentExternApis = null;
+			Info.CurrentTraversalType = TraversalType.Root2Leaf;
+			Info.CurrentFuncVariables = null;
+			Info.CurrentClass = null;
+			Info.CurrentFunc = null;
 			//
 			// 读取源码
 			Info.CurrentFile = Path.Combine (Info.SrcPath, "App.fa");

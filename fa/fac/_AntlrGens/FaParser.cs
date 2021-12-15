@@ -4737,11 +4737,11 @@ public partial class FaParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public SwitchStmtContext switchStmt() {
 			return GetRuleContext<SwitchStmtContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public NormalStmtContext normalStmt() {
-			return GetRuleContext<NormalStmtContext>(0);
-		}
 		[System.Diagnostics.DebuggerNonUserCode] public DefVarStmtContext defVarStmt() {
 			return GetRuleContext<DefVarStmtContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public NormalStmtContext normalStmt() {
+			return GetRuleContext<NormalStmtContext>(0);
 		}
 		public StmtContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -4824,14 +4824,14 @@ public partial class FaParser : Parser {
 				EnterOuterAlt(_localctx, 9);
 				{
 				State = 741;
-				normalStmt();
+				defVarStmt();
 				}
 				break;
 			case 10:
 				EnterOuterAlt(_localctx, 10);
 				{
 				State = 742;
-				defVarStmt();
+				normalStmt();
 				}
 				break;
 			}
@@ -6869,7 +6869,7 @@ public partial class FaParser : Parser {
 		'\x5', 'H', '%', '\x2', '\x2E3', '\x2EA', '\x5', 'J', '&', '\x2', '\x2E4', 
 		'\x2EA', '\x5', '<', '\x1F', '\x2', '\x2E5', '\x2EA', '\x5', 'X', '-', 
 		'\x2', '\x2E6', '\x2EA', '\x5', 'T', '+', '\x2', '\x2E7', '\x2EA', '\x5', 
-		'\x84', '\x43', '\x2', '\x2E8', '\x2EA', '\x5', '\x82', '\x42', '\x2', 
+		'\x82', '\x42', '\x2', '\x2E8', '\x2EA', '\x5', '\x84', '\x43', '\x2', 
 		'\x2E9', '\x2DF', '\x3', '\x2', '\x2', '\x2', '\x2E9', '\x2E0', '\x3', 
 		'\x2', '\x2', '\x2', '\x2E9', '\x2E1', '\x3', '\x2', '\x2', '\x2', '\x2E9', 
 		'\x2E2', '\x3', '\x2', '\x2', '\x2', '\x2E9', '\x2E3', '\x3', '\x2', '\x2', 

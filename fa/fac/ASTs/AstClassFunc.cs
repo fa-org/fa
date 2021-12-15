@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs {
 	public class AstClassFunc: IAst {
+		public IAstClass ParentClass { get; set; }
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
 		public string Name { init; get; }
@@ -20,13 +21,24 @@ namespace fac.ASTs {
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
 
 		public AstType_Func FuncType {
-			get => new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList () };
+			get {
+				var _arglist = (from p in Arguments select p._type).ToList ();
+				//if (!Static) {
+				//	if (ParentClass is AstTemplateClassInst _inst) {
+				//		_arglist.Insert (0, AstType_Class.GetType (Token, _inst.Class, _inst.Templates));
+				//	} else {
+				//		_arglist.Insert (0, AstType_Class.GetType (Token, ParentClass));
+				//	}
+				//}
+				return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = _arglist };
+			}
 		}
 
 
 
-		public AstClassFunc (AstClassFunc _src, Func<string, IAstType> _get_impl_type) {
+		public AstClassFunc (IAstClass _class, AstClassFunc _src, Func<string, IAstType> _get_impl_type) {
 			Token = _src.Token;
+			ParentClass = _class;
 			Level = _src.Level;
 			Static = _src.Static;
 			Name = _src.Name;
@@ -37,8 +49,9 @@ namespace fac.ASTs {
 			}
 			BodyRaw = _src.BodyRaw;
 		}
-		public AstClassFunc (FaParser.ClassFuncContext _ctx) {
+		public AstClassFunc (IAstClass _parent_class, FaParser.ClassFuncContext _ctx) {
 			Token = _ctx.Start;
+			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
 			Name = _ctx.classFuncName ().GetText ();

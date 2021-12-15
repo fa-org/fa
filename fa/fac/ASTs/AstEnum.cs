@@ -14,6 +14,7 @@ namespace fac.ASTs {
 		public List<AstEnumItem> ClassEnumItems { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
+		private bool m_compiled = false;
 
 
 
@@ -48,7 +49,11 @@ namespace fac.ASTs {
 			return -1;
 		}
 
-		public void Compile () {
+		public bool Compile () {
+			if (m_compiled)
+				return false;
+			m_compiled = true;
+
 			Info.CurrentClass = this;
 			Info.CurrentFuncVariables = null;
 
@@ -96,6 +101,7 @@ if (_l.@index != _r.@index) {{
 				Info.CurrentFunc = _func;
 				_func.BodyCodes.TraversalCalcType ();
 			}
+			return true;
 		}
 
 		public override string GenerateCSharp (int _indent) {

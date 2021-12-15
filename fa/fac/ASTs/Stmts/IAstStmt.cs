@@ -23,7 +23,7 @@ namespace fac.ASTs.Stmts {
 			if (_ctx == null) {
 				return new List<IAstStmt> ();
 			} else if (_ctx.ifStmt () != null) {
-				return AstStmt_If.FromCtx (_ctx.ifStmt ());
+				return AstStmt_If.FromContext (_ctx.ifStmt ());
 			} else if (_ctx.whileStmt () != null) {
 				var _whilestmt = new AstStmt_While { Token = _ctx.Start, IsDoWhile = false };
 				_whilestmt.Condition = FromContext (_ctx.whileStmt ().expr ());
@@ -67,6 +67,8 @@ namespace fac.ASTs.Stmts {
 				_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
 				_t.CaseCodes = (from p in _switch_items select FromStmt (p.stmt ()).ToSingleStmt ()).ToList ();
 				_stmts.Add (_t);
+			} else if (_ctx.defVarStmt () != null) {
+				return AstStmt_DefVariable.FromContext (_ctx.defVarStmt ());
 			} else if (_ctx.normalStmt () != null) {
 				if (_ctx.normalStmt ().Continue () != null) {
 					_stmts.Add (AstStmt_ExprWrap.MakeContinue (_ctx.Start));
@@ -77,8 +79,6 @@ namespace fac.ASTs.Stmts {
 				} else {
 					_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (FromContext (_ctx.normalStmt ().expr ())));
 				}
-			} else if (_ctx.defVarStmt () != null) {
-				return AstStmt_DefVariable.FromCtx (_ctx.defVarStmt ());
 			} else {
 				throw new UnimplException (_ctx.Start);
 			}

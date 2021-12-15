@@ -14,21 +14,27 @@ namespace fac.ASTs {
 		public PublicLevel Level { init; get; }
 		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
 		public List<AstClassVar> ClassVars { init; get; }
-		public List<AstClassFunc> ClassFuncs { init; get; }
+		public List<AstClassFunc> ClassFuncs { get; set; }
+		private bool m_compiled = false;
 
 
 
 		public static AstClass FromContext (FaParser.ClassStmtContext _ctx) {
-			return new AstClass {
+			var _ret = new AstClass {
 				Token = _ctx.Start,
 				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
 				ClassVars = (from p in _ctx.classVar () select new AstClassVar (p)).ToList (),
-				ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (p)).ToList (),
 			};
+			_ret.ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (_ret, p)).ToList ();
+			return _ret;
 		}
 
-		public void Compile () {
+		public bool Compile () {
+			if (m_compiled)
+				return false;
+			m_compiled = true;
+
 			Info.CurrentClass = this;
 
 			// Antlr转AST
@@ -65,6 +71,7 @@ namespace fac.ASTs {
 
 			foreach (var _func in ClassFuncs)
 				_func.ExpandFunc ();
+			return true;
 		}
 
 		public override string GenerateCSharp (int _indent) {
