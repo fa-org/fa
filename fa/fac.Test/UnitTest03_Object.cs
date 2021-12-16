@@ -42,5 +42,30 @@ class Program {
 			string _ret = BuildTool.RunAndGetReturn (_code);
 			Assert.AreEqual (_ret, "TestObject2");
 		}
+
+		[TestMethod]
+		public void TestMethod3 () {
+			string _code = @"
+use fa;
+
+class Dic1<T1> {
+	public T1 s;
+	public T1 test (T1 t) {
+		T1 a = ""{0}{1}"".Format (s, t);
+		return a;
+	}
+}
+
+class Program {
+	public static void Main () {
+		Dic1<string> d = new { s = ""Test"" };
+		string _s = d.test (""Object3"");
+		Console.Write (_s);
+	}
+}
+			";
+			string _ret = BuildTool.RunAndGetReturn (_code);
+			Assert.AreEqual (_ret, "TestObject3");
+		}
 	}
 }

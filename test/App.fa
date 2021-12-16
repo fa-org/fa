@@ -24,44 +24,6 @@ class Program {
 
 
 
-//class Dic1<T1> {
-//	public T1 s;
-//	public T1 test (T1 t) {
-//		T1 a = "{0}   {1}".Format (s, t);
-//		return a;
-//	}
-//}
-//
-//class Program {
-//	public static void Main () {
-//		Dic1<string> d = new { s = "hello" };
-//		string _s = d.test ("world");
-//		Console.WriteLine (_s);
-//	}
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-//class Dic0 {
-//	public string s;
-//}
-//
-//class Program {
-//	public static void Main () {
-//		Dic0 d = new { s = "hello" };
-//		Console.WriteLine (d.s);
-//	}
-//}
 
 
 

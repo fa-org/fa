@@ -23,6 +23,8 @@ namespace fac.ASTs.Exprs {
 			var _expr = Info.GetCurrentFuncVariableFromName (_token, _is_what);
 			if (_expr is AstExprName_ClassEnum _enum) {
 				// TODO;
+			} else {
+				throw new CodeException (_token, $"未知的 is 类型：{_is_what}");
 			}
 			return new AstExpr_Is {
 				Token = _token,
