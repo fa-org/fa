@@ -150,6 +150,8 @@ namespace fac.ASTs.Exprs {
 					_tmp_expr.Operator = _suffix_ctx.GetText ();
 					_tmp_expr.IsPrefix = false;
 					_expr = _tmp_expr;
+				} else if (_suffix_ctx.Is () != null) {
+					_expr = AstExpr_Is.FromContext (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ().GetText ());
 				} else if (_suffix_ctx.QuotYuanL () != null) {
 					var _tmp_expr = new AstExpr_OpN { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;

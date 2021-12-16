@@ -45,7 +45,7 @@ namespace fac.ASTs.Exprs {
 			if (_opt is AstExpr_AccessBuildIn _opt1 && _opt1.AccessType == AccessBuildInType.OPT_GetValue) {
 				return _opt1.Value;
 			} else {
-				return new AstExpr_AccessBuildIn { Token = _opt.Token, AccessType = AccessBuildInType.OPT_FromValue, Value = _opt, ExpectType = new AstType_OptionalWrap { Token = _opt.Token, ItemType = _opt.ExpectType } };
+				return new AstExpr_AccessBuildIn { Token = _opt.Token, AccessType = AccessBuildInType.OPT_FromValue, Value = _opt, ExpectType = _opt.ExpectType.Optional };
 			}
 		}
 		public static IAstExpr Optional_FromError (IAstType _opt_type, IAstExpr _err) => new AstExpr_AccessBuildIn { Token = _err.Token, AccessType = AccessBuildInType.OPT_FromError, ExpectType = _opt_type, AttachArgs = new List<IAstExpr> { _err } };

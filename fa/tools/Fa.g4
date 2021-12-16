@@ -28,6 +28,7 @@ Enum:						'enum';
 FaMain:						'FaMain';
 For:						'for';
 If:							'if';
+Is:							'is';
 Internal:					'internal';
 Mut:						'mut';
 Namespace:					'namespace';
@@ -234,6 +235,7 @@ strongExprSuffix			: AddAddOp | SubSubOp															// บ๓ืบ ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
 							| (PointOp id)																	//     wnd.Name
+							| (Is ids QuotYuanL id QuotYuanR)												//     _a is EnumA (_val)
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
 middleExpr:					strongExpr (allOp2 strongExpr)*;												//     a == 24    a + b - c

@@ -99,7 +99,7 @@ namespace fac.ASTs.Types {
 				if (_after == "[]") {
 					_ret = new AstType_ArrayWrap { Token = _after_ctx.Start, Mut = _mut, Params = false, ItemType = _ret };
 				} else if (_after == "?") {
-					_ret = new AstType_OptionalWrap { Token = _after_ctx.Start, Mut = _mut, ItemType = _ret };
+					_ret = _ret.Optional;
 				} else {
 					throw new UnimplException (_after_ctx.Start);
 				}
@@ -170,6 +170,6 @@ namespace fac.ASTs.Types {
 			};
 		}
 
-		public AstType_OptionalWrap Optional { get => this is AstType_OptionalWrap _owrap ? _owrap : new AstType_OptionalWrap { Token = Token, ItemType = this }; }
+		public AstType_OptionalWrap Optional { get => this is AstType_OptionalWrap _owrap ? _owrap : new AstType_OptionalWrap { Token = Token, ItemType = this, Mut = Mut }; }
 	}
 }

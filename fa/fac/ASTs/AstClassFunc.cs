@@ -22,15 +22,16 @@ namespace fac.ASTs {
 
 		public AstType_Func FuncType {
 			get {
-				var _arglist = (from p in Arguments select p._type).ToList ();
-				//if (!Static) {
-				//	if (ParentClass is AstTemplateClassInst _inst) {
-				//		_arglist.Insert (0, AstType_Class.GetType (Token, _inst.Class, _inst.Templates));
-				//	} else {
-				//		_arglist.Insert (0, AstType_Class.GetType (Token, ParentClass));
-				//	}
-				//}
-				return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = _arglist };
+				var _args = new List<IAstType> ();
+				if (!Static) {
+					if (ParentClass is AstTemplateClassInst _inst) {
+						_args.Add (AstType_Class.GetType (Token, _inst.Class, _inst.Templates));
+					} else {
+						_args.Add (AstType_Class.GetType (Token, ParentClass));
+					}
+				}
+				_args.AddRange (from p in Arguments select p._type);
+				return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = _args };
 			}
 		}
 
@@ -50,6 +51,8 @@ namespace fac.ASTs {
 			BodyRaw = _src.BodyRaw;
 		}
 		public AstClassFunc (IAstClass _parent_class, FaParser.ClassFuncContext _ctx) {
+			if (_parent_class == null)
+				throw new NotImplementedException ();
 			Token = _ctx.Start;
 			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;

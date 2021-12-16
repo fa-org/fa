@@ -36,8 +36,6 @@ namespace fac.Test {
 			string _ret = "";
 			try {
 				_ret = _RunAndGetReturn (_code);
-			} catch (Exception e) {
-				int i = 0;
 			} finally {
 				Directory.SetCurrentDirectory (_cur_directory);
 				try {

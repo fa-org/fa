@@ -79,9 +79,6 @@ namespace fac.AntlrTools {
 				if (_idexpr.Id == "_")
 					return new AstExprName_Ignore { Token = _expr.Token };
 
-				if (_idexpr.Id == "a")
-					_idexpr.Id = _idexpr.Id;
-
 				// 查找预定义名称
 				var _buildinexpr = AstExprName_BuildIn.FindFromName (_idexpr.Id);
 				if (_buildinexpr != null)

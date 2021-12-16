@@ -63,7 +63,7 @@ namespace fac.ASTs.Exprs {
 				if (Operator == "??") {
 					Value2 = Value2.TraversalCalcType (null);
 					var _exp_type = _expect_type ?? Value2.ExpectType;
-					_exp_type = _exp_type is AstType_OptionalWrap ? _exp_type : new AstType_OptionalWrap { Token = Token, ItemType = _exp_type };
+					_exp_type = _exp_type.Optional;
 					Value1 = Value1.TraversalCalcType (_exp_type);
 					ExpectType = Value2.ExpectType;
 					return AstExprTypeCast.Make (this, _expect_type);
@@ -93,7 +93,7 @@ namespace fac.ASTs.Exprs {
 				bool _opt = Operator == "/" && Info.CurrentReturnType () is not AstType_OptionalWrap;
 				var _type = TypeFuncs.GetCompatibleType (true, Value1.GuessType (), Value2.GuessType ());
 				if (_opt)
-					_type = _type is AstType_OptionalWrap ? _type : new AstType_OptionalWrap { Token = Token, ItemType = _type };
+					_type = _type.Optional;
 				return _type;
 				// 除法，返回不为空，那么猜测类型为    可空
 				// 除法，返回为空，那么猜测类型为    不可空

@@ -1,21 +1,44 @@
 use fa;
 
-
-class Dic1<T1> {
-	public T1 s;
-	public T1 test (T1 t) {
-		T1 a = "{}   {}".Format (s, t);
-		return a;
-	}
-}
+enum TestEnum { A, B (int), C }
 
 class Program {
 	public static void Main () {
-		Dic1<string> d = new { s = "hello" };
-		string s = d.test ("world");
-		Console.WriteLine (d.s);
+		TestEnum e = TestEnum.B (10);
+		if e == TestEnum.A {
+			Console.Write ("error");
+		} else if e is TestEnum.B (_val) {
+			Console.Write ("TestIf{0}".Format (_val));
+		} else {
+			Console.Write ("error");
+		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+//class Dic1<T1> {
+//	public T1 s;
+//	public T1 test (T1 t) {
+//		T1 a = "{0}   {1}".Format (s, t);
+//		return a;
+//	}
+//}
+//
+//class Program {
+//	public static void Main () {
+//		Dic1<string> d = new { s = "hello" };
+//		string _s = d.test ("world");
+//		Console.WriteLine (_s);
+//	}
+//}
 
 
 
@@ -278,19 +301,7 @@ class Program {
 //	}
 //}
 
-//class Program {
-//	public static void Main () {
-//		int aaa = 10;
-//		int xx = switch "C" {
-//			"A"               => 1,
-//			"B"               => 2,
-//			"C" when aaa == 5 => 3,
-//			"C"               => 4,
-//			_                 => 5,
-//		};
-//		Console.WriteLine ("{0}".Format (xx));
-//	}
-//}
+
 
 //class Program {
 //	public static void test (mut int a) {
@@ -304,58 +315,5 @@ class Program {
 //	}
 //}
 
-//class Program {
-//	public static void Main () {
-//		int aaa = 10;
-//		string _s = if aaa == 4 {
-//			"ab"
-//		} else if aaa == 10 {
-//			"hello"
-//		} else {
-//			"C"
-//		};
-//		Console.WriteLine (_s);
-//	}
-//}
 
-//class Program {
-//	public static void Main () {
-//		int aaa = 10;
-//		string _s = switch {
-//			when aaa == 3      => "A",
-//			when aaa == 5      => "B",
-//			when aaa == 8      => "C",
-//			when aaa == 10     => "Hello World",
-//			when aaa == 15     => "E",
-//			_                  => "F",
-//		};
-//		Console.WriteLine (_s);
-//	}
-//}
 
-//class Program {
-//	public static void Main () {
-//		int aaa = 10;
-//		switch {
-//			when aaa == 3      => Console.WriteLine ("A");
-//			when aaa == 5      => Console.WriteLine ("B");
-//			when aaa == 8      => Console.WriteLine ("C");
-//			when aaa == 10     => Console.WriteLine ("D");
-//			when aaa == 15     => Console.WriteLine ("E");
-//			_                  => Console.WriteLine ("F");
-//		}
-//	}
-//}
-
-//class Program {
-//	public static void Main () {
-//		int aaa = 10;
-//		switch "C" {
-//			"A"               => Console.WriteLine ("A");
-//			"B"               => Console.WriteLine ("B");
-//			"C" when aaa == 5 => Console.WriteLine ("C1");
-//			"C"               => Console.WriteLine ("C2");
-//			_                 => Console.WriteLine ("_");
-//		}
-//	}
-//}

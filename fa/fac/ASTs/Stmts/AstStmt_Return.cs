@@ -30,7 +30,7 @@ namespace fac.ASTs.Stmts {
 			if (Expr != null) {
 				if (ReturnType is AstType_OptionalWrap _otype) {
 					if (_otype.ItemType is AstType_Void)
-						_otype = new AstType_OptionalWrap { ItemType = new AstType_Integer { BitWidth = 32, IsSign = true } };
+						_otype = new AstType_Integer { BitWidth = 32, IsSign = true }.Optional;
 					try {
 						Expr = Expr.TraversalCalcType (_otype.ItemType);
 						Expr = AstExprTypeCast.Make (Expr, _otype);

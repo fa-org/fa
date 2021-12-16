@@ -21,11 +21,14 @@ namespace fac.ASTs.Stmts {
 		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			if (Condition != null)
 				Condition = Condition.TraversalWrap (_trav);
-			if (CaseValues != null)
-				CaseValues.TraversalWraps (_trav);
-			CaseWhen.TraversalWraps (_trav);
-			for (int i = 0; i < CaseCodes.Count; ++i)
-				CaseCodes[i] = CaseCodes[i].TraversalWrap (_trav) as IAstStmt;
+			for (int i = 0; i < CaseCodes.Count; ++i) {
+				var _trav1 = (_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _cb: _trav._cb);
+				if (CaseValues != null && CaseValues[i] != null)
+					CaseValues[i] = CaseValues[i].TraversalWrap (_trav1);
+				if (CaseWhen != null && CaseWhen[i] != null)
+					CaseWhen[i] = CaseWhen[i].TraversalWrap (_trav1);
+				CaseCodes[i] = CaseCodes[i].TraversalWrap (_trav1) as IAstStmt;
+			}
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

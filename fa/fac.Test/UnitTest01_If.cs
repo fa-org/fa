@@ -177,5 +177,57 @@ class Program {
 			string _ret = BuildTool.RunAndGetReturn (_code);
 			Assert.AreEqual (_ret, "TestIf7");
 		}
+
+		// if判断枚举类型
+		[TestMethod]
+		public void TestIf8 () {
+			string _code = @"
+use fa;
+
+enum TestEnum { A, B, C }
+
+class Program {
+	public static void Main () {
+		TestEnum e = TestEnum.B;
+		if e == TestEnum.A {
+			Console.Write (""error"");
+		} else if e == TestEnum.B {
+			Console.Write (""TestIf8"");
+		} else {
+			Console.Write (""error"");
+		}
+	}
+}
+";
+			string _ret = BuildTool.RunAndGetReturn (_code);
+			Assert.AreEqual (_ret, "TestIf8");
+		}
+
+		// if判断枚举带参数类型
+		[TestMethod]
+		public void TestIf9 () {
+			string _code = @"
+use fa;
+
+enum TestEnum { A, B (int), C }
+
+class Program {
+	public static void Main () {
+		TestEnum e = TestEnum.B (2);
+		if e == TestEnum.A {
+			Console.Write (""error"");
+		} else if e == TestEnum.B (6) {
+			Console.Write (""error"");
+		} else if e == TestEnum.B (2) {
+			Console.Write (""TestIf9"");
+		} else {
+			Console.Write (""error"");
+		}
+	}
+}
+";
+			string _ret = BuildTool.RunAndGetReturn (_code);
+			Assert.AreEqual (_ret, "TestIf9");
+		}
 	}
 }

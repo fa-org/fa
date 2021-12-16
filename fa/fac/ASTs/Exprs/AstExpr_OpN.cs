@@ -85,8 +85,8 @@ namespace fac.ASTs.Exprs {
 			}
 
 			var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;
-			if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
-				_arg_types = _arg_types.Skip (1).ToList ();
+			//if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
+			//	_arg_types = _arg_types.Skip (1).ToList ();
 			// 如果最后一个参数为params列表
 			if (_arg_types.Count > 0 && _arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params && Value is not AstExprName_BuildIn) {
 				bool _process_last = _arg_types.Count == Arguments.Count && Arguments[^1].ExpectType.IsSame (_awrap);
@@ -104,14 +104,16 @@ namespace fac.ASTs.Exprs {
 		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			var _arg_types = (Value.ExpectType as AstType_Func).ArgumentTypes;
-			if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
-				_arg_types = _arg_types.Skip (1).ToList ();
+			//if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
+			//	_arg_types = _arg_types.Skip (1).ToList ();
 			var _b = Value.GenerateCSharp (_indent);
 			_sb.Append ($"{_b} (");
 			for (int i = 0; i < Arguments.Count; ++i) {
 				_b = Arguments[i].GenerateCSharp (_indent);
-				if (_arg_types[i].Mut)
-					_sb.Append ($"ref ");
+				if (Value is not AstExprName_BuildIn) {
+					if (_arg_types[i].Mut)
+						_sb.Append ($"ref ");
+				}
 				_sb.Append ($"{_b}, ");
 			}
 			if (Value is AstExprName_BuildIn _biexpr && _biexpr.Name.EndsWith ("AllText"))
