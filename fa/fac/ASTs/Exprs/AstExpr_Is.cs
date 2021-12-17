@@ -12,30 +12,27 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Exprs {
 	public class AstExpr_Is: IAstExpr {
 		public IAstExpr Value { get; set; }
-		public string IsWhat { get; set; }
+		public AstExprName_ClassEnum IsWhatExpr { get; set; }
 		public AstStmt_DefVariable DefVar { get; set; }
-		public bool IsDefVar { get => DefVar.VarName != ""; }
+		public bool IsDefVar { get => DefVar != null; }
 
 
 
 		private AstExpr_Is () { }
 		public static AstExpr_Is FromContext (IToken _token, IAstExpr _src, string _is_what, string _var) {
-			var _expr = Info.GetCurrentFuncVariableFromName (_token, _is_what);
-			if (_expr is AstExprName_ClassEnum _enum) {
-				// TODO;
-			} else {
-				throw new CodeException (_token, $"未知的 is 类型：{_is_what}");
-			}
+			AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
+			var _is_what_expr = AstExprName_ClassEnum.FindFromName (_token, _is_what, _var_stmt?.GetRef () ?? null);
 			return new AstExpr_Is {
 				Token = _token,
 				Value = _src,
-				IsWhat = _is_what,
-				DefVar = new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var },
+				IsWhatExpr = _is_what_expr,
+				DefVar = _var_stmt,
 			};
 		}
 
 		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
 			Value = Value.TraversalWrap (_trav);
+			IsWhatExpr = IsWhatExpr.TraversalWrap (_trav) as AstExprName_ClassEnum;
 			if (IsDefVar)
 				DefVar = DefVar.TraversalWrap (_trav) as AstStmt_DefVariable;
 		}

@@ -144,14 +144,14 @@ namespace fac.ASTs.Exprs {
 			var _prefix_ctxs = _ctx.strongExprPrefix ();
 			var _suffix_ctxs = _ctx.strongExprSuffix ();
 			foreach (var _suffix_ctx in _suffix_ctxs) {
-				if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.id () != null) {
+				if (_suffix_ctx.Is () != null) {
+					_expr = AstExpr_Is.FromContext (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ().GetText ());
+				} else if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.id () != null) {
 					var _tmp_expr = new AstExpr_Op1 { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;
 					_tmp_expr.Operator = _suffix_ctx.GetText ();
 					_tmp_expr.IsPrefix = false;
 					_expr = _tmp_expr;
-				} else if (_suffix_ctx.Is () != null) {
-					_expr = AstExpr_Is.FromContext (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ().GetText ());
 				} else if (_suffix_ctx.QuotYuanL () != null) {
 					var _tmp_expr = new AstExpr_OpN { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;

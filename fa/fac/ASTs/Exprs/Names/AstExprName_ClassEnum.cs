@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Types;
+﻿using Antlr4.Runtime;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -10,14 +11,35 @@ namespace fac.ASTs.Exprs.Names {
 	public class AstExprName_ClassEnum: IAstExprName {
 		public IAstClass EnumClass { init; get; }
 		public int EnumItemIndex { init; get; }
-		public IAstExpr ThisObject { get; set; }
 		public IAstExpr AttachExpr { get; set; }
 
 
 
+		public static AstExprName_ClassEnum FindFromName (IToken _token, string _name, IAstExprName _attach_var = null) {
+			int _pt = _name.LastIndexOf ('.');
+			string _class_name = _name[.._pt];
+			var _classes = Info.GetClassFromName (_class_name);
+			if (_classes.Count == 0) {
+				throw new CodeException (_token, $"未识别的标识符 {_class_name}");
+			} else if (_classes.Count > 1) {
+				throw new CodeException (_token, $"不明确的标识符 {_class_name}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
+			} else if (_classes[0] is AstEnum _enum) {
+				_name = _name[(_pt + 1)..];
+				for (int i = 0; i < _enum.ClassEnumItems.Count; ++i) {
+					if (_enum.ClassEnumItems[i].Name == _name) {
+						if ((_enum.ClassEnumItems[i].AttachType == null) != (_attach_var == null)) {
+							throw new CodeException (_token, _attach_var == null ? "枚举类型需附带参数" : "枚举类型不应附带参数");
+						}
+						return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = i, AttachExpr = _attach_var };
+					}
+				}
+				throw new CodeException (_token, $"枚举类型 {_class_name} 不存在成员 {_name}");
+			} else {
+				throw new CodeException (_token, $"标识符 {_class_name} 非枚举类型");
+			}
+		}
+
 		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
-			if (ThisObject != null)
-				ThisObject = ThisObject.TraversalWrap (_trav);
 			if (AttachExpr != null)
 				AttachExpr = AttachExpr.TraversalWrap (_trav);
 		}
