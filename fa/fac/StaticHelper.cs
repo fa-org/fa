@@ -22,14 +22,14 @@ namespace fac {
 
 		public static string Indent (this int _indent) => new string (' ', _indent * 4);
 
-		public static void TraversalWraps (this List<IAstExpr> _exprs, (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public static void TraversalWraps (this List<IAstExpr> _exprs, (int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
 				if (_exprs[i] != null)
 					_exprs[i] = _exprs[i].TraversalWrap (_trav);
 			}
 		}
 
-		public static void TraversalWraps (this List<IAstStmt> _stmts, (int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public static void TraversalWraps (this List<IAstStmt> _stmts, (int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			for (int i = 0; i < (_stmts?.Count ?? 0); ++i) {
 				if (_stmts[i] != null)
 					_stmts[i] = _stmts[i].TraversalWrap (_trav) as IAstStmt;

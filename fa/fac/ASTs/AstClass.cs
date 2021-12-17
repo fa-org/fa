@@ -55,7 +55,7 @@ namespace fac.ASTs {
 					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
-					ClassVars[j].DefaultValue = ClassVars[j].DefaultValue.TraversalWrap ((_deep: 0, _group: 0, _cb: (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group)));
+					ClassVars[j].DefaultValue = ClassVars[j].DefaultValue.TraversalWrap ((_deep: 0, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 				}
 
 				// 类成员方法
@@ -65,7 +65,7 @@ namespace fac.ASTs {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
-					ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _cb: (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group)));
+					ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 				}
 			}
 

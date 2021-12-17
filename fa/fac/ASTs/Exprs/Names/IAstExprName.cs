@@ -20,7 +20,7 @@ namespace fac.ASTs.Exprs.Names {
 			}
 		}
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) { }
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) { }
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var (_stmts, _val) = ExpandExpr (_cache_err);

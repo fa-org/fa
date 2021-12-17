@@ -11,8 +11,8 @@ namespace fac.ASTs.Stmts {
 	public class AstStmt_HuaQuotWrap: IAstStmt {
 		public List<IAstStmt> Stmts { get; set; }
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
-			Stmts.TraversalWraps ((_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _cb: _trav._cb));
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
+			Stmts.TraversalWraps ((_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _loop: _trav._loop, _cb: _trav._cb));
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

@@ -12,7 +12,7 @@ namespace fac.ASTs.Exprs {
 	public class AstExpr_BaseId: IAstExpr {
 		public string Id { get; set; }
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) { }
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) { }
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");

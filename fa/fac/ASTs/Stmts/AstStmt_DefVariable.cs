@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public class AstStmt_DefVariable: IAstStmt {
-		public IAstType DataType { init; get; }
+		public IAstType DataType { get; set; }
 		public string VarName { init; get; } = Common.GetTempId ();
 		public IAstExpr Expr { get; set; } = null;
 
@@ -32,7 +32,7 @@ namespace fac.ASTs.Stmts {
 			return _stmts;
 		}
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (VarName == "_")
 				throw new CodeException (Token, "声明的变量名不能为“_”");
 			if (Expr != null)
@@ -42,7 +42,8 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			Expr = Expr.TraversalCalcType (DataType);
+			if (Expr != null)
+				Expr = Expr.TraversalCalcType (DataType);
 			return this;
 		}
 

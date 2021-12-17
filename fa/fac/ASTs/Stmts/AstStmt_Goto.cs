@@ -13,7 +13,7 @@ namespace fac.ASTs.Stmts {
 
 
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) { }
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) { }
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) => this;
 

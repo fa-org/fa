@@ -14,7 +14,7 @@ namespace fac.ASTs.Exprs.Names {
 
 
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			bool _static = Class.ClassVars[VariableIndex].Static;
 			if (_static && (ThisObject != null))
 				throw new CodeException (Token, "类静态方法无法通过对象访问");

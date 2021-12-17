@@ -40,7 +40,7 @@ namespace fac.ASTs.Stmts {
 		public static AstStmt_ExprWrap MakeContinue (IToken _token) => new AstStmt_ExprWrap { Token = _token, Expr = AstExprName_BuildIn.FindFromName ("continue") };
 		public static AstStmt_ExprWrap MakeBreak (IToken _token) => new AstStmt_ExprWrap { Token = _token, Expr = AstExprName_BuildIn.FindFromName ("break") };
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (Expr != null)
 				Expr = Expr.TraversalWrap (_trav);
 		}

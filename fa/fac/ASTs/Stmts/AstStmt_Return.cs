@@ -19,7 +19,7 @@ namespace fac.ASTs.Stmts {
 		public static AstStmt_Return Make () => new AstStmt_Return { Token = null };
 		public static AstStmt_Return MakeFromExpr (IAstExpr _val) => new AstStmt_Return { Token = _val?.Token ?? null, Expr = _val };
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (Expr != null)
 				Expr = Expr.TraversalWrap (_trav);
 		}

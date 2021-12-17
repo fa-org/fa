@@ -19,14 +19,14 @@ namespace fac.ASTs.Exprs {
 
 
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			var _temp_int = Common.GetRandomInt ();
-			var _trav1 = (_deep: _trav._deep + 1, _group: _temp_int, _cb: _trav._cb);
+			var _trav1 = (_deep: _trav._deep + 1, _group: _temp_int, _loop: _trav._loop, _cb: _trav._cb);
 			Condition = Condition.TraversalWrap (_trav1);
 			IfTrueCodes.TraversalWraps (_trav1);
 			IfTrue = IfTrue.TraversalWrap (_trav1);
 			_temp_int = Common.GetRandomInt ();
-			_trav1 = (_deep: _trav._deep + 1, _group: _temp_int, _cb: _trav._cb);
+			_trav1 = (_deep: _trav._deep + 1, _group: _temp_int, _loop: _trav._loop, _cb: _trav._cb);
 			IfFalseCodes.TraversalWraps (_trav1);
 			IfFalse = IfFalse.TraversalWrap (_trav1);
 		}

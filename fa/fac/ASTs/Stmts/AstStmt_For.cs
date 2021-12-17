@@ -18,9 +18,9 @@ namespace fac.ASTs.Stmts {
 
 
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			int _rand_int = Common.GetRandomInt ();
-			var _trav1 = (_deep: _trav._deep + 1, _group: _rand_int, _cb: _trav._cb);
+			var _trav1 = (_deep: _trav._deep + 1, _group: _rand_int, _loop: _trav._loop, _cb: _trav._cb);
 			Initializes.TraversalWraps (_trav1);
 			Condition = Condition.TraversalWrap (_trav1);
 			Increment.TraversalWraps (_trav1);

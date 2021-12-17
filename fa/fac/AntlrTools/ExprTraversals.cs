@@ -30,14 +30,14 @@ namespace fac.AntlrTools {
 		/// 枚举函数节点处理函数，每次遍历到的每一个节点都将调用此方法
 		/// </summary>
 		/// <param name="_expr">当前遍历到的节点</param>
-		/// <param name="_index">第几轮节点遍历，不同数字需调用不同处理方法</param>
 		/// <param name="_deep">函数内部作用域深度，默认0，有个大括号那么深度+1</param>
 		/// <param name="_group">作用域深度组，比如if跳到else，深度相同，但非不同组，那么前组变量需清空</param>
+		/// <param name="_loop">第几轮节点遍历，不同数字需调用不同处理方法</param>
 		/// <returns></returns>
-		public static IAstExpr Traversal (IAstExpr _expr, int _index, int _deep, int _group) {
+		public static IAstExpr Traversal (IAstExpr _expr, int _deep, int _group, int _loop) {
 			// 计算 Info.CurrentFuncVariables
 			// TODO 这一堆应该放到表达式或语句里去，放此处逻辑不对
-			if ((TraversalTypes[_index] & TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
+			if ((TraversalTypes[_loop] & TraversalType.CalcVar) > 0) { // _deep 为 0 代表类成员变量计算，不需计算方法变量，故跳过
 				if (_expr is AstExpr_Lambda _lambdaexpr) {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 1, LambdaFunc = _lambdaexpr });
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = _group + 2, Vars = new Dictionary<string, AstStmt_DefVariable> () });
@@ -60,13 +60,13 @@ namespace fac.AntlrTools {
 				}
 			}
 
-			if (_index == 0) {
+			if (_loop == 0) {
 				return Traversal0 (_expr);
-			} else if (_index == 1) {
+			} else if (_loop == 1) {
 				return Traversal1 (_expr);
-			} else if (_index == 2) {
+			} else if (_loop == 2) {
 				return Traversal2 (_expr);
-			} else if (_index == 3) {
+			} else if (_loop == 3) {
 				return Traversal3 (_expr);
 			} else {
 				throw new NotImplementedException ();

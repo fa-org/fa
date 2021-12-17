@@ -45,8 +45,8 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
-			BodyCodes.TraversalWraps ((_deep: _trav._deep + 2, _group: Common.GetRandomInt (), _cb: _trav._cb));
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
+			BodyCodes.TraversalWraps ((_deep: _trav._deep + 2, _group: Common.GetRandomInt (), _loop: _trav._loop, _cb: _trav._cb));
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {

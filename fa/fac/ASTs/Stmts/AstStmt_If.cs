@@ -40,11 +40,11 @@ namespace fac.ASTs.Stmts {
 			return FromIfStmt (_conditions, _contents);
 		}
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
-			var _trav1 = (_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _cb: _trav._cb);
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
+			var _trav1 = (_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _loop: _trav._loop, _cb: _trav._cb);
 			Condition = Condition.TraversalWrap (_trav1);
 			IfTrueCodes.TraversalWraps (_trav1);
-			_trav1 = (_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _cb: _trav._cb);
+			_trav1 = (_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _loop: _trav._loop, _cb: _trav._cb);
 			IfFalseCodes.TraversalWraps (_trav1);
 		}
 

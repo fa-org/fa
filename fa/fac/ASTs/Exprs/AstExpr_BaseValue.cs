@@ -30,7 +30,7 @@ namespace fac.ASTs.Exprs {
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) { }
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) { }
 
 		public override IAstType GuessType () => DataType;
 

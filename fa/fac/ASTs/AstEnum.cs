@@ -93,7 +93,7 @@ if (_l.@index != _r.@index) {{
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
 					for (int k = 0; k < ClassFuncs[j].BodyCodes.Count; ++k) {
-						ClassFuncs[j].BodyCodes[k] = ClassFuncs[j].BodyCodes[k].TraversalWrap ((_deep: 1, _group: 0, _cb: (_expr, _deep, _group) => ExprTraversals.Traversal (_expr, i, _deep, _group))) as IAstStmt;
+						ClassFuncs[j].BodyCodes[k] = ClassFuncs[j].BodyCodes[k].TraversalWrap ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal)) as IAstStmt;
 					}
 				}
 			}

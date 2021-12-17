@@ -17,7 +17,7 @@ namespace fac.ASTs.Exprs {
 
 
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			InitCount = InitCount.TraversalWrap (_trav);
 			InitValues.TraversalWraps (_trav);
 		}

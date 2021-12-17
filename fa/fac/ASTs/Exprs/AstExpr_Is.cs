@@ -22,6 +22,8 @@ namespace fac.ASTs.Exprs {
 		public static AstExpr_Is FromContext (IToken _token, IAstExpr _src, string _is_what, string _var) {
 			AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
 			var _is_what_expr = AstExprName_ClassEnum.FindFromName (_token, _is_what, _var_stmt?.GetRef () ?? null);
+			if (_var_stmt != null)
+				_var_stmt.DataType = _is_what_expr.EnumClass.ClassEnumItems[_is_what_expr.EnumItemIndex].AttachType;
 			return new AstExpr_Is {
 				Token = _token,
 				Value = _src,
@@ -30,7 +32,7 @@ namespace fac.ASTs.Exprs {
 			};
 		}
 
-		public override void Traversal ((int _deep, int _group, Func<IAstExpr, int, int, IAstExpr> _cb) _trav) {
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			Value = Value.TraversalWrap (_trav);
 			IsWhatExpr = IsWhatExpr.TraversalWrap (_trav) as AstExprName_ClassEnum;
 			if (IsDefVar)
