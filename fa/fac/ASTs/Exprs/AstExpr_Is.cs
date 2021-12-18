@@ -23,7 +23,7 @@ namespace fac.ASTs.Exprs {
 			AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
 			var _is_what_expr = AstExprName_ClassEnum.FindFromName (_token, _is_what, _var_stmt?.GetRef () ?? null);
 			if (_var_stmt != null)
-				_var_stmt.DataType = _is_what_expr.EnumClass.ClassEnumItems[_is_what_expr.EnumItemIndex].AttachType;
+				_var_stmt.DataType = _is_what_expr.AttachType;
 			return new AstExpr_Is {
 				Token = _token,
 				Value = _src,
@@ -48,18 +48,23 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => IAstType.FromName ("bool");
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
-			var (_stmts, _val) = Value.ExpandExpr (_cache_err);
-			Value = _val;
-			return (_stmts, this);
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new CodeException (Token, "is 表达式只支持在if判定条件中使用");
+
+		public (IAstExpr, List<IAstStmt>) ExpandExpr_If ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			var _expr = AstExpr_Op2.MakeCondition (
+				new AstExpr_Op1 { Token = Token, Value = Value, IsPrefix = false, Operator = ".@index" },
+				"==",
+				IAstExpr.FromValue ("int", $"{IsWhatExpr.EnumItemIndex}")
+			);
+			var _stmts = new List<IAstStmt> ();
+			if (DefVar != null) {
+				_stmts.Add (DefVar);
+				_stmts.Add (AstStmt_ExprWrap.MakeAssign (DefVar.GetRef (), new AstExpr_Op1 { Token = Token, Value = Value, IsPrefix = false, Operator = $".{IsWhatExpr.AttachName}", ExpectType = IsWhatExpr.AttachType }));
+			}
+			return (_expr, _stmts);
 		}
 
-		public override string GenerateCSharp (int _indent) => throw new CodeException (Token, "is 表达式只支持在if判定条件中使用");
-
-		public (string, string) GenerateCSharp_IfExpr () {
-			// TODO
-			throw new NotImplementedException ();
-		}
+		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
 		public override bool AllowAssign () => Value.AllowAssign ();
 	}

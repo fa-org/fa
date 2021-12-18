@@ -12,6 +12,8 @@ namespace fac.ASTs.Exprs.Names {
 		public IAstClass EnumClass { init; get; }
 		public int EnumItemIndex { init; get; }
 		public IAstExpr AttachExpr { get; set; }
+		public IAstType AttachType { get => EnumClass.ClassEnumItems[EnumItemIndex].AttachType; }
+		public string AttachName { get => EnumClass.ClassVars[EnumClass.GetRealAttachVarPos (EnumItemIndex)].Name; }
 
 
 

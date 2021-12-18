@@ -58,12 +58,20 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
-			var (_stmts, _expr) = Condition.ExpandExpr (_cache_err);
-			Condition = _expr;
-			IfTrueCodes = IfTrueCodes.ExpandStmts (_cache_err);
+			List<IAstStmt> _pre_stmts = new List<IAstStmt> (), _true_stmts = new List<IAstStmt> ();
+			IAstExpr _expr;
+			if (Condition is AstExpr_Is _is_expr) {
+				(_expr, _true_stmts) = _is_expr.ExpandExpr_If (_cache_err);
+				Condition = _expr;
+			} else {
+				(_pre_stmts, _expr) = Condition.ExpandExpr (_cache_err);
+				Condition = _expr;
+			}
+			_true_stmts.AddRange (IfTrueCodes.ExpandStmts (_cache_err));
+			IfTrueCodes = _true_stmts;
 			IfFalseCodes = IfFalseCodes.ExpandStmts (_cache_err);
-			_stmts.Add (this);
-			return _stmts;
+			_pre_stmts.Add (this);
+			return _pre_stmts;
 		}
 
 		public override string GenerateCSharp (int _indent) {

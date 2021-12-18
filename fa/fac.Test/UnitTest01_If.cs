@@ -229,5 +229,30 @@ class Program {
 			string _ret = BuildTool.RunAndGetReturn (_code);
 			Assert.AreEqual (_ret, "TestIf9");
 		}
+
+		// if判断枚举带参数类型
+		[TestMethod]
+		public void TestIf10 () {
+			string _code = @"
+use fa;
+
+enum TestEnum { A, B (int), C }
+
+class Program {
+	public static void Main () {
+		TestEnum e = TestEnum.B (10);
+		if e == TestEnum.A {
+			Console.Write (""error"");
+		} else if e is TestEnum.B(_val) {
+			Console.Write(""TestIf{0}"".Format (_val));
+		} else {
+			Console.Write(""error"");
+		}
+	}
+}
+";
+			string _ret = BuildTool.RunAndGetReturn (_code);
+			Assert.AreEqual (_ret, "TestIf10");
+		}
 	}
 }
