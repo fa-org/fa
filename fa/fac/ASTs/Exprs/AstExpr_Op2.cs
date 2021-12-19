@@ -95,10 +95,6 @@ namespace fac.ASTs.Exprs {
 				if (_opt)
 					_type = _type.Optional;
 				return _type;
-				// 除法，返回不为空，那么猜测类型为    可空
-				// 除法，返回为空，那么猜测类型为    不可空
-				// 非除法，返回不为空，那么猜测类型为    不可空
-				// 非除法，返回为空，那么猜测类型为    不可空
 			} else if (sQusQusOp2s.Contains (Operator)) {
 				return Value2.GuessType ();
 			} else {
@@ -150,7 +146,7 @@ namespace fac.ASTs.Exprs {
 					_stmts.Add (new AstStmt_If {
 						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
 						IfTrueCodes = new List<IAstStmt> {
-							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType, "除数不能为0")),
+							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType.Optional, "除数不能为0")),
 							_cache_err?._pos.GetRef (),
 						},
 						IfFalseCodes = new List<IAstStmt> {
