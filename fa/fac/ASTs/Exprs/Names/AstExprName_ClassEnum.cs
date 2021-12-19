@@ -13,31 +13,40 @@ namespace fac.ASTs.Exprs.Names {
 		public int EnumItemIndex { init; get; }
 		public IAstExpr AttachExpr { get; set; }
 		public IAstType AttachType { get => EnumClass.ClassEnumItems[EnumItemIndex].AttachType; }
+		public string LabelName { get => EnumClass.ClassEnumItems[EnumItemIndex].Name; }
 		public string AttachName { get => EnumClass.ClassVars[EnumClass.GetRealAttachVarPos (EnumItemIndex)].Name; }
 
 
 
 		public static AstExprName_ClassEnum FindFromName (IToken _token, string _name, IAstExprName _attach_var = null) {
+			var _class_enum = FindFromNameUncheckAttach (_token, _name);
+			if (_class_enum == null)
+				throw new CodeException (_token, $"未识别的标识符 {_name}");
+			if ((_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null) != (_attach_var == null)) {
+				throw new CodeException (_token, _attach_var == null ? "枚举类型需附带参数" : "枚举类型不应附带参数");
+			}
+			_class_enum.AttachExpr = _attach_var;
+			return _class_enum;
+		}
+
+		public static AstExprName_ClassEnum FindFromNameUncheckAttach (IToken _token, string _name) {
 			int _pt = _name.LastIndexOf ('.');
 			string _class_name = _name[.._pt];
 			var _classes = Info.GetClassFromName (_class_name);
 			if (_classes.Count == 0) {
-				throw new CodeException (_token, $"未识别的标识符 {_class_name}");
+				return null;
 			} else if (_classes.Count > 1) {
-				throw new CodeException (_token, $"不明确的标识符 {_class_name}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
+				return null;
 			} else if (_classes[0] is AstEnum _enum) {
 				_name = _name[(_pt + 1)..];
 				for (int i = 0; i < _enum.ClassEnumItems.Count; ++i) {
 					if (_enum.ClassEnumItems[i].Name == _name) {
-						if ((_enum.ClassEnumItems[i].AttachType == null) != (_attach_var == null)) {
-							throw new CodeException (_token, _attach_var == null ? "枚举类型需附带参数" : "枚举类型不应附带参数");
-						}
-						return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = i, AttachExpr = _attach_var };
+						return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = i };
 					}
 				}
-				throw new CodeException (_token, $"枚举类型 {_class_name} 不存在成员 {_name}");
+				return null;
 			} else {
-				throw new CodeException (_token, $"标识符 {_class_name} 非枚举类型");
+				return null;
 			}
 		}
 

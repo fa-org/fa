@@ -52,7 +52,7 @@ namespace fac.ASTs.Stmts {
 			} else if (_ctx.switchStmt2 () != null) {
 				var _t = new AstStmt_Switch { Token = _ctx.Start, Condition = null };
 				var _switch_items = _ctx.switchStmt2 ().switchStmtPart2 ();
-				_t.CaseValues = null;
+				_t.CaseCond = null;
 				_t.CaseWhen = (from p in _switch_items select FromContext (p.expr ())).ToList ();
 				_t.CaseCodes = (from p in _switch_items select FromStmt (p.stmt ()).ToSingleStmt ()).ToList ();
 				if (_ctx.switchStmt2 ().switchStmtPart2Last () != null) {
@@ -63,7 +63,8 @@ namespace fac.ASTs.Stmts {
 			} else if (_ctx.switchStmt () != null) {
 				var _t = new AstStmt_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchStmt ().expr ()) };
 				var _switch_items = _ctx.switchStmt ().switchStmtPart ();
-				_t.CaseValues = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
+				_t.CaseCond = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
+				_t.CaseCond.PreprocessCaseCond ();
 				_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
 				_t.CaseCodes = (from p in _switch_items select FromStmt (p.stmt ()).ToSingleStmt ()).ToList ();
 				_stmts.Add (_t);

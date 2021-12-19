@@ -240,7 +240,7 @@ namespace fac.ASTs.Exprs {
 			} else if (_ctx.switchExpr2 () != null) {
 				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = null };
 				var _switch_items = _ctx.switchExpr2 ().switchExprPart2 ();
-				_t.CaseValues = null;
+				_t.CaseCond = null;
 				_t.CaseWhen = (from p in _switch_items select FromContext (p.expr ())).ToList ();
 				_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
 				_t.CaseWhen.Add (null);
@@ -262,8 +262,9 @@ namespace fac.ASTs.Exprs {
 			} else if (_ctx.switchExpr () != null) {
 				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchExpr ().expr ()) };
 				var _switch_items = _ctx.switchExpr ().switchExprPart ();
-				_t.CaseValues = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
-				_t.CaseValues.Add (new AstExprName_Ignore { Token = _ctx.switchExpr ().switchExprPartLast ().Start });
+				_t.CaseCond = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
+				_t.CaseCond.Add (new AstExprName_Ignore { Token = _ctx.switchExpr ().switchExprPartLast ().Start });
+				_t.CaseCond.PreprocessCaseCond ();
 				_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
 				_t.CaseWhen.Add (null);
 				_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();

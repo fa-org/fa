@@ -89,5 +89,20 @@ namespace fac {
 				_stmts1.AddRange (_stmt.ExpandStmt (_cache_err));
 			return _stmts1;
 		}
+
+		public static void PreprocessCaseCond (this List<IAstExpr> _exprs) {
+			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
+				if (_exprs[i] is AstExpr_OpN _opn_expr1) {
+					string _enum_name = _opn_expr1.Value switch {
+						AstExpr_Op1 _op1_expr => _op1_expr.GetIdRaw (),
+						AstExpr_BaseId _bi_expr => _bi_expr.Id,
+						_ => throw new NotSupportedException (),
+					};
+					if (AstExprName_ClassEnum.FindFromNameUncheckAttach (_exprs[i].Token, _enum_name) != null) {
+						_exprs[i] = AstExpr_Is.FromContext (_exprs[i].Token, null, _enum_name, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
+					}
+				}
+			}
+		}
 	}
 }

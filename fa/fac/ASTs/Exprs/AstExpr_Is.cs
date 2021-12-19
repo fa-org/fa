@@ -22,8 +22,9 @@ namespace fac.ASTs.Exprs {
 		public static AstExpr_Is FromContext (IToken _token, IAstExpr _src, string _is_what, string _var) {
 			AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
 			var _is_what_expr = AstExprName_ClassEnum.FindFromName (_token, _is_what, _var_stmt?.GetRef () ?? null);
-			if (_var_stmt != null)
+			if (_var_stmt != null) {
 				_var_stmt.DataType = _is_what_expr.AttachType;
+			}
 			return new AstExpr_Is {
 				Token = _token,
 				Value = _src,
@@ -33,14 +34,16 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
-			Value = Value.TraversalWrap (_trav);
+			if (Value != null)
+				Value = Value.TraversalWrap (_trav);
 			IsWhatExpr = IsWhatExpr.TraversalWrap (_trav) as AstExprName_ClassEnum;
 			if (IsDefVar)
 				DefVar = DefVar.TraversalWrap (_trav) as AstStmt_DefVariable;
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			Value = Value.TraversalCalcType (null);
+			if (Value != null)
+				Value = Value.TraversalCalcType (null);
 			// DefVar 为虚拟变量定义对象，不需要重新计算类型
 			ExpectType = IAstType.FromName ("bool");
 			return AstExprTypeCast.Make (this, _expect_type);
@@ -66,6 +69,6 @@ namespace fac.ASTs.Exprs {
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
-		public override bool AllowAssign () => Value.AllowAssign ();
+		public override bool AllowAssign () => false;
 	}
 }

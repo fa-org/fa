@@ -189,11 +189,11 @@ namespace fac.AntlrTools {
 					&& _op1expr.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
 					_opnexpr.Arguments.Insert (0, _op1expr.Value);
 					_opnexpr.Value = AstExprName_BuildIn.FindFromName ("string.Format");
-				} else if (_opnexpr.Value is AstExprName_ClassEnum _ceiexpr) {
+				} else if (_opnexpr.Value is AstExprName_ClassEnum _ceexpr) {
 					if (_opnexpr.Arguments.Count != 1)
-						throw new CodeException (_ceiexpr.Token, "附带参数只能是一个");
-					_ceiexpr.AttachExpr = _opnexpr.Arguments[0];
-					return _ceiexpr;
+						throw new CodeException (_ceexpr.Token, "附带参数只能是一个");
+					_ceexpr.AttachExpr = _opnexpr.Arguments[0];
+					return _ceexpr;
 				}
 			}
 			return _expr;

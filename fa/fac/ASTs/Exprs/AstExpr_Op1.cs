@@ -57,5 +57,16 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override bool AllowAssign () => Value.AllowAssign ();
+
+		public string GetIdRaw () {
+			if (!IsPrefix) {
+				if (Value is AstExpr_Op1 _op1_expr) {
+					return $"{_op1_expr.GetIdRaw ()}{Operator}";
+				} else if (Value is AstExpr_BaseId _bi_expr) {
+					return $"{_bi_expr.Id}{Operator}";
+				}
+			}
+			throw new CodeException (Token, "此对象非ID");
+		}
 	}
 }

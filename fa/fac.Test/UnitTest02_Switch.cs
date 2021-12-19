@@ -252,5 +252,30 @@ class Program {
 			string _ret = BuildTool.RunAndGetReturn (_code);
 			Assert.AreEqual (_ret, "TestSwitch10");
 		}
+
+		/// <summary>
+		/// switch 枚举
+		/// </summary>
+		[TestMethod]
+		public void TestSwitch11 () {
+			string _code = @"
+use fa;
+
+enum TestEnum { A, B, C }
+
+class Program {
+	public static void Main () {
+		TestEnum e = TestEnum.B;
+		switch e {
+			TestEnum.A => Console.Write (""error"");
+			TestEnum.B => Console.Write (""TestSwitch11"");
+			TestEnum.C => Console.Write (""error"");
+		}
+	}
+}
+";
+			string _ret = BuildTool.RunAndGetReturn (_code);
+			Assert.AreEqual (_ret, "TestSwitch11");
+		}
 	}
 }
