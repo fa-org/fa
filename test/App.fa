@@ -7,7 +7,7 @@ public enum Optional<T1> {
 
 class Program {
 	public static void Main () {
-		Optional<string> _o = Optional<string>.Value ("hello111");
+		Optional<string> _o = Value ("hello111");
 		switch _o {
 			Value (_s) => Console.Write (_s);
 			Error1     => Console.Write ("Error1");

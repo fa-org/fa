@@ -13,7 +13,7 @@ namespace fac.ASTs.Exprs.Names {
 		public IAstClass EnumClass { init; get; }
 		public int EnumItemIndex { init; get; }
 		public IAstExpr AttachExpr { get; set; }
-		public IAstType AttachType { get => EnumClass.ClassEnumItems[EnumItemIndex].AttachType; }
+		public IAstType AttachType { get => EnumClass is AstTemplateEnum ? null : EnumClass.ClassEnumItems[EnumItemIndex].AttachType; }
 		public string LabelName { get => EnumClass.ClassEnumItems[EnumItemIndex].Name; }
 		public string AttachName { get => EnumClass.ClassVars[EnumClass.GetRealAttachVarPos (EnumItemIndex)].Name; }
 
@@ -23,7 +23,10 @@ namespace fac.ASTs.Exprs.Names {
 			var _class_enum = FindFromNameUncheckAttach (_token, _name);
 			if (_class_enum == null)
 				throw new CodeException (_token, $"未识别的标识符 {_name}");
-			if ((_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null) != (_attach_var == null)) {
+			if (_name == "Value") {
+				if (_attach_var == null)
+					throw new CodeException (_token, "枚举类型需附带参数");
+			} else if ((_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null) != (_attach_var == null)) {
 				throw new CodeException (_token, _attach_var == null ? "枚举类型需附带参数" : "枚举类型不应附带参数");
 			}
 			_class_enum.AttachExpr = _attach_var;
@@ -31,23 +34,28 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public static AstExprName_ClassEnum FindFromNameUncheckAttach (IToken _token, string _name) {
-			int _pt = _name.LastIndexOf ('.');
-			string _class_name = _name[.._pt];
-			var _classes = Info.GetClassFromName (_class_name);
-			if (_classes.Count == 0) {
-				return null;
-			} else if (_classes.Count > 1) {
-				return null;
-			} else if (_classes[0] is AstEnum _enum) {
-				_name = _name[(_pt + 1)..];
-				for (int i = 0; i < _enum.ClassEnumItems.Count; ++i) {
-					if (_enum.ClassEnumItems[i].Name == _name) {
-						return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = i };
-					}
-				}
-				return null;
+			if (_name == "Value") {
+				var _enum = Info.GetClassFromName ("Optional", new List<IAstType> { null })[0];
+				return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = 0 };
 			} else {
-				return null;
+				int _pt = _name.LastIndexOf ('.');
+				string _class_name = _name[.._pt];
+				var _classes = Info.GetClassFromName (_class_name);
+				if (_classes.Count == 0) {
+					return null;
+				} else if (_classes.Count > 1) {
+					return null;
+				} else if (_classes[0] is AstEnum _enum) {
+					_name = _name[(_pt + 1)..];
+					for (int i = 0; i < _enum.ClassEnumItems.Count; ++i) {
+						if (_enum.ClassEnumItems[i].Name == _name) {
+							return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = i };
+						}
+					}
+					return null;
+				} else {
+					return null;
+				}
 			}
 		}
 

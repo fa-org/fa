@@ -109,5 +109,7 @@ namespace fac.ASTs.Structs {
 		}
 
 		public int GetRealAttachVarPos (int _enum_index) => -1;
+
+		public int GetTemplateNum () => 0;
 	}
 }

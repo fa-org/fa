@@ -41,6 +41,7 @@ namespace fac.ASTs.Types {
 			if (_ctx.typeSingle () != null) {
 				// id<xxx>、id?
 				string _type_str = _ctx.typeSingle ().ids ().GetText ();
+
 				var _templates1 = FromContexts (_ctx.typeSingle ().type ());
 				if ((_templates1?.Count ?? 0) == 0) {
 					// 基本数据类型
@@ -70,7 +71,7 @@ namespace fac.ASTs.Types {
 
 				// 类
 				if (_ret == null) {
-					var _classes = Info.GetClassFromName (_type_str);
+					var _classes = Info.GetClassFromName (_type_str, _templates1);
 					if (_classes.Count == 1) {
 						_ret = AstType_Class.GetType (_ctx.Start, _classes[0], _templates1, _mut);
 					} else if (_classes.Count > 1) {

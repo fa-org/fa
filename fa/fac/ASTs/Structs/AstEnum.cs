@@ -119,5 +119,7 @@ if (_l.@index != _r.@index) {{
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();
 		}
+
+		public int GetTemplateNum () => 0;
 	}
 }

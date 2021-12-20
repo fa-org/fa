@@ -61,5 +61,7 @@ namespace fac.ASTs.Structs {
 		public override string GenerateCSharp (int _indent) {
 			return string.Join ("", from p in Insts select p.Value.GenerateCSharp (_indent));
 		}
+
+		public int GetTemplateNum () => Templates.Count;
 	}
 }

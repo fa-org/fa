@@ -89,5 +89,7 @@ namespace fac.ASTs.Structs {
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();
 		}
+
+		public int GetTemplateNum () => 0;
 	}
 }

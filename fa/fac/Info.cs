@@ -41,17 +41,21 @@ namespace fac {
 		public static List<IAstClass> GetClassFromName (string _name) {
 			var _templates = new List<IAstType> ();
 			if (_name.Contains ('<')) {
-				var _template_names = _name[(_name.IndexOf ('<') + 1)..^1].ItemSplit ();
+				int _p = _name.IndexOf ('<');
+				var _template_names = _name[(_p + 1)..^1].ItemSplit ();
 				_templates = (from p in _template_names select IAstType.FromName (p)).ToList ();
-				// TODO
-#warning TODO：寻找类时判断类是否需要模板，根据模板返回对应的类
+				_name = _name[.._p];
 			}
+			return GetClassFromName (_name, _templates);
+		}
+		public static List<IAstClass> GetClassFromName (string _name, List<IAstType> _templates) {
 			var _classes = new List<IAstClass> (); // 非绝对路径，收集起来，避免重复名称
 			foreach (var _program in Info.Programs) {
 				foreach (var _class in _program.CurrentClasses) {
 					if (_class.FullName.Length >= _name.Length) {
 						// 如果类名完全一致，那么直接返回
-						if (_class.FullName == _name) {
+						if (_class.FullName == _name && _class.GetTemplateNum () == _templates.Count) {
+							_classes.Clear ();
 							_classes.Add (_class);
 							return _classes;
 						}
@@ -59,7 +63,7 @@ namespace fac {
 						// 迭代当前命名空间
 						var _tmp_namespace = Info.CurrentNamespace;
 						while (_tmp_namespace != "") {
-							if (_class.FullName == $"{_tmp_namespace}.{_name}") {
+							if (_class.FullName == $"{_tmp_namespace}.{_name}" && _class.GetTemplateNum () == _templates.Count) {
 								_classes.Add (_class);
 								break;
 							}
@@ -75,7 +79,7 @@ namespace fac {
 
 						// 迭代use的命名空间
 						foreach (var _namespace in Info.CurrentUses) {
-							if (_class.FullName == $"{_namespace}.{_name}") {
+							if (_class.FullName == $"{_namespace}.{_name}" && _class.GetTemplateNum () == _templates.Count) {
 								_classes.Add (_class);
 								break;
 							}

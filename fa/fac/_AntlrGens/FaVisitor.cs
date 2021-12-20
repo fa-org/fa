@@ -158,12 +158,6 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitIds([NotNull] FaParser.IdsContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.idExt"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitIdExt([NotNull] FaParser.IdExtContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.typeAfter"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

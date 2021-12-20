@@ -285,9 +285,6 @@ namespace fac.ASTs.Exprs {
 				// TODO: 移植为if else
 			} else if (_ctx.lambdaExpr () != null) {
 				return new AstExpr_Lambda { Token = _ctx.Start, LambdaExprCtx = _ctx.lambdaExpr () };
-			} else if (_ctx.idExt () != null) {
-#warning TODO：检查途径此处的调用栈
-				return AstExprName_ClassEnum.FindFromNameUncheckAttach (_ctx.Start, _ctx.idExt ().GetText ());
 			} else {
 				throw new UnimplException (_ctx);
 			}
