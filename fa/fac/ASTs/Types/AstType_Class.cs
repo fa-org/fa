@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.ASTs.Structs;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,8 @@ namespace fac.ASTs.Types {
 			if ((_templates?.Count ?? 0) > 0) {
 				if (_class is AstTemplateClass _tclass) {
 					_class = _tclass.GetInst (_token, _templates);
+				} else if (_class is AstTemplateEnum _tenum) {
+					_class = _tenum.GetInst (_token, _templates);
 				} else {
 					throw new CodeException (_token, "非模板类型无法指定模板参数");
 				}

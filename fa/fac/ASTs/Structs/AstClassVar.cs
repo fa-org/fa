@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fac.ASTs {
+namespace fac.ASTs.Structs {
 	public class AstClassVar: IAst {
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fac.ASTs {
+namespace fac.ASTs.Structs {
 	public class AstEnum: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
@@ -18,6 +18,7 @@ namespace fac.ASTs {
 
 
 
+		private AstEnum () { }
 		public static AstEnum FromContext (FaParser.EnumStmtContext _ctx) {
 			var _enum_items = (from p in _ctx.classEnumItem () select new AstEnumItem (p)).ToList ();
 			var _types = (from p in _enum_items where p.AttachType != null select p.AttachType).ToList ();

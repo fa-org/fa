@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fac.ASTs {
+namespace fac.ASTs.Structs {
 	public class AstTemplateClassInst: IAst, IAstClass {
 		public AstTemplateClass Class { init; get; }
 		public List<IAstType> Templates { init; get; }

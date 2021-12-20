@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fac.ASTs {
+namespace fac.ASTs.Structs {
 	public class AstClass: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
@@ -19,6 +19,7 @@ namespace fac.ASTs {
 
 
 
+		private AstClass () { }
 		public static AstClass FromContext (FaParser.ClassStmtContext _ctx) {
 			var _ret = new AstClass {
 				Token = _ctx.Start,

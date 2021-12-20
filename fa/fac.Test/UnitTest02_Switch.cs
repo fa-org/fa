@@ -277,5 +277,57 @@ class Program {
 			string _ret = BuildTool.RunAndGetReturn (_code);
 			Assert.AreEqual (_ret, "TestSwitch11");
 		}
+
+		/// <summary>
+		/// switch 语句解构带参数枚举
+		/// </summary>
+		[TestMethod]
+		public void TestSwitch12 () {
+			string _code = @"
+use fa;
+
+enum TestEnum { A, B (int), C }
+
+class Program {
+	public static void Main () {
+		TestEnum e = TestEnum.B (12);
+		switch e {
+			TestEnum.A        => Console.Write (""error1"");
+			TestEnum.B (_var) => Console.Write (""TestSwitch{0}"".Format (_var));
+			TestEnum.C        => Console.Write (""error3"");
+		}
+	}
+}
+";
+			string _ret = BuildTool.RunAndGetReturn (_code);
+			Assert.AreEqual (_ret, "TestSwitch12");
+		}
+
+		/// <summary>
+		/// switch 表达式解构带参数枚举
+		/// </summary>
+		[TestMethod]
+		public void TestSwitch13 () {
+			string _code = @"
+use fa;
+
+enum TestEnum { A, B (int), C }
+
+class Program {
+	public static void Main () {
+		TestEnum e = TestEnum.B (13);
+		string s = switch e {
+			TestEnum.A        => ""error"",
+			TestEnum.B (_var) => ""TestSwitch{0}"".Format (_var),
+			TestEnum.C        => ""error"",
+			_                 => ""error"",
+		};
+		Console.Write(s);
+	}
+}
+";
+			string _ret = BuildTool.RunAndGetReturn (_code);
+			Assert.AreEqual (_ret, "TestSwitch13");
+		}
 	}
 }

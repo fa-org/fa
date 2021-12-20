@@ -5,6 +5,7 @@ using fac.ASTs;
 using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs;
 using fac.ASTs.Types;
 using fac.Structures;
 using System.Collections.Generic;
@@ -38,6 +39,13 @@ namespace fac {
 		/// </summary>
 		public static List<AstProgram> Programs = new List<AstProgram> ();
 		public static List<IAstClass> GetClassFromName (string _name) {
+			var _templates = new List<IAstType> ();
+			if (_name.Contains ('<')) {
+				var _template_names = _name[(_name.IndexOf ('<') + 1)..^1].ItemSplit ();
+				_templates = (from p in _template_names select IAstType.FromName (p)).ToList ();
+				// TODO
+#warning TODO：寻找类时判断类是否需要模板，根据模板返回对应的类
+			}
 			var _classes = new List<IAstClass> (); // 非绝对路径，收集起来，避免重复名称
 			foreach (var _program in Info.Programs) {
 				foreach (var _class in _program.CurrentClasses) {

@@ -2,6 +2,7 @@
 using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace fac.ASTs.Types {
 			IAstType _ret = null;
 			if (_ctx.typeSingle () != null) {
 				// id<xxx>、id?
-				string _type_str = _ctx.typeSingle ().id ().GetText ();
+				string _type_str = _ctx.typeSingle ().ids ().GetText ();
 				var _templates1 = FromContexts (_ctx.typeSingle ().type ());
 				if ((_templates1?.Count ?? 0) == 0) {
 					// 基本数据类型

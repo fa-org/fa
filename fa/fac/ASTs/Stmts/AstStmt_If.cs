@@ -12,7 +12,7 @@ namespace fac.ASTs.Stmts {
 	public class AstStmt_If: IAstStmt {
 		public IAstExpr Condition { get; set; }
 		public List<IAstStmt> IfTrueCodes { get; set; }
-		public List<IAstStmt> IfFalseCodes { get; set; }
+		public List<IAstStmt> IfFalseCodes { get; set; } = null;
 
 
 

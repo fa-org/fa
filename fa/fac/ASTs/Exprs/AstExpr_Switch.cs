@@ -36,7 +36,9 @@ namespace fac.ASTs.Exprs {
 			if (Condition != null)
 				Condition = Condition.TraversalCalcType (null);
 			for (int i = 0; i < (CaseCond?.Count ?? 0); ++i) {
-				CaseCond[i] = CaseCond[i].TraversalCalcType (CaseCond[i] is AstExpr_Is ? IAstType.FromName ("bool") : Condition.ExpectType);
+				if (CaseCond[i] is not AstExprName_Ignore) {
+					CaseCond[i] = CaseCond[i].TraversalCalcType (CaseCond[i] is AstExpr_Is ? IAstType.FromName ("bool") : Condition.ExpectType);
+				}
 			}
 			CaseWhen.TraversalCalcType (IAstType.FromName ("bool"));
 			if (_expect_type == null)

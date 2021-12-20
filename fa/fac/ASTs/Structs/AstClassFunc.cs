@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fac.ASTs {
+namespace fac.ASTs.Structs {
 	public class AstClassFunc: IAst {
 		public IAstClass ParentClass { get; set; }
 		public PublicLevel Level { init; get; }

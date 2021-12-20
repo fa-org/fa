@@ -1,16 +1,17 @@
 use fa;
 
+public enum Optional<T1> {
+	Value (T1),
+	Error1,
+}
 
-
-enum TestEnum { A, B (int), C }
 class Program {
 	public static void Main () {
-		TestEnum e = TestEnum.B (2);
-		switch e {
-			TestEnum.A        => Console.WriteLine ("error1");
-			TestEnum.B (_var) => Console.WriteLine ("hello{0}".Format (_var));
-			TestEnum.C        => Console.WriteLine ("error3");
-		}
+		Optional<string> _o = Optional<string>.Value ("hello111");
+		switch _o {
+			Value (_s) => Console.Write (_s);
+			Error1     => Console.Write ("Error1");
+		};
 	}
 }
 

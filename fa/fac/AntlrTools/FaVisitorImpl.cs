@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using fac.ASTs;
+using fac.ASTs.Structs;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -117,5 +118,6 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeVar2List (FaParser.TypeVar2ListContext context) => throw new NotImplementedException ();
 		public IAst VisitLambdaExpr (FaParser.LambdaExprContext context) => throw new NotImplementedException ();
 		public IAst VisitClassTemplates (FaParser.ClassTemplatesContext context) => throw new NotImplementedException ();
+		public IAst VisitIdExt (FaParser.IdExtContext context) => throw new NotImplementedException ();
 	}
 }

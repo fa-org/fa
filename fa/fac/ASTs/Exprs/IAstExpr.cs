@@ -207,7 +207,7 @@ namespace fac.ASTs.Exprs {
 					_exprs.RemoveAt (_exprs.Count - 1);
 					_branches.RemoveAt (_branches.Count - 1);
 				}
-				if (_branches [0].Item1.Count > 0)
+				if (_branches[0].Item1.Count > 0)
 					throw new Exception ("校验错误，此处不应该出现stmt代码");
 				return _branches[0].Item2;
 			} else if (_ctx.quotExpr () != null) {
@@ -223,13 +223,13 @@ namespace fac.ASTs.Exprs {
 				_expr.DataType = IAstType.FromName (_ctx.newExpr1 ().ids ().GetText ()) as AstType_Class;
 				_expr.ConstructorArguments = (from p in _ctx.newExpr2 ().expr () select FromContext (p)).ToList ();
 				return _expr;
-			//} else if (_ctx.newArray () != null) {
-			//	var _expr = new AstExpr_Array { Token = _ctx.Start };
-			//	if (_ctx.newArray ().ids () != null)
-			//		_expr.ItemDataType = IAstType.FromName (_ctx.newArray ().ids ().GetText ());
-			//	_expr.InitValues = new List<IAstExpr> ();
-			//	_expr.InitCount = FromContext (_ctx.newArray ().middleExpr ());
-			//	return _expr;
+				//} else if (_ctx.newArray () != null) {
+				//	var _expr = new AstExpr_Array { Token = _ctx.Start };
+				//	if (_ctx.newArray ().ids () != null)
+				//		_expr.ItemDataType = IAstType.FromName (_ctx.newArray ().ids ().GetText ());
+				//	_expr.InitValues = new List<IAstExpr> ();
+				//	_expr.InitCount = FromContext (_ctx.newArray ().middleExpr ());
+				//	return _expr;
 			} else if (_ctx.arrayExpr1 () != null) {
 				throw new UnimplException (_ctx);
 			} else if (_ctx.arrayExpr2 () != null) {
@@ -285,6 +285,9 @@ namespace fac.ASTs.Exprs {
 				// TODO: 移植为if else
 			} else if (_ctx.lambdaExpr () != null) {
 				return new AstExpr_Lambda { Token = _ctx.Start, LambdaExprCtx = _ctx.lambdaExpr () };
+			} else if (_ctx.idExt () != null) {
+#warning TODO：检查途径此处的调用栈
+				return AstExprName_ClassEnum.FindFromNameUncheckAttach (_ctx.Start, _ctx.idExt ().GetText ());
 			} else {
 				throw new UnimplException (_ctx);
 			}

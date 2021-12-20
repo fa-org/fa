@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.ASTs.Structs;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;

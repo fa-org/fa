@@ -152,7 +152,8 @@ fragment HEX:				NUM | [a-fA-F];
 //fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
 RawId:						('@' | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX)) (NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX))*;
 id:							Underline | RawId;
-ids:						id (PointOp id)*;
+ids:						(id PointOp)? id;
+idExt:						ids QuotJianL type (Comma type)* QuotJianR PointOp id;
 
 
 
@@ -160,7 +161,7 @@ ids:						id (PointOp id)*;
 // type
 //
 typeAfter:					(QuotFangL QuotFangR) | Qus;
-typeSingle:					id (QuotJianL type (Comma type)* QuotJianR)?;
+typeSingle:					ids (QuotJianL type (Comma type)* QuotJianR)?;
 typeMulti:					QuotYuanL typeVar (Comma typeVar)+ QuotYuanR;
 type:						(Mut | Params)? (typeSingle | typeMulti) typeAfter*;
 
@@ -229,7 +230,7 @@ newExpr2:					New ids? QuotYuanL (expr (Comma expr)*)? QuotYuanR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
 lambdaExpr:					QuotYuanL typeVar2List? QuotYuanR exprFuncDef (expr | (QuotHuaL stmt* QuotHuaR));
-strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr;
+strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr | idExt;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// 前缀 - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
@@ -267,11 +268,8 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 publicLevel:				Public | Internal | Protected | Private;
 classTemplates:				QuotJianL type (Comma type)* QuotJianR;
 classParent:				Colon ids (Comma ids)*;
-enumStmt:					publicLevel? Enum id QuotHuaL (classEnumItem (Comma classEnumItem)* Comma?)? QuotHuaR;
+enumStmt:					publicLevel? Enum id classTemplates? QuotHuaL (classEnumItem (Comma classEnumItem)* Comma?)? QuotHuaR;
 classStmt:					publicLevel? Class id classTemplates? classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
-							// classParent 由 class 和 struct 专属使用
-							// enumItems 由 enum 专属使用
-							// enum 的 classVar 不允许使用
 //
 classVarExtFunc:			publicLevel? id (Semi | classFuncBody);
 classVarExt:				QuotHuaL classVarExtFunc+ QuotHuaR tmpAssignExpr?;

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fac.ASTs {
+namespace fac.ASTs.Structs {
 	public class AstEnumItem: IAst {
 		public string Name { init; get; }
 		public IAstType AttachType { init; get; } = null;

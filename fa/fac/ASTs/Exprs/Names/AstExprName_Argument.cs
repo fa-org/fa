@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs.Structs;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;

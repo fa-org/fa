@@ -104,5 +104,28 @@ namespace fac {
 				}
 			}
 		}
+
+		public static List<string> ItemSplit (this string _str) {
+			var _items = new List<string> ();
+			if (_str.Length == 0)
+				return _items;
+			string _tmp = "";
+			int _level = 0;
+			foreach (char c in _str) {
+				if (c == '(' || c == '<' || c == '[' || c == '{') {
+					_level++;
+				} else if (c == ')' || c == '>' || c == ']' || c == '}') {
+					_level--;
+				}
+				if (c == ',' && _level == 0) {
+					_items.Add (_tmp);
+					_tmp = "";
+				} else {
+					_tmp += c;
+				}
+			}
+			_items.Add (_tmp);
+			return _items;
+		}
 	}
 }
