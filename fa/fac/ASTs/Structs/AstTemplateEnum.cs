@@ -13,24 +13,13 @@ namespace fac.ASTs.Structs {
 	public class AstTemplateEnum: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
-		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
+		public List<AstEnumItem> ClassEnumItems { init; get; }
 		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { get; set; }
 		public Dictionary<string, AstTemplateEnumInst> Insts { get; set; } = new Dictionary<string, AstTemplateEnumInst> ();
 
 
-
-		public AstTemplateEnumInst GetInst (IToken _token, List<IAstType> _templates) {
-			if (Templates.Count != _templates.Count)
-				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {_templates.Count} 个参数");
-			string _type_str = $"{FullName}__lt__{string.Join ("__comma__", from p in _templates select p.ToString ())}__gt__";
-			if (Insts.ContainsKey (_type_str))
-				return Insts[_type_str];
-			var _tcls_inst = new AstTemplateEnumInst(Token, this, _templates, _type_str);
-			Insts[_type_str] = _tcls_inst;
-			return _tcls_inst;
-		}
 
 		public static AstTemplateEnum FromContext (FaParser.EnumStmtContext _ctx) {
 			var _templates = (from p in _ctx.classTemplates ().type () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList ();
@@ -52,6 +41,7 @@ namespace fac.ASTs.Structs {
 				Token = _ctx.Start,
 				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
+				ClassEnumItems = _enum_items,
 				Templates = _templates,
 				ClassVars = _vars,
 				ClassFuncs = new List<AstClassFunc> (),
@@ -73,5 +63,16 @@ namespace fac.ASTs.Structs {
 		}
 
 		public int GetTemplateNum () => Templates.Count;
+
+		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
+			if (Templates.Count != (_templates?.Count ?? 0))
+				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {(_templates?.Count ?? 0)} 个参数");
+			string _type_str = $"{FullName}<{string.Join (",", from p in _templates select p.ToString ())}>";
+			if (Insts.ContainsKey (_type_str))
+				return Insts[_type_str];
+			var _tcls_inst = new AstTemplateEnumInst(Token, this, _templates, _type_str);
+			Insts[_type_str] = _tcls_inst;
+			return _tcls_inst;
+		}
 	}
 }

@@ -21,17 +21,6 @@ namespace fac.ASTs.Structs {
 
 
 
-		public AstTemplateClassInst GetInst (IToken _token, List<IAstType> _templates) {
-			if (Templates.Count != _templates.Count)
-				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {_templates.Count} 个参数");
-			string _type_str = $"{FullName}__lt__{string.Join ("__comma__", from p in _templates select p.ToString ())}__gt__";
-			if (Insts.ContainsKey (_type_str))
-				return Insts[_type_str];
-			var _tcls_inst = new AstTemplateClassInst(Token, this, _templates, _type_str);
-			Insts[_type_str] = _tcls_inst;
-			return _tcls_inst;
-		}
-
 		public static AstTemplateClass FromContext (FaParser.ClassStmtContext _ctx) {
 			var _templates = (from p in _ctx.classTemplates ().type () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList ();
 			foreach (var _var in _templates) {
@@ -63,5 +52,16 @@ namespace fac.ASTs.Structs {
 		}
 
 		public int GetTemplateNum () => Templates.Count;
+
+		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
+			if (Templates.Count != (_templates?.Count ?? 0))
+				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {(_templates?.Count ?? 0)} 个参数");
+			string _type_str = $"{FullName}<{string.Join (",", from p in _templates select p.ToString ())}>";
+			if (Insts.ContainsKey (_type_str))
+				return Insts[_type_str];
+			var _tcls_inst = new AstTemplateClassInst(Token, this, _templates, _type_str);
+			Insts[_type_str] = _tcls_inst;
+			return _tcls_inst;
+		}
 	}
 }

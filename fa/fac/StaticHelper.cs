@@ -90,16 +90,22 @@ namespace fac {
 			return _stmts1;
 		}
 
+		// 处理enum类型在switch条件中的解构
 		public static void PreprocessCaseCond (this List<IAstExpr> _exprs) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
 				if (_exprs[i] is AstExpr_OpN _opn_expr1) {
-					string _enum_name = _opn_expr1.Value switch {
-						AstExpr_Op1 _op1_expr => _op1_expr.GetIdRaw (),
-						AstExpr_BaseId _bi_expr => _bi_expr.Id,
-						_ => throw new NotSupportedException (),
-					};
-					if (AstExprName_ClassEnum.FindFromNameUncheckAttach (_exprs[i].Token, _enum_name) != null) {
-						_exprs[i] = AstExpr_Is.FromContext (_exprs[i].Token, null, _enum_name, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
+					if (_opn_expr1.Value is AstExprName_ClassEnum _ce_expr) {
+						_exprs[i] = AstExpr_Is.FromContext (_exprs[i].Token, null, _ce_expr, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
+					} else {
+						string _enum_name = _opn_expr1.Value switch {
+							AstExpr_Op1 _op1_expr => _op1_expr.GetIdRaw (),
+							AstExpr_BaseId _bi_expr => _bi_expr.Id,
+							_ => throw new NotSupportedException (),
+						};
+						var _ce_expr1 = AstExprName_ClassEnum.FindFromNameUncheckAttach (_exprs[i].Token, _enum_name);
+						if (_ce_expr1 != null) {
+							_exprs[i] = AstExpr_Is.FromContext (_exprs[i].Token, null, _ce_expr1, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
+						}
 					}
 				}
 			}

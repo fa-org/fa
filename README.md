@@ -56,6 +56,8 @@ fa语言快排实现：
 
 ![compile](imgs/20211201235129.jpg)
 
+![stars](https://starchart.cc/fa-org/fa.svg)
+
 <!--## 当前进度
 
 - [ ] 基本语法

@@ -56,7 +56,7 @@ namespace fac {
 						// 如果类名完全一致，那么直接返回
 						if (_class.FullName == _name && _class.GetTemplateNum () == _templates.Count) {
 							_classes.Clear ();
-							_classes.Add (_class);
+							_classes.Add (_class.GetInst (_templates));
 							return _classes;
 						}
 
@@ -64,7 +64,7 @@ namespace fac {
 						var _tmp_namespace = Info.CurrentNamespace;
 						while (_tmp_namespace != "") {
 							if (_class.FullName == $"{_tmp_namespace}.{_name}" && _class.GetTemplateNum () == _templates.Count) {
-								_classes.Add (_class);
+								_classes.Add (_class.GetInst (_templates));
 								break;
 							}
 							int p = _tmp_namespace.LastIndexOf ('.');
@@ -80,7 +80,7 @@ namespace fac {
 						// 迭代use的命名空间
 						foreach (var _namespace in Info.CurrentUses) {
 							if (_class.FullName == $"{_namespace}.{_name}" && _class.GetTemplateNum () == _templates.Count) {
-								_classes.Add (_class);
+								_classes.Add (_class.GetInst (_templates));
 								break;
 							}
 						}

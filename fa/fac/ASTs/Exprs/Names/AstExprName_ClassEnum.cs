@@ -13,8 +13,12 @@ namespace fac.ASTs.Exprs.Names {
 		public IAstClass EnumClass { init; get; }
 		public int EnumItemIndex { init; get; }
 		public IAstExpr AttachExpr { get; set; }
-		public IAstType AttachType { get => EnumClass is AstTemplateEnum ? null : EnumClass.ClassEnumItems[EnumItemIndex].AttachType; }
-		public string LabelName { get => EnumClass.ClassEnumItems[EnumItemIndex].Name; }
+		public IAstType AttachType {
+			get {
+				var _type = EnumClass.ClassEnumItems[EnumItemIndex].AttachType;
+				return EnumClass is AstTemplateEnumInst _enum_inst ? _enum_inst.GetImplType ((_type as AstType_Placeholder).Name) : _type;
+			}
+		}
 		public string AttachName { get => EnumClass.ClassVars[EnumClass.GetRealAttachVarPos (EnumItemIndex)].Name; }
 
 
@@ -34,29 +38,39 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public static AstExprName_ClassEnum FindFromNameUncheckAttach (IToken _token, string _name) {
-			if (_name == "Value") {
-				var _enum = Info.GetClassFromName ("Optional", new List<IAstType> { null })[0];
-				return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = 0 };
+			int _pt = _name.LastIndexOf ('.');
+			if (_pt == -1)
+				return null;
+			string _class_name = _name[.._pt];
+			var _classes = Info.GetClassFromName (_class_name);
+			if (_classes.Count == 1) {
+				return FindFromNameUncheckAttach (_token, _classes[0], _name[(_pt + 1)..]);
 			} else {
-				int _pt = _name.LastIndexOf ('.');
-				string _class_name = _name[.._pt];
-				var _classes = Info.GetClassFromName (_class_name);
-				if (_classes.Count == 0) {
-					return null;
-				} else if (_classes.Count > 1) {
-					return null;
-				} else if (_classes[0] is AstEnum _enum) {
-					_name = _name[(_pt + 1)..];
-					for (int i = 0; i < _enum.ClassEnumItems.Count; ++i) {
-						if (_enum.ClassEnumItems[i].Name == _name) {
-							return new AstExprName_ClassEnum { Token = _token, EnumClass = _enum, EnumItemIndex = i };
-						}
-					}
-					return null;
-				} else {
-					return null;
+				return null;
+			}
+		}
+
+		public static AstExprName_ClassEnum FindFromName (IToken _token, IAstClass _class, string _name, IAstExprName _attach_var = null) {
+			var _class_enum = FindFromNameUncheckAttach (_token, _class, _name);
+			if (_class_enum == null)
+				throw new CodeException (_token, $"未识别的标识符 {_name}");
+			if (_name == "Value") {
+				if (_attach_var == null)
+					throw new CodeException (_token, "枚举类型需附带参数");
+			} else if ((_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null) != (_attach_var == null)) {
+				throw new CodeException (_token, _attach_var == null ? "枚举类型需附带参数" : "枚举类型不应附带参数");
+			}
+			_class_enum.AttachExpr = _attach_var;
+			return _class_enum;
+		}
+
+		public static AstExprName_ClassEnum FindFromNameUncheckAttach (IToken _token, IAstClass _class, string _name) {
+			for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
+				if (_class.ClassEnumItems[i].Name == _name) {
+					return new AstExprName_ClassEnum { Token = _token, EnumClass = _class, EnumItemIndex = i };
 				}
 			}
+			return null;
 		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
@@ -70,7 +84,7 @@ namespace fac.ASTs.Exprs.Names {
 				throw new CodeException (Token, $"{EnumClass.ClassEnumItems[EnumItemIndex].Name} 枚举条件{(_need_attach ? "需要附带参数" : "不能附带参数")}，但实际{(_need_attach ? "没有附带参数" : "附带了参数")}");
 			}
 			if (_need_attach)
-				AttachExpr = AttachExpr.TraversalCalcType (EnumClass.ClassEnumItems[EnumItemIndex].AttachType);
+				AttachExpr = AttachExpr.TraversalCalcType (AttachType);
 			ExpectType = GuessType ();
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
@@ -82,9 +96,9 @@ namespace fac.ASTs.Exprs.Names {
 			if (_need_attach) {
 				int _real_var_index = EnumClass.GetRealAttachVarPos (EnumItemIndex);
 				var _b = AttachExpr.GenerateCSharp (_indent);
-				return $"new {EnumClass.FullName} {{ @index = {EnumItemIndex}, {EnumClass.ClassVars[_real_var_index].Name} = {_b} }}";
+				return $"new {EnumClass.CSharpFullName} {{ @index = {EnumItemIndex}, {EnumClass.ClassVars[_real_var_index].Name} = {_b} }}";
 			} else {
-				return $"new {EnumClass.FullName} {{ @index = {EnumItemIndex} }}";
+				return $"new {EnumClass.CSharpFullName} {{ @index = {EnumItemIndex} }}";
 			}
 			//throw new NotImplementedException ();
 		}

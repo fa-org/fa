@@ -2,6 +2,7 @@
 using fac.AntlrTools;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace fac.ASTs.Structs {
 		public List<IAstType> Templates { init; get; }
 
 		public string FullName { init; get; }
+		public string CSharpFullName { get => FullName.Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__"); }
 		public List<AstEnumItem> ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
@@ -48,7 +50,7 @@ namespace fac.ASTs.Structs {
 			return null;
 		}
 
-		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class, Templates);
+		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class.GetInst (Templates));
 
 		public bool Compile () {
 			if (m_compiled)
@@ -56,6 +58,7 @@ namespace fac.ASTs.Structs {
 			m_compiled = true;
 
 			Info.CurrentClass = this;
+			Info.CurrentFuncVariables = null;
 
 			// Antlr转AST
 			foreach (var _var in ClassVars)
@@ -85,7 +88,28 @@ namespace fac.ASTs.Structs {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
-					ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+					if (i == 2) {
+						ClassFuncs[j].BodyCodes.TraversalCalcType ();
+						ExprTraversals.Init = ExprTraversals.Complete = true;
+						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+						if (!ExprTraversals.Complete) {
+							ExprTraversals.Init = false;
+							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
+							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
+							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+						}
+					} else {
+						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+					}
 				}
 			}
 
@@ -99,7 +123,7 @@ namespace fac.ASTs.Structs {
 			Info.CurrentFuncVariables = null;
 			//
 			var _sb = new StringBuilder ();
-			_sb.AppendLine ($"{_indent.Indent ()}{Class.Level.ToString ().ToLower ()} class {FullName[(FullName.LastIndexOf ('.') + 1)..]} {{");
+			_sb.AppendLine ($"{_indent.Indent ()}{Class.Level.ToString ().ToLower ()} class {CSharpFullName[(CSharpFullName.LastIndexOf ('.') + 1)..]} {{");
 			foreach (var _var in ClassVars)
 				_sb.Append (_var.GenerateCSharp (_indent + 1));
 			foreach (var _func in ClassFuncs)
@@ -111,5 +135,11 @@ namespace fac.ASTs.Structs {
 		public int GetRealAttachVarPos (int _enum_index) => -1;
 
 		public int GetTemplateNum () => 0;
+
+		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
+			if ((_templates?.Count ?? 0) > 0)
+				throw new CodeException (_token, $"泛型类型无法再次指定模板参数");
+			return this;
+		}
 	}
 }

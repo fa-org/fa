@@ -73,7 +73,7 @@ namespace fac.ASTs.Types {
 				if (_ret == null) {
 					var _classes = Info.GetClassFromName (_type_str, _templates1);
 					if (_classes.Count == 1) {
-						_ret = AstType_Class.GetType (_ctx.Start, _classes[0], _templates1, _mut);
+						_ret = AstType_Class.GetType (_ctx.Start, _classes[0], _mut);
 					} else if (_classes.Count > 1) {
 						throw new CodeException (_ctx.Start, $"不明确的符号 {_type_str}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
 					}

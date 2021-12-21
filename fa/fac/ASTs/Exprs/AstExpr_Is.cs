@@ -32,6 +32,19 @@ namespace fac.ASTs.Exprs {
 				DefVar = _var_stmt,
 			};
 		}
+		public static AstExpr_Is FromContext (IToken _token, IAstExpr _src, AstExprName_ClassEnum _is_what_expr, string _var) {
+			AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
+			if (_var_stmt != null) {
+				_var_stmt.DataType = _is_what_expr.AttachType;
+				_is_what_expr.AttachExpr = _var_stmt.GetRef ();
+			}
+			return new AstExpr_Is {
+				Token = _token,
+				Value = _src,
+				IsWhatExpr = _is_what_expr,
+				DefVar = _var_stmt,
+			};
+		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (Value != null)

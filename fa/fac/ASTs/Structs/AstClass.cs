@@ -1,4 +1,5 @@
-﻿using fac.AntlrTools;
+﻿using Antlr4.Runtime;
+using fac.AntlrTools;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
@@ -66,7 +67,28 @@ namespace fac.ASTs.Structs {
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
 					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
 					//
-					ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+					if (i == 2) {
+						ClassFuncs[j].BodyCodes.TraversalCalcType ();
+						ExprTraversals.Init = ExprTraversals.Complete = true;
+						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+						if (!ExprTraversals.Complete) {
+							ExprTraversals.Init = false;
+							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
+							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
+							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
+							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+						}
+					} else {
+						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
+					}
 				}
 			}
 
@@ -91,5 +113,11 @@ namespace fac.ASTs.Structs {
 		}
 
 		public int GetTemplateNum () => 0;
+
+		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
+			if ((_templates?.Count ?? 0) > 0)
+				throw new CodeException (_token, $"非泛型类型无法指定模板参数");
+			return this;
+		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Exprs.Names;
+﻿using fac.AntlrTools;
+using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
 using fac.Exceptions;
@@ -15,7 +16,19 @@ namespace fac.ASTs.Exprs {
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) { }
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
+			// 单独处理枚举类型，另一部分代码位于AstExpr_OpN.cs
+			if (_expect_type is AstType_Class _classty && (_classty.Class.ClassEnumItems?.Count ?? 0) > 0) {
+				var _class_enum = AstExprName_ClassEnum.FindFromNameUncheckAttach (Token, _classty.Class, Id);
+				_class_enum.ExpectType = _expect_type;
+				return _class_enum;
+			}
+			//
+			if (ExprTraversals.Init) {
+				ExprTraversals.Complete = false;
+				return this;
+			} else {
+				throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
+			}
 		}
 
 		public override IAstType GuessType () {

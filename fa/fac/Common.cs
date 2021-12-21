@@ -47,7 +47,7 @@ namespace fac {
 			Info.Visitor = new FaVisitorImpl ();
 			return Info.Visitor.Visit (typeof (T).FullName switch {
 				"fac.ASTs.AstProgram" => _parser.program (),
-				"fac.ASTs.AstClassFunc" => _parser.classFunc (),
+				"fac.ASTs.Structs.AstClassFunc" => _parser.classFunc (),
 				"fac.ASTs.Types.IAstType" => _parser.type (),
 				_ => throw new NotImplementedException (),
 			}) as T;

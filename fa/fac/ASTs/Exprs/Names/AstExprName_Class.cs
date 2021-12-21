@@ -19,7 +19,7 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstType GuessType () => AstType_Class.GetType (Token, Class);
 
-		public override string GenerateCSharp (int _indent) => Class.FullName;
+		public override string GenerateCSharp (int _indent) => Class.CSharpFullName;
 
 		public override bool AllowAssign () => false;
 	}

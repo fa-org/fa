@@ -37,7 +37,7 @@ namespace fac.ASTs.Exprs.Names {
 				var _b = ThisObject.GenerateCSharp (_indent);
 				return $"{_b}.{Class.ClassVars[VariableIndex].Name}";
 			} else {
-				return $"{Class.FullName}.{Class.ClassVars[VariableIndex].Name}";
+				return $"{Class.CSharpFullName}.{Class.ClassVars[VariableIndex].Name}";
 			}
 		}
 

@@ -258,7 +258,6 @@ namespace fac.ASTs.Exprs {
 					}
 				}
 				return _t;
-				// TODO: 移植为if else
 			} else if (_ctx.switchExpr () != null) {
 				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchExpr ().expr ()) };
 				var _switch_items = _ctx.switchExpr ().switchExprPart ();
@@ -282,9 +281,10 @@ namespace fac.ASTs.Exprs {
 					}
 				}
 				return _t;
-				// TODO: 移植为if else
 			} else if (_ctx.lambdaExpr () != null) {
 				return new AstExpr_Lambda { Token = _ctx.Start, LambdaExprCtx = _ctx.lambdaExpr () };
+			} else if (_ctx.idExt () != null) {
+				return AstExprName_ClassEnum.FindFromNameUncheckAttach (_ctx.Start, _ctx.idExt ().GetText ());
 			} else {
 				throw new UnimplException (_ctx);
 			}

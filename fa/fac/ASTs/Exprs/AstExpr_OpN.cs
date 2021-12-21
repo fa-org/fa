@@ -45,6 +45,23 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			// 单独处理枚举类型，另一部分代码位于AstExpr_BaseId.cs
+			if (_expect_type is AstType_Class _class_type && (_class_type.Class.ClassEnumItems?.Count ?? 0) > 0
+				&& Value is AstExpr_BaseId _bi_expr
+				&& Arguments.Count == 1) {
+				if (Arguments[0] is AstExpr_BaseId _bi_expr1) {
+					var _class_enum = AstExprName_ClassEnum.FindFromNameUncheckAttach (Token, _class_type.Class, _bi_expr.Id);
+					var _is_expr = AstExpr_Is.FromContext (Token, null, _class_enum, _bi_expr1.Id);
+					_is_expr.ExpectType = _expect_type;
+					return _is_expr;
+				} else {
+					var _ce_expr = AstExprName_ClassEnum.FindFromNameUncheckAttach (Token, _class_type.Class, _bi_expr.Id);
+					_ce_expr.AttachExpr = Arguments[0];
+					_ce_expr.ExpectType = _expect_type;
+					return _ce_expr;
+				}
+			}
+			//
 			Value = Value.TraversalCalcType (null);
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				if (_funcexpr.ThisObject != null)
