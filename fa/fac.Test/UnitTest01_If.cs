@@ -243,10 +243,10 @@ class Program {
 		TestEnum e = TestEnum.B (10);
 		if e == TestEnum.A {
 			Console.Write (""error"");
-		} else if e is TestEnum.B(_val) {
-			Console.Write(""TestIf{0}"".Format (_val));
+		} else if e is TestEnum.B (_val) {
+			Console.Write (""TestIf{0}"".Format (_val));
 		} else {
-			Console.Write(""error"");
+			Console.Write (""error"");
 		}
 	}
 }

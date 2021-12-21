@@ -194,6 +194,14 @@ namespace fac {
 		/// </summary>
 		public static AstClassFunc CurrentFunc { get; set; } = null;
 
+		public static void InitFunc (AstClassFunc _func) {
+			CurrentFunc = _func;
+			CurrentFuncVariables = new List<FuncArgumentOrVars> ();
+			CurrentFuncVariables.Add (new FuncArgumentOrVars { Group = 0, ClassFunc = _func });
+			if (_func != null)
+				CurrentFuncVariables.Add (new FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+		}
+
 		//
 		public static string GenerateCSharp () {
 			var _sb = new StringBuilder ();

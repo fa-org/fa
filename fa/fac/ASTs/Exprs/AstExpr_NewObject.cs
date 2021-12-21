@@ -79,7 +79,7 @@ namespace fac.ASTs.Exprs {
 
 		public override string GenerateCSharp (int _indent) {
 			StringBuilder _sb = new StringBuilder ();
-			_sb.Append ($"new {DataType}");
+			_sb.Append ($"new {DataType.Class.CSharpFullName}");
 			if (InitialValues != null) {
 				_sb.Append ($" {{ ");
 				foreach (var _init in InitialValues) {

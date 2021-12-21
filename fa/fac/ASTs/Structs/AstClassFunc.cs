@@ -24,13 +24,7 @@ namespace fac.ASTs.Structs {
 			get {
 				var _args = new List<IAstType> ();
 				if (!Static) {
-					if (ParentClass is AstTemplateClassInst _inst) {
-						_args.Add (AstType_Class.GetType (Token, _inst.Class));
-					} else if (ParentClass is AstTemplateEnumInst _inst1) {
-						_args.Add (AstType_Class.GetType (Token, _inst1.Class));
-					} else {
-						_args.Add (AstType_Class.GetType (Token, ParentClass));
-					}
+					_args.Add (AstType_Class.GetType (Token, ParentClass));
 				}
 				_args.AddRange (from p in Arguments select p._type);
 				return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = _args };

@@ -1,20 +1,20 @@
 use fa;
 
-public enum Optional<T1> {
-	Value (T1),
-	Error1,
+class Dic1<T1> {
+	public T1 s;
+	public T1 test (T1 t) {
+		T1 a = "{0}{1}".Format (s, t);
+		return a;
+	}
 }
 
 class Program {
 	public static void Main () {
-		Optional<string> _o = Value ("Hello fa");
-		switch _o {
-			Value (_s) => Console.Write (_s);
-			Error1     => Console.Write ("Error1");
-		};
+		Dic1<string> d = new { s = "Test" };
+		string _s = d.test ("Object3");
+		Console.Write (_s);
 	}
 }
-
 
 
 

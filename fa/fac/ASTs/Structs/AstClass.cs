@@ -53,19 +53,14 @@ namespace fac.ASTs.Structs {
 				for (int j = 0; j < ClassVars.Count; ++j) {
 					if (ClassVars[j].DefaultValue == null)
 						continue;
-					Info.CurrentFunc = null;
-					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+					Info.InitFunc (null);
 					//
 					ClassVars[j].DefaultValue = ClassVars[j].DefaultValue.TraversalWrap ((_deep: 0, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 				}
 
 				// 类成员方法
 				for (int j = 0; j < ClassFuncs.Count; ++j) {
-					Info.CurrentFunc = ClassFuncs[j];
-					Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
-					Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+					Info.InitFunc (ClassFuncs[j]);
 					//
 					if (i == 2) {
 						ClassFuncs[j].BodyCodes.TraversalCalcType ();
@@ -73,17 +68,11 @@ namespace fac.ASTs.Structs {
 						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						if (!ExprTraversals.Complete) {
 							ExprTraversals.Init = false;
-							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
-							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
-							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
-							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
-							Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
-							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 0, ClassFunc = Info.CurrentFunc });
-							Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = 1, Vars = new Dictionary<string, AstStmt_DefVariable> () });
+							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						}
 					} else {
