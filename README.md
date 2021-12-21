@@ -54,7 +54,7 @@ fa语言是一款不容易误解、简单易学的编程语言。目前处于测
 
 fa语言快排实现：
 
-![compile](imgs/20211201235129.jpg)
+![compile](imgs/20211222001053.jpg)
 
 ![stars](https://starchart.cc/fa-org/fa.svg)
 
