@@ -131,18 +131,18 @@ namespace fac {
 				_src_files = (from p in _src_files where p[^3..].ToLower () == ".fa" select p).ToList ();
 			}
 
-			//// TODO: 读取编译器自带标准库，比如Error等，用于后续part拼接，以及替换掉buildin实现
-			//var _assembly = Assembly.GetExecutingAssembly ();
-			//var _fa_files = _assembly.GetManifestResourceNames ();
-			//_fa_files = (from p in _fa_files where p[..7] == "fac.fa." select p).ToArray ();
-			//foreach (var _fa_file in _fa_files) {
-			//	Info.CurrentFile = $"res://fa/{_fa_file[7..]}";
-			//	using var _stream = _assembly.GetManifestResourceStream (_fa_file);
-			//	using var _reader = new StreamReader (_stream, Encoding.UTF8);
-			//	Info.CurrentSourceCode = _reader.ReadToEnd ();
-			//	Log.Mark (LogMark.Parse);
-			//	Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode));
-			//}
+			// 读取编译器自带标准库，比如Error等，用于后续part拼接，以及替换掉buildin实现
+			var _assembly = Assembly.GetExecutingAssembly ();
+			var _fa_files = _assembly.GetManifestResourceNames ();
+			_fa_files = (from p in _fa_files where p[..7] == "fac.fa." select p).ToArray ();
+			foreach (var _fa_file in _fa_files) {
+				Info.CurrentFile = $"res://fa/{_fa_file[7..]}";
+				using var _stream = _assembly.GetManifestResourceStream (_fa_file);
+				using var _reader = new StreamReader (_stream, Encoding.UTF8);
+				Info.CurrentSourceCode = _reader.ReadToEnd ();
+				Log.Mark (LogMark.Parse);
+				Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode));
+			}
 
 			// 读取源码
 			foreach (var _src_file in _src_files) {

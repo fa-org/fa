@@ -290,7 +290,7 @@ useStmt:					Use ids Semi;
 callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
 importStmt:					AImport type callConvention id QuotYuanL typeVarList QuotYuanR Semi;
 libStmt:					ALib String1Literal Semi;
-namespaceStmt:				Namespace ids;
+namespaceStmt:				Namespace ids Semi;
 
 
 

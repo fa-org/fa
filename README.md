@@ -108,35 +108,6 @@ public class TestClass {
 	// 定义函数
 	public string func () {}
 }
-
-// 实例化类型
-var tc1 = new TestClass { Value1 = "a", Value3 = "c" }; // 必填参数
-var tc2 = new TestClass { Value1 = "a", Value2 = "b", Value3 = "c", Value4 = "d" }; // 包括可选参数
-```
-
-### 运行效果
-
-if表达式：
-
-![img](./imgs/screen1.png)
-
----
-
-类成员访问：
-
-![img](./imgs/screen2.png)
-
----
-
-循环：
-
-![img](./imgs/screen3.png)
-
----
-
-数组：
-
-![img](./imgs/screen4.png)
 -->
 
 
