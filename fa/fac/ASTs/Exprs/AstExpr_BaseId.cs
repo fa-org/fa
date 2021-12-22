@@ -27,7 +27,7 @@ namespace fac.ASTs.Exprs {
 				ExprTraversals.Complete = false;
 				return this;
 			} else {
-				throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
+				throw new CodeException (Token, $"未定义的标识符 {Id}");
 			}
 		}
 

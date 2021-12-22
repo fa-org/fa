@@ -93,6 +93,7 @@ namespace fac.ASTs.Structs {
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
+							ClassFuncs[j].BodyCodes.TraversalCalcType ();
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						}

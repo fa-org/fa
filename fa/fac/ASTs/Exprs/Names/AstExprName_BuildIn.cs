@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Types;
+﻿using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -15,17 +16,27 @@ namespace fac.ASTs.Exprs.Names {
 
 
 		private static Dictionary<string, AstExprName_BuildIn> sBuildIn = new Dictionary<string, AstExprName_BuildIn> {
-			["continue"] = new AstExprName_BuildIn { Token = null, Name = "continue", NameType = "void" },
-			["break"] = new AstExprName_BuildIn { Token = null, Name = "break", NameType = "void" },
-			["Console.WriteLine"] = new AstExprName_BuildIn { Token = null, Name = "Console.WriteLine", NameType = "Func<string, void>" },
-			["Console.Write"] = new AstExprName_BuildIn { Token = null, Name = "Console.Write", NameType = "Func<string, void>" },
-			["string.Format"] = new AstExprName_BuildIn { Token = null, Name = "string.Format", NameType = "Func<string, params any[], string>" },
-			["File.Exists"] = new AstExprName_BuildIn { Token = null, Name = "File.Exists", NameType = "Func<string, bool>" },
-			["File.ReadAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.ReadAllText", NameType = "Func<string, string>" },
-			["File.WriteAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.WriteAllText", NameType = "Func<string, string, void>" },
-			["File.AppendAllText"] = new AstExprName_BuildIn { Token = null, Name = "File.AppendAllText", NameType = "Func<string, string, void>" },
-			["@FILE"] = new AstExprName_BuildIn { Token = null, Name = "@FILE", NameType = "string" },
-			["@SOURCE"] = new AstExprName_BuildIn { Token = null, Name = "@SOURCE", NameType = "string" },
+			["continue"] =              new AstExprName_BuildIn { Name = "continue",           NameType = "void" },
+			["break"] =                 new AstExprName_BuildIn { Name = "break",              NameType = "void" },
+			//
+			["Console.WriteLine"] =     new AstExprName_BuildIn { Name = "Console.WriteLine",  NameType = "Func<string, void>" },
+			["Console.Write"] =         new AstExprName_BuildIn { Name = "Console.Write",      NameType = "Func<string, void>" },
+			//
+			["string.Format"] =         new AstExprName_BuildIn { Name = "string.Format",      NameType = "Func<string, params any[], string>" },
+			//
+			["File.Exists"] =           new AstExprName_BuildIn { Name = "File.Exists",        NameType = "Func<string, bool>" },
+			["File.ReadAllText"] =      new AstExprName_BuildIn { Name = "File.ReadAllText",   NameType = "Func<string, string>" },
+			["File.WriteAllText"] =     new AstExprName_BuildIn { Name = "File.WriteAllText",  NameType = "Func<string, string, void>" },
+			["File.AppendAllText"] =    new AstExprName_BuildIn { Name = "File.AppendAllText", NameType = "Func<string, string, void>" },
+			["File.Delete"] =           new AstExprName_BuildIn { Name = "File.Delete",        NameType = "Func<string, void>" },
+			//
+			["Directory.Exists"] =      new AstExprName_BuildIn { Name = "Directory.Exists",   NameType = "Func<string, bool>" },
+			["Directory.Create"] =      new AstExprName_BuildIn { Name = "Directory.Create",   NameType = "Func<string, void>" },
+			["Directory.Delete"] =      new AstExprName_BuildIn { Name = "Directory.Delete",   NameType = "Func<string, void>" },
+			["Directory.GetFiles"] =    new AstExprName_BuildIn { Name = "Directory.GetFiles", NameType = "Func<string, string[]>" },
+			//
+			["@FILE"] =                 new AstExprName_BuildIn { Name = "@FILE",              NameType = "string" },
+			["@FILEDATA"] =             new AstExprName_BuildIn { Name = "@FILEDATA",          NameType = "string" },
 		};
 
 		public static AstExprName_BuildIn FindFromName (string _name) {
@@ -36,29 +47,26 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (ExpectType == null)
-				ExpectType = NameType != "" ? IAstType.FromName (NameType) : null;
+				ExpectType = IAstType.FromName (NameType);
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 
 		public override IAstType GuessType () {
 			if (ExpectType == null)
-				ExpectType = NameType != "" ? IAstType.FromName (NameType) : null;
+				ExpectType = IAstType.FromName (NameType);
 			return ExpectType;
 		}
 
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			// TODO 扩展写文件之类的错误判断
+			return (new List<IAstStmt> (), this);
+		}
+
 		public override string GenerateCSharp (int _indent) => Name switch {
-			"continue" => "continue",
-			"break" => "break",
-			"Console.WriteLine" => "Console.WriteLine",
-			"Console.Write" => "Console.Write",
-			"string.Format" => "string.Format",
-			"File.Exists" => "File.Exists",
-			"File.ReadAllText" => "File.ReadAllText",
-			"File.WriteAllText" => "File.WriteAllText",
-			"File.AppendAllText" => "File.AppendAllText",
+			"Directory.Create" => "Directory.CreateDirectory",
 			"@FILE" => Common.WrapStringValue (Info.CurrentFile),
-			"@SOURCE" => Common.WrapStringValue (File.ReadAllText (Info.CurrentFile, Encoding.UTF8)),
-			_ => throw new UnimplException (Token),
+			"@FILEDATA" => Common.WrapStringValue (File.ReadAllText (Info.CurrentFile, Encoding.UTF8)),
+			_ => Name,
 		};
 
 		public override bool AllowAssign () => false;

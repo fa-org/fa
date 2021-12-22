@@ -108,8 +108,12 @@ namespace fac {
 		/// </summary>
 		public static string CurrentRelativeFile {
 			get {
-				string _s = CurrentFile.Substring (SrcPath.Length);
-				return (_s[0] == '/' || _s[0] == '\\') ? _s.Substring(1) : _s;
+				if (CurrentFile.StartsWith ("res://")) {
+					return CurrentFile[6..];
+				} else {
+					string _s = CurrentFile.Substring (SrcPath.Length);
+					return (_s[0] == '/' || _s[0] == '\\') ? _s.Substring (1) : _s;
+				}
 			}
 		}
 

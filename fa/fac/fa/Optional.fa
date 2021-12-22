@@ -1,0 +1,6 @@
+﻿namespace fa;
+
+public enum Optional<T1> {
+	Value (T1),
+	Error (Error),
+}

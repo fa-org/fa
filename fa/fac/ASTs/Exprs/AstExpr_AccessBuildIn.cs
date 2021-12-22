@@ -227,7 +227,7 @@ namespace fac.ASTs.Exprs {
 			var _attach0 = (AttachArgs?.Count ?? 0) > 0 ? AttachArgs[0].GenerateCSharp (_indent) : "";
 			return AccessType switch {
 				AccessBuildInType.ARR_New => $"new {_exp} ()",
-				AccessBuildInType.ARR_Length => $"{_b}.Count",
+				AccessBuildInType.ARR_Length => Value.ExpectType is AstType_ArrayWrap ? $"{_b}.Count" : $"{_b}.Length",
 				AccessBuildInType.ARR_Add => $"{_b}.Add ({_attach0})",
 				AccessBuildInType.ARR_AccessItem => $"{_b} [{_attach0}]",
 				AccessBuildInType.OPT_HasValue => $"{_b}.HasValue ()",

@@ -131,7 +131,18 @@ namespace fac {
 				_src_files = (from p in _src_files where p[^3..].ToLower () == ".fa" select p).ToList ();
 			}
 
-			// TODO: 读取编译器自带标准库，比如Error等，用于后续part拼接，以及替换掉buildin实现
+			//// TODO: 读取编译器自带标准库，比如Error等，用于后续part拼接，以及替换掉buildin实现
+			//var _assembly = Assembly.GetExecutingAssembly ();
+			//var _fa_files = _assembly.GetManifestResourceNames ();
+			//_fa_files = (from p in _fa_files where p[..7] == "fac.fa." select p).ToArray ();
+			//foreach (var _fa_file in _fa_files) {
+			//	Info.CurrentFile = $"res://fa/{_fa_file[7..]}";
+			//	using var _stream = _assembly.GetManifestResourceStream (_fa_file);
+			//	using var _reader = new StreamReader (_stream, Encoding.UTF8);
+			//	Info.CurrentSourceCode = _reader.ReadToEnd ();
+			//	Log.Mark (LogMark.Parse);
+			//	Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode));
+			//}
 
 			// 读取源码
 			foreach (var _src_file in _src_files) {
@@ -141,42 +152,39 @@ namespace fac {
 				Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode));
 			}
 
-			//try {
-				// 编译
+			// 编译
+			if (Debugger.IsAttached) {
 				foreach (var _program in Info.Programs)
 					_program.Compile ();
-			//} catch (CodeException _ce) {
-			//	if (_ce.Token != null) {
-			//		Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件第 {_ce.Token.Line} 行的错误：{_ce.Message}");
-			//		int _start = Info.CurrentSourceCode.LastIndexOfAny (new char[] { '\r', '\n' }, _ce.Token.StartIndex) + 1;
-			//		string _code = Info.CurrentSourceCode[_start..];
-			//		int _p = _code.IndexOfAny (new char [] { '\r', '\n' });
-			//		_code = _code[.._p];
-			//		Console.WriteLine (_code);
-			//		var _sb = new StringBuilder ();
-			//		for (int i = 0; i < _ce.Token.Column; ++i) {
-			//			if (_code[i] == '\t') {
-			//				_sb.Append ('\t');
-			//			} else if (((short) _code[i]) < 128) {
-			//				_sb.Append (' ');
-			//			} else {
-			//				_sb.Append ('　');
-			//			}
-			//		}
-			//		Console.WriteLine ($"{_sb}^");
-			//	} else {
-			//		Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件的错误：{_ce.Message}");
-			//	}
-			//	if (Debugger.IsAttached) {
-			//		Console.WriteLine ();
-			//		// 重写一遍，此处抛异常
-			//		foreach (var _program in Info.Programs)
-			//			_program.Compile ();
-			//		Console.WriteLine ($"按任意键退出。。。");
-			//		Console.ReadKey ();
-			//	}
-			//	return;
-			//}
+			} else {
+				try {
+					foreach (var _program in Info.Programs)
+						_program.Compile ();
+				} catch (CodeException _ce) {
+					if (_ce.Token != null) {
+						Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件第 {_ce.Token.Line} 行的错误：{_ce.Message}");
+						int _start = Info.CurrentSourceCode.LastIndexOfAny (new char[] { '\r', '\n' }, _ce.Token.StartIndex) + 1;
+						string _code = Info.CurrentSourceCode[_start..];
+						int _p = _code.IndexOfAny (new char [] { '\r', '\n' });
+						_code = _code[.._p];
+						Console.WriteLine (_code);
+						var _sb = new StringBuilder ();
+						for (int i = 0; i < _ce.Token.Column; ++i) {
+							if (_code[i] == '\t') {
+								_sb.Append ('\t');
+							} else if (((short) _code[i]) < 128) {
+								_sb.Append (' ');
+							} else {
+								_sb.Append ('　');
+							}
+						}
+						Console.WriteLine ($"{_sb}^");
+					} else {
+						Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件的错误：{_ce.Message}");
+					}
+					return;
+				}
+			}
 
 			// 输出
 			Directory.SetCurrentDirectory (Info.DestPath);

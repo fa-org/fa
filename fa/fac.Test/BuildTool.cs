@@ -62,6 +62,7 @@ namespace fac.Test {
 			//
 			// 读取源码
 			Info.CurrentFile = Path.Combine (Info.SrcPath, "App.fa");
+			File.WriteAllText (Info.CurrentFile, _code);
 			Log.Mark (LogMark.Parse);
 			Info.Programs.Clear ();
 			Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode = _code));

@@ -138,6 +138,8 @@ namespace fac.ASTs.Exprs {
 			if (Arguments.Any ())
 				_sb.Remove (_sb.Length - 2, 2);
 			_sb.Append (")");
+			if (Value is AstExprName_BuildIn _biexpr1 && _biexpr1.Name == "Directory.GetFiles")
+				_sb.Append (".ToList ()");
 			return _sb.ToString ();
 		}
 

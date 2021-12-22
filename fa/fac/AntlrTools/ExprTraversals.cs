@@ -164,8 +164,9 @@ namespace fac.AntlrTools {
 					// 参数1为类名
 					Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
 						return _typeexpr switch {
-							AstType_Class _classexpr => _access_func (_obj, _classexpr.Class),
-							AstType_ArrayWrap _arrexpr when _access_name == "Length" => AstExpr_AccessBuildIn.Array_Length (_obj),
+							AstType_Class _classexpr                        => _access_func (_obj, _classexpr.Class),
+							AstType_ArrayWrap when _access_name == "Length" => AstExpr_AccessBuildIn.Array_Length (_obj),
+							AstType_String    when _access_name == "Length" => AstExpr_AccessBuildIn.Array_Length (_obj),
 							_ => throw new UnimplException (_typeexpr.Token),
 						};
 					};
