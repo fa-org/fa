@@ -33,14 +33,39 @@ namespace fac.ASTs.Structs {
 			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "@index" } };
 			_vars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
 			//
-			return new AstEnum {
+			string _name = _ctx.id ().GetText ();
+			var _ret = new AstEnum {
 				Token = _ctx.Start,
-				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
+				FullName = $"{Info.CurrentNamespace}.{_name}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
 				ClassEnumItems = _enum_items,
 				ClassVars = _vars,
 				ClassFuncs = new List<AstClassFunc> (),
 			};
+			//
+			Info.CurrentClass = _ret;
+			Info.CurrentFuncVariables = null;
+			var _sb = new StringBuilder ();
+			_sb.Append (@$"public static bool operator== ({_name} _l, {_name} _r) {{
+if (_l.@index != _r.@index) {{
+	return false;
+}}
+");
+			for (int i = 0; i < _enum_items.Count; ++i) {
+				_sb.AppendLine ($" else if (_l.@index == {i}) {{");
+				if (_enum_items[i].AttachType == null) {
+					_sb.AppendLine ($"return true;");
+				} else {
+					var _real_var_index = _ret.GetRealAttachVarPos (i);
+					_sb.AppendLine ($"return _l.{_vars[_real_var_index].Name} == _r.{_vars[_real_var_index].Name};");
+				}
+				_sb.AppendLine ($"}}");
+			}
+			_sb.AppendLine ($" else {{ return false; }}");
+			_sb.AppendLine (@$"}}");
+			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
+			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
+			return _ret;
 		}
 
 		public int GetRealAttachVarPos (int _enum_index) {
@@ -53,6 +78,7 @@ namespace fac.ASTs.Structs {
 		}
 
 		public void ProcessType () {
+			Info.CurrentClass = this;
 			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
 				ClassEnumItems[i].ProcessType ();
 			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)
@@ -68,28 +94,6 @@ namespace fac.ASTs.Structs {
 
 			Info.CurrentClass = this;
 			Info.CurrentFuncVariables = null;
-
-			string _name = FullName[(FullName.LastIndexOf ('.') + 1)..];
-			var _sb = new StringBuilder ();
-			_sb.Append (@$"public static bool operator== ({_name} _l, {_name} _r) {{
-if (_l.@index != _r.@index) {{
-	return false;
-}}
-");
-			for (int i = 0; i < ClassEnumItems.Count; ++i) {
-				_sb.AppendLine ($" else if (_l.@index == {i}) {{");
-				if (ClassEnumItems[i].AttachType == null) {
-					_sb.AppendLine ($"return true;");
-				} else {
-					var _real_var_index = GetRealAttachVarPos (i);
-					_sb.AppendLine ($"return _l.{ClassVars[_real_var_index].Name} == _r.{ClassVars[_real_var_index].Name};");
-				}
-				_sb.AppendLine ($"}}");
-			}
-			_sb.AppendLine ($" else {{ return false; }}");
-			_sb.AppendLine (@$"}}");
-			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
-			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
 
 			ClassFuncs[0].ToAST ();
 			ClassFuncs[1].ToAST ();

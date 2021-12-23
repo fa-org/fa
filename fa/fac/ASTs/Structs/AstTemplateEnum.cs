@@ -52,6 +52,7 @@ namespace fac.ASTs.Structs {
 		public AstType_Class GetClassType () => throw new Exception ("不应执行此处代码");
 
 		public void ProcessType () {
+			Info.CurrentClass = this;
 			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
 				ClassEnumItems[i].ProcessType ();
 			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)

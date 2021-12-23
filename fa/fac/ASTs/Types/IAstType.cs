@@ -83,7 +83,9 @@ namespace fac.ASTs.Types {
 				if (_ret == null && _type_str[0] == 'T') {
 					if (Info.CurrentClass is AstTemplateClassInst _cls_inst) {
 						_ret = _cls_inst.GetImplType (_type_str);
-					} else if (Info.CurrentClass == null) {
+					} else if (Info.CurrentClass is AstTemplateEnumInst _enum_inst) {
+						_ret = _enum_inst.GetImplType (_type_str);
+					} else {
 						_ret = new AstType_Placeholder { Token = _ctx.Start, Mut = _mut, Name = _type_str };
 					}
 				}
@@ -168,6 +170,7 @@ namespace fac.ASTs.Types {
 					return !(from _p in _tptype1.TupleTypes.Zip (_tptype2.TupleTypes) where !_p.First._type.IsSame (_p.Second._type) select 1).Any ();
 				}).Invoke (),
 				AstType_Void when _other is AstType_Void => true,
+				AstType_TempType _ttype1 when _other is AstType_TempType _ttype2 => _ttype1.Name == _ttype2.Name && _ttype1.TypeRaw == _ttype2.TypeRaw,
 				_ => false,
 			};
 		}

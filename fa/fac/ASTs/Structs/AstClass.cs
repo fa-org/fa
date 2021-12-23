@@ -33,6 +33,7 @@ namespace fac.ASTs.Structs {
 		}
 
 		public void ProcessType () {
+			Info.CurrentClass = this;
 			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
 				ClassEnumItems[i].ProcessType ();
 			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)

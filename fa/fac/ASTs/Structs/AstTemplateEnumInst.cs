@@ -37,39 +37,10 @@ namespace fac.ASTs.Structs {
 					ClassVars.Add (_var);
 				}
 			}
+			//
 			ClassFuncs = new List<AstClassFunc> ();
-			foreach (var _func in Class.ClassFuncs) {
+			foreach (var _func in Class.ClassFuncs)
 				ClassFuncs.Add (new AstClassFunc (this, _func, GetImplType));
-			}
-		}
-
-		public IAstType GetImplType (string _ttype_name) {
-			for (int i = 0; i < Class.Templates.Count; ++i) {
-				if (_ttype_name == Class.Templates[i].Name)
-					return Templates[i];
-			}
-			return null;
-		}
-
-		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class.GetInst (Templates));
-
-		public void ProcessType () {
-			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
-				ClassEnumItems[i].ProcessType ();
-			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)
-				ClassVars[i].ProcessType ();
-			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
-				ClassFuncs[i].ProcessType ();
-		}
-
-		public bool Compile () {
-			if (m_compiled)
-				return false;
-			m_compiled = true;
-
-			Info.CurrentClass = this;
-			Info.CurrentFuncVariables = null;
-
 			string _name = FullName[(FullName.LastIndexOf ('.') + 1)..];
 			var _sb = new StringBuilder ();
 			_sb.Append (@$"public static bool operator== ({_name} _l, {_name} _r) {{
@@ -91,6 +62,35 @@ if (_l.@index != _r.@index) {{
 			_sb.AppendLine (@$"}}");
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
+		}
+
+		public IAstType GetImplType (string _ttype_name) {
+			for (int i = 0; i < Class.Templates.Count; ++i) {
+				if (_ttype_name == Class.Templates[i].Name)
+					return Templates[i];
+			}
+			return null;
+		}
+
+		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class.GetInst (Templates));
+
+		public void ProcessType () {
+			Info.CurrentClass = this;
+			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
+				ClassEnumItems[i].ProcessType ();
+			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)
+				ClassVars[i].ProcessType ();
+			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
+				ClassFuncs[i].ProcessType ();
+		}
+
+		public bool Compile () {
+			if (m_compiled)
+				return false;
+			m_compiled = true;
+
+			Info.CurrentClass = this;
+			Info.CurrentFuncVariables = null;
 
 			// Antlr转AST
 			foreach (var _var in ClassVars)
