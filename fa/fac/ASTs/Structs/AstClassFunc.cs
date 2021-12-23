@@ -15,7 +15,7 @@ namespace fac.ASTs.Structs {
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
 		public string Name { init; get; }
-		public IAstType ReturnType { init; get; }
+		public IAstType ReturnType { get; set; }
 		public List<(IAstType _type, string _name)> Arguments { init; get; }
 		public FaParser.ClassFuncBodyContext BodyRaw { init; get; }
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
@@ -54,9 +54,18 @@ namespace fac.ASTs.Structs {
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
 			Name = _ctx.classFuncName ().GetText ();
-			ReturnType = IAstType.FromContext (_ctx.type ());
+			ReturnType = new AstType_TempType (_ctx.type ());
 			Arguments = AstElemParser.Parse (_ctx.typeVarList ());
 			BodyRaw = _ctx.classFuncBody ();
+		}
+
+		public void ProcessType () {
+			if (ReturnType is AstType_TempType _ttype)
+				ReturnType = _ttype.GetRealType ();
+			for (int i = 0; i < Arguments.Count; ++i) {
+				if (Arguments[i]._type is AstType_TempType _ttype1)
+					Arguments[i] = (_type: _ttype1.GetRealType (), _name: Arguments[i]._name);
+			}
 		}
 
 		public void ToAST () {

@@ -69,6 +69,8 @@ namespace fac.Test {
 
 			// 编译
 			foreach (var _program in Info.Programs)
+				_program.ProcessType ();
+			foreach (var _program in Info.Programs)
 				_program.Compile ();
 
 			// 输出

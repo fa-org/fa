@@ -6,6 +6,7 @@ using fac.ASTs.Stmts;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -42,15 +43,26 @@ namespace fac {
 			var _stream = new AntlrInputStream (_code);
 			var _lexer = new FaLexer (_stream);
 			var _token_stream = new CommonTokenStream (_lexer);
-			var _parser = new FaParser (_token_stream);
+			StringBuilder _sb = new StringBuilder (), _sb_err = new StringBuilder ();
+			using StringWriter _writer = new StringWriter (_sb), _writer_err = new StringWriter (_sb_err);
+			var _parser = new FaParser (_token_stream, _writer, _writer_err);
 			//
 			Info.Visitor = new FaVisitorImpl ();
-			return Info.Visitor.Visit (typeof (T).FullName switch {
-				"fac.ASTs.AstProgram" => _parser.program (),
-				"fac.ASTs.Structs.AstClassFunc" => _parser.classFunc (),
-				"fac.ASTs.Types.IAstType" => _parser.type (),
+			var _ret = Info.Visitor.Visit (typeof (T).FullName switch {
+				"fac.ASTs.AstProgram" => _parser.programEntry (),
+				"fac.ASTs.Structs.AstClassFunc" => _parser.classFuncEntry (),
+				"fac.ASTs.Types.IAstType" => _parser.typeEntry (),
 				_ => throw new NotImplementedException (),
 			}) as T;
+			if (_sb.Length > 0) {
+				Console.WriteLine (_sb);
+			}
+			if (_sb_err.Length > 0) {
+				Console.WriteLine ("文法解析失败：");
+				Console.WriteLine (_sb_err.ToString ());
+				return null;
+			}
+			return _ret;
 		}
 
 		public static string GetStringLiterialText (ITerminalNode _node) {

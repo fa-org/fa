@@ -141,7 +141,15 @@ namespace fac {
 				using var _reader = new StreamReader (_stream, Encoding.UTF8);
 				Info.CurrentSourceCode = _reader.ReadToEnd ();
 				Log.Mark (LogMark.Parse);
-				Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode));
+				var _program = Common.ParseCode<AstProgram> (Info.CurrentSourceCode);
+				if (_program == null) {
+					if (Debugger.IsAttached) {
+						Console.WriteLine ($"按任意键退出。。。");
+						Console.ReadKey ();
+					}
+					return;
+				}
+				Info.Programs.Add (_program);
 			}
 
 			// 读取源码
@@ -149,15 +157,27 @@ namespace fac {
 				Info.CurrentFile = _src_file;
 				Info.CurrentSourceCode = File.ReadAllText (_src_file, Encoding.UTF8);
 				Log.Mark (LogMark.Parse);
-				Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode));
+				var _program = Common.ParseCode<AstProgram> (Info.CurrentSourceCode);
+				if (_program == null) {
+					if (Debugger.IsAttached) {
+						Console.WriteLine ($"按任意键退出。。。");
+						Console.ReadKey ();
+					}
+					return;
+				}
+				Info.Programs.Add (_program);
 			}
 
 			// 编译
 			if (Debugger.IsAttached) {
 				foreach (var _program in Info.Programs)
+					_program.ProcessType ();
+				foreach (var _program in Info.Programs)
 					_program.Compile ();
 			} else {
 				try {
+					foreach (var _program in Info.Programs)
+						_program.ProcessType ();
 					foreach (var _program in Info.Programs)
 						_program.Compile ();
 				} catch (CodeException _ce) {

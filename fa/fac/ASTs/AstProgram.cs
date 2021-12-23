@@ -57,6 +57,11 @@ namespace fac.ASTs {
 			CurrentClasses.AddRange (from p in _ctx.classStmt () select IAstClass.FromContext (p));
 		}
 
+		public void ProcessType () {
+			foreach (var _class in CurrentClasses)
+				_class.ProcessType ();
+		}
+
 		public void Compile () {
 			bool _b = true;
 			while (_b) {

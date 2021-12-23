@@ -118,7 +118,7 @@ namespace fac.ASTs.Types {
 			sTypeNames.Add (_name, _type);
 			return _type;
 		}
-		private static Dictionary<string, IAstType> sTypeNames = new Dictionary<string, IAstType> ();
+		private static Dictionary<string, IAstType> sTypeNames = new Dictionary<string, IAstType> { [""] = null };
 
 		public static List<IAstType> FromContexts (FaParser.TypeContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
 

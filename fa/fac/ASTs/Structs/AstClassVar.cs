@@ -11,7 +11,7 @@ namespace fac.ASTs.Structs {
 	public class AstClassVar: IAst {
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
-		public IAstType DataType { init; get; }
+		public IAstType DataType { get; set; }
 		public string Name { init; get; }
 		public ParserRuleContext DefaultValueRaw { init; get; }
 		public IAstExpr DefaultValue { get; set; } = null;
@@ -21,16 +21,16 @@ namespace fac.ASTs.Structs {
 		public AstClassVar () { }
 		public AstClassVar (FaParser.ClassVarContext _ctx) {
 			Token = _ctx.Start;
-			//
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
-			//
 			Static = _ctx.Static () != null;
-			//
-			DataType = IAstType.FromContext (_ctx.type ());
-			//
+			DataType = new AstType_TempType (_ctx.type ());
 			Name = _ctx.id ().GetText ();
-			//
 			DefaultValueRaw = (_ctx.classVarExt () != null ? _ctx.classVarExt ().tmpAssignExpr () : _ctx.tmpAssignExpr ())?.middleExpr ();
+		}
+
+		public void ProcessType () {
+			if (DataType is AstType_TempType _ttype)
+				DataType = _ttype.GetRealType ();
 		}
 
 		public void ToAST () {

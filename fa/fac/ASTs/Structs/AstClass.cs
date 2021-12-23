@@ -32,6 +32,15 @@ namespace fac.ASTs.Structs {
 			return _ret;
 		}
 
+		public void ProcessType () {
+			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
+				ClassEnumItems[i].ProcessType ();
+			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)
+				ClassVars[i].ProcessType ();
+			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
+				ClassFuncs[i].ProcessType ();
+		}
+
 		public bool Compile () {
 			if (m_compiled)
 				return false;

@@ -284,20 +284,23 @@ classEnumItem:				id (QuotYuanL type QuotYuanR)?;
 
 
 //
-// file headers
+// file
 //
 useStmt:					Use ids Semi;
 callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
 importStmt:					AImport type callConvention id QuotYuanL typeVarList QuotYuanR Semi;
 libStmt:					ALib String1Literal Semi;
 namespaceStmt:				Namespace ids Semi;
-
-
-
-//
-// fa_entry_main
-//
 program:					(useStmt | importStmt | libStmt | namespaceStmt)* (enumStmt | classStmt)*;
+
+
+
+//
+// entry
+//
+programEntry:				program EOF;
+classFuncEntry:				classFunc EOF;
+typeEntry:					type EOF;
 
 
 

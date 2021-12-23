@@ -9,17 +9,19 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Structs {
 	public class AstEnumItem: IAst {
 		public string Name { init; get; }
-		public IAstType AttachType { init; get; } = null;
+		public IAstType AttachType { get; set; }
 
 
 
 		public AstEnumItem (FaParser.ClassEnumItemContext _ctx) {
 			Token = _ctx.Start;
-			//
 			Name = _ctx.id ().GetText ();
-			//
-			if (_ctx.type () != null)
-				AttachType = IAstType.FromContext (_ctx.type ());
+			AttachType = new AstType_TempType (_ctx.type ());
+		}
+
+		public void ProcessType () {
+			if (AttachType is AstType_TempType _ttype)
+				AttachType = _ttype.GetRealType ();
 		}
 
 		public override string GenerateCSharp (int _indent) => throw new NotImplementedException ();

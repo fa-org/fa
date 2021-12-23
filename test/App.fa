@@ -1,5 +1,15 @@
 use fa;
 
+namespace std;
+
+//class RB_Node<T> {
+//	public RB_Node? _left = null;
+//	public RB_Node? _right;
+//	public RB_Node? _parent;
+//	public T _data;
+//	public int _color;
+//}
+
 class Program {
 	public static void Main () {
 		Console.Write ("hello");

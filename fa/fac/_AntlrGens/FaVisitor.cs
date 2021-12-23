@@ -547,4 +547,22 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitProgram([NotNull] FaParser.ProgramContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.programEntry"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitProgramEntry([NotNull] FaParser.ProgramEntryContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.classFuncEntry"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitClassFuncEntry([NotNull] FaParser.ClassFuncEntryContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeEntry"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeEntry([NotNull] FaParser.TypeEntryContext context);
 }
