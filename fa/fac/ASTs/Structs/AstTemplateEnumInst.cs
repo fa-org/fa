@@ -43,22 +43,19 @@ namespace fac.ASTs.Structs {
 				ClassFuncs.Add (new AstClassFunc (this, _func, GetImplType));
 			string _name = FullName[(FullName.LastIndexOf ('.') + 1)..];
 			var _sb = new StringBuilder ();
-			_sb.Append (@$"public static bool operator== ({_name} _l, {_name} _r) {{
-if (_l.@index != _r.@index) {{
-	return false;
-}}
-");
+			_sb.AppendLine (@$"public static bool operator== ({_name} _l, {_name} _r) {{
+if (_l.__index__ != _r.__index__) {{ return false; }}");
 			for (int i = 0; i < ClassEnumItems.Count; ++i) {
-				_sb.AppendLine ($" else if (_l.@index == {i}) {{");
+				_sb.Append ($"else if (_l.__index__ == {i}) {{ ");
 				if (ClassEnumItems[i].AttachType == null) {
-					_sb.AppendLine ($"return true;");
+					_sb.Append ($"return true;");
 				} else {
 					var _real_var_index = GetRealAttachVarPos (i);
-					_sb.AppendLine ($"return _l.{ClassVars[_real_var_index].Name} == _r.{ClassVars[_real_var_index].Name};");
+					_sb.Append ($"return _l.{ClassVars[_real_var_index].Name} == _r.{ClassVars[_real_var_index].Name};");
 				}
-				_sb.AppendLine ($"}}");
+				_sb.AppendLine ($" }}");
 			}
-			_sb.AppendLine ($" else {{ return false; }}");
+			_sb.AppendLine ($"else {{ return false; }}");
 			_sb.AppendLine (@$"}}");
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));

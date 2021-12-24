@@ -12,7 +12,8 @@ namespace std;
 
 class Program {
 	public static void Main () {
-		Console.Write ("hello");
+		int? n = null;
+		Console.Write ("{0}".Format (n ?? 123));
 	}
 }
 

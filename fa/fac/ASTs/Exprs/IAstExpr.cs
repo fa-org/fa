@@ -179,7 +179,8 @@ namespace fac.ASTs.Exprs {
 
 		public static IAstExpr FromContext (FaParser.StrongExprBaseContext _ctx) {
 			if (_ctx.id () != null) {
-				return new AstExpr_BaseId { Token = _ctx.Start, Id = $"{(_ctx.ColonColon () != null ? _ctx.ColonColon ().GetText () : "")}{_ctx.id ().GetText ()}" };
+				string _id = $"{(_ctx.ColonColon () != null ? "::" : "")}{_ctx.id ().GetText ()}";
+				return new AstExpr_BaseId { Token = _ctx.Start, Id = _id };
 			} else if (_ctx.literal () != null) {
 				string _type, _value = _ctx.GetText ();
 				if (_ctx.literal ().BoolLiteral () != null) {
@@ -292,5 +293,9 @@ namespace fac.ASTs.Exprs {
 
 		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
+
+		public static IAstExpr OptionalFromError (AstType_OptionalWrap _otype, string _err_str) {
+#warning TODO：处理逻辑
+		}
 	}
 }

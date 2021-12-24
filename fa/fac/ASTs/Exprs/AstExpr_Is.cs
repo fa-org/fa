@@ -68,7 +68,7 @@ namespace fac.ASTs.Exprs {
 
 		public (IAstExpr, List<IAstStmt>) ExpandExpr_If ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _expr = AstExpr_Op2.MakeCondition (
-				new AstExpr_Op1 { Token = Token, Value = Value, IsPrefix = false, Operator = ".@index" },
+				new AstExpr_Op1 { Token = Token, Value = Value, IsPrefix = false, Operator = ".__index__" },
 				"==",
 				IAstExpr.FromValue ("int", $"{IsWhatExpr.EnumItemIndex}")
 			);

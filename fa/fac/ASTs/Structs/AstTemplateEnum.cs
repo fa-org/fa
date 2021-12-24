@@ -35,7 +35,7 @@ namespace fac.ASTs.Structs {
 						_types.RemoveAt (j--);
 				}
 			}
-			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "@index" } };
+			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "__index__" } };
 			_vars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
 			var _ret = new AstTemplateEnum {
 				Token = _ctx.Start,
@@ -51,6 +51,7 @@ namespace fac.ASTs.Structs {
 
 		public AstType_Class GetClassType () => throw new Exception ("不应执行此处代码");
 
+		private bool _processed_type = false;
 		public void ProcessType () {
 			Info.CurrentClass = this;
 			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
@@ -59,8 +60,9 @@ namespace fac.ASTs.Structs {
 				ClassVars[i].ProcessType ();
 			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
 				ClassFuncs[i].ProcessType ();
-			foreach (var (_name, _inst) in Insts)
+			foreach (var (_, _inst) in Insts)
 				_inst.ProcessType ();
+			_processed_type = true;
 		}
 
 		public bool Compile () {
@@ -83,6 +85,8 @@ namespace fac.ASTs.Structs {
 			if (Insts.ContainsKey (_type_str))
 				return Insts[_type_str];
 			var _tcls_inst = new AstTemplateEnumInst(Token, this, _templates, _type_str);
+			if (_processed_type)
+				_tcls_inst.ProcessType ();
 			Insts[_type_str] = _tcls_inst;
 			return _tcls_inst;
 		}

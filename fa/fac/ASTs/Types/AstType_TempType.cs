@@ -12,7 +12,11 @@ namespace fac.ASTs.Types {
 
 
 		public AstType_TempType (string _name) => Name = _name;
-		public AstType_TempType (FaParser.TypeContext _type_raw) => TypeRaw = _type_raw;
+		public AstType_TempType (FaParser.TypeContext _type_raw) {
+			if (_type_raw == null)
+				throw new NotImplementedException ();
+			TypeRaw = _type_raw;
+		}
 		public IAstType GetRealType () {
 			if (TypeRaw != null) {
 				return IAstType.FromContext (TypeRaw);

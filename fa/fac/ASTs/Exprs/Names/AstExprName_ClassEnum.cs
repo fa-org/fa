@@ -96,9 +96,9 @@ namespace fac.ASTs.Exprs.Names {
 			if (_need_attach) {
 				int _real_var_index = EnumClass.GetRealAttachVarPos (EnumItemIndex);
 				var _b = AttachExpr.GenerateCSharp (_indent);
-				return $"new {EnumClass.CSharpFullName} {{ @index = {EnumItemIndex}, {EnumClass.ClassVars[_real_var_index].Name} = {_b} }}";
+				return $"new {EnumClass.CSharpFullName} {{ __index__ = {EnumItemIndex}, {EnumClass.ClassVars[_real_var_index].Name} = {_b} }}";
 			} else {
-				return $"new {EnumClass.CSharpFullName} {{ @index = {EnumItemIndex} }}";
+				return $"new {EnumClass.CSharpFullName} {{ __index__ = {EnumItemIndex} }}";
 			}
 			//throw new NotImplementedException ();
 		}

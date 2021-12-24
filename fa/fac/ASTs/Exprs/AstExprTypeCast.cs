@@ -18,23 +18,28 @@ namespace fac.ASTs.Exprs {
 		private AstExprTypeCast () { }
 
 		public static IAstExpr Make (IAstExpr _dest, IAstType _to_type) {
-			if (_dest.ExpectType == null) {
+			var _src_type = _dest.ExpectType;
+			if (_src_type == null) {
 				throw new Exception ("应识别类型后做转换处理");
-			} else if (AllowDirectReturn (_dest.ExpectType, _to_type)) {
+			} else if (AllowDirectReturn (_src_type, _to_type)) {
 				return _dest;
-			} else if (_dest.ExpectType is AstType_OptionalWrap _owrap1 && AllowDirectReturn (_owrap1.ItemType, _to_type)) {
+			} else if (_src_type is AstType_OptionalWrap _owrap1 && AllowDirectReturn (_owrap1.ItemType, _to_type)) {
 				return Make (AstExpr_AccessBuildIn.Optional_GetValue (_dest), _to_type);
-			} else if (_to_type is AstType_OptionalWrap _owrap2 && AllowDirectReturn (_dest.ExpectType, _owrap2.ItemType)) {
+			} else if (_to_type is AstType_OptionalWrap _owrap2 && AllowDirectReturn (_src_type, _owrap2.ItemType)) {
 				return Make (AstExpr_AccessBuildIn.Optional_FromValue (_dest), _to_type);
 			} else {
-				throw new CodeException (_dest.Token, $"类型 {_dest.ExpectType} 无法转为类型 {_to_type}");
+				throw new CodeException (_dest.Token, $"类型 {_src_type} 无法转为类型 {_to_type}");
 			}
 		}
 
 		private static bool AllowDirectReturn (IAstType _src, IAstType _dest) {
-			if (_dest == null || _dest is AstType_Any || _src.IsSame (_dest))
+			if (_dest == null || _dest is AstType_Any || _src.IsSame (_dest)) {
 				return true;
-			return false;
+			} else if (_src is AstType_OptionalWrap _src1 && _dest is AstType_OptionalWrap _dest1) {
+				return AllowDirectReturn (_src1.ItemType, _dest1.ItemType);
+			} else {
+				return false;
+			}
 		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) => Value = Value.TraversalWrap (_trav);

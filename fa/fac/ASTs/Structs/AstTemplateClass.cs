@@ -40,6 +40,7 @@ namespace fac.ASTs.Structs {
 
 		public AstType_Class GetClassType () => throw new Exception ("不应执行此处代码");
 
+		private bool _processed_type = false;
 		public void ProcessType () {
 			Info.CurrentClass = this;
 			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
@@ -48,8 +49,9 @@ namespace fac.ASTs.Structs {
 				ClassVars[i].ProcessType ();
 			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
 				ClassFuncs[i].ProcessType ();
-			foreach (var (_name, _inst) in Insts)
+			foreach (var (_, _inst) in Insts)
 				_inst.ProcessType ();
+			_processed_type = true;
 		}
 
 		public bool Compile () {
@@ -72,6 +74,8 @@ namespace fac.ASTs.Structs {
 			if (Insts.ContainsKey (_type_str))
 				return Insts[_type_str];
 			var _tcls_inst = new AstTemplateClassInst(Token, this, _templates, _type_str);
+			if (_processed_type)
+				_tcls_inst.ProcessType ();
 			Insts[_type_str] = _tcls_inst;
 			return _tcls_inst;
 		}

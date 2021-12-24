@@ -30,7 +30,7 @@ namespace fac.ASTs.Structs {
 						_types.RemoveAt (j--);
 				}
 			}
-			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "@index" } };
+			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "__index__" } };
 			_vars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
 			//
 			string _name = _ctx.id ().GetText ();
@@ -46,22 +46,19 @@ namespace fac.ASTs.Structs {
 			Info.CurrentClass = _ret;
 			Info.CurrentFuncVariables = null;
 			var _sb = new StringBuilder ();
-			_sb.Append (@$"public static bool operator== ({_name} _l, {_name} _r) {{
-if (_l.@index != _r.@index) {{
-	return false;
-}}
-");
+			_sb.AppendLine (@$"public static bool operator== ({_name} _l, {_name} _r) {{
+if (_l.__index__ != _r.__index__) {{ return false; }}");
 			for (int i = 0; i < _enum_items.Count; ++i) {
-				_sb.AppendLine ($" else if (_l.@index == {i}) {{");
+				_sb.Append ($"else if (_l.__index__ == {i}) {{ ");
 				if (_enum_items[i].AttachType == null) {
-					_sb.AppendLine ($"return true;");
+					_sb.Append ($"return true;");
 				} else {
 					var _real_var_index = _ret.GetRealAttachVarPos (i);
-					_sb.AppendLine ($"return _l.{_vars[_real_var_index].Name} == _r.{_vars[_real_var_index].Name};");
+					_sb.Append ($"return _l.{_vars[_real_var_index].Name} == _r.{_vars[_real_var_index].Name};");
 				}
-				_sb.AppendLine ($"}}");
+				_sb.AppendLine ($" }}");
 			}
-			_sb.AppendLine ($" else {{ return false; }}");
+			_sb.AppendLine ($"else {{ return false; }}");
 			_sb.AppendLine (@$"}}");
 			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
 			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));

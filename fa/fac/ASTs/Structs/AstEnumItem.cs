@@ -9,14 +9,15 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Structs {
 	public class AstEnumItem: IAst {
 		public string Name { init; get; }
-		public IAstType AttachType { get; set; }
+		public IAstType AttachType { get; set; } = null;
 
 
 
 		public AstEnumItem (FaParser.ClassEnumItemContext _ctx) {
 			Token = _ctx.Start;
 			Name = _ctx.id ().GetText ();
-			AttachType = new AstType_TempType (_ctx.type ());
+			if (_ctx.type () != null)
+				AttachType = new AstType_TempType (_ctx.type ());
 		}
 
 		public void ProcessType () {

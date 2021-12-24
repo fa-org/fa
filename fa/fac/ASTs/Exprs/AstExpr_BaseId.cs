@@ -13,9 +13,17 @@ namespace fac.ASTs.Exprs {
 	public class AstExpr_BaseId: IAstExpr {
 		public string Id { get; set; }
 
+
+
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) { }
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			if (Id == "null") {
+				if (_expect_type is AstType_OptionalWrap _otype) {
+					return IAstExpr.OptionalFromError (_otype, "fa.Error.Null");
+				}
+			}
+
 			// 单独处理枚举类型，另一部分代码位于AstExpr_OpN.cs
 			if (_expect_type is AstType_Class _classty && (_classty.Class.ClassEnumItems?.Count ?? 0) > 0) {
 				var _class_enum = AstExprName_ClassEnum.FindFromNameUncheckAttach (Token, _classty.Class, Id);
