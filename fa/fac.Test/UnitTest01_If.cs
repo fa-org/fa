@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 namespace fac.Test {
 	[TestClass]
 	public class UnitTest01_If {
-		// if语句嵌套，命中及未命中
+		/// <summary>
+		/// if语句嵌套，命中及未命中
+		/// </summary>
 		[TestMethod]
 		public void TestIf1 () {
 			string _code = @"
@@ -33,7 +35,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf1");
 		}
 
-		// if语句并列，命中
+		/// <summary>
+		/// if语句并列，命中
+		/// </summary>
 		[TestMethod]
 		public void TestIf2 () {
 			string _code = @"
@@ -56,7 +60,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf2");
 		}
 
-		// if语句并列，未命中
+		/// <summary>
+		/// if语句并列，未命中
+		/// </summary>
 		[TestMethod]
 		public void TestIf3 () {
 			string _code = @"
@@ -79,7 +85,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf3");
 		}
 
-		// if表达式嵌套，命中及未命中
+		/// <summary>
+		/// if表达式嵌套，命中及未命中
+		/// </summary>
 		[TestMethod]
 		public void TestIf4 () {
 			string _code = @"
@@ -105,7 +113,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf4");
 		}
 
-		// if表达式并列，命中
+		/// <summary>
+		/// if表达式并列，命中
+		/// </summary>
 		[TestMethod]
 		public void TestIf5 () {
 			string _code = @"
@@ -129,7 +139,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf5");
 		}
 
-		// if表达式并列，未命中
+		/// <summary>
+		/// if表达式并列，未命中
+		/// </summary>
 		[TestMethod]
 		public void TestIf6 () {
 			string _code = @"
@@ -153,7 +165,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf6");
 		}
 
-		// if语句连续条件，命中及未命中
+		/// <summary>
+		/// if语句连续条件，命中及未命中
+		/// </summary>
 		[TestMethod]
 		public void TestIf7 () {
 			string _code = @"
@@ -178,7 +192,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf7");
 		}
 
-		// if判断枚举类型
+		/// <summary>
+		/// if判断枚举类型
+		/// </summary>
 		[TestMethod]
 		public void TestIf8 () {
 			string _code = @"
@@ -203,7 +219,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf8");
 		}
 
-		// if判断枚举带参数类型
+		/// <summary>
+		/// if判断枚举带参数类型
+		/// </summary>
 		[TestMethod]
 		public void TestIf9 () {
 			string _code = @"
@@ -230,7 +248,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestIf9");
 		}
 
-		// if判断枚举带参数类型
+		/// <summary>
+		/// if判断枚举带参数类型
+		/// <summary>
 		[TestMethod]
 		public void TestIf10 () {
 			string _code = @"

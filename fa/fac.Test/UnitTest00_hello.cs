@@ -3,6 +3,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace fac.Test {
 	[TestClass]
 	public class UnitTest00_hello {
+		/// <summary>
+		/// 输出Hello
+		/// </summary>
 		[TestMethod]
 		public void TestMethod1 () {
 			string _code = @"
@@ -18,6 +21,9 @@ class Program {
 			Assert.AreEqual (_ret, "hello");
 		}
 
+		/// <summary>
+		/// 测试内建
+		/// </summary>
 		[TestMethod]
 		public void TestMethod2 () {
 			// 备注：所有内建方法请参见 fa/fac/ASTs/Exprs/Names/AstExprName_BuildIn.cs
