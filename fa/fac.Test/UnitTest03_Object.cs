@@ -3,6 +3,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace fac.Test {
 	[TestClass]
 	public class UnitTest03_Object {
+		/// <summary>
+		/// 测试Class内DataMembers
+		/// </summary>
 		[TestMethod]
 		public void TestMethod1 () {
 			string _code = @"
@@ -23,6 +26,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestObject1");
 		}
 
+		/// <summary>
+		/// 测试DataMembers及Template
+		/// </summary>
 		[TestMethod]
 		public void TestMethod2 () {
 			string _code = @"
@@ -43,6 +49,9 @@ class Program {
 			Assert.AreEqual (_ret, "TestObject2");
 		}
 
+		/// <summary>
+		/// 测试Template成员方法
+		/// </summary>
 		[TestMethod]
 		public void TestMethod3 () {
 			string _code = @"

@@ -5,6 +5,9 @@ namespace fac.Test
 	[TestClass]
 	public class UnitTest04_Loop
 	{
+		/// <summary>
+		/// 测试While关键字
+		/// </summary>
 		[TestMethod]
 		public void TestLoop1()
 		{
@@ -27,6 +30,9 @@ class Program {
 			Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
 		}
 
+		/// <summary>
+		/// 测试For关键字
+		/// </summary>
 		[TestMethod]
 		public void TestLoopd2()
 		{
@@ -46,7 +52,10 @@ class Program {
 			string ret = BuildTool.RunAndGetReturn(code);
 			Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
 		}
-
+		
+		/// <summary>
+		/// 测试DoWhile关键字
+		/// </summary>
 		[TestMethod]
 		public void TestLoop3()
 		{
