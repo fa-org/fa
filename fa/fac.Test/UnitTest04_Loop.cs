@@ -2,13 +2,13 @@
 
 namespace fac.Test
 {
-    [TestClass]
-    public class UnitTest04_Loop
-    {
-        [TestMethod]
-        public void TestMethod1()
-        {
-            string code = @"
+	[TestClass]
+	public class UnitTest04_Loop
+	{
+		[TestMethod]
+		public void TestMethod1()
+		{
+			string code = @"
 
 use fa;
 
@@ -17,58 +17,58 @@ class Program {
 		int id = 0;
 		while id < 3 {
 			Console.WriteLine(""Hey, User{0}"".Format(id));
-            id++;
+			id++;
 		}
 	}
 }
 
 ";
-            string ret = BuildTool.RunAndGetReturn(code);
-            Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
-        }
+			string ret = BuildTool.RunAndGetReturn(code);
+			Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
+		}
 
-        [TestMethod]
-        public void TestMethod2()
-        {
-            string code = @"
+		[TestMethod]
+		public void TestMethod2()
+		{
+			string code = @"
 
 use fa;
 
 class Program {
 	public static void Main () {
 		for int id = 0; a < 3; id++ {
-            Console.WriteLine(""Hey, User{0}"".Format(id));
-        }
+			Console.WriteLine(""Hey, User{0}"".Format(id));
+		}
 	}
 }
 
 ";
-            string ret = BuildTool.RunAndGetReturn(code);
-            Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
-        }
+			string ret = BuildTool.RunAndGetReturn(code);
+			Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
+		}
 
-        [TestMethod]
-        public void TestMethod3()
-        {
-            string code = @"
+		[TestMethod]
+		public void TestMethod3()
+		{
+			string code = @"
 
 use fa;
 
 class Program {
 	public static void Main () {
 		int id = 0;
-        do {
+		do {
 			Console.WriteLine(""Hey, User{0}"".Format(id));
-            id ++;
+			id ++;
 		} while id<3;
 	}
 }
 
 ";
-            string ret = BuildTool.RunAndGetReturn(code);
-            Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
-        }
-    }
+			string ret = BuildTool.RunAndGetReturn(code);
+			Assert.AreEqual(ret, "Hey, User0\r\nHey, User1\r\nHey, User2\r\n");
+		}
+	}
 
 
 }
