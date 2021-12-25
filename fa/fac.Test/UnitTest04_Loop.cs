@@ -6,7 +6,7 @@ namespace fac.Test
 	public class UnitTest04_Loop
 	{
 		[TestMethod]
-		public void TestMethod1()
+		public void TestLoop1()
 		{
 			string code = @"
 
@@ -28,7 +28,7 @@ class Program {
 		}
 
 		[TestMethod]
-		public void TestMethod2()
+		public void TestLoopd2()
 		{
 			string code = @"
 
@@ -48,7 +48,7 @@ class Program {
 		}
 
 		[TestMethod]
-		public void TestMethod3()
+		public void TestLoop3()
 		{
 			string code = @"
 
