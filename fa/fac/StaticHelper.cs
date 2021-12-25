@@ -1,4 +1,5 @@
 ﻿using fac.AntlrTools;
+using fac.ASTs;
 using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
@@ -132,6 +133,20 @@ namespace fac {
 			}
 			_items.Add (_tmp);
 			return _items;
+		}
+
+		public static void ProcessType (this List<AstProgram> _programs) {
+			foreach (var _program in Info.Programs)
+				_program.ProcessType ();
+		}
+
+		public static void Compile (this List<AstProgram> _programs) {
+			bool _b = true;
+			while (_b) {
+				_b = false;
+				foreach (var _program in Info.Programs)
+					_b |= _program.Compile ();
+			}
 		}
 	}
 }

@@ -74,9 +74,9 @@ namespace fac.ASTs.Structs {
 			if (Insts.ContainsKey (_type_str))
 				return Insts[_type_str];
 			var _tcls_inst = new AstTemplateClassInst(Token, this, _templates, _type_str);
+			Insts[_type_str] = _tcls_inst;
 			if (_processed_type)
 				_tcls_inst.ProcessType ();
-			Insts[_type_str] = _tcls_inst;
 			return _tcls_inst;
 		}
 	}

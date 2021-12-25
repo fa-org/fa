@@ -170,16 +170,12 @@ namespace fac {
 
 			// 编译
 			if (Debugger.IsAttached) {
-				foreach (var _program in Info.Programs)
-					_program.ProcessType ();
-				foreach (var _program in Info.Programs)
-					_program.Compile ();
+				Info.Programs.ProcessType ();
+				Info.Programs.Compile ();
 			} else {
 				try {
-					foreach (var _program in Info.Programs)
-						_program.ProcessType ();
-					foreach (var _program in Info.Programs)
-						_program.Compile ();
+					Info.Programs.ProcessType ();
+					Info.Programs.Compile ();
 				} catch (CodeException _ce) {
 					if (_ce.Token != null) {
 						Console.WriteLine ($"位于 {Info.CurrentRelativeFile} 文件第 {_ce.Token.Line} 行的错误：{_ce.Message}");

@@ -24,11 +24,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="fa\Optional.fa" />
+    <None Remove="fa\_error_optional.fa" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="fa\Optional.fa">
+    <EmbeddedResource Include="fa\_error_optional.fa">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

@@ -20,7 +20,7 @@ namespace fac.ASTs.Exprs {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (Id == "null") {
 				if (_expect_type is AstType_OptionalWrap _otype) {
-					return IAstExpr.OptionalFromError (_otype, "fa.Error.Null");
+					return IAstExpr.OptionalFromError (_otype, fa_Error.Null);
 				}
 			}
 

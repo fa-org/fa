@@ -175,6 +175,6 @@ namespace fac.ASTs.Types {
 			};
 		}
 
-		public AstType_OptionalWrap Optional { get => this is AstType_OptionalWrap _owrap ? _owrap : new AstType_OptionalWrap { Token = Token, ItemType = this, Mut = Mut }; }
+		public AstType_OptionalWrap Optional { get => this is AstType_OptionalWrap _owrap ? _owrap : new AstType_OptionalWrap (Token, this, Mut); }
 	}
 }

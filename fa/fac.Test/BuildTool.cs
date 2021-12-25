@@ -68,10 +68,8 @@ namespace fac.Test {
 			Info.Programs.Add (Common.ParseCode<AstProgram> (Info.CurrentSourceCode = _code));
 
 			// 编译
-			foreach (var _program in Info.Programs)
-				_program.ProcessType ();
-			foreach (var _program in Info.Programs)
-				_program.Compile ();
+			Info.Programs.ProcessType ();
+			Info.Programs.Compile ();
 
 			// 输出
 			Directory.SetCurrentDirectory (Info.DestPath);

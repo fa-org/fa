@@ -62,14 +62,11 @@ namespace fac.ASTs {
 				_class.ProcessType ();
 		}
 
-		public void Compile () {
-			bool _b = true;
-			while (_b) {
-				_b = false;
-				foreach (var _class in CurrentClasses)
-					_b |= _class.Compile ();
-			}
-			
+		public bool Compile () {
+			bool _b = false;
+			foreach (var _class in CurrentClasses)
+				_b |= _class.Compile ();
+			return _b;
 		}
 
 		public override string GenerateCSharp (int _indent) {
