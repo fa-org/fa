@@ -22,7 +22,7 @@ namespace fac.ASTs.Exprs {
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
 				for (int i = 0; i < _functype.ArgumentTypes.Count - 1; ++i)
 					Arguments[i] = Arguments[i].TraversalCalcType (_functype.ArgumentTypes[i]);
-				if (_functype.ArgumentTypes.Count == Arguments.Count) {
+				if (_functype.ArgumentTypes.Count == Arguments.Count && Arguments[^1].GuessType ().IsSame (_arrtype)) {
 					try {
 						Arguments[^1] = Arguments[^1].TraversalCalcType (_functype.ArgumentTypes[^1]);
 						return;

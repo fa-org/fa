@@ -84,7 +84,7 @@ namespace fac.ASTs.Structs {
 			string _type_str = $"{FullName}<{string.Join (",", from p in _templates select p.ToString ())}>";
 			if (Insts.ContainsKey (_type_str))
 				return Insts[_type_str];
-			var _tcls_inst = new AstTemplateEnumInst(Token, this, _templates, _type_str);
+			var _tcls_inst = new AstTemplateEnumInst (Token, this, _templates, _type_str);
 			Insts[_type_str] = _tcls_inst;
 			if (_processed_type)
 				_tcls_inst.ProcessType ();

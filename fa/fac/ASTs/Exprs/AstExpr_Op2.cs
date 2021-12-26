@@ -62,7 +62,7 @@ namespace fac.ASTs.Exprs {
 				// ?? ??=
 				if (Operator == "??") {
 					Value2 = Value2.TraversalCalcType (null);
-					var _exp_type = _expect_type ?? Value2.ExpectType;
+					var _exp_type = (_expect_type == null || _expect_type is AstType_Any) ? Value2.ExpectType : _expect_type;
 					_exp_type = _exp_type.Optional;
 					Value1 = Value1.TraversalCalcType (_exp_type);
 					ExpectType = Value2.ExpectType;
