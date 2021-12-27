@@ -506,11 +506,11 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitClassFunc([NotNull] FaParser.ClassFuncContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classEnumItem"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.classEnum"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitClassEnumItem([NotNull] FaParser.ClassEnumItemContext context);
+	Result VisitClassEnum([NotNull] FaParser.ClassEnumContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.useStmt"/>.
 	/// </summary>

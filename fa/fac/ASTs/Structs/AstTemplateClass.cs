@@ -70,6 +70,10 @@ namespace fac.ASTs.Structs {
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
 			if (Templates.Count != (_templates?.Count ?? 0))
 				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {(_templates?.Count ?? 0)} 个参数");
+			foreach (var _type in _templates) {
+				if (_type is AstType_Void || _type is AstType_Any)
+					throw new CodeException (_token, "不可将 void 类型或 any 类型用于模板");
+			}
 			string _type_str = $"{FullName}<{string.Join (",", from p in _templates select p.ToString ())}>";
 			if (Insts.ContainsKey (_type_str))
 				return Insts[_type_str];

@@ -104,7 +104,7 @@ namespace fac.AntlrTools {
 		public IAst VisitClassFuncName (FaParser.ClassFuncNameContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassFuncBody (FaParser.ClassFuncBodyContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassFunc (FaParser.ClassFuncContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassEnumItem (FaParser.ClassEnumItemContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassEnum (FaParser.ClassEnumContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitCallConvention (FaParser.CallConventionContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitImportStmt (FaParser.ImportStmtContext _ctx) => throw new NotImplementedException ();

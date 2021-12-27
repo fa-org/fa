@@ -31,6 +31,6 @@ namespace fac.ASTs.Types {
 
 		public override string ToString () => $"{ItemType}?";
 
-		public override string GenerateCSharp (int _indent) => $"fa.Optional__lt__{(ItemType is AstType_Void ? "int32" : ItemType)}__gt__";
+		public override string GenerateCSharp (int _indent) => ItemType is AstType_Void ? "fa.OptionalVoid" : $"fa.Optional__lt__{ItemType}__gt__";
 	}
 }

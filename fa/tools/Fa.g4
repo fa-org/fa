@@ -236,7 +236,7 @@ strongExprSuffix			: AddAddOp | SubSubOp															// บ๓ืบ ++ --
 							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
 							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
 							| (PointOp id)																	//     wnd.Name
-							| (Is ids QuotYuanL id QuotYuanR)												//     _a is EnumA (_val)
+							| (Is ids (QuotYuanL id QuotYuanR)?)											//     _a is EnumA (_val)
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
 middleExpr:					strongExpr (allOp2 strongExpr)*;												//     a == 24    a + b - c
@@ -268,7 +268,7 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 publicLevel:				Public | Internal | Protected | Private;
 classTemplates:				QuotJianL type (Comma type)* QuotJianR;
 classParent:				Colon ids (Comma ids)*;
-enumStmt:					publicLevel? Enum id classTemplates? QuotHuaL (classEnumItem (Comma classEnumItem)* Comma?)? QuotHuaR;
+enumStmt:					publicLevel? Enum id classTemplates? QuotHuaL classEnum* classFunc* QuotHuaR;
 classStmt:					publicLevel? Class id classTemplates? classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
 //
 classVarExtFunc:			publicLevel? id (Semi | classFuncBody);
@@ -279,7 +279,7 @@ classFuncName:				id ((QuotFangL QuotFangR) | allOp2 | allAssign)?;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnumItem:				id (QuotYuanL type QuotYuanR)?;
+classEnum:					id (QuotYuanL type QuotYuanR)? Comma;
 
 
 

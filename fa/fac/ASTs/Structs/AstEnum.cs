@@ -22,7 +22,7 @@ namespace fac.ASTs.Structs {
 
 		private AstEnum () { }
 		public static AstEnum FromContext (FaParser.EnumStmtContext _ctx) {
-			var _enum_items = (from p in _ctx.classEnumItem () select new AstEnumItem (p)).ToList ();
+			var _enum_items = (from p in _ctx.classEnum () select new AstEnumItem (p)).ToList ();
 			var _types = (from p in _enum_items where p.AttachType != null select p.AttachType).ToList ();
 			for (int i = 0; i < _types.Count - 1; ++i) {
 				for (int j = i + 1; j < _types.Count; ++j) {
@@ -62,6 +62,7 @@ if (_l.__index__ != _r.__index__) {{ return false; }}");
 			_sb.AppendLine (@$"}}");
 			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
 			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
+			_ret.ClassFuncs.AddRange (from p in _ctx.classFunc () select new AstClassFunc (_ret, p));
 			return _ret;
 		}
 

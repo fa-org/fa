@@ -27,7 +27,7 @@ namespace fac.ASTs.Structs {
 				if (_var.Name[0] != 'T')
 					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
 			}
-			var _enum_items = (from p in _ctx.classEnumItem () select new AstEnumItem (p)).ToList ();
+			var _enum_items = (from p in _ctx.classEnum () select new AstEnumItem (p)).ToList ();
 			var _types = (from p in _enum_items where p.AttachType != null select p.AttachType).ToList ();
 			for (int i = 0; i < _types.Count - 1; ++i) {
 				for (int j = i + 1; j < _types.Count; ++j) {
@@ -46,6 +46,7 @@ namespace fac.ASTs.Structs {
 				ClassVars = _vars,
 				ClassFuncs = new List<AstClassFunc> (),
 			};
+			_ret.ClassFuncs.AddRange (from p in _ctx.classFunc () select new AstClassFunc (_ret, p));
 			return _ret;
 		}
 
@@ -81,6 +82,10 @@ namespace fac.ASTs.Structs {
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
 			if (Templates.Count != (_templates?.Count ?? 0))
 				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {(_templates?.Count ?? 0)} 个参数");
+			foreach (var _type in _templates) {
+				if (_type is AstType_Void || _type is AstType_Any)
+					throw new CodeException (_token, "不可将 void 类型或 any 类型用于模板");
+			}
 			string _type_str = $"{FullName}<{string.Join (",", from p in _templates select p.ToString ())}>";
 			if (Insts.ContainsKey (_type_str))
 				return Insts[_type_str];

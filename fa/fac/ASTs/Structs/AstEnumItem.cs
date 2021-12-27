@@ -13,7 +13,7 @@ namespace fac.ASTs.Structs {
 
 
 
-		public AstEnumItem (FaParser.ClassEnumItemContext _ctx) {
+		public AstEnumItem (FaParser.ClassEnumContext _ctx) {
 			Token = _ctx.Start;
 			Name = _ctx.id ().GetText ();
 			if (_ctx.type () != null)
