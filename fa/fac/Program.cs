@@ -11,6 +11,7 @@ using System.Text;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace fac {
 	class Program {
@@ -56,33 +57,32 @@ namespace fac {
 		}
 
 		// 更新检查
-		private static void CheckUpdates(Version version) {
-			var client = new HttpClient {
-				Timeout = TimeSpan.FromSeconds(2)
-			};
-			client.DefaultRequestHeaders.Accept.Clear();
-			client.DefaultRequestHeaders.Accept.Add(
-				new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+		private static async Task CheckUpdatesAsync (Version version) {
+			using var client = new HttpClient { Timeout = TimeSpan.FromSeconds (2) };
+			client.DefaultRequestHeaders.Accept.Clear ();
+			client.DefaultRequestHeaders.Accept.Add (new MediaTypeWithQualityHeaderValue ("application/vnd.github.v3+json"));
 			client.DefaultRequestHeaders.Add("User-Agent", "falang Compiler Version Checker");
 			try {
-				var streamTask = client.GetStringAsync("https://api.github.com/repos/fa-org/fa/releases").Result;
-				var repositories = JsonSerializer.Deserialize<List<Releases>>(streamTask);
+				var streamTask = await client.GetStringAsync ("https://api.github.com/repos/fa-org/fa/releases");
+				var repositories = JsonSerializer.Deserialize<List<Releases>> (streamTask);
 
 				var updatable = false;
-				foreach(var releases in repositories) {
-					var releaseVersion = new Version(releases.ReleaseVersion[1..]);
-					if(releaseVersion <= version)
+				foreach (var releases in repositories) {
+					var releaseVersion = new Version (releases.ReleaseVersion[1..]);
+					if (releaseVersion <= version)
 						break;
-					if(!updatable) {
-						Console.WriteLine($"发现新版本");
-						Console.WriteLine($"Download Link:{releases.Asset[0].Download_url}");
+					if (!updatable) {
+						Console.WriteLine ($"发现新版本");
+						Console.WriteLine ($"Download Link:{releases.Asset[0].Download_url}");
 					}
-					Console.WriteLine($"{releases.ReleaseVersion}:");
-					Console.WriteLine($"	-{releases.Detail}");
-					Console.WriteLine();
+					Console.WriteLine ($"{releases.ReleaseVersion}:");
+					Console.WriteLine ($"	-{releases.Detail}");
+					Console.WriteLine ();
 					updatable = true;
 				}
-			} finally { client.Dispose(); };
+			} finally {
+				client.Dispose ();
+			}
 		}
 		static void Main (string[] args) {
 			var _asm = Assembly.GetExecutingAssembly ();
@@ -90,7 +90,10 @@ namespace fac {
 			Console.WriteLine ($"    版权：{(Attribute.GetCustomAttribute (_asm, typeof (AssemblyCopyrightAttribute)) as AssemblyCopyrightAttribute).Copyright}");
 			Console.WriteLine ($"    版本：{_asm.GetName ().Version}");
 			Console.WriteLine ($"    源码：https://github.com/fa-org/fa");
-			CheckUpdates(_asm.GetName().Version);
+			try {
+				CheckUpdatesAsync (_asm.GetName ().Version).Wait ();
+			} catch (Exception) {
+			}
 			Console.WriteLine ();
 			if (args.Length == 0 || (args.Length == 1 && (args[0] == "--help" || args[0] == "-help" || args[0] == "/help" || args[0] == "-?" || args[0] == "/?"))) {
 				var _exename = Process.GetCurrentProcess ().MainModule.ModuleName;

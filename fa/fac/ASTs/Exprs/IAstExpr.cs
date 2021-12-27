@@ -295,8 +295,9 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
 
 		public static IAstExpr OptionalFromError (AstType_OptionalWrap _otype, fa_Error _err) {
-			var _expr = AstExprName_ClassEnum.FindFromName (_otype.Token, $"fa.Error.{_err}");
-			return _expr.TraversalCalcType (null);
+			var _err_expr = AstExprName_ClassEnum.FindFromName (_otype.Token, $"fa.Error.{_err}");
+#warning TODO:此处改为实际类型
+			return _err_expr.TraversalCalcType (null);
 		}
 	}
 }
