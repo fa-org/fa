@@ -14,7 +14,6 @@ using System.Text.Json;
 
 
 namespace fac {
-
 	class Program {
 		private static List<string> _GetAllFiles(string _path) {
 			var _files = new List<string>();
@@ -57,6 +56,7 @@ namespace fac {
 			return "Hello";
 		}
 
+
 		private static void CheckUpdates(Version version) {
 			var client = new HttpClient {
 				Timeout = TimeSpan.FromSeconds(2)
@@ -86,16 +86,16 @@ namespace fac {
 			} finally { client.Dispose(); };
 		}
 
+
 		static void Main(string[] args) {
 			var _asm = Assembly.GetExecutingAssembly();
 			Console.WriteLine($"fa语言编译器");
-			Console.WriteLine($"	版权：{(Attribute.GetCustomAttribute(_asm, typeof(AssemblyCopyrightAttribute)) as AssemblyCopyrightAttribute).Copyright}");
-			Console.WriteLine($"	版本：{_asm.GetName().Version}");
+			Console.WriteLine($"    版权：{(Attribute.GetCustomAttribute(_asm, typeof(AssemblyCopyrightAttribute)) as AssemblyCopyrightAttribute).Copyright}");
+			Console.WriteLine($"    版本：{_asm.GetName().Version}");
 			Console.WriteLine($"	源码：https://github.com/fa-org/fa");
+			// 检查更新
 			CheckUpdates(_asm.GetName().Version);
 			Console.WriteLine();
-			// 检查更新
-
 			if(args.Length == 0 || (args.Length == 1 && (args[0] == "--help" || args[0] == "-help" || args[0] == "/help" || args[0] == "-?" || args[0] == "/?"))) {
 				var _exename = Process.GetCurrentProcess().MainModule.ModuleName;
 				if(_exename == "dotnet" || _exename == "dotnet.exe") {
@@ -106,17 +106,17 @@ namespace fac {
 				Console.WriteLine($"用法：");
 				Console.WriteLine($"{_exename} fa程序文件目录|fa程序文件.fa [-d] [-r]");
 				Console.WriteLine();
-				Console.WriteLine($"	-d	调试模式，将在控制台打印C#后端输出");
-				Console.WriteLine($"	-r	发布模式，将编译为可发布版本");
+				Console.WriteLine($"    -d    调试模式，将在控制台打印C#后端输出");
+				Console.WriteLine($"    -r    发布模式，将编译为可发布版本");
 				Console.WriteLine();
 				Console.WriteLine($"备注：如果指定目录，则目录名不要以“.fa”结尾，另外fa程序扩展名必须小写");
 				Console.WriteLine($"示例：");
 				if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-					Console.WriteLine($"	{_exename} D:\\FaProject -r");
-					Console.WriteLine($"	{_exename} D:\\FaProject\\Program.fa -d");
+					Console.WriteLine($"    {_exename} D:\\FaProject -r");
+					Console.WriteLine($"    {_exename} D:\\FaProject\\Program.fa -d");
 				} else {
-					Console.WriteLine($"	{_exename} /FaProject -r");
-					Console.WriteLine($"	{_exename} /FaProject/Program.fa -d");
+					Console.WriteLine($"    {_exename} /FaProject -r");
+					Console.WriteLine($"    {_exename} /FaProject/Program.fa -d");
 				}
 				Console.WriteLine();
 				if(Debugger.IsAttached) {
@@ -258,13 +258,11 @@ namespace fac {
 				Console.WriteLine("正在构建并运行。。。");
 				_process_run("dotnet run");
 			}
-
 			//
 			if(Debugger.IsAttached) {
 				Console.WriteLine($"按任意键退出。。。");
 				Console.ReadKey();
 			}
 		}
-
 	}
 }
