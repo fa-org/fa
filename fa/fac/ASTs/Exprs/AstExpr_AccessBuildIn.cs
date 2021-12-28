@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	public enum AccessBuildInType { ARR_New, ARR_Length, ARR_Add, ARR_AccessItem, OPT_HasValue, OPT_GetValue, OPT_GetError, OPT_FromValue, OPT_FromError }
+	public enum AccessBuildInType { ARR_New, ARR_Length, ARR_Add, ARR_AccessItem, OPT_GetValue, OPT_FromValue, OPT_FromError }
 	public class AstExpr_AccessBuildIn: IAstExpr {
 		public IAstExpr Value { get; set; } = null;
 		public AccessBuildInType AccessType { get; set; }
@@ -31,8 +31,6 @@ namespace fac.ASTs.Exprs {
 			}
 			return new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
 		}
-		public static IAstExpr Optional_HasValue (IAstExpr _opt) => new AstExpr_AccessBuildIn { Token = _opt.Token, AccessType = AccessBuildInType.OPT_HasValue, Value = _opt, ExpectType = IAstType.FromName ("bool") };
-		public static IAstExpr Optional_NotHasValue (IAstExpr _opt) => new AstExpr_Op1 { Token = _opt.Token, Value = Optional_HasValue (_opt), IsPrefix = true, Operator = "!", ExpectType = IAstType.FromName ("bool") };
 		public static IAstExpr Optional_GetValue (IAstExpr _opt) {
 			if (_opt is AstExpr_AccessBuildIn _opt1 && _opt1.AccessType == AccessBuildInType.OPT_FromValue) {
 				return _opt1.Value;
@@ -40,7 +38,6 @@ namespace fac.ASTs.Exprs {
 				return new AstExpr_AccessBuildIn { Token = _opt.Token, Value = _opt, AccessType = AccessBuildInType.OPT_GetValue, ExpectType = (_opt.ExpectType as AstType_OptionalWrap).ItemType };
 			}
 		}
-		public static IAstExpr Optional_GetError (IAstExpr _opt) => new AstExpr_AccessBuildIn { Token = _opt.Token, Value = _opt, AccessType = AccessBuildInType.OPT_GetError, ExpectType = IAstType.FromName ("string") };
 		public static IAstExpr Optional_FromValue (IAstExpr _opt) {
 			if (_opt is AstExpr_AccessBuildIn _opt1 && _opt1.AccessType == AccessBuildInType.OPT_GetValue) {
 				return _opt1.Value;
@@ -158,6 +155,24 @@ namespace fac.ASTs.Exprs {
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = InitExpand (_cache_err);
+			if (AccessType == AccessBuildInType.OPT_GetValue) {
+				if (_cache_err == null || _cache_err == (null, null))
+					throw new CodeException (Token, "可选类型可能不包含值，需处理异常");
+				var _expr = AstExpr_Is.FromContext (Value.Token, Value, "Val", Common.GetTempId ());
+				var (_expr1, _stmts1) = _expr.ExpandExpr_If (_cache_err);
+				var _if_stmt = new AstStmt_If {
+					Token = Token,
+					Condition = AstExpr_Op1.Not (_expr1),
+					IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, Optional_FromError (_cache_err?._var.ExpectType, IAstExpr.FromValue ("string", ""))),
+						_cache_err?._pos.GetRef (),
+					},
+				};
+				_stmts.Add (_if_stmt);
+				_stmts.AddRange (_stmts1);
+				return (_stmts, _expr.DefVar.GetRef ());
+			}
+
 			if (AccessType == AccessBuildInType.ARR_AccessItem) {
 				if (_cache_err == null || _cache_err == (null, null))
 					throw new CodeException (Token, "数组随机访问可能为空值，需处理异常");
@@ -206,17 +221,6 @@ namespace fac.ASTs.Exprs {
 				});
 
 				return (_stmts, Array_AccessItem (Value, _index_defvar.GetRef (), false));
-			} else if (AccessType == AccessBuildInType.OPT_GetValue) {
-				if (_cache_err == null || _cache_err == (null, null))
-					throw new CodeException (Token, "值可能为空，需处理异常");
-				_stmts.Add (new AstStmt_If {
-					Token = Token,
-					Condition = Optional_NotHasValue (Value),
-					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, Optional_FromError (_cache_err?._var.ExpectType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
-						_cache_err?._pos.GetRef (),
-					},
-				});
 			}
 			return (_stmts, this);
 		}
@@ -230,11 +234,9 @@ namespace fac.ASTs.Exprs {
 				AccessBuildInType.ARR_Length => Value.ExpectType is AstType_ArrayWrap ? $"{_b}.Count" : $"{_b}.Length",
 				AccessBuildInType.ARR_Add => $"{_b}.Add ({_attach0})",
 				AccessBuildInType.ARR_AccessItem => $"{_b} [{_attach0}]",
-				AccessBuildInType.OPT_HasValue => $"{_b}.HasValue ()",
-				AccessBuildInType.OPT_GetValue => $"{_b}.GetValue ()",
-				AccessBuildInType.OPT_GetError => $"{_b}.GetError ()",
-				AccessBuildInType.OPT_FromValue => $"{_exp}.FromValue ({_b})",
-				AccessBuildInType.OPT_FromError => $"{_exp}.FromError ({_attach0})",
+				//AccessBuildInType.OPT_GetValue => $"{_b}.GetValue ()",
+				//AccessBuildInType.OPT_FromValue => $"{_exp}.FromValue ({_b})",
+				//AccessBuildInType.OPT_FromError => $"{_exp}.FromError ({_attach0})",
 				_ => throw new NotImplementedException (),
 			};
 		}

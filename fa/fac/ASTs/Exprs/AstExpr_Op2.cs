@@ -115,7 +115,11 @@ namespace fac.ASTs.Exprs {
 				_stmts.Add (_err_pos);
 				var _ifstmt = new AstStmt_If {
 					Token = Token,
-					Condition = AstExpr_AccessBuildIn.Optional_NotHasValue (_tmp_stmt.GetRef ()),
+					Condition = AstExpr_Op1.Not (AstExpr_Is.FromContext (Token, _tmp_stmt.GetRef (), "Val", "")),
+					IfTrueCodes = new List<IAstStmt> {
+						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (_tmp_stmt.GetRef (), fa_Error.Null)),
+						_cache_err?._pos.GetRef (),
+					},
 				};
 				(_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
 				_ifstmt.IfTrueCodes = _stmts1;

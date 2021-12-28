@@ -93,8 +93,8 @@ if (_l.__index__ != _r.__index__) {{ return false; }}");
 			Info.CurrentClass = this;
 			Info.CurrentFuncVariables = null;
 
-			ClassFuncs[0].ToAST ();
-			ClassFuncs[1].ToAST ();
+			foreach (var _func in ClassFuncs)
+				_func.ToAST ();
 
 			// 处理AST
 			for (int i = 0; i < ExprTraversals.TraversalTypes.Count; ++i) {

@@ -145,7 +145,7 @@ namespace fac.ASTs.Exprs {
 			var _suffix_ctxs = _ctx.strongExprSuffix ();
 			foreach (var _suffix_ctx in _suffix_ctxs) {
 				if (_suffix_ctx.Is () != null) {
-					_expr = AstExpr_Is.FromContext (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ().GetText ());
+					_expr = AstExpr_Is.FromContext (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ()?.GetText () ?? "");
 				} else if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.id () != null) {
 					var _tmp_expr = new AstExpr_Op1 { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;
@@ -214,16 +214,9 @@ namespace fac.ASTs.Exprs {
 			} else if (_ctx.quotExpr () != null) {
 				return FromContext (_ctx.quotExpr ().expr ());
 			} else if (_ctx.newExpr1 () != null) {
-				var _expr = new AstExpr_NewObject { Token = _ctx.Start };
-				string _type_str = _ctx.newExpr1 ().ids ()?.GetText () ?? "";
-				_expr.DataType = _type_str != "" ? IAstType.FromName (_type_str) as AstType_Class : null;
-				_expr.InitialValues = (from p in _ctx.newExpr1 ().newExprItem () select (_name: p.id ().GetText (), _value: FromContext (p.middleExpr ()))).ToList ();
-				return _expr;
+				return AstExpr_NewObject.FromContext (_ctx.newExpr1 ());
 			} else if (_ctx.newExpr2 () != null) {
-				var _expr = new AstExpr_NewObject { Token = _ctx.Start };
-				_expr.DataType = IAstType.FromName (_ctx.newExpr1 ().ids ().GetText ()) as AstType_Class;
-				_expr.ConstructorArguments = (from p in _ctx.newExpr2 ().expr () select FromContext (p)).ToList ();
-				return _expr;
+				return AstExpr_NewObject.FromContext (_ctx.newExpr2 ());
 				//} else if (_ctx.newArray () != null) {
 				//	var _expr = new AstExpr_Array { Token = _ctx.Start };
 				//	if (_ctx.newArray ().ids () != null)
@@ -239,49 +232,9 @@ namespace fac.ASTs.Exprs {
 				_expr.InitCount = FromValue ("int", $"{_expr.InitValues.Count}");
 				return _expr;
 			} else if (_ctx.switchExpr2 () != null) {
-				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = null };
-				var _switch_items = _ctx.switchExpr2 ().switchExprPart2 ();
-				_t.CaseCond = null;
-				_t.CaseWhen = (from p in _switch_items select FromContext (p.expr ())).ToList ();
-				_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
-				_t.CaseWhen.Add (null);
-				var _wraps = (from p in _switch_items select p.quotStmtExprWrap ()).ToList ();
-				_wraps.Add (_ctx.switchExpr2 ().switchExprPartLast ().quotStmtExprWrap ());
-				foreach (var _wrap in _wraps) {
-					if (_wrap.expr () != null) {
-						var _stmts = new List<IAstStmt> ();
-						var _expr = FromContext (_wrap.expr ());
-						_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
-					} else {
-						var _stmts = IAstStmt.FromStmts (_wrap.quotStmtExpr ().stmt ());
-						var _expr = FromContext (_wrap.quotStmtExpr ().expr ());
-						_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
-					}
-				}
-				return _t;
+				return AstExpr_Switch.FromContext (_ctx.switchExpr2 ());
 			} else if (_ctx.switchExpr () != null) {
-				var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.switchExpr ().expr ()) };
-				var _switch_items = _ctx.switchExpr ().switchExprPart ();
-				_t.CaseCond = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
-				_t.CaseCond.Add (new AstExprName_Ignore { Token = _ctx.switchExpr ().switchExprPartLast ().Start });
-				_t.CaseCond.PreprocessCaseCond ();
-				_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
-				_t.CaseWhen.Add (null);
-				_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
-				var _wraps = (from p in _switch_items select p.quotStmtExprWrap ()).ToList ();
-				_wraps.Add (_ctx.switchExpr ().switchExprPartLast ().quotStmtExprWrap ());
-				foreach (var _wrap in _wraps) {
-					if (_wrap.expr () != null) {
-						var _stmts = new List<IAstStmt> ();
-						var _expr = FromContext (_wrap.expr ());
-						_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
-					} else {
-						var _stmts = IAstStmt.FromStmts (_wrap.quotStmtExpr ().stmt ());
-						var _expr = FromContext (_wrap.quotStmtExpr ().expr ());
-						_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
-					}
-				}
-				return _t;
+				return AstExpr_Switch.FromContext (_ctx.switchExpr ());
 			} else if (_ctx.lambdaExpr () != null) {
 				return new AstExpr_Lambda { Token = _ctx.Start, LambdaExprCtx = _ctx.lambdaExpr () };
 			} else if (_ctx.idExt () != null) {
@@ -294,10 +247,26 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
 
+		public static AstExprName_ClassEnum FromError (IToken _token, fa_Error _err) {
+			var _ret = AstExprName_ClassEnum.FindFromName (_token, $"fa.Error.{_err}");
+			_ret.ExpectType = _ret.GuessType ();
+			return _ret;
+		}
+
+		public static IAstExpr OptionalFromError (AstExprName_ClassEnum _err_expr) {
+			var _expr = AstExprName_ClassEnum.FindFromName (_err_expr.Token, _err_expr.EnumClass, "Err", _err_expr);
+			return _expr.TraversalCalcType (null);
+		}
+
 		public static IAstExpr OptionalFromError (AstType_OptionalWrap _otype, fa_Error _err) {
-			var _err_expr = AstExprName_ClassEnum.FindFromName (_otype.Token, $"fa.Error.{_err}");
-#warning TODO:此处改为实际类型
-			return _err_expr.TraversalCalcType (null);
+			var _err_expr = FromError (_otype.Token, _err);
+			return OptionalFromError (_err_expr);
+		}
+
+		public static AstExprName_ClassEnum OptionalGetError (IAstExpr _expr) {
+			// TODO 考虑直接移除此方法，全部交由 AstExpr_Is 实现
+			var _err_expr = AstExprName_ClassEnum.FindFromNameUncheckAttach (_expr.Token, AstType_OptionalWrap.ErrorClass, "Err");
+			var _expr_is = new AstExpr_Is { Token = _expr.Token, IsWhatExpr = _err_expr, DefVar };
 		}
 	}
 }

@@ -58,11 +58,11 @@ namespace fac {
 
 		// 更新检查
 		private static async Task CheckUpdatesAsync (Version version) {
-			using var client = new HttpClient { Timeout = TimeSpan.FromSeconds (2) };
-			client.DefaultRequestHeaders.Accept.Clear ();
-			client.DefaultRequestHeaders.Accept.Add (new MediaTypeWithQualityHeaderValue ("application/vnd.github.v3+json"));
-			client.DefaultRequestHeaders.Add("User-Agent", "falang Compiler Version Checker");
 			try {
+				using var client = new HttpClient { Timeout = TimeSpan.FromSeconds (2) };
+				client.DefaultRequestHeaders.Accept.Clear ();
+				client.DefaultRequestHeaders.Accept.Add (new MediaTypeWithQualityHeaderValue ("application/vnd.github.v3+json"));
+				client.DefaultRequestHeaders.Add("User-Agent", "falang Compiler Version Checker");
 				var streamTask = await client.GetStringAsync ("https://api.github.com/repos/fa-org/fa/releases");
 				var repositories = JsonSerializer.Deserialize<List<Releases>> (streamTask);
 
@@ -80,8 +80,7 @@ namespace fac {
 					Console.WriteLine ();
 					updatable = true;
 				}
-			} finally {
-				client.Dispose ();
+			} catch (Exception) {
 			}
 		}
 		static void Main (string[] args) {
@@ -90,10 +89,7 @@ namespace fac {
 			Console.WriteLine ($"    版权：{(Attribute.GetCustomAttribute (_asm, typeof (AssemblyCopyrightAttribute)) as AssemblyCopyrightAttribute).Copyright}");
 			Console.WriteLine ($"    版本：{_asm.GetName ().Version}");
 			Console.WriteLine ($"    源码：https://github.com/fa-org/fa");
-			try {
-				CheckUpdatesAsync (_asm.GetName ().Version).Wait ();
-			} catch (Exception) {
-			}
+			CheckUpdatesAsync (_asm.GetName ().Version).Wait ();
 			Console.WriteLine ();
 			if (args.Length == 0 || (args.Length == 1 && (args[0] == "--help" || args[0] == "-help" || args[0] == "/help" || args[0] == "-?" || args[0] == "/?"))) {
 				var _exename = Process.GetCurrentProcess ().MainModule.ModuleName;

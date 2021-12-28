@@ -18,6 +18,54 @@ namespace fac.ASTs.Exprs {
 
 
 
+		public static AstExpr_Switch FromContext (FaParser.SwitchExprContext _ctx) {
+			var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = FromContext (_ctx.expr ()) };
+			var _switch_items = _ctx.switchExprPart ();
+			_t.CaseCond = (from p in _switch_items select FromContext (p.expr ()[0])).ToList ();
+			_t.CaseCond.Add (new AstExprName_Ignore { Token = _ctx.switchExprPartLast ().Start });
+			_t.CaseCond.PreprocessCaseCond ();
+			_t.CaseWhen = (from p in _switch_items select p.expr ().Length > 1 ? FromContext (p.expr ()[1]) : null).ToList ();
+			_t.CaseWhen.Add (null);
+			_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
+			var _wraps = (from p in _switch_items select p.quotStmtExprWrap ()).ToList ();
+			_wraps.Add (_ctx.switchExprPartLast ().quotStmtExprWrap ());
+			foreach (var _wrap in _wraps) {
+				if (_wrap.expr () != null) {
+					var _stmts = new List<IAstStmt> ();
+					var _expr = FromContext (_wrap.expr ());
+					_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
+				} else {
+					var _stmts = IAstStmt.FromStmts (_wrap.quotStmtExpr ().stmt ());
+					var _expr = FromContext (_wrap.quotStmtExpr ().expr ());
+					_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
+				}
+			}
+			return _t;
+		}
+
+		public static AstExpr_Switch FromContext (FaParser.SwitchExpr2Context _ctx) {
+			var _t = new AstExpr_Switch { Token = _ctx.Start, Condition = null };
+			var _switch_items = _ctx.switchExprPart2 ();
+			_t.CaseCond = null;
+			_t.CaseWhen = (from p in _switch_items select FromContext (p.expr ())).ToList ();
+			_t.CaseCodes = new List<(List<IAstStmt> _stmts, IAstExpr _expr)> ();
+			_t.CaseWhen.Add (null);
+			var _wraps = (from p in _switch_items select p.quotStmtExprWrap ()).ToList ();
+			_wraps.Add (_ctx.switchExprPartLast ().quotStmtExprWrap ());
+			foreach (var _wrap in _wraps) {
+				if (_wrap.expr () != null) {
+					var _stmts = new List<IAstStmt> ();
+					var _expr = FromContext (_wrap.expr ());
+					_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
+				} else {
+					var _stmts = IAstStmt.FromStmts (_wrap.quotStmtExpr ().stmt ());
+					var _expr = FromContext (_wrap.quotStmtExpr ().expr ());
+					_t.CaseCodes.Add ((_stmts: _stmts, _expr: _expr));
+				}
+			}
+			return _t;
+		}
+
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (Condition != null)
 				Condition = Condition.TraversalWrap (_trav);

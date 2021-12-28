@@ -9,24 +9,49 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Types {
 	public class AstType_OptionalWrap: IAstType {
 		public IAstType ItemType { init; get; }
+		public IAstClass Class { get => BaseClass.GetInst (new List<IAstType> { ItemType }); }
 
 
 
-		private static IAstClass s_optional = null;
+		private static IAstClass _ErrorClass = null;
+		public static IAstClass ErrorClass {
+			get {
+				if (_ErrorClass == null) {
+					var _classes = Info.GetTemplateClassFromName ("fa.Error", 0);
+					if (_classes.Count == 0) {
+						throw new NotImplementedException ();
+					} else if (_classes.Count > 1) {
+						throw new CodeException ((IToken) null, $"不允许定义 fa.Error 类型");
+					}
+					_ErrorClass = _classes[0];
+				}
+				return _ErrorClass;
+			}
+		}
+
+		private static IAstClass _BaseClass = null;
+		public static IAstClass BaseClass {
+			get {
+				if (_BaseClass == null) {
+					var _classes = Info.GetTemplateClassFromName ("fa.Optional", 1);
+					if (_classes.Count == 0) {
+						throw new NotImplementedException ();
+					} else if (_classes.Count > 1) {
+						throw new CodeException ((IToken) null, $"不允许定义 fa.Optional 类型");
+					}
+					_BaseClass = _classes[0];
+				}
+				return _BaseClass;
+			}
+		}
+
+
+
 		public AstType_OptionalWrap (IToken _token, IAstType _item_type, bool _mut) {
 			Token = _token;
 			ItemType = _item_type;
 			Mut = _mut;
-			if (s_optional == null) {
-				var _classes = Info.GetTemplateClassFromName ("fa.Optional", 1);
-				if (_classes.Count == 0) {
-					throw new NotImplementedException ();
-				} else if (_classes.Count > 1) {
-					throw new CodeException (_token, $"不允许定义 fa.Optional 类型");
-				}
-				s_optional = _classes[0];
-			}
-			s_optional.GetInst (new List<IAstType> { _item_type });
+			BaseClass.GetInst (new List<IAstType> { _item_type });
 		}
 
 		public override string ToString () => $"{ItemType}?";

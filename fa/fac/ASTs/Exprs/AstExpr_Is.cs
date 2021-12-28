@@ -32,6 +32,7 @@ namespace fac.ASTs.Exprs {
 				DefVar = _var_stmt,
 			};
 		}
+
 		public static AstExpr_Is FromContext (IToken _token, IAstExpr _src, AstExprName_ClassEnum _is_what_expr, string _var) {
 			AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
 			if (_var_stmt != null) {
@@ -64,7 +65,16 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => IAstType.FromName ("bool");
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new CodeException (Token, "is 表达式只支持在if判定条件中使用");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			if (DefVar != null)
+				throw new CodeException (Token, "带解构的 is 表达式只支持在if判定条件中使用");
+			var _expr = AstExpr_Op2.MakeCondition (
+				new AstExpr_Op1 { Token = Token, Value = Value, IsPrefix = false, Operator = ".__index__" },
+				"==",
+				IAstExpr.FromValue ("int", $"{IsWhatExpr.EnumItemIndex}")
+			);
+			return (new List<IAstStmt> (), _expr);
+		}
 
 		public (IAstExpr, List<IAstStmt>) ExpandExpr_If ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _expr = AstExpr_Op2.MakeCondition (

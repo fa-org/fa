@@ -74,8 +74,11 @@ namespace fac.AntlrTools {
 		// 第一遍遍历
 		private static IAstExpr Traversal0 (IAstExpr _expr) {
 			if (_expr is AstExpr_BaseId _idexpr) {
-				if (_idexpr.Id == "_")
+				if (_idexpr.Id == "_") {
 					return new AstExprName_Ignore { Token = _expr.Token };
+				} else if (_idexpr.Id == "this") {
+					return new AstExprName_This { Token = _expr.Token, Class = Info.CurrentClass, ExpectType = Info.CurrentClass.GetClassType () };
+				}
 
 				// 查找预定义名称
 				var _buildinexpr = AstExprName_BuildIn.FindFromName (_idexpr.Id);

@@ -11,11 +11,11 @@ public enum Error {
 public enum OptionalVoid {
 	Ok,
 	Err (Error),
-	bool HasValue () => this is Ok;
+	//bool HasValue () => this is Ok;
 }
 
 public enum Optional<T1> {
 	Val (T1),
 	Err (Error),
-	bool HasValue () => this is Val;
+	//bool HasValue () => this is Val;
 }

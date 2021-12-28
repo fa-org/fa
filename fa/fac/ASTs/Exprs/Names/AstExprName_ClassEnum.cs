@@ -30,8 +30,8 @@ namespace fac.ASTs.Exprs.Names {
 			if (_name == "Value") {
 				if (_attach_var == null)
 					throw new CodeException (_token, "枚举类型需附带参数");
-			} else if ((_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null) != (_attach_var == null)) {
-				throw new CodeException (_token, _attach_var == null ? "枚举类型需附带参数" : "枚举类型不应附带参数");
+			} else if (_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null && _attach_var != null) {
+				throw new CodeException (_token, "枚举类型不应附带参数");
 			}
 			_class_enum.AttachExpr = _attach_var;
 			return _class_enum;
@@ -40,7 +40,7 @@ namespace fac.ASTs.Exprs.Names {
 		public static AstExprName_ClassEnum FindFromNameUncheckAttach (IToken _token, string _name) {
 			int _pt = _name.LastIndexOf ('.');
 			if (_pt == -1)
-				return null;
+				return FindFromNameUncheckAttach (_token, Info.CurrentClass, _name);
 			string _class_name = _name[.._pt];
 			var _classes = Info.GetClassFromName (_class_name);
 			if (_classes.Count == 1) {
@@ -57,7 +57,7 @@ namespace fac.ASTs.Exprs.Names {
 			if (_name == "Value") {
 				if (_attach_var == null)
 					throw new CodeException (_token, "枚举类型需附带参数");
-			} else if ((_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null) != (_attach_var == null)) {
+			} else if (_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null && _attach_var != null) {
 				throw new CodeException (_token, _attach_var == null ? "枚举类型需附带参数" : "枚举类型不应附带参数");
 			}
 			_class_enum.AttachExpr = _attach_var;
