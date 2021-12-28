@@ -117,7 +117,7 @@ namespace fac.ASTs.Exprs {
 					Token = Token,
 					Condition = AstExpr_Op1.Not (AstExpr_Is.FromContext (Token, _tmp_stmt.GetRef (), "Val", "")),
 					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (_tmp_stmt.GetRef (), fa_Error.Null)),
+						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, _tmp_stmt.GetRef ().GetError ()),
 						_cache_err?._pos.GetRef (),
 					},
 				};

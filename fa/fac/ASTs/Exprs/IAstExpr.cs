@@ -253,20 +253,29 @@ namespace fac.ASTs.Exprs {
 			return _ret;
 		}
 
-		public static IAstExpr OptionalFromError (AstExprName_ClassEnum _err_expr) {
+		public static IAstExpr OptionalFromError (AstType_Class _type, AstExprName_ClassEnum _err_expr) {
 			var _expr = AstExprName_ClassEnum.FindFromName (_err_expr.Token, _err_expr.EnumClass, "Err", _err_expr);
 			return _expr.TraversalCalcType (null);
 		}
 
 		public static IAstExpr OptionalFromError (AstType_OptionalWrap _otype, fa_Error _err) {
 			var _err_expr = FromError (_otype.Token, _err);
-			return OptionalFromError (_err_expr);
+			return new AstExprName_ClassEnum { Token = _otype.Token, EnumClass = _otype.Class, EnumItemIndex = 1, AttachExpr = _err_expr };
 		}
 
-		public static AstExprName_ClassEnum OptionalGetError (IAstExpr _expr) {
-			// TODO 考虑直接移除此方法，全部交由 AstExpr_Is 实现
-			var _err_expr = AstExprName_ClassEnum.FindFromNameUncheckAttach (_expr.Token, AstType_OptionalWrap.ErrorClass, "Err");
-			var _expr_is = new AstExpr_Is { Token = _expr.Token, IsWhatExpr = _err_expr, DefVar };
+		public IAstExpr GetError () {
+			if (ExpectType is AstType_OptionalWrap _otype) {
+				//var _err_expr = AstExprName_ClassEnum.FindFromNameUncheckAttach (Token, AstType_OptionalWrap.ErrorClass, "Err");
+				//var _ret = new AstExpr_Op1 { Token = Token, Value = _otype, IsPrefix = false, Operator = $".{_err_expr.AttachName}", ExpectType = _err_expr.AttachType };
+				//return _ret;
+#warning TODO 获取 iswhatexpr 然后通过op1取值
+				return new AstExpr_Op1 { Token = Token, Value = this, IsPrefix = false, Operator = ".Err", ExpectType = AstType_OptionalWrap.ErrorClass.GetClassType () };
+			} else {
+				throw new NotImplementedException ();
+			}
+			//// TODO 考虑直接移除此方法，全部交由 AstExpr_Is 实现
+			//
+			//var _expr_is = new AstExpr_Is { Token = _expr.Token, IsWhatExpr = _err_expr, DefVar };
 		}
 	}
 }
