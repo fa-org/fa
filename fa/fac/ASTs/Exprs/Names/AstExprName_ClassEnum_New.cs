@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs.Names {
-	public class AstExprName_ClassEnum: IAstExprName {
+	public class AstExprName_ClassEnum_New: IAstExprName {
 		public IAstClass EnumClass { init; get; }
 		public int EnumItemIndex { init; get; }
 		public IAstExpr AttachExpr { get; set; }
@@ -23,35 +23,35 @@ namespace fac.ASTs.Exprs.Names {
 
 
 
-		public static AstExprName_ClassEnum FindFromName (IToken _token, string _name, IAstExprName _attach_var = null) {
-			var _class_enum = FindFromNameUncheckAttach (_token, _name);
-			if (_class_enum == null)
-				throw new CodeException (_token, $"未识别的标识符 {_name}");
-			if (_name == "Value") {
-				if (_attach_var == null)
-					throw new CodeException (_token, "枚举类型需附带参数");
-			} else if (_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null && _attach_var != null) {
-				throw new CodeException (_token, "枚举类型不应附带参数");
-			}
-			_class_enum.AttachExpr = _attach_var;
-			return _class_enum;
-		}
+		//public static AstExprName_ClassEnum_New FindFromName (IToken _token, string _name, IAstExprName _attach_var = null) {
+		//	var _class_enum = FindFromNameUncheckAttach (_token, _name);
+		//	if (_class_enum == null)
+		//		throw new CodeException (_token, $"未识别的标识符 {_name}");
+		//	if (_name == "Value") {
+		//		if (_attach_var == null)
+		//			throw new CodeException (_token, "枚举类型需附带参数");
+		//	} else if (_class_enum.EnumClass.ClassEnumItems[_class_enum.EnumItemIndex].AttachType == null && _attach_var != null) {
+		//		throw new CodeException (_token, "枚举类型不应附带参数");
+		//	}
+		//	_class_enum.AttachExpr = _attach_var;
+		//	return _class_enum;
+		//}
 
-		public static AstExprName_ClassEnum FindFromNameUncheckAttach (IToken _token, string _name) {
+		public static AstExprName_ClassEnum_New _FindFromNameUncheckAttach (IToken _token, string _name) {
 			int _pt = _name.LastIndexOf ('.');
 			if (_pt == -1)
-				return FindFromNameUncheckAttach (_token, Info.CurrentClass, _name);
+				return _FindFromNameUncheckAttach (_token, Info.CurrentClass, _name);
 			string _class_name = _name[.._pt];
 			var _classes = Info.GetClassFromName (_class_name);
 			if (_classes.Count == 1) {
-				return FindFromNameUncheckAttach (_token, _classes[0], _name[(_pt + 1)..]);
+				return _FindFromNameUncheckAttach (_token, _classes[0], _name[(_pt + 1)..]);
 			} else {
 				return null;
 			}
 		}
 
-		public static AstExprName_ClassEnum FindFromName (IToken _token, IAstClass _class, string _name, IAstExprName _attach_var = null) {
-			var _class_enum = FindFromNameUncheckAttach (_token, _class, _name);
+		public static AstExprName_ClassEnum_New FindFromName (IToken _token, IAstClass _class, string _name, IAstExpr _attach_var = null) {
+			var _class_enum = _FindFromNameUncheckAttach (_token, _class, _name);
 			if (_class_enum == null)
 				throw new CodeException (_token, $"未识别的标识符 {_name}");
 			if (_name == "Value") {
@@ -64,10 +64,10 @@ namespace fac.ASTs.Exprs.Names {
 			return _class_enum;
 		}
 
-		public static AstExprName_ClassEnum FindFromNameUncheckAttach (IToken _token, IAstClass _class, string _name) {
+		public static AstExprName_ClassEnum_New _FindFromNameUncheckAttach (IToken _token, IAstClass _class, string _name) {
 			for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
 				if (_class.ClassEnumItems[i].Name == _name) {
-					return new AstExprName_ClassEnum { Token = _token, EnumClass = _class, EnumItemIndex = i };
+					return new AstExprName_ClassEnum_New { Token = _token, EnumClass = _class, EnumItemIndex = i };
 				}
 			}
 			return null;

@@ -115,16 +115,16 @@ namespace fac.ASTs.Exprs {
 				_stmts.Add (_err_pos);
 				var _ifstmt = new AstStmt_If {
 					Token = Token,
-					Condition = AstExpr_Op1.Not (AstExpr_Is.FromContext (Token, _tmp_stmt.GetRef (), "Val", "")),
+					Condition = AstExpr_Is.FromContext2 (Token, _tmp_stmt.GetRef (), "Err", ""),
 					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, _tmp_stmt.GetRef ().GetError ()),
-						_cache_err?._pos.GetRef (),
+						AstStmt_ExprWrap.MakeAssign (_cache_err1._var, _tmp_stmt.GetRef ().AccessError ()),
+						_cache_err1._pos.GetRef (),
 					},
 				};
 				(_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
 				_ifstmt.IfTrueCodes = _stmts1;
 				_ifstmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
-				_stmts.Add (_ifstmt);
+				_stmts.AddRange (_ifstmt.ExpandStmt (_cache_err));
 				return (_stmts, _tmp_stmt.GetRef ());
 			} else {
 				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
@@ -150,7 +150,7 @@ namespace fac.ASTs.Exprs {
 					_stmts.Add (new AstStmt_If {
 						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
 						IfTrueCodes = new List<IAstStmt> {
-							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_AccessBuildIn.Optional_FromError (_tmp_stmt.DataType.Optional, "除数不能为0")),
+							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (Token, fa_Error.DivideZero)),
 							_cache_err?._pos.GetRef (),
 						},
 						IfFalseCodes = new List<IAstStmt> {
@@ -159,11 +159,11 @@ namespace fac.ASTs.Exprs {
 					});
 				} else if (Operator == "=") {
 					_stmts.RemoveAt (0);
-					if (Value1 is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType == AccessBuildInType.OPT_GetValue) {
-						_stmts.Add (AstStmt_ExprWrap.MakeAssign (_biexpr.Value, AstExpr_AccessBuildIn.Optional_FromValue (Value2)));
-					} else {
+					//if (Value1 is AstExpr_AccessBuildIn _biexpr && _biexpr.AccessType == AccessBuildInType.OPT_GetValue) {
+					//	_stmts.Add (AstStmt_ExprWrap.MakeAssign (_biexpr.Value, AstExpr_AccessBuildIn.Optional_FromValue (Value2)));
+					//} else {
 						_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (this));
-					}
+					//}
 					return (_stmts, Value1);
 				} else {
 					_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), this));

@@ -22,11 +22,7 @@ namespace fac.AntlrTools {
 				}
 				return _types[0];
 			} else {
-				if (_types[0] is AstType_OptionalWrap _owrap)
-					_types[0] = _owrap;
 				for (int i = 1; i < _types.Length; ++i) {
-					if (_types[i] is AstType_OptionalWrap _owrap1)
-						_types[i] = _owrap1;
 					if (!_types[0].IsSame (_types[i]))
 						throw new Exception ("无法计算类型");
 				}
@@ -71,7 +67,7 @@ namespace fac.AntlrTools {
 		}
 
 		public static List<IAstStmt> ExpandFuncCodes (IAstType _return_type, List<IAstStmt> _codes) {
-			if (_return_type is AstType_OptionalWrap) {
+			if (_return_type.IsOptional) {
 				var _stmts = new List<IAstStmt> ();
 
 				var _retvar_stmt = new AstStmt_DefVariable { DataType = _return_type };

@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	public enum AccessBuildInType { ARR_New, ARR_Length, ARR_Add, ARR_AccessItem, OPT_GetValue, OPT_FromValue, OPT_FromError }
+	public enum AccessBuildInType { ARR_New, ARR_Length, ARR_Add, ARR_AccessItem }
 	public class AstExpr_AccessBuildIn: IAstExpr {
 		public IAstExpr Value { get; set; } = null;
 		public AccessBuildInType AccessType { get; set; }
@@ -31,22 +31,6 @@ namespace fac.ASTs.Exprs {
 			}
 			return new AstExpr_AccessBuildIn { Token = _array.Token, Value = _array, AccessType = AccessBuildInType.ARR_AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
 		}
-		public static IAstExpr Optional_GetValue (IAstExpr _opt) {
-			if (_opt is AstExpr_AccessBuildIn _opt1 && _opt1.AccessType == AccessBuildInType.OPT_FromValue) {
-				return _opt1.Value;
-			} else {
-				return new AstExpr_AccessBuildIn { Token = _opt.Token, Value = _opt, AccessType = AccessBuildInType.OPT_GetValue, ExpectType = (_opt.ExpectType as AstType_OptionalWrap).ItemType };
-			}
-		}
-		public static IAstExpr Optional_FromValue (IAstExpr _opt) {
-			if (_opt is AstExpr_AccessBuildIn _opt1 && _opt1.AccessType == AccessBuildInType.OPT_GetValue) {
-				return _opt1.Value;
-			} else {
-				return new AstExpr_AccessBuildIn { Token = _opt.Token, AccessType = AccessBuildInType.OPT_FromValue, Value = _opt, ExpectType = _opt.ExpectType.Optional };
-			}
-		}
-		public static IAstExpr Optional_FromError (IAstType _opt_type, IAstExpr _err) => new AstExpr_AccessBuildIn { Token = _err.Token, AccessType = AccessBuildInType.OPT_FromError, ExpectType = _opt_type, AttachArgs = new List<IAstExpr> { _err } };
-		public static IAstExpr Optional_FromError (IAstType _opt_type, string _err) => Optional_FromError (_opt_type, IAstExpr.FromValue ("string", _err));
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (Value != null)
@@ -144,7 +128,7 @@ namespace fac.ASTs.Exprs {
 					IfFalseCodes = new List<IAstStmt> { AstStmt_ExprWrap.MakeAssign (_val_idx, _rval), },
 				};
 				if (_cache_err?._var != null) {
-					_if_stmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_cache_err?._var, Optional_FromError (_cache_err?._var.ExpectType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))));
+					_if_stmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (null, fa_Error.IndexOutOfBounds)));
 					_if_stmt.IfTrueCodes.Add (_cache_err?._pos.GetRef ());
 				}
 				_stmts.Add (_if_stmt);
@@ -155,24 +139,6 @@ namespace fac.ASTs.Exprs {
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = InitExpand (_cache_err);
-			if (AccessType == AccessBuildInType.OPT_GetValue) {
-				if (_cache_err == null || _cache_err == (null, null))
-					throw new CodeException (Token, "可选类型可能不包含值，需处理异常");
-				var _expr = AstExpr_Is.FromContext (Value.Token, Value, "Val", Common.GetTempId ());
-				var (_expr1, _stmts1) = _expr.ExpandExpr_If (_cache_err);
-				var _if_stmt = new AstStmt_If {
-					Token = Token,
-					Condition = AstExpr_Op1.Not (_expr1),
-					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, Optional_FromError (_cache_err?._var.ExpectType, IAstExpr.FromValue ("string", ""))),
-						_cache_err?._pos.GetRef (),
-					},
-				};
-				_stmts.Add (_if_stmt);
-				_stmts.AddRange (_stmts1);
-				return (_stmts, _expr.DefVar.GetRef ());
-			}
-
 			if (AccessType == AccessBuildInType.ARR_AccessItem) {
 				if (_cache_err == null || _cache_err == (null, null))
 					throw new CodeException (Token, "数组随机访问可能为空值，需处理异常");
@@ -215,7 +181,7 @@ namespace fac.ASTs.Exprs {
 						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", Array_Length (Value))
 					),
 					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, Optional_FromError (_cache_err?._var.ExpectType, IAstExpr.FromValue ("string", "数组随机访问下标超过数组大小"))),
+						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstType.OptionalFromError (Token, fa_Error.IndexOutOfBounds)),
 						_cache_err?._pos.GetRef (),
 					},
 				});

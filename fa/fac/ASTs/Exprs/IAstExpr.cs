@@ -145,7 +145,7 @@ namespace fac.ASTs.Exprs {
 			var _suffix_ctxs = _ctx.strongExprSuffix ();
 			foreach (var _suffix_ctx in _suffix_ctxs) {
 				if (_suffix_ctx.Is () != null) {
-					_expr = AstExpr_Is.FromContext (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ()?.GetText () ?? "");
+					_expr = AstExpr_Is.FromContext2 (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ()?.GetText () ?? "");
 				} else if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.id () != null) {
 					var _tmp_expr = new AstExpr_Op1 { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;
@@ -180,7 +180,11 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromContext (FaParser.StrongExprBaseContext _ctx) {
 			if (_ctx.id () != null) {
 				string _id = $"{(_ctx.ColonColon () != null ? "::" : "")}{_ctx.id ().GetText ()}";
-				return new AstExpr_BaseId { Token = _ctx.Start, Id = _id };
+				if (_id != "null") {
+					return new AstExpr_BaseId { Token = _ctx.Start, Id = _id };
+				} else {
+					return OptionalFromError (_ctx.Start, fa_Error.Null);
+				}
 			} else if (_ctx.literal () != null) {
 				string _type, _value = _ctx.GetText ();
 				if (_ctx.literal ().BoolLiteral () != null) {
@@ -238,7 +242,7 @@ namespace fac.ASTs.Exprs {
 			} else if (_ctx.lambdaExpr () != null) {
 				return new AstExpr_Lambda { Token = _ctx.Start, LambdaExprCtx = _ctx.lambdaExpr () };
 			} else if (_ctx.idExt () != null) {
-				return AstExprName_ClassEnum.FindFromNameUncheckAttach (_ctx.Start, _ctx.idExt ().GetText ());
+				return AstExprName_ClassEnum_New._FindFromNameUncheckAttach (_ctx.Start, _ctx.idExt ().GetText ());
 			} else {
 				throw new UnimplException (_ctx);
 			}
@@ -247,35 +251,32 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
 
-		public static AstExprName_ClassEnum FromError (IToken _token, fa_Error _err) {
-			var _ret = AstExprName_ClassEnum.FindFromName (_token, $"fa.Error.{_err}");
+		public static AstExprName_ClassEnum_New OptionalFromError (IToken _token, fa_Error _err) {
+			var _ret = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
 			_ret.ExpectType = _ret.GuessType ();
 			return _ret;
 		}
 
-		public static IAstExpr OptionalFromError (AstType_Class _type, AstExprName_ClassEnum _err_expr) {
-			var _expr = AstExprName_ClassEnum.FindFromName (_err_expr.Token, _err_expr.EnumClass, "Err", _err_expr);
+		public static IAstExpr OptionalFromValue (IAstExpr _expr) {
+			if (_expr.ExpectType is AstType_OptionalWrap)
+				return _expr;
+			var _class = AstType_OptionalWrap.GetInstClass (_expr.ExpectType);
+			var _expr1 = AstExprName_ClassEnum_New.FindFromName (_expr.Token, _class, "Val", _expr);
+			return _expr1.TraversalCalcType (null);
+		}
+
+		public static IAstExpr OptionalFromOk () {
+			var _expr = AstExprName_ClassEnum_New.FindFromName (null, AstType_OptionalWrap.VoidClass, "Ok");
 			return _expr.TraversalCalcType (null);
 		}
 
-		public static IAstExpr OptionalFromError (AstType_OptionalWrap _otype, fa_Error _err) {
-			var _err_expr = FromError (_otype.Token, _err);
-			return new AstExprName_ClassEnum { Token = _otype.Token, EnumClass = _otype.Class, EnumItemIndex = 1, AttachExpr = _err_expr };
+		public static IAstExpr OptionalFromError (AstType_Class _type, AstExprName_ClassEnum_New _err_expr) {
+			var _expr = AstExprName_ClassEnum_New.FindFromName (_err_expr.Token, _err_expr.EnumClass, "Err", _err_expr);
+			return _expr.TraversalCalcType (null);
 		}
 
-		public IAstExpr GetError () {
-			if (ExpectType is AstType_OptionalWrap _otype) {
-				//var _err_expr = AstExprName_ClassEnum.FindFromNameUncheckAttach (Token, AstType_OptionalWrap.ErrorClass, "Err");
-				//var _ret = new AstExpr_Op1 { Token = Token, Value = _otype, IsPrefix = false, Operator = $".{_err_expr.AttachName}", ExpectType = _err_expr.AttachType };
-				//return _ret;
-#warning TODO 获取 iswhatexpr 然后通过op1取值
-				return new AstExpr_Op1 { Token = Token, Value = this, IsPrefix = false, Operator = ".Err", ExpectType = AstType_OptionalWrap.ErrorClass.GetClassType () };
-			} else {
-				throw new NotImplementedException ();
-			}
-			//// TODO 考虑直接移除此方法，全部交由 AstExpr_Is 实现
-			//
-			//var _expr_is = new AstExpr_Is { Token = _expr.Token, IsWhatExpr = _err_expr, DefVar };
-		}
+		public IAstExpr AccessValue () => AstExprName_ClassEnum_Access.FromAccess (this, "Val");
+
+		public IAstExpr AccessError () => AstExprName_ClassEnum_Access.FromAccess (this, "Err");
 	}
 }

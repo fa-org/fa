@@ -149,7 +149,7 @@ namespace fac.AntlrTools {
 					Func<IAstExpr, IAstClass, IAstExpr> _access_func = (_obj, _class) => {
 						for (int i = 0; i < (_class.ClassEnumItems?.Count ?? 0); ++i) {
 							if (_class.ClassEnumItems[i].Name == _access_name)
-								return new AstExprName_ClassEnum { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i, AttachExpr = null };
+								return new AstExprName_ClassEnum_New { Token = _expr.Token, EnumClass = _class, EnumItemIndex = i, AttachExpr = null };
 						}
 						for (int i = 0; i < _class.ClassVars.Count; ++i) {
 							if (_class.ClassVars[i].Name == _access_name)
@@ -191,7 +191,7 @@ namespace fac.AntlrTools {
 					&& _op1expr.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
 					_opnexpr.Arguments.Insert (0, _op1expr.Value);
 					_opnexpr.Value = AstExprName_BuildIn.FindFromName ("string.Format");
-				} else if (_opnexpr.Value is AstExprName_ClassEnum _ceexpr) {
+				} else if (_opnexpr.Value is AstExprName_ClassEnum_New _ceexpr) {
 					if (_opnexpr.Arguments.Count != 1)
 						throw new CodeException (_ceexpr.Token, "附带参数只能是一个");
 					_ceexpr.AttachExpr = _opnexpr.Arguments[0];
@@ -221,7 +221,7 @@ namespace fac.AntlrTools {
 					throw new CodeException (_op2expr.Value1.Token, "目标不可被赋值");
 			} else if (_expr is AstStmt_Return _ret_stmt) {
 				if (Info.CurrentReturnType ().ToString () == "void?" && _ret_stmt.Expr == null) {
-					_ret_stmt.Expr = AstExpr_AccessBuildIn.Optional_FromValue (IAstExpr.FromValue ("int", "0"));
+					_ret_stmt.Expr = IAstExpr.OptionalFromOk ();
 				}
 			}
 			return _expr;

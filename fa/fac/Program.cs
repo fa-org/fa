@@ -89,7 +89,8 @@ namespace fac {
 			Console.WriteLine ($"    版权：{(Attribute.GetCustomAttribute (_asm, typeof (AssemblyCopyrightAttribute)) as AssemblyCopyrightAttribute).Copyright}");
 			Console.WriteLine ($"    版本：{_asm.GetName ().Version}");
 			Console.WriteLine ($"    源码：https://github.com/fa-org/fa");
-			CheckUpdatesAsync (_asm.GetName ().Version).Wait ();
+			if (!Debugger.IsAttached)
+				CheckUpdatesAsync (_asm.GetName ().Version).Wait ();
 			Console.WriteLine ();
 			if (args.Length == 0 || (args.Length == 1 && (args[0] == "--help" || args[0] == "-help" || args[0] == "/help" || args[0] == "-?" || args[0] == "/?"))) {
 				var _exename = Process.GetCurrentProcess ().MainModule.ModuleName;

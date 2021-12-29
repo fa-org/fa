@@ -161,7 +161,6 @@ namespace fac.ASTs.Types {
 					return _functype1.ReturnType.IsSame (_functype2.ReturnType);
 				}).Invoke (),
 				AstType_Integer _inttype1 when _other is AstType_Integer _inttype2 => _inttype1.BitWidth == _inttype2.BitWidth,
-				AstType_OptionalWrap _otype1 when _other is AstType_OptionalWrap _otype2 => _otype1.ItemType.IsSame (_otype2.ItemType),
 				AstType_Placeholder _ptype1 when _other is AstType_Placeholder _ptype2 => _ptype1.Name == _ptype2.Name,
 				AstType_String when _other is AstType_String => true,
 				AstType_Tuple _tptype1 when _other is AstType_Tuple _tptype2 => new Func<bool> (() => {
@@ -175,6 +174,8 @@ namespace fac.ASTs.Types {
 			};
 		}
 
-		public AstType_OptionalWrap Optional { get => this is AstType_OptionalWrap _owrap ? _owrap : new AstType_OptionalWrap (Token, this, Mut); }
+		public bool IsOptional { get => this is AstType_Class _class && _class.Class.FullName.StartsWith ("fa.Optional"); }
+
+		public IAstType Optional { get => this.IsOptional ? this : AstType_OptionalWrap.GetInstClass (this).GetClassType (); }
 	}
 }

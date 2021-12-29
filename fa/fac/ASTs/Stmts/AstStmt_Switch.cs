@@ -63,7 +63,7 @@ namespace fac.ASTs.Stmts {
 				} else {
 					IAstExpr _cond_expr;
 					if (CaseCond[0] is AstExpr_Is _is_expr) {
-						_is_expr.Value = _cond1;
+						_is_expr.AccessExpr.Value = _cond1;
 						(_cond_expr, _stmts1) = _is_expr.ExpandExpr_If (_cache_err);
 						var (_stmts3, _cond3) = CaseWhen[0]?.ExpandExpr (_cache_err) ?? (new List<IAstStmt> (), null);
 						_stmts.AddRange (_stmts3);

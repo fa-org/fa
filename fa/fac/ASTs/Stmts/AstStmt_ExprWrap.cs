@@ -20,10 +20,10 @@ namespace fac.ASTs.Stmts {
 		private AstStmt_ExprWrap () { }
 		public static AstStmt_ExprWrap MakeAssign (IAstExpr _dest, IAstExpr _src) {
 			if (!_dest.ExpectType.IsSame (_src.ExpectType)) {
-				if (_dest.ExpectType.IsSame (_src.ExpectType.Optional)) {
-					_src = AstExpr_AccessBuildIn.Optional_FromValue (_src);
+				if ($"{_src.ExpectType}" != "fa.Error" && _dest.ExpectType.IsSame (_src.ExpectType.Optional)) {
+					_src = IAstExpr.OptionalFromValue (_src);
 				} else if (_dest.ExpectType.Optional.IsSame (_src.ExpectType)) {
-					_src = AstExpr_AccessBuildIn.Optional_GetValue (_src);
+					_src = _src.AccessValue ();
 				}
 			}
 			return new AstStmt_ExprWrap { Token = _src.Token, Expr = new AstExpr_Op2 { Token = _src.Token, Value1 = _dest, Value2 = _src, Operator = "=", ExpectType = _dest.ExpectType } };
