@@ -21,7 +21,7 @@ namespace fac.ASTs.Exprs.Names {
 		private AstExprName_ClassEnum_Access () { }
 
 		public static AstExprName_ClassEnum_Access FromAccess (IAstExpr _opt, string _enum_name) {
-			var _class = ((_opt.ExpectType ?? _opt.GuessType ()) as AstType_OptionalWrap).Class;
+			var _class = (_opt.ExpectType ?? _opt.GuessType ()).AstClass;
 			var _access = new AstExprName_ClassEnum_Access { Token = _opt.Token, Class = _class, Value = _opt, EnumItemIndex = -1 };
 			for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
 				if (_class.ClassEnumItems[i].Name == _enum_name) {

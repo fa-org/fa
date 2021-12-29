@@ -69,7 +69,7 @@ namespace fac.ASTs.Stmts {
 			}
 			_true_stmts.AddRange (IfTrueCodes.ExpandStmts (_cache_err));
 			IfTrueCodes = _true_stmts;
-			IfFalseCodes = IfFalseCodes.ExpandStmts (_cache_err);
+			IfFalseCodes = IfFalseCodes?.ExpandStmts (_cache_err) ?? null;
 			_pre_stmts.Add (this);
 			return _pre_stmts;
 		}

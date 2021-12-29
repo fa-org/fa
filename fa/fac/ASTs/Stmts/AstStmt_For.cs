@@ -31,7 +31,7 @@ namespace fac.ASTs.Stmts {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			Initializes.TraversalCalcType ();
-			if (Info.CurrentReturnType () is AstType_OptionalWrap) {
+			if (Info.CurrentReturnType ().IsOptional) {
 				try {
 					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
 				} catch (Exception) {

@@ -28,14 +28,14 @@ namespace fac.ASTs.Stmts {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			if (Expr != null) {
-				if (ReturnType is AstType_OptionalWrap _otype) {
-					if (_otype.ItemType is AstType_Void)
-						_otype = new AstType_Integer { BitWidth = 32, IsSign = true }.Optional;
+				if (ReturnType.IsOptional) {
+					if (ReturnType.UnwrapOptional is AstType_Void)
+						ReturnType = new AstType_Integer { BitWidth = 32, IsSign = true }.Optional;
 					try {
-						Expr = Expr.TraversalCalcType (_otype.ItemType);
-						Expr = AstExprTypeCast.Make (Expr, _otype);
+						Expr = Expr.TraversalCalcType (ReturnType.UnwrapOptional);
+						Expr = AstExprTypeCast.Make (Expr, ReturnType);
 					} catch (Exception) {
-						Expr = Expr.TraversalCalcType (_otype);
+						Expr = Expr.TraversalCalcType (ReturnType);
 					}
 				} else {
 					Expr = Expr.TraversalCalcType (ReturnType);
@@ -56,7 +56,7 @@ namespace fac.ASTs.Stmts {
 
 		public override string GenerateCSharp (int _indent) {
 			if (Expr == null && ReturnType.ToString () == "void?") {
-				return $"{_indent.Indent ()}return fa.Optional<int>.FromValue (0);\r\n";
+				return $"{_indent.Indent ()}return new fa.OptionalVoid {{ __index__ = 0 }};\r\n";
 			} else if (Expr != null) {
 				return $"{_indent.Indent ()}return {Expr.GenerateCSharp (_indent)};\r\n";
 			} else {

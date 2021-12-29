@@ -46,8 +46,7 @@ namespace fac.ASTs.Exprs {
 			} else if (sNumOp2s.Contains (Operator)) {
 				// + - * /
 				var _exp_type = _expect_type ?? TypeFuncs.GetCompatibleType (false, Value1.GuessType (), Value2.GuessType ());
-				if (_exp_type is AstType_OptionalWrap _owrap)
-					_exp_type = _owrap.ItemType;
+				_exp_type = _exp_type.UnwrapOptional;
 				Value1 = Value1.TraversalCalcType (_exp_type);
 				Value2 = Value2.TraversalCalcType (_exp_type);
 				ExpectType = _exp_type;
@@ -69,10 +68,10 @@ namespace fac.ASTs.Exprs {
 					return AstExprTypeCast.Make (this, _expect_type);
 				} else if (Operator == "??=") {
 					Value1 = Value1.TraversalCalcType (null);
-					if (Value1.ExpectType is AstType_OptionalWrap _owrap) {
+					if (Value1.ExpectType.IsOptional) {
 						try {
-							Value2 = Value2.TraversalCalcType (_owrap.ItemType);
-							ExpectType = _owrap.ItemType;
+							Value2 = Value2.TraversalCalcType (Value1.ExpectType.UnwrapOptional);
+							ExpectType = Value1.ExpectType.UnwrapOptional;
 						} catch (Exception) {
 							Value2 = Value2.TraversalCalcType (Value1.ExpectType);
 							ExpectType = Value1.ExpectType;
@@ -90,7 +89,7 @@ namespace fac.ASTs.Exprs {
 			if (sCompareOp2s.Contains (Operator) || sLogicOp2s.Contains (Operator)) {
 				return IAstType.FromName ("bool");
 			} else if (sNumOp2s.Contains (Operator) || sAssignOp2s.Contains (Operator)) {
-				bool _opt = Operator == "/" && Info.CurrentReturnType () is not AstType_OptionalWrap;
+				bool _opt = Operator == "/" && (!Info.CurrentReturnType ().IsOptional);
 				var _type = TypeFuncs.GetCompatibleType (true, Value1.GuessType (), Value2.GuessType ());
 				if (_opt)
 					_type = _type.Optional;
@@ -105,27 +104,38 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = new List<IAstStmt> { };
 			if (Operator == "??") {
-				var _tmp_stmt = new AstStmt_DefVariable { DataType = Value1.ExpectType };
+				var _tmp_stmt = new AstStmt_DefVariable { DataType = Value2.ExpectType };
 				_stmts.Add (_tmp_stmt);
-				var _err_pos = new AstStmt_Label { };
-				var _cache_err1 = (_var: _tmp_stmt.GetRef (), _pos: _err_pos);
-				var (_stmts1, _val1) = Value1.ExpandExpr (_cache_err1);
+				var (_stmts1, _expr1) = Value1.OptionalHasValue ().ExpandExpr (_cache_err);
 				_stmts.AddRange (_stmts1);
-				_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
-				_stmts.Add (_err_pos);
-				var _ifstmt = new AstStmt_If {
+				_stmts.Add (new AstStmt_If {
 					Token = Token,
-					Condition = AstExpr_Is.FromContext2 (Token, _tmp_stmt.GetRef (), "Err", ""),
-					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err1._var, _tmp_stmt.GetRef ().AccessError ()),
-						_cache_err1._pos.GetRef (),
-					},
-				};
-				(_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
-				_ifstmt.IfTrueCodes = _stmts1;
-				_ifstmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
-				_stmts.AddRange (_ifstmt.ExpandStmt (_cache_err));
+					Condition = _expr1,
+					IfTrueCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err),
+					IfFalseCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err),
+				});
 				return (_stmts, _tmp_stmt.GetRef ());
+				//var _tmp_stmt = new AstStmt_DefVariable { DataType = Value1.ExpectType };
+				//_stmts.Add (_tmp_stmt);
+				//var _err_pos = new AstStmt_Label { };
+				//var _cache_err1 = (_var: _tmp_stmt.GetRef (), _pos: _err_pos);
+				//var (_stmts1, _val1) = Value1.ExpandExpr (_cache_err1);
+				//_stmts.AddRange (_stmts1);
+				//_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
+				//_stmts.Add (_err_pos);
+				//var _ifstmt = new AstStmt_If {
+				//	Token = Token,
+				//	Condition = AstExpr_Is.FromContext2 (Token, _tmp_stmt.GetRef (), "Err", ""),
+				//	IfTrueCodes = new List<IAstStmt> {
+				//		AstStmt_ExprWrap.MakeAssign (_cache_err1._var, _tmp_stmt.GetRef ().AccessError ()),
+				//		_cache_err1._pos.GetRef (),
+				//	},
+				//};
+				//(_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
+				//_ifstmt.IfTrueCodes = _stmts1;
+				//_ifstmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
+				//_stmts.AddRange (_ifstmt.ExpandStmt (_cache_err));
+				//return (_stmts, _tmp_stmt.GetRef ());
 			} else {
 				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
 				_stmts.AddRange (_stmts1);
@@ -146,7 +156,7 @@ namespace fac.ASTs.Exprs {
 				if (Operator == "/") {
 					if (_cache_err == (null, null))
 						throw new CodeException (Token, "除法结果可能为空，此处需使用");
-					ExpectType = (ExpectType as AstType_OptionalWrap)?.ItemType ?? ExpectType;
+					ExpectType = ExpectType.UnwrapOptional;
 					_stmts.Add (new AstStmt_If {
 						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
 						IfTrueCodes = new List<IAstStmt> {

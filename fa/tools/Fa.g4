@@ -268,7 +268,7 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 publicLevel:				Public | Internal | Protected | Private;
 classTemplates:				QuotJianL type (Comma type)* QuotJianR;
 classParent:				Colon ids (Comma ids)*;
-enumStmt:					publicLevel? Enum id classTemplates? QuotHuaL classEnum* classFunc* QuotHuaR;
+enumStmt:					publicLevel? Enum id classTemplates? QuotHuaL (classEnum Comma)* classEnum (Comma classFunc*)? QuotHuaR;
 classStmt:					publicLevel? Class id classTemplates? classParent? QuotHuaL (classVar | classFunc)* QuotHuaR;
 //
 classVarExtFunc:			publicLevel? id (Semi | classFuncBody);
@@ -279,7 +279,7 @@ classFuncName:				id ((QuotFangL QuotFangR) | allOp2 | allAssign)?;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
 //
-classEnum:					id (QuotYuanL type QuotYuanR)? Comma;
+classEnum:					id (QuotYuanL type QuotYuanR)?;
 
 
 

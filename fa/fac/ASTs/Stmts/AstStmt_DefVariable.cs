@@ -53,7 +53,7 @@ namespace fac.ASTs.Stmts {
 				return _stmts;
 
 			AstStmt_Label _label = null;
-			if (DataType is AstType_OptionalWrap) {
+			if (DataType.IsOptional) {
 				_label = new AstStmt_Label { };
 				_cache_err = (_var: GetRef (), _pos: _label);
 			}

@@ -21,14 +21,16 @@ namespace fac.ASTs.Exprs {
 			var _src_type = _dest.ExpectType;
 			if (_src_type == null) {
 				throw new Exception ("应识别类型后做转换处理");
+			} else if (_src_type.IsOptional && _to_type is AstType_Any) {
+				return _dest.AccessValue ();
 			} else if (AllowDirectReturn (_src_type, _to_type)) {
 				return _dest;
-			} else if (_src_type is AstType_OptionalWrap _owrap1 && AllowDirectReturn (_owrap1.ItemType, _to_type)) {
+			} else if (_src_type.IsOptional && AllowDirectReturn (_src_type.UnwrapOptional, _to_type)) {
 				return Make (_dest.AccessValue (), _to_type);
-			} else if (_to_type is AstType_OptionalWrap _owrap2 && AllowDirectReturn (_src_type, _owrap2.ItemType)) {
+			} else if (_to_type.IsOptional && AllowDirectReturn (_src_type, _to_type.UnwrapOptional)) {
 				return Make (_dest.AccessValue (), _to_type);
-			} else if (_src_type is AstType_Class _cls_type && _cls_type.Class.FullName == "fa.Error" && _to_type is AstType_OptionalWrap _otype) {
-				return AstExprName_ClassEnum_New.FindFromName (_dest.Token, _otype.Class, "Err", _dest);
+			} else if (_src_type is AstType_Class _cls_type && _cls_type.Class.FullName == "fa.Error" && _to_type.IsOptional) {
+				return AstExprName_ClassEnum_New.FindFromName (_dest.Token, _to_type.AstClass, "Err", _dest);
 			} else {
 				throw new CodeException (_dest.Token, $"类型 {_src_type} 无法转为类型 {_to_type}");
 			}
@@ -37,8 +39,8 @@ namespace fac.ASTs.Exprs {
 		private static bool AllowDirectReturn (IAstType _src, IAstType _dest) {
 			if (_dest == null || _dest is AstType_Any || _src.IsSame (_dest)) {
 				return true;
-			} else if (_src is AstType_OptionalWrap _src1 && _dest is AstType_OptionalWrap _dest1) {
-				return AllowDirectReturn (_src1.ItemType, _dest1.ItemType);
+			} else if (_src.IsOptional && _dest.IsOptional) {
+				return AllowDirectReturn (_src.UnwrapOptional, _dest.UnwrapOptional);
 			} else {
 				return false;
 			}

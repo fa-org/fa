@@ -1,21 +1,48 @@
 use fa;
 
-namespace std;
-
-//class RB_Node<T> {
-//	public RB_Node? _left = null;
-//	public RB_Node? _right;
-//	public RB_Node? _parent;
-//	public T _data;
-//	public int _color;
-//}
+enum TestEnum { A, B (int), C }
 
 class Program {
 	public static void Main () {
-		int? n = null;
-		Console.Write ("{0}".Format (n ?? 123));
+		TestEnum e = TestEnum.B (10);
+		if e == TestEnum.A {
+			Console.Write ("error");
+		} else if e is TestEnum.B (_val) {
+			Console.Write ("TestIf{0}".Format (_val));
+		} else {
+			Console.Write ("error");
+		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+//use fa;
+//
+//namespace std;
+//
+////class RB_Node<T> {
+////	public RB_Node? _left = null;
+////	public RB_Node? _right;
+////	public RB_Node? _parent;
+////	public T _data;
+////	public int _color;
+////}
+//
+//class Program {
+//	public static void Main () {
+//		int? n = null;
+//		Console.Write ("{0}".Format (n ?? 123));
+//	}
+//}
 
 
 

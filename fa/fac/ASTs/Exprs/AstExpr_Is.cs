@@ -32,7 +32,7 @@ namespace fac.ASTs.Exprs {
 			};
 		}
 
-		public static AstExpr_Is FromContext2 (IToken _token, IAstExpr _expr, string _is_what, string _var) {
+		public static AstExpr_Is FromContext2 (IToken _token, IAstExpr _expr, string _is_what, string _var = "") {
 			if (_expr.ExpectType == null)
 				_expr.ExpectType = _expr.GuessType ();
 			var _access = AstExprName_ClassEnum_Access.FromAccess (_expr, _is_what);

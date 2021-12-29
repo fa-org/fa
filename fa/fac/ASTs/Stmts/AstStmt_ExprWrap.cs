@@ -52,7 +52,7 @@ namespace fac.ASTs.Stmts {
 				Expr = Expr.TraversalCalcType (null);
 
 				// 异常强制处理
-				if (Expr.ExpectType is AstType_OptionalWrap && (!IgnoreError) && Info.CurrentReturnType () is not AstType_OptionalWrap)
+				if (Expr.ExpectType.IsOptional && (!IgnoreError) && (!Info.CurrentReturnType ().IsOptional))
 					throw new CodeException (Token, "此处未处理异常必须处理");
 			}
 			return this;
