@@ -154,9 +154,10 @@ namespace fac
 					Console.WriteLine($"指定文件 {_path} 不存在，无法编译");
 					if (Debugger.IsAttached)
 					{
-						Console.WriteLine($"按任意键退出。。。");
-						Console.ReadKey();
+						Console.Write("按回车退出...");
+						Console.ReadLine();
 					}
+					return;
 				}
 				Info.ProjectName = _GetLastName(_path[..^3]);
 				Info.SrcPath = Path.GetDirectoryName(_path);
