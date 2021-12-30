@@ -50,7 +50,8 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			Value = Value.TraversalCalcType (Class.GetClassType ());
+			if (!Value.TraversalCalcTypeWrap (Class.GetClassType (), a => Value = a))
+				return null;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 

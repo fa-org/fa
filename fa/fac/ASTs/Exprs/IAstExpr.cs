@@ -266,12 +266,14 @@ namespace fac.ASTs.Exprs {
 
 		public IAstExpr OptionalHasValue () {
 			var _expr = AstExpr_Is.FromContext2 (Token, this, "Val");
-			return _expr.TraversalCalcType (null);
+			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExpr_Is);
+			return _expr;
 		}
 
 		public IAstExpr OptionalNotHasValue () {
 			var _expr = AstExpr_Is.FromContext2 (Token, this, "Err");
-			return _expr.TraversalCalcType (null);
+			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExpr_Is);
+			return _expr;
 		}
 
 		public static IAstExpr OptionalFromValue (IAstExpr _expr) {
@@ -279,17 +281,20 @@ namespace fac.ASTs.Exprs {
 				return _expr;
 			var _class = AstType_OptionalWrap.GetInstClass (_expr.ExpectType);
 			var _expr1 = AstExprName_ClassEnum_New.FindFromName (_expr.Token, _class, "Val", _expr);
-			return _expr1.TraversalCalcType (null);
+			_expr1.TraversalCalcTypeWrap (null, a => _expr1 = a as AstExprName_ClassEnum_New);
+			return _expr;
 		}
 
 		public static IAstExpr OptionalFromOk () {
 			var _expr = AstExprName_ClassEnum_New.FindFromName (null, AstType_OptionalWrap.VoidClass, "Ok");
-			return _expr.TraversalCalcType (null);
+			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
+			return _expr;
 		}
 
 		public static IAstExpr OptionalFromError (AstType_Class _type, AstExprName_ClassEnum_New _err_expr) {
 			var _expr = AstExprName_ClassEnum_New.FindFromName (_err_expr.Token, _err_expr.EnumClass, "Err", _err_expr);
-			return _expr.TraversalCalcType (null);
+			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
+			return _expr;
 		}
 
 		public IAstExpr AccessValue () => AstExprName_ClassEnum_Access.FromAccess (this, "Val");

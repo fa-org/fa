@@ -51,10 +51,10 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
-			IfTrueCodes.TraversalCalcType ();
-			IfFalseCodes.TraversalCalcType ();
-			return this;
+			bool _success = Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool"), a => Condition = a);
+			_success &= IfTrueCodes.TraversalCalcTypeWrap ();
+			_success &= IfFalseCodes.TraversalCalcTypeWrap ();
+			return _success ? this : null;
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {

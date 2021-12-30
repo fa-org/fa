@@ -28,9 +28,9 @@ namespace fac.ASTs.Stmts {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			// Iterator 为虚拟变量定义对象，不需要重新计算类型
-			ListContainer = ListContainer.TraversalCalcType (new AstType_ArrayWrap { Token = Iterator.DataType.Token, ItemType = Iterator.DataType, Params = false });
-			BodyCodes.TraversalCalcType ();
-			return this;
+			bool _success = ListContainer.TraversalCalcTypeWrap (new AstType_ArrayWrap { Token = Iterator.DataType.Token, ItemType = Iterator.DataType, Params = false }, a => ListContainer = a);
+			_success &= BodyCodes.TraversalCalcTypeWrap ();
+			return _success ? this : null;
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {

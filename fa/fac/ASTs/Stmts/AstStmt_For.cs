@@ -30,19 +30,19 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
-			Initializes.TraversalCalcType ();
+			bool _success = Initializes.TraversalCalcTypeWrap ();
 			if (Info.CurrentReturnType ().IsOptional) {
 				try {
-					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
+					_success &= Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool"), a => Condition = a);
 				} catch (Exception) {
-					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool?"));
+					_success &= Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool?"), a => Condition = a);
 				}
 			} else {
-				Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
+				_success &= Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool"), a => Condition = a);
 			}
-			Increment.TraversalCalcType ();
-			BodyCodes.TraversalCalcType ();
-			return this;
+			_success &= Increment.TraversalCalcTypeWrap ();
+			_success &= BodyCodes.TraversalCalcTypeWrap ();
+			return _success ? this : null;
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {

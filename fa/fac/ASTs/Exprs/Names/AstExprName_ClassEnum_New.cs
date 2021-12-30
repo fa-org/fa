@@ -83,8 +83,10 @@ namespace fac.ASTs.Exprs.Names {
 			if ((AttachExpr != null) != _need_attach) {
 				throw new CodeException (Token, $"{EnumClass.ClassEnumItems[EnumItemIndex].Name} 枚举条件{(_need_attach ? "需要附带参数" : "不能附带参数")}，但实际{(_need_attach ? "没有附带参数" : "附带了参数")}");
 			}
-			if (_need_attach)
-				AttachExpr = AttachExpr.TraversalCalcType (AttachType);
+			if (_need_attach) {
+				if (!AttachExpr.TraversalCalcTypeWrap (AttachType, a => AttachExpr = a))
+					return null;
+			}
 			ExpectType = GuessType ();
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

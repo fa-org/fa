@@ -34,19 +34,20 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
+			bool _success = true;
 			if (Condition != null)
-				Condition = Condition.TraversalCalcType (null);
+				_success &= Condition.TraversalCalcTypeWrap (null, a => Condition = a);
 			for (int i = 0; i < (CaseCond?.Count ?? 0); ++i) {
 				if (CaseCond[i] is not AstExprName_Ignore) {
-					CaseCond[i] = CaseCond[i].TraversalCalcType (CaseCond[i] is AstExpr_Is ? IAstType.FromName ("bool") : Condition.ExpectType);
+					_success &= CaseCond[i].TraversalCalcTypeWrap (CaseCond[i] is AstExpr_Is ? IAstType.FromName ("bool") : Condition.ExpectType, a => CaseCond[i] = a);
 				}
 			}
 			for (int i = 0; i < CaseWhen.Count; ++i) {
 				if (CaseWhen[i] != null)
-					CaseWhen[i] = CaseWhen[i].TraversalCalcType (CaseWhen[i] is AstExprName_Ignore ? null : IAstType.FromName ("bool"));
+					_success &= CaseWhen[i].TraversalCalcTypeWrap (CaseWhen[i] is AstExprName_Ignore ? null : IAstType.FromName ("bool"), a => CaseWhen[i] = a);
 			}
-			CaseCodes.TraversalCalcType ();
-			return this;
+			_success &= CaseCodes.TraversalCalcTypeWrap ();
+			return _success ? this : null;
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {

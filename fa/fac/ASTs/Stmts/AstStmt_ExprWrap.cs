@@ -49,7 +49,8 @@ namespace fac.ASTs.Stmts {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			if (Expr != null) {
-				Expr = Expr.TraversalCalcType (null);
+				if (!Expr.TraversalCalcTypeWrap (null, a => Expr = a))
+					return null;
 
 				// 异常强制处理
 				if (Expr.ExpectType.IsOptional && (!IgnoreError) && (!Info.CurrentReturnType ().IsOptional))

@@ -27,21 +27,22 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
+			bool _success = true;
 			if (Expr != null) {
 				if (ReturnType.IsOptional) {
 					if (ReturnType.UnwrapOptional is AstType_Void)
 						ReturnType = new AstType_Integer { BitWidth = 32, IsSign = true }.Optional;
 					try {
-						Expr = Expr.TraversalCalcType (ReturnType.UnwrapOptional);
+						_success &= Expr.TraversalCalcTypeWrap (ReturnType.UnwrapOptional, a => Expr = a);
 						Expr = AstExprTypeCast.Make (Expr, ReturnType);
 					} catch (Exception) {
-						Expr = Expr.TraversalCalcType (ReturnType);
+						_success &= Expr.TraversalCalcTypeWrap (ReturnType, a => Expr = a);
 					}
 				} else {
-					Expr = Expr.TraversalCalcType (ReturnType);
+					_success &= Expr.TraversalCalcTypeWrap (ReturnType, a => Expr = a);
 				}
 			}
-			return this;
+			return _success ? this : null;
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {

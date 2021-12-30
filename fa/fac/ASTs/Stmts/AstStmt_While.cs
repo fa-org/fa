@@ -28,17 +28,18 @@ namespace fac.ASTs.Stmts {
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
+			bool _success = true;
 			if (Info.CurrentReturnType ().IsOptional) {
 				try {
-					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
+					_success &= Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool"), a => Condition = a);
 				} catch (Exception) {
-					Condition = Condition.TraversalCalcType (IAstType.FromName ("bool?"));
+					_success &= Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool?"), a => Condition = a);
 				}
 			} else {
-				Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
+				_success &= Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool"), a => Condition = a);
 			}
-			Contents.TraversalCalcType ();
-			return this;
+			_success &= Contents.TraversalCalcTypeWrap ();
+			return _success ? this : null;
 		}
 
 		public override List<IAstStmt> ExpandStmt ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
