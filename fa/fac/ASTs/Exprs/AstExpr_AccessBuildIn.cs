@@ -40,16 +40,22 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			if (Value != null)
-				Value = Value.TraversalCalcType (null);
+			bool _success = true;
+			if (Value != null) {
+				if (!Value.TraversalCalcTypeWrap (null, a => Value = a))
+					_success = false;
+			}
 			for (int i = 0; i < (AttachArgs?.Count ?? 0); ++i) {
-				AttachArgs[i] = AttachArgs[i].TraversalCalcType (null);
+				if (!AttachArgs[i].TraversalCalcTypeWrap (null, a => AttachArgs[i] = a))
+					_success = false;
 			}
 			if (ExpectType == null) {
 				if (AccessType == AccessBuildInType.ARR_AccessItem) {
 					ExpectType = (Value.ExpectType as AstType_ArrayWrap).ItemType;
 				}
 			}
+			if (!_success)
+				return null;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 

@@ -37,18 +37,22 @@ namespace fac {
 			}
 		}
 
-		public static void TraversalCalcType (this List<IAstExpr> _exprs, IAstType _expect_type = null) {
+		public static bool TraversalCalcTypeWrap (this List<IAstExpr> _exprs, IAstType _expect_type = null) {
+			bool _success = true;
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
 				if (_exprs[i] != null && _exprs[i] is not AstExprName_Ignore)
-					_exprs[i] = _exprs[i].TraversalCalcType (_expect_type);
+					_success &= _exprs[i].TraversalCalcTypeWrap (_expect_type, a => _exprs[i] = a);
 			}
+			return _success;
 		}
 
-		public static void TraversalCalcType (this List<IAstStmt> _stmts) {
+		public static bool TraversalCalcTypeWrap (this List<IAstStmt> _stmts) {
+			bool _success = true;
 			for (int i = 0; i < (_stmts?.Count ?? 0); ++i) {
 				if (_stmts[i] != null)
-					_stmts[i] = _stmts[i].TraversalCalcType (null) as IAstStmt;
+					_success &= _stmts[i].TraversalCalcTypeWrap (null, a => _stmts[i] = a as IAstStmt);
 			}
+			return _success;
 		}
 
 		public static void AppendStmts (this StringBuilder _sb, List<IAstStmt> _stmts, int _indent) {

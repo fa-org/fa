@@ -22,6 +22,15 @@ namespace fac.ASTs.Exprs.Names {
 
 		public static AstExprName_ClassEnum_Access FromAccess (IAstExpr _opt, string _enum_name) {
 			var _class = (_opt.ExpectType ?? _opt.GuessType ()).AstClass;
+			int _p = _enum_name.LastIndexOf ('.');
+			if (_p != -1) {
+				string _clsname = _enum_name[.._p];
+				if (_class.FullName == _clsname || _class.FullName.EndsWith ($".{_clsname}")) {
+					_enum_name = _enum_name[(_p + 1)..];
+				} else {
+					throw new CodeException (_opt.Token, $"无法将 {_enum_name} 转为 {_class.FullName} 类型枚举值");
+				}
+			}
 			var _access = new AstExprName_ClassEnum_Access { Token = _opt.Token, Class = _class, Value = _opt, EnumItemIndex = -1 };
 			for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
 				if (_class.ClassEnumItems[i].Name == _enum_name) {

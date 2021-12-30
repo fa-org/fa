@@ -16,27 +16,49 @@ namespace fac.ASTs.Exprs {
 
 
 
-		private void CheckArguments (AstType_Func _functype) {
+		private bool CheckArguments (AstType_Func _functype) {
 			if (_functype.ArgumentTypes.Count > 0 && _functype.ArgumentTypes[^1] is AstType_ArrayWrap _arrtype && _arrtype.Params) {
 				if (Arguments.Count < _functype.ArgumentTypes.Count - 1)
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
 				for (int i = 0; i < _functype.ArgumentTypes.Count - 1; ++i)
+#warning 移除所有的   .TraversalCalcType (
 					Arguments[i] = Arguments[i].TraversalCalcType (_functype.ArgumentTypes[i]);
-				if (_functype.ArgumentTypes.Count == Arguments.Count && Arguments[^1].GuessType ().IsSame (_arrtype)) {
-					try {
-						Arguments[^1] = Arguments[^1].TraversalCalcType (_functype.ArgumentTypes[^1]);
-						return;
-					} catch (Exception) {
+				if (_functype.ArgumentTypes.Count == Arguments.Count) {
+					var _type1 = Arguments[^1].GuessType ();
+					if (_type1 == null) {
+						return false;
+					} else if (_type1.IsSame (_arrtype)) {
+						try {
+							var _arg = Arguments[^1].TraversalCalcType (_functype.ArgumentTypes[^1]);
+							if (_arg == null)
+								return false;
+							Arguments[^1] = _arg;
+							return true;
+						} catch (Exception) {
+						}
 					}
 				}
-				for (int i = _functype.ArgumentTypes.Count - 1; i < Arguments.Count; ++i)
-					Arguments[i] = Arguments[i].TraversalCalcType (_arrtype.ItemType);
+				for (int i = _functype.ArgumentTypes.Count - 1; i < Arguments.Count; ++i) {
+					var _type1 = Arguments[i].TraversalCalcType (_arrtype.ItemType);
+					if (_type1 == null) {
+						return false;
+					} else {
+						Arguments[i] = _type1;
+					}
+				}
 			} else {
 				if (_functype.ArgumentTypes.Count != Arguments.Count)
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
-				for (int i = 0; i < _functype.ArgumentTypes.Count; ++i)
-					Arguments[i] = Arguments[i].TraversalCalcType (_functype.ArgumentTypes[i]);
+				for (int i = 0; i < _functype.ArgumentTypes.Count; ++i) {
+					var _type1 = Arguments[i].TraversalCalcType (_functype.ArgumentTypes[i]);
+					if (_type1 == null) {
+						return false;
+					} else {
+						Arguments[i] = _type1;
+					}
+				}
 			}
+			return true;
 		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
@@ -66,7 +88,8 @@ namespace fac.ASTs.Exprs {
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				if (_funcexpr.ThisObject != null)
 					Arguments.Insert (0, _funcexpr.ThisObject);
-				CheckArguments (_funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].FuncType);
+				if (!CheckArguments (_funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].FuncType))
+					return null;
 				if (_funcexpr.ThisObject != null)
 					Arguments.RemoveAt (0);
 				ExpectType = _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;
@@ -75,7 +98,8 @@ namespace fac.ASTs.Exprs {
 				if (Value is AstExprName_BuildIn _biexpr)
 					Value.GuessType ();
 				if (Value.ExpectType is AstType_Func _functype) {
-					CheckArguments (_functype);
+					if (!CheckArguments (_functype))
+						return null;
 					ExpectType = _functype.ReturnType;
 					return AstExprTypeCast.Make (this, _expect_type);
 				} else {

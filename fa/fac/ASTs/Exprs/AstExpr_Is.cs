@@ -19,6 +19,14 @@ namespace fac.ASTs.Exprs {
 
 		private AstExpr_Is () { }
 
+		public static AstExpr_Is FromExistVar (AstExprName_ClassEnum_Access _access_expr, AstStmt_DefVariable _def_var) {
+			return new AstExpr_Is {
+				Token = _access_expr.Token,
+				AccessExpr = _access_expr,
+				DefVar = _def_var,
+			};
+		}
+
 		public static AstExpr_Is FromAccess (AstExprName_ClassEnum_Access _access_expr, string _var) {
 			return new AstExpr_Is {
 				Token = _access_expr.Token,
@@ -75,8 +83,10 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			if (AccessExpr != null)
-				AccessExpr = AccessExpr.TraversalCalcType (null) as AstExprName_ClassEnum_Access;
+			if (AccessExpr != null) {
+				if (!AccessExpr.TraversalCalcTypeWrap (null, a => AccessExpr = a as AstExprName_ClassEnum_Access))
+					return null;
+			}
 			// DefVar 为虚拟变量定义对象，不需要重新计算类型
 			ExpectType = IAstType.FromName ("bool");
 			return AstExprTypeCast.Make (this, _expect_type);

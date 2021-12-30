@@ -30,50 +30,64 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			bool _success = true;
 			if (sCompareOp2s.Contains (Operator)) {
 				// > >=
 				var _exp_type = TypeFuncs.GetCompatibleType (false, Value1.GuessType (), Value2.GuessType ());
-				Value1 = Value1.TraversalCalcType (_exp_type);
-				Value2 = Value2.TraversalCalcType (_exp_type);
+				_success &= Value1.TraversalCalcTypeWrap (_exp_type, a => Value1 = a);
+				_success &= Value2.TraversalCalcTypeWrap (_exp_type, a => Value2 = a);
+				if (!_success)
+					return null;
 				ExpectType = IAstType.FromName ("bool");
 				return AstExprTypeCast.Make (this, _expect_type);
 			} else if (sLogicOp2s.Contains (Operator)) {
 				// && ||
 				ExpectType = IAstType.FromName ("bool");
-				Value1 = Value1.TraversalCalcType (ExpectType);
-				Value2 = Value2.TraversalCalcType (ExpectType);
+				_success &= Value1.TraversalCalcTypeWrap (ExpectType, a => Value1 = a);
+				_success &= Value2.TraversalCalcTypeWrap (ExpectType, a => Value2 = a);
+				if (!_success)
+					return null;
 				return AstExprTypeCast.Make (this, _expect_type);
 			} else if (sNumOp2s.Contains (Operator)) {
 				// + - * /
 				var _exp_type = _expect_type ?? TypeFuncs.GetCompatibleType (false, Value1.GuessType (), Value2.GuessType ());
 				_exp_type = _exp_type.UnwrapOptional;
-				Value1 = Value1.TraversalCalcType (_exp_type);
-				Value2 = Value2.TraversalCalcType (_exp_type);
+				_success &= Value1.TraversalCalcTypeWrap (_exp_type, a => Value1 = a);
+				_success &= Value2.TraversalCalcTypeWrap (_exp_type, a => Value2 = a);
+				if (!_success)
+					return null;
 				ExpectType = _exp_type;
 				return AstExprTypeCast.Make (this, _expect_type);
 			} else if (sAssignOp2s.Contains (Operator)) {
 				// = += -=
-				Value1 = Value1.TraversalCalcType (null);
-				Value2 = Value2.TraversalCalcType (Value1.ExpectType);
+				_success &= Value1.TraversalCalcTypeWrap (null, a => Value1 = a);
+				_success &= Value2.TraversalCalcTypeWrap (Value1.ExpectType, a => Value2 = a);
+				if (!_success)
+					return null;
 				ExpectType = Value1.ExpectType;
 				return AstExprTypeCast.Make (this, _expect_type);
 			} else if (sQusQusOp2s.Contains (Operator)) {
 				// ?? ??=
 				if (Operator == "??") {
-					Value2 = Value2.TraversalCalcType (null);
+					_success &= Value2.TraversalCalcTypeWrap (null, a => Value2 = a);
 					var _exp_type = (_expect_type == null || _expect_type is AstType_Any) ? Value2.ExpectType : _expect_type;
 					_exp_type = _exp_type.Optional;
-					Value1 = Value1.TraversalCalcType (_exp_type);
+					_success &= Value1.TraversalCalcTypeWrap (_exp_type, a => Value1 = a);
+					if (!_success)
+						return null;
 					ExpectType = Value2.ExpectType;
 					return AstExprTypeCast.Make (this, _expect_type);
 				} else if (Operator == "??=") {
-					Value1 = Value1.TraversalCalcType (null);
+					if (!Value1.TraversalCalcTypeWrap (null, a => Value1 = a))
+						return null;
 					if (Value1.ExpectType.IsOptional) {
 						try {
-							Value2 = Value2.TraversalCalcType (Value1.ExpectType.UnwrapOptional);
+							if (!Value2.TraversalCalcTypeWrap (Value1.ExpectType.UnwrapOptional, a => Value2 = a))
+								return null;
 							ExpectType = Value1.ExpectType.UnwrapOptional;
 						} catch (Exception) {
-							Value2 = Value2.TraversalCalcType (Value1.ExpectType);
+							if (!Value2.TraversalCalcTypeWrap (Value1.ExpectType, a => Value2 = a))
+								return null;
 							ExpectType = Value1.ExpectType;
 						}
 						return AstExprTypeCast.Make (this, _expect_type);

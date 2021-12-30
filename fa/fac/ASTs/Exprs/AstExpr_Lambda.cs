@@ -55,8 +55,10 @@ namespace fac.ASTs.Exprs {
 			int _size = Info.CurrentFuncVariables.Count;
 			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Group = Info.CurrentFuncVariables[^1].Group + 1, LambdaFunc = this });
 			Info.CurrentFuncVariables.Add (new Info.FuncArgumentOrVars { Vars = new Dictionary<string, AstStmt_DefVariable> (), Group = Info.CurrentFuncVariables[^1].Group + 1 });
-			BodyCodes.TraversalCalcType ();
+			bool _ret = BodyCodes.TraversalCalcTypeWrap ();
 			Info.CurrentFuncVariables.RemoveRange (_size, Info.CurrentFuncVariables.Count - _size);
+			if (!_ret)
+				return null;
 			ExpectType = GuessType ();
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

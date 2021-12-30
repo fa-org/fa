@@ -24,8 +24,11 @@ namespace fac.ASTs.Exprs {
 			if ((from p in Operators where !sComare.Contains (p) select p).Any ())
 				throw new UnimplException (Values[0].Token);
 			var _item_type = TypeFuncs.GetCompatibleType (false, (from p in Values select p.GuessType ()).ToArray ());
+			bool _success = true;
 			for (int i = 0; i < Values.Count; ++i)
-				Values[i] = Values[i].TraversalCalcType (_item_type);
+				_success &= Values[i].TraversalCalcTypeWrap (_item_type, a => Values[i] = a);
+			if (!_success)
+				return null;
 			ExpectType = IAstType.FromName ("bool");
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

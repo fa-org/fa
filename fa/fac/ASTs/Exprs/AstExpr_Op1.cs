@@ -23,7 +23,8 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			Value = Value.TraversalCalcType (_expect_type);
+			if (!Value.TraversalCalcTypeWrap (_expect_type, a => Value = a))
+				return null;
 			ExpectType = Value.ExpectType;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

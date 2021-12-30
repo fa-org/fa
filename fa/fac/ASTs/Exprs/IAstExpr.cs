@@ -31,6 +31,13 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);
+		public bool TraversalCalcTypeWrap (IAstType _expect_type, Action<IAstExpr> _cb) {
+			var _expr1 = TraversalCalcType (_expect_type);
+			bool _ret = _expr1 != null;
+			if (_ret)
+				_cb (_expr1);
+			return _ret;
+		}
 		public abstract IAstType GuessType ();
 		public abstract bool AllowAssign ();
 
@@ -145,7 +152,7 @@ namespace fac.ASTs.Exprs {
 			var _suffix_ctxs = _ctx.strongExprSuffix ();
 			foreach (var _suffix_ctx in _suffix_ctxs) {
 				if (_suffix_ctx.Is () != null) {
-					_expr = AstExpr_Is.FromContext2 (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ()?.GetText () ?? "");
+					_expr = AstExpr_Is_Temp.FromContext2 (_suffix_ctx.Is ().Symbol, _expr, _suffix_ctx.ids ().GetText (), _suffix_ctx.id ()?.GetText () ?? "");
 				} else if (_suffix_ctx.AddAddOp () != null || _suffix_ctx.SubSubOp () != null || _suffix_ctx.id () != null) {
 					var _tmp_expr = new AstExpr_Op1 { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;

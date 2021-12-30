@@ -2,7 +2,9 @@
 using Antlr4.Runtime.Tree;
 using fac.AntlrTools;
 using fac.ASTs;
+using fac.ASTs.Exprs;
 using fac.ASTs.Stmts;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;

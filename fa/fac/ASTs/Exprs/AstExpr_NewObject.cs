@@ -47,21 +47,24 @@ namespace fac.ASTs.Exprs {
 				DataType = _expect_type as AstType_Class;
 			}
 			if (InitialValues != null) {
+				bool _success = true;
 				var _default_init_vals = new List<(string _name, IAstExpr _value)> ();
 				foreach (var _vars in DataType.Class.ClassVars) {
 					int i = 0;
 					for (; i < InitialValues.Count; ++i) {
 						if (InitialValues[i]._name != _vars.Name)
 							continue;
-						InitialValues[i] = (_name: _vars.Name, _value: InitialValues[i]._value.TraversalCalcType (_vars.DataType));
+						_success &= InitialValues[i]._value.TraversalCalcTypeWrap (_vars.DataType, a => InitialValues[i] = (_name: _vars.Name, _value: a));
 						break;
 					}
 					if (i == InitialValues.Count) {
 						if (_vars.DefaultValue == null)
 							throw new CodeException (Token, $"未指定成员变量 {_vars.Name} 的初始值");
-						_default_init_vals.Add ((_name: _vars.Name, _value: _vars.DefaultValue.TraversalCalcType (_vars.DataType)));
+						_success &= _vars.DefaultValue.TraversalCalcTypeWrap (_vars.DataType, a => _default_init_vals.Add ((_name: _vars.Name, _value: a)));
 					}
 				}
+				if (!_success)
+					return null;
 				InitialValues.AddRange (_default_init_vals);
 			} else {
 				// TODO 检查构造函数参数

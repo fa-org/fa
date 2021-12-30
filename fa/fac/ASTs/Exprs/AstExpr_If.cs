@@ -35,11 +35,12 @@ namespace fac.ASTs.Exprs {
 			if (_expect_type == null)
 				_expect_type = GuessType ();
 			//
-			Condition = Condition.TraversalCalcType (IAstType.FromName ("bool"));
-			IfTrueCodes.TraversalCalcType ();
-			IfTrue = IfTrue.TraversalCalcType (_expect_type);
-			IfFalseCodes.TraversalCalcType ();
-			IfFalse = IfFalse.TraversalCalcType (_expect_type);
+			bool _success = true;
+			_success &= Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool"), a => Condition = a);
+			_success &= IfTrueCodes.TraversalCalcTypeWrap ();
+			_success &= IfTrue.TraversalCalcTypeWrap (_expect_type, a => IfTrue = a);
+			_success &= IfFalseCodes.TraversalCalcTypeWrap ();
+			_success &= IfFalse.TraversalCalcTypeWrap (_expect_type, a => IfFalse = a);
 			ExpectType = _expect_type;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

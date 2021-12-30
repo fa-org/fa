@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public class AstStmt_DefVariable: IAstStmt {
-		public IAstType DataType { get; set; }
+		public IAstType DataType { get; set; } = null;
 		public string VarName { init; get; } = Common.GetTempId ();
 		public IAstExpr Expr { get; set; } = null;
 

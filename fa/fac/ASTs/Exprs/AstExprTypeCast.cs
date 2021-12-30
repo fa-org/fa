@@ -52,8 +52,7 @@ namespace fac.ASTs.Exprs {
 			// 只有一种情况会调用到，提前构造好转换，也就是ExpectType设置好之后
 			if (ExpectType == null)
 				throw new NotImplementedException ();
-			Value.TraversalCalcType (null);
-			return this;
+			return Value.TraversalCalcTypeWrap (null, a => Value = a) ? this : null;
 		}
 
 		public override IAstType GuessType () => Value.GuessType ();

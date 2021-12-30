@@ -33,9 +33,7 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override IAstType GuessType () {
-			throw new Exception ("执行类型处理步骤时不再允许出现 AstExpr_BaseId 类型对象");
-		}
+		public override IAstType GuessType () => throw new Exception ("不应执行此处代码");
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new Exception ("不应执行此处代码");
 
