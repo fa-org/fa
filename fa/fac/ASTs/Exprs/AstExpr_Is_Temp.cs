@@ -38,9 +38,10 @@ namespace fac.ASTs.Exprs {
 			if (!Value.TraversalCalcTypeWrap (null, a => Value = a))
 				return null;
 			var _access = AstExprName_ClassEnum_Access.FromAccess (Value, IsWhat);
+			if (DefVar.DataType == null)
+				DefVar.DataType = _access.AttachVar.DataType;
 			var _ret = AstExpr_Is.FromExistVar (_access, DefVar);
-			_ret.TraversalCalcTypeWrap (_expect_type, a => _ret = a as AstExpr_Is);
-			return _ret;
+			return _ret.TraversalCalcTypeWrap (_expect_type, a => _ret = a as AstExpr_Is) ? _ret : null;
 		}
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new Exception ("不应执行此处代码");

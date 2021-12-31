@@ -28,7 +28,7 @@ namespace fac.ASTs.Exprs {
 			} else if (_src_type.IsOptional && AllowDirectReturn (_src_type.UnwrapOptional, _to_type)) {
 				return Make (_dest.AccessValue (), _to_type);
 			} else if (_to_type.IsOptional && AllowDirectReturn (_src_type, _to_type.UnwrapOptional)) {
-				return Make (_dest.AccessValue (), _to_type);
+				return Make (_dest.OptionalFromValue (), _to_type);
 			} else if (_src_type is AstType_Class _cls_type && _cls_type.Class.FullName == "fa.Error" && _to_type.IsOptional) {
 				return AstExprName_ClassEnum_New.FindFromName (_dest.Token, _to_type.AstClass, "Err", _dest);
 			} else {

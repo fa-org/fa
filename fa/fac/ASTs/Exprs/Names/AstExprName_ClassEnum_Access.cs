@@ -10,18 +10,20 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs.Names {
 	public class AstExprName_ClassEnum_Access: IAstExprName {
-		public IAstClass Class { init; get; }
+		public IAstClass EnumClass { init; get; }
 		public IAstExpr Value { get; set; }
-		public int EnumItemIndex { get; set; }
+		public int EnumItemIndex { init; get; }
 
-		public AstClassVar AttachVar { get => Class.ClassVars[Class.GetRealAttachVarPos (EnumItemIndex)]; }
+		public AstClassVar AttachVar { get => EnumClass.ClassVars[EnumClass.GetRealAttachVarPos (EnumItemIndex)]; }
 
 
 
 		private AstExprName_ClassEnum_Access () { }
 
+		public static AstExprName_ClassEnum_Access FromSwitchCond (AstExprName_ClassEnum_New _new_expr) => new AstExprName_ClassEnum_Access { Token = _new_expr.Token, EnumClass = _new_expr.EnumClass, Value = null, EnumItemIndex = _new_expr.EnumItemIndex };
+
 		public static AstExprName_ClassEnum_Access FromAccess (IAstExpr _opt, string _enum_name) {
-			var _class = (_opt.ExpectType ?? _opt.GuessType ()).AstClass;
+			var _class = (_opt.ExpectType ?? _opt.GuessType ()).Optional.AstClass;
 			int _p = _enum_name.LastIndexOf ('.');
 			if (_p != -1) {
 				string _clsname = _enum_name[.._p];
@@ -31,15 +33,16 @@ namespace fac.ASTs.Exprs.Names {
 					throw new CodeException (_opt.Token, $"无法将 {_enum_name} 转为 {_class.FullName} 类型枚举值");
 				}
 			}
-			var _access = new AstExprName_ClassEnum_Access { Token = _opt.Token, Class = _class, Value = _opt, EnumItemIndex = -1 };
+			var _enum_index = -1;
 			for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
 				if (_class.ClassEnumItems[i].Name == _enum_name) {
 					if (_class.ClassEnumItems[i].AttachType == null)
 						throw new CodeException (_opt.Token, $"枚举成员 {_class.FullName}.{_enum_name} 不附带参数，无法访问");
-					_access.EnumItemIndex = i;
+					_enum_index = i;
 					break;
 				}
 			}
+			var _access = new AstExprName_ClassEnum_Access { Token = _opt.Token, EnumClass = _class, Value = _opt, EnumItemIndex = _enum_index };
 			_access.ExpectType = _access.AttachVar.DataType;
 			return _access;
 		}
@@ -50,8 +53,11 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			if (!Value.TraversalCalcTypeWrap (Class.GetClassType (), a => Value = a))
-				return null;
+			if (Value != null) {
+				if (!Value.TraversalCalcTypeWrap (EnumClass.GetClassType (), a => Value = a))
+					return null;
+			}
+			ExpectType = GuessType ();
 			return AstExprTypeCast.Make (this, _expect_type);
 		}
 

@@ -15,7 +15,14 @@ namespace fac.ASTs.Structs {
 		public List<IAstType> Templates { init; get; }
 
 		public string FullName { init; get; }
-		public string CSharpFullName { get => FullName.Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__"); }
+		public string CSharpFullName {
+			get {
+				int p = FullName.IndexOf ('<');
+				var _left = FullName[..p].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__");
+				var _right = FullName[p..].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__").Replace (".", "__dot__");
+				return $"{_left}{_right}";
+			}
+		}
 		public List<AstEnumItem> ClassEnumItems { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
@@ -41,12 +48,12 @@ namespace fac.ASTs.Structs {
 			ClassFuncs = new List<AstClassFunc> ();
 			foreach (var _func in Class.ClassFuncs)
 				ClassFuncs.Add (new AstClassFunc (this, _func, GetImplType));
-			string _name = FullName[(FullName.LastIndexOf ('.') + 1)..];
+			string _name = FullName.StartsWith ("fa.") ? FullName[3..] : FullName;
 			var _sb = new StringBuilder ();
-			_sb.AppendLine (@$"public static bool operator== ({_name} _l, {_name} _r) {{
-if (_l.__index__ != _r.__index__) {{ return false; }}");
+			_sb.AppendLine ($"public static bool operator== ({_name} _l, {_name} _r) {{");
+			_sb.AppendLine ($"    if (_l.__index__ != _r.__index__) {{ return false; }}");
 			for (int i = 0; i < ClassEnumItems.Count; ++i) {
-				_sb.Append ($"else if (_l.__index__ == {i}) {{ ");
+				_sb.Append ($"    else if (_l.__index__ == {i}) {{ ");
 				if (ClassEnumItems[i].AttachType == null) {
 					_sb.Append ($"return true;");
 				} else {
@@ -55,7 +62,7 @@ if (_l.__index__ != _r.__index__) {{ return false; }}");
 				}
 				_sb.AppendLine ($" }}");
 			}
-			_sb.AppendLine ($"else {{ return false; }}");
+			_sb.AppendLine ($"    else {{ return false; }}");
 			_sb.AppendLine (@$"}}");
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
@@ -113,7 +120,7 @@ if (_l.__index__ != _r.__index__) {{ return false; }}");
 					Info.InitFunc (ClassFuncs[j]);
 					//
 					if (i == 2) {
-						ClassFuncs[j].BodyCodes.TraversalCalcType ();
+						ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
 						ExprTraversals.Init = ExprTraversals.Complete = true;
 						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						if (!ExprTraversals.Complete) {
@@ -122,7 +129,7 @@ if (_l.__index__ != _r.__index__) {{ return false; }}");
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
-							ClassFuncs[j].BodyCodes.TraversalCalcType ();
+							ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						}

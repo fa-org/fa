@@ -46,10 +46,14 @@ namespace fac.ASTs.Stmts {
 			var (_stmts, _expr) = Condition.ExpandExpr (_cache_err);
 			Condition = _expr;
 			Contents = Contents.ExpandStmts (_cache_err);
-			Contents.AddRange (_stmts);
 			if (IsDoWhile) {
-				return new List<IAstStmt> { this };
+				var _stmts1 = (from p in _stmts where p is AstStmt_DefVariable select p).ToList ();
+				_stmts = (from p in _stmts where p is not AstStmt_DefVariable select p).ToList ();
+				Contents.AddRange (_stmts);
+				_stmts1.Add (this);
+				return _stmts1;
 			} else {
+				Contents.AddRange (_stmts);
 				_stmts.Add (this);
 				return _stmts;
 			}

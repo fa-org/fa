@@ -15,7 +15,14 @@ namespace fac.ASTs.Structs {
 		public List<IAstType> Templates { init; get; }
 
 		public string FullName { init; get; }
-		public string CSharpFullName { get => FullName.Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__"); }
+		public string CSharpFullName {
+			get {
+				int p = FullName.IndexOf ('<');
+				var _left = FullName[..p].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__");
+				var _right = FullName[p..].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__").Replace (".", "__dot__");
+				return $"{_left}{_right}";
+			}
+		}
 		public List<AstEnumItem> ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
@@ -94,7 +101,7 @@ namespace fac.ASTs.Structs {
 					Info.InitFunc (ClassFuncs[j]);
 					//
 					if (i == 2) {
-						ClassFuncs[j].BodyCodes.TraversalCalcType ();
+						ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
 						ExprTraversals.Init = ExprTraversals.Complete = true;
 						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						if (!ExprTraversals.Complete) {
@@ -103,7 +110,7 @@ namespace fac.ASTs.Structs {
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
-							ClassFuncs[j].BodyCodes.TraversalCalcType ();
+							ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						}

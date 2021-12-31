@@ -105,7 +105,7 @@ if (_l.__index__ != _r.__index__) {{ return false; }}");
 					Info.InitFunc (ClassFuncs[j]);
 					//
 					if (i == 2) {
-						ClassFuncs[j].BodyCodes.TraversalCalcType ();
+						ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
 						ExprTraversals.Init = ExprTraversals.Complete = true;
 						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						if (!ExprTraversals.Complete) {
@@ -114,7 +114,7 @@ if (_l.__index__ != _r.__index__) {{ return false; }}");
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
-							ClassFuncs[j].BodyCodes.TraversalCalcType ();
+							ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
 							Info.InitFunc (ClassFuncs[j]);
 							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 						}

@@ -34,7 +34,7 @@ class Program {
 		/// 测试For关键字
 		/// </summary>
 		[TestMethod]
-		public void TestLoopd2()
+		public void TestLoop2()
 		{
 			string code = @"
 
@@ -42,7 +42,7 @@ use fa;
 
 class Program {
 	public static void Main () {
-		for int id = 0; a < 3; id++ {
+		for int id = 0; id < 3; id++ {
 			Console.WriteLine(""Hey, User{0}"".Format(id));
 		}
 	}

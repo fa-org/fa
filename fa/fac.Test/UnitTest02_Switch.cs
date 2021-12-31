@@ -321,7 +321,7 @@ class Program {
 			TestEnum.A        => ""error"",
 			TestEnum.B (_var) => ""TestSwitch{0}"".Format (_var),
 			C                 => ""error"",
-			D (_val)          => _val,
+			TestEnum.D (_val) => _val,
 			_                 => ""error"",
 		};
 		Console.Write (s);
@@ -350,7 +350,7 @@ class Program {
 			TestEnum.A        => ""TestSwitch14"",
 			TestEnum.B (_var) => ""error{0}"".Format (_var),
 			C                 => ""error"",
-			D (_val)          => _val,
+			TestEnum.D (_val) => _val,
 			_                 => ""error"",
 		};
 		Console.Write (s);

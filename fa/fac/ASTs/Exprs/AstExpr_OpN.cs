@@ -54,22 +54,19 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			// 单独处理枚举类型，另一部分代码位于AstExpr_BaseId.cs
-			//if (_expect_type is AstType_Class _class_type && (_class_type.Class.ClassEnumItems?.Count ?? 0) > 0
-			//	&& Value is AstExpr_BaseId _bi_expr
-			//	&& Arguments.Count == 1) {
-			//	if (Arguments[0] is AstExpr_BaseId _bi_expr1) {
-			//		var _class_enum = AstExprName_ClassEnum_New.FindFromName (Token, _class_type.Class, _bi_expr.Id);
-			//		var _is_expr = AstExpr_Is.FromContext (Token, null, _class_enum, _bi_expr1.Id);
-			//		_is_expr.ExpectType = _expect_type;
-			//		return _is_expr;
-			//	} else {
-			//		var _ce_expr = AstExprName_ClassEnum_New.FindFromNameUncheckAttach (Token, _class_type.Class, _bi_expr.Id);
-			//		_ce_expr.AttachExpr = Arguments[0];
-			//		_ce_expr.ExpectType = _expect_type;
-			//		return _ce_expr;
-			//	}
-			//}
+			if (Value is AstExpr_BaseId _bi_expr) {
+				Value = _bi_expr.TryParse ();
+				if (Value is AstExpr_BaseId _bi_expr1) {
+					if (!Value.TraversalCalcTypeWrap (_expect_type, a => Value = a))
+						throw new NotSupportedException ();
+					if (Value is AstExprName_ClassEnum_New _new_expr && Arguments.Count == 1) {
+						_new_expr.AttachExpr = Arguments[0];
+						return AstExprTypeCast.Make (Value, _expect_type);
+					}
+				}
+			}
+			if (Value is AstExpr_Op1 _op1_expr)
+				Value = _op1_expr.TryParse ();
 			//
 			if (!Value.TraversalCalcTypeWrap (null, a => Value = a))
 				return null;
@@ -97,6 +94,8 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstType GuessType () {
+			if (Value is AstExpr_Op1 _op1_expr)
+				Value = _op1_expr.TryParse ();
 			if (Value is AstExprName_ClassFunc _funcexpr) {
 				return _funcexpr.Class.ClassFuncs[_funcexpr.FunctionIndex].ReturnType;
 			} else {
@@ -156,5 +155,22 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override bool AllowAssign () => false;
+
+		public IAstExpr TryParse () {
+			if (Value is AstExpr_Op1 _op1expr)
+				Value = _op1expr.TryParse ();
+			if (Value is AstExpr_Op1 _op1expr1
+					&& (!_op1expr1.IsPrefix) && _op1expr1.Operator[1..] == "Format"
+					&& _op1expr1.Value is AstExpr_BaseValue _valexpr && _valexpr.DataType is AstType_String) {
+				Arguments.Insert (0, _op1expr1.Value);
+				Value = AstExprName_BuildIn.FindFromName ("string.Format");
+			} else if (Value is AstExprName_ClassEnum_New _ceexpr) {
+				if (Arguments.Count != 1)
+					throw new CodeException (_ceexpr.Token, "附带参数只能是一个");
+				_ceexpr.AttachExpr = Arguments[0];
+				return _ceexpr;
+			}
+			return this;
+		}
 	}
 }

@@ -4,6 +4,7 @@ using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -99,18 +100,14 @@ namespace fac {
 		public static void PreprocessCaseCond (this List<IAstExpr> _exprs) {
 			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
 				if (_exprs[i] is AstExpr_OpN _opn_expr1) {
-					AstExpr_Is _is_expr;
-					if (_opn_expr1.Value is AstExprName_ClassEnum_Access _ce_expr) {
-						_is_expr = AstExpr_Is.FromAccess (_ce_expr, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
-					} else {
-						string _enum_name = _opn_expr1.Value switch {
-							AstExpr_Op1 _op1_expr => _op1_expr.GetIdRaw (),
-							AstExpr_BaseId _bi_expr => _bi_expr.Id,
-							_ => throw new NotSupportedException (),
-						};
-						_is_expr = AstExpr_Is.FromContext2 (_exprs[i].Token, _exprs[i], _enum_name, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
+					if (_opn_expr1.Value is AstExpr_Op1 _op1_expr)
+						_opn_expr1.Value = _op1_expr.TryParse ();
+					if (_opn_expr1.Value is AstExpr_BaseId _id_expr)
+						_opn_expr1.Value = _id_expr.TryParse ();
+					if (_opn_expr1.Value is AstExprName_ClassEnum_New _new_expr) {
+						var _access_expr = AstExprName_ClassEnum_Access.FromSwitchCond (_new_expr);
+						_exprs[i] = AstExpr_Is.FromAccess (_access_expr, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
 					}
-					_exprs[i] = _is_expr != null ? _is_expr : _exprs[i];
 				}
 			}
 		}

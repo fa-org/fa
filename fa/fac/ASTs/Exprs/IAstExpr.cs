@@ -276,13 +276,13 @@ namespace fac.ASTs.Exprs {
 			return _expr;
 		}
 
-		public static IAstExpr OptionalFromValue (IAstExpr _expr) {
-			if (_expr.ExpectType.IsOptional)
-				return _expr;
-			var _class = AstType_OptionalWrap.GetInstClass (_expr.ExpectType);
-			var _expr1 = AstExprName_ClassEnum_New.FindFromName (_expr.Token, _class, "Val", _expr);
+		public IAstExpr OptionalFromValue () {
+			if (ExpectType.IsOptional)
+				return this;
+			var _class = AstType_OptionalWrap.GetInstClass (ExpectType);
+			var _expr1 = AstExprName_ClassEnum_New.FindFromName (Token, _class, "Val", this);
 			_expr1.TraversalCalcTypeWrap (null, a => _expr1 = a as AstExprName_ClassEnum_New);
-			return _expr;
+			return _expr1;
 		}
 
 		public static IAstExpr OptionalFromOk () {

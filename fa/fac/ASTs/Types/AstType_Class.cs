@@ -18,7 +18,16 @@ namespace fac.ASTs.Types {
 			return new AstType_Class { Token = _token, Mut = _mut, Class = _class };
 		}
 
-		public override string ToString () => Class.FullName;
+		public override string ToString () {
+			string _name = Class.FullName;
+			if (_name == "fa.OptionalVoid") {
+				return "void?";
+			} else if (_name.StartsWith ("fa.Optional<")) {
+				return $"{_name[12..^1]}?";
+			} else {
+				return _name;
+			}
+		}
 
 		public override string GenerateCSharp (int _indent) {
 			string _full_name = Class.CSharpFullName;

@@ -34,12 +34,12 @@ namespace fac.ASTs.Exprs {
 			}
 
 			// 处理类型
-			if (!InitCount.TraversalCalcTypeWrap (IAstType.FromName ("int"), a => InitCount = a))
-				return null;
+			bool _success = InitCount.TraversalCalcTypeWrap (IAstType.FromName ("int"), a => InitCount = a);
 			for (int i = 0; i < InitValues.Count; ++i) {
-				if (!InitValues[i].TraversalCalcTypeWrap (ItemDataType, a => InitValues[i] = a))
-					return null;
+				_success &= InitValues[i].TraversalCalcTypeWrap (ItemDataType, a => InitValues[i] = a);
 			}
+			if (!_success)
+				return null;
 			ExpectType = new AstType_ArrayWrap { Token = Token, ItemType = ItemDataType };
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

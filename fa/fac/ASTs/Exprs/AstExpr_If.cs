@@ -42,7 +42,7 @@ namespace fac.ASTs.Exprs {
 			_success &= IfFalseCodes.TraversalCalcTypeWrap ();
 			_success &= IfFalse.TraversalCalcTypeWrap (_expect_type, a => IfFalse = a);
 			ExpectType = _expect_type;
-			return AstExprTypeCast.Make (this, _expect_type);
+			return _success ? AstExprTypeCast.Make (this, _expect_type) : null;
 		}
 
 		public override IAstType GuessType () {

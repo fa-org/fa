@@ -1,16 +1,41 @@
 use fa;
 
-enum TestEnum { A, B (int), C }
-
 class Program {
+	public static void Sort (mut int[] numbers) {
+		_ = QuickSort (numbers, 0, numbers.Length - 1);
+	}
+
+	private static void? QuickSort (mut int[] numbers, int left, int right) {
+		if left > right {
+			return;
+		}
+		int middle = numbers [(left + right) / 2];
+		int i = left - 1;
+		int j = right + 1;
+		while true {
+			while (numbers[++i] < middle) {}
+			while (numbers[--j] > middle) {}
+			if i >= j {
+				break;
+			}
+			Swap(numbers, i, j);
+		}
+		QuickSort(numbers, left, i - 1);
+		QuickSort(numbers, j + 1, right);
+	}
+
+	private static void? Swap (mut int[] numbers, int i, int j) {
+		int number = numbers[i];
+		numbers[i] = numbers[j];
+		numbers[j] = number;
+	}
+
 	public static void Main () {
-		TestEnum e = TestEnum.B (10);
-		if e == TestEnum.A {
-			Console.Write ("error");
-		} else if e is TestEnum.B (_val) {
-			Console.Write ("TestIf{0}".Format (_val));
-		} else {
-			Console.Write ("error");
+		int[] n = [45, 4123, 213, 42, 123, 53, 22];
+		Sort (n);
+		for int a = 0; a < n.Length; ++a {
+			int nn = n[a] ?? -1;
+			Console.Write ("{0} ".Format (nn));
 		}
 	}
 }

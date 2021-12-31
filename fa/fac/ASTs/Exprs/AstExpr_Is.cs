@@ -33,47 +33,17 @@ namespace fac.ASTs.Exprs {
 				AccessExpr = _access_expr,
 				DefVar = _var != "" ? new AstStmt_DefVariable {
 					Token = _access_expr.Token,
-					DataType = _access_expr.Class.GetClassType (),
+					DataType = _access_expr.AttachVar.DataType,
 					VarName = _var,
-					Expr = _access_expr,
+					Expr = null,
 				} : null,
 			};
 		}
 
 		public static AstExpr_Is FromContext2 (IToken _token, IAstExpr _expr, string _is_what, string _var = "") {
-			if (_expr.ExpectType == null)
-				_expr.ExpectType = _expr.GuessType ();
 			var _access = AstExprName_ClassEnum_Access.FromAccess (_expr, _is_what);
 			return FromAccess (_access, _var);
 		}
-
-		//public static AstExpr_Is FromContext (IToken _token, IAstExpr _src, string _is_what, string _var) {
-		//	AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
-		//	var _is_what_expr = AstExprName_ClassEnum_Access.FromAccess (null, _src, _is_what);
-		//	if (_var_stmt != null) {
-		//		_var_stmt.DataType = _is_what_expr.AttachType;
-		//	}
-		//	return new AstExpr_Is {
-		//		Token = _token,
-		//		Value = _src,
-		//		IsWhatExpr = _is_what_expr,
-		//		DefVar = _var_stmt,
-		//	};
-		//}
-
-		//public static AstExpr_Is FromContext (IToken _token, IAstExpr _src, AstExprName_ClassEnum_Access _is_what_expr, string _var) {
-		//	AstStmt_DefVariable _var_stmt = _var != "" ? new AstStmt_DefVariable { Token = _token, DataType = null, VarName = _var } : null;
-		//	if (_var_stmt != null) {
-		//		_var_stmt.DataType = _is_what_expr.AttachType;
-		//		_is_what_expr.AttachExpr = _var_stmt.GetRef ();
-		//	}
-		//	return new AstExpr_Is {
-		//		Token = _token,
-		//		Value = _src,
-		//		IsWhatExpr = _is_what_expr,
-		//		DefVar = _var_stmt,
-		//	};
-		//}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (AccessExpr != null)

@@ -54,9 +54,7 @@ namespace fac.ASTs.Exprs {
 					ExpectType = (Value.ExpectType as AstType_ArrayWrap).ItemType;
 				}
 			}
-			if (!_success)
-				return null;
-			return AstExprTypeCast.Make (this, _expect_type);
+			return _success ? AstExprTypeCast.Make (this, _expect_type) : null;
 		}
 
 		public override IAstType GuessType () {
