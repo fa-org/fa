@@ -129,27 +129,6 @@ namespace fac.ASTs.Exprs {
 					IfFalseCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err),
 				});
 				return (_stmts, _tmp_stmt.GetRef ());
-				//var _tmp_stmt = new AstStmt_DefVariable { DataType = Value1.ExpectType };
-				//_stmts.Add (_tmp_stmt);
-				//var _err_pos = new AstStmt_Label { };
-				//var _cache_err1 = (_var: _tmp_stmt.GetRef (), _pos: _err_pos);
-				//var (_stmts1, _val1) = Value1.ExpandExpr (_cache_err1);
-				//_stmts.AddRange (_stmts1);
-				//_stmts.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
-				//_stmts.Add (_err_pos);
-				//var _ifstmt = new AstStmt_If {
-				//	Token = Token,
-				//	Condition = AstExpr_Is.FromContext2 (Token, _tmp_stmt.GetRef (), "Err", ""),
-				//	IfTrueCodes = new List<IAstStmt> {
-				//		AstStmt_ExprWrap.MakeAssign (_cache_err1._var, _tmp_stmt.GetRef ().AccessError ()),
-				//		_cache_err1._pos.GetRef (),
-				//	},
-				//};
-				//(_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
-				//_ifstmt.IfTrueCodes = _stmts1;
-				//_ifstmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _val1));
-				//_stmts.AddRange (_ifstmt.ExpandStmt (_cache_err));
-				//return (_stmts, _tmp_stmt.GetRef ());
 			} else {
 				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
 				_stmts.AddRange (_stmts1);
@@ -174,7 +153,7 @@ namespace fac.ASTs.Exprs {
 					_stmts.Add (new AstStmt_If {
 						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
 						IfTrueCodes = new List<IAstStmt> {
-							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (Token, fa_Error.DivideZero)),
+							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (Token, _cache_err?._var.ExpectType, fa_Error.DivideZero)),
 							_cache_err?._pos.GetRef (),
 						},
 						IfFalseCodes = new List<IAstStmt> {

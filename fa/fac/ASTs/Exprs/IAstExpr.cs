@@ -190,7 +190,7 @@ namespace fac.ASTs.Exprs {
 				if (_id != "null") {
 					return new AstExpr_BaseId { Token = _ctx.Start, Id = _id };
 				} else {
-					return OptionalFromError (_ctx.Start, fa_Error.Null);
+					return FromError (_ctx.Start, fa_Error.Null);
 				}
 			} else if (_ctx.literal () != null) {
 				string _type, _value = _ctx.GetText ();
@@ -258,10 +258,17 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
 
-		public static AstExprName_ClassEnum_New OptionalFromError (IToken _token, fa_Error _err) {
-			var _ret = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
-			_ret.ExpectType = _ret.GuessType ();
-			return _ret;
+		public static AstExprName_ClassEnum_New OptionalFromError (IToken _token, IAstType _type, fa_Error _err) {
+			var _err_expr = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
+			var _expr = AstExprName_ClassEnum_New.FindFromName (_token, _type.AstClass, "Err", _err_expr);
+			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
+			return _expr;
+		}
+
+		public static AstExprName_ClassEnum_New FromError (IToken _token, fa_Error _err) {
+			var _err_expr = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
+			_err_expr.ExpectType = _err_expr.GuessType ();
+			return _err_expr;
 		}
 
 		public IAstExpr OptionalHasValue () {
@@ -287,12 +294,6 @@ namespace fac.ASTs.Exprs {
 
 		public static IAstExpr OptionalFromOk () {
 			var _expr = AstExprName_ClassEnum_New.FindFromName (null, AstType_OptionalWrap.VoidClass, "Ok");
-			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
-			return _expr;
-		}
-
-		public static IAstExpr OptionalFromError (AstType_Class _type, AstExprName_ClassEnum_New _err_expr) {
-			var _expr = AstExprName_ClassEnum_New.FindFromName (_err_expr.Token, _err_expr.EnumClass, "Err", _err_expr);
 			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
 			return _expr;
 		}
