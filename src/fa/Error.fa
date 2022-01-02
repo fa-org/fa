@@ -1,6 +1,0 @@
-namespace fa;
-
-public enum Error {
-    DivideZero,
-    IndexOutOfBounds,
-}

@@ -3,10 +3,10 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.0.5.0</AssemblyVersion>
-    <FileVersion>0.0.5.0</FileVersion>
-    <Version>0.0.5</Version>
-    <Copyright>Copyright © 2021</Copyright>
+    <AssemblyVersion>0.0.6.0</AssemblyVersion>
+    <FileVersion>0.0.6.0</FileVersion>
+    <Version>0.0.6</Version>
+    <Copyright>Copyright © 2021-2022</Copyright>
     <Authors>fawdlstty</Authors>
     <Company>fa-org</Company>
     <Description>fa语言编译器（C#后端）</Description>

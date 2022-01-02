@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,6 +66,12 @@ namespace fac.ASTs.Exprs.Names {
 		public override string GenerateCSharp (int _indent) => Name switch {
 			"Directory.Create" => "Directory.CreateDirectory",
 			"@FILE" => Common.WrapStringValue (Info.CurrentFile),
+			"@FILEDATA" when Info.CurrentFile.StartsWith ("res://") => new Func<string>(() => {
+				var _assembly = Assembly.GetExecutingAssembly ();
+				using var _stream = _assembly.GetManifestResourceStream ($"fac.{Info.CurrentFile[6..].Replace ('/', '.')}");
+				using var _reader = new StreamReader (_stream, Encoding.UTF8);
+				return Common.WrapStringValue (_reader.ReadToEnd ());
+			}) (),
 			"@FILEDATA" => Common.WrapStringValue (File.ReadAllText (Info.CurrentFile, Encoding.UTF8)),
 			_ => Name,
 		};

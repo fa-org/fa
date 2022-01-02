@@ -28,7 +28,7 @@ namespace fac.ASTs {
 			CurrentSourceCode = Info.CurrentSourceCode;
 
 			// 生成模块名
-			CurrentModule = $"{Info.ProjectName}.{Info.CurrentRelativeFile.Replace ('/', '.').Replace ('\\', '.')}"[..^3];
+			CurrentModule = Info.CurrentRelativeFile.Replace ('/', '.').Replace ('\\', '.')[..^3];
 
 			// 生成命名空间
 			CurrentNamespace = CurrentModule[..CurrentModule.LastIndexOf ('.')];

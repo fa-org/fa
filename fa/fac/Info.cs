@@ -116,10 +116,11 @@ namespace fac {
 		public static string CurrentRelativeFile {
 			get {
 				if (CurrentFile.StartsWith ("res://")) {
-					return CurrentFile;
+					return CurrentFile[6..];
 				} else {
 					string _s = CurrentFile.Substring (SrcPath.Length);
-					return (_s[0] == '/' || _s[0] == '\\') ? _s.Substring (1) : _s;
+					_s = (_s[0] == '/' || _s[0] == '\\') ? _s.Substring (1) : _s;
+					return $"{Info.ProjectName}.{_s}";
 				}
 			}
 		}

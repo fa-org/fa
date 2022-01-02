@@ -23,7 +23,7 @@ namespace fac.ASTs.Exprs.Names {
 		public static AstExprName_ClassEnum_Access FromSwitchCond (AstExprName_ClassEnum_New _new_expr) => new AstExprName_ClassEnum_Access { Token = _new_expr.Token, EnumClass = _new_expr.EnumClass, Value = null, EnumItemIndex = _new_expr.EnumItemIndex };
 
 		public static AstExprName_ClassEnum_Access FromAccess (IAstExpr _opt, string _enum_name) {
-			var _class = (_opt.ExpectType ?? _opt.GuessType ()).Optional.AstClass;
+			var _class = (_opt.ExpectType ?? _opt.GuessType ()).AstClass;
 			int _p = _enum_name.LastIndexOf ('.');
 			if (_p != -1) {
 				string _clsname = _enum_name[.._p];
