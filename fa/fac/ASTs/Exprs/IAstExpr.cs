@@ -169,7 +169,7 @@ namespace fac.ASTs.Exprs {
 					var _args = (from p in _suffix_ctx.exprOpt () select p.expr () != null ? FromContext (p.expr ()) : null).ToList ();
 					if (_args.Count != 1)
 						throw new CodeException (_args.Count > 0 ? _args[0].Token : _expr.Token, "数组随机访问下标只能传一个整数");
-					return AstExpr_AccessBuildIn.Array_AccessItem (_expr, _args[0], true);
+					return AstExpr_ArrayAPI_Temp.Array_AccessItem (_expr, _args[0], true);
 				} else {
 					throw new UnimplException (_suffix_ctx);
 				}

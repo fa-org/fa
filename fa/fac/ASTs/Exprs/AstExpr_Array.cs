@@ -54,12 +54,12 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = new List<IAstStmt> ();
 			var _var_id = Common.GetTempId ();
-			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _var_id, Expr = AstExpr_AccessBuildIn.Array_New (ExpectType) };
+			var _defvar_stmt = new AstStmt_DefVariable { Token = Token, DataType = ExpectType, VarName = _var_id, Expr = AstExpr_ArrayAPI_Temp.Array_New (ExpectType) };
 			_stmts.Add (_defvar_stmt);
 			foreach (var _val in InitValues) {
 				var (_stmts1, _val1) = _val.ExpandExpr (_cache_err);
 				_stmts.AddRange (_stmts1);
-				_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (AstExpr_AccessBuildIn.Array_Add (_defvar_stmt.GetRef (), _val1)));
+				_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (AstExpr_ArrayAPI_Temp.Array_Add (_defvar_stmt.GetRef (), _val1)));
 			}
 			return (_stmts, _defvar_stmt.GetRef ());
 		}
