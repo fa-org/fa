@@ -13,19 +13,35 @@ namespace fac.ASTs.Exprs {
 	public class AstExpr_ArrayAPI_Temp: IAstExpr {
 		public IAstExpr Value { get; set; } = null;
 		public ArrayApiType AccessType { get; set; }
+		public List<IAstExpr> AttachArgs { get; set; } = null;
 
 
+
+		public static IAstExpr Array_AccessItem (IAstExpr _array, IAstExpr _index, bool _pre_expand) {
+			IAstType _item_type = null;
+			if (!_pre_expand) {
+				if (_array.ExpectType is not AstType_ArrayWrap)
+					throw new CodeException (_array.Token, "类型必须指定为数组类型");
+				_item_type = (_array.ExpectType as AstType_ArrayWrap).ItemType;
+			}
+			return new AstExpr_ArrayAPI_Temp { Token = _array.Token, Value = _array, AccessType = ArrayApiType._AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
+		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (Value != null)
 				Value = Value.TraversalWrap (_trav);
+			if (AttachArgs != null)
+				AttachArgs.TraversalWraps (_trav);
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			bool _success = true;
 			if (Value != null) {
 				if (!Value.TraversalCalcTypeWrap (null, a => Value = a))
-					_success = false;
+					_success &= false;
+			}
+			if (AttachArgs != null) {
+				_success &= AttachArgs.TraversalCalcTypeWrap ();
 			}
 			if (ExpectType == null) {
 				if (AccessType == ArrayApiType._AccessItem) {
@@ -89,7 +105,7 @@ namespace fac.ASTs.Exprs {
 					Condition = AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
 					IfTrueCodes = new List<IAstStmt> {
 						// idx += val.Length;
-						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", Array_Length (Value), IAstType.FromName ("int")),
+						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_ArrayAPI.Array_Length (Value), IAstType.FromName ("int")),
 					},
 				});
 
@@ -98,13 +114,13 @@ namespace fac.ASTs.Exprs {
 				// } else {
 				//     val[idx] = _rval;
 				// }
-				var _val_idx = Array_AccessItem (Value, _index_defvar.GetRef (), false);
+				var _val_idx = AstExpr_ArrayAPI.Array_AccessItem (Value, _index_defvar.GetRef (), false);
 				var _if_stmt = new AstStmt_If {
 					Token = Token,
 					Condition = AstExpr_Op2.MakeCondition (
 						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
 						"||",
-						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", Array_Length (Value))
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_ArrayAPI.Array_Length (Value))
 					),
 					IfTrueCodes = new List<IAstStmt> { /*用户可能忽略异常，后面判断处理异常后再添加错误处理逻辑*/ },
 					IfFalseCodes = new List<IAstStmt> { AstStmt_ExprWrap.MakeAssign (_val_idx, _rval), },
@@ -115,8 +131,10 @@ namespace fac.ASTs.Exprs {
 				}
 				_stmts.Add (_if_stmt);
 				return (_stmts, _val_idx);
+			} else {
+				var _new_obj = new AstExpr_ArrayAPI { Token = Token, Value = Value, AccessType = AccessType, AttachArgs = AttachArgs, ExpectType = ExpectType };
+				return (_stmts, _new_obj);
 			}
-			return (_stmts, this);
 		}
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
@@ -147,7 +165,7 @@ namespace fac.ASTs.Exprs {
 					Condition = AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
 					IfTrueCodes = new List<IAstStmt> {
 						// idx += val.Length;
-						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", Array_Length (Value), IAstType.FromName ("int")),
+						AstStmt_ExprWrap.MakeOp2 (_index_defvar.GetRef (), "+=", AstExpr_ArrayAPI.Array_Length (Value), IAstType.FromName ("int")),
 					},
 				});
 
@@ -160,7 +178,7 @@ namespace fac.ASTs.Exprs {
 					Condition = AstExpr_Op2.MakeCondition (
 						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), "<", IAstExpr.FromValue ("int", "0")),
 						"||",
-						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", Array_Length (Value))
+						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_ArrayAPI.Array_Length (Value))
 					),
 					IfTrueCodes = new List<IAstStmt> {
 						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstType.OptionalFromError (Token, _cache_err?._var.ExpectType, fa_Error.IndexOutOfBounds)),
@@ -168,9 +186,11 @@ namespace fac.ASTs.Exprs {
 					},
 				});
 
-				return (_stmts, Array_AccessItem (Value, _index_defvar.GetRef (), false));
+				return (_stmts, AstExpr_ArrayAPI.Array_AccessItem (Value, _index_defvar.GetRef (), false));
+			} else {
+				var _new_obj = new AstExpr_ArrayAPI { Token = Token, Value = Value, AccessType = AccessType, AttachArgs = AttachArgs, ExpectType = ExpectType };
+				return (_stmts, _new_obj);
 			}
-			return (_stmts, this);
 		}
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");

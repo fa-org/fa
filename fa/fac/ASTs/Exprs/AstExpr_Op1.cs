@@ -122,8 +122,8 @@ namespace fac.ASTs.Exprs {
 				Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
 					return _typeexpr switch {
 						AstType_Class _classexpr                        => _access_func (_obj, _classexpr.Class),
-						AstType_ArrayWrap when _access_name == "Length" => AstExpr_ArrayAPI_Temp.Array_Length (_obj),
-						AstType_String    when _access_name == "Length" => AstExpr_ArrayAPI_Temp.Array_Length (_obj),
+						AstType_ArrayWrap when _access_name == "Length" => AstExpr_ArrayAPI.Array_Length (_obj),
+						AstType_String    when _access_name == "Length" => AstExpr_ArrayAPI.Array_Length (_obj),
 						_ => throw new UnimplException (_typeexpr.Token),
 					};
 				};

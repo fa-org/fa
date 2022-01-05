@@ -17,7 +17,6 @@ namespace fac.ASTs.Exprs {
 
 
 
-		private AstExpr_ArrayAPI () { }
 		public static IAstExpr Array_New (IAstType _type) => new AstExpr_ArrayAPI { AccessType = ArrayApiType.New, ExpectType = _type };
 		public static IAstExpr Array_Length (IAstExpr _array) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.Length, ExpectType = IAstType.FromName ("int") };
 		public static IAstExpr Array_Add (IAstExpr _array, IAstExpr _item) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.Add, AttachArgs = new List<IAstExpr> { _item }, ExpectType = new AstType_Void () };
@@ -31,15 +30,20 @@ namespace fac.ASTs.Exprs {
 			return new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType._AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
 		}
 
-		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) => throw new Exception ("不应执行此处代码");
+		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
+			if (Value != null)
+				Value = Value.TraversalWrap (_trav);
+			if (AttachArgs != null)
+				AttachArgs.TraversalWraps (_trav);
+		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) => throw new Exception ("不应执行此处代码");
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) => AstExprTypeCast.Make (this, _expect_type);
 
-		public override IAstType GuessType () => throw new Exception ("不应执行此处代码");
+		public override IAstType GuessType () => ExpectType;
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) => (new List<IAstStmt> (), this);
 
-		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => throw new Exception ("不应执行此处代码");
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) => (new List<IAstStmt> (), this);
 
 		public override string GenerateCSharp (int _indent) {
 			var _b = Value?.GenerateCSharp (_indent) ?? "";
