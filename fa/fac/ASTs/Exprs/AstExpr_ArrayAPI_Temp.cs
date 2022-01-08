@@ -127,7 +127,7 @@ namespace fac.ASTs.Exprs {
 				};
 				if (_cache_err?._var != null) {
 					_if_stmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (null, _cache_err?._var.ExpectType, fa_Error.IndexOutOfBounds)));
-					_if_stmt.IfTrueCodes.Add (_cache_err?._pos.GetRef ());
+					_if_stmt.IfTrueCodes.Add (_cache_err?._pos.Goto ());
 				}
 				_stmts.Add (_if_stmt);
 				return (_stmts, _val_idx);
@@ -182,7 +182,7 @@ namespace fac.ASTs.Exprs {
 					),
 					IfTrueCodes = new List<IAstStmt> {
 						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstType.OptionalFromError (Token, _cache_err?._var.ExpectType, fa_Error.IndexOutOfBounds)),
-						_cache_err?._pos.GetRef (),
+						_cache_err?._pos.Goto (),
 					},
 				});
 
@@ -196,7 +196,5 @@ namespace fac.ASTs.Exprs {
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
 		public override bool AllowAssign () => AccessType == ArrayApiType._AccessItem && Value.AllowAssign ();
-
-		public bool IsChangeData () => AccessType == ArrayApiType.Add;
 	}
 }

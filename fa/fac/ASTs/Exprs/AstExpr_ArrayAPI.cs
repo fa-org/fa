@@ -37,7 +37,14 @@ namespace fac.ASTs.Exprs {
 				AttachArgs.TraversalWraps (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) => AstExprTypeCast.Make (this, _expect_type);
+		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			bool _success = true;
+			if (Value != null)
+				_success &= Value.TraversalCalcTypeWrap (null, a => Value = a);
+			if (AttachArgs != null)
+				_success &= AttachArgs.TraversalCalcTypeWrap (null);
+			return _success ? AstExprTypeCast.Make (this, _expect_type) : null;
+		}
 
 		public override IAstType GuessType () => ExpectType;
 
@@ -62,5 +69,7 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override bool AllowAssign () => AccessType == ArrayApiType._AccessItem && Value.AllowAssign ();
+
+		public bool IsChangeData () => AccessType == ArrayApiType.Add;
 	}
 }

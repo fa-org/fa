@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.ASTs.Stmts;
 using fac.ASTs.Structs;
 using fac.ASTs.Types;
 using fac.Exceptions;
@@ -92,6 +93,14 @@ namespace fac.ASTs.Exprs.Names {
 		}
 
 		public override IAstType GuessType () => AstType_Class.GetType (Token, EnumClass);
+
+		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
+			if (AttachExpr == null)
+				return (new List<IAstStmt> (), this);
+			var (_stmts, _expr) = AttachExpr.ExpandExpr (_cache_err);
+			AttachExpr = _expr;
+			return (_stmts, this);
+		}
 
 		public override string GenerateCSharp (int _indent) {
 			bool _need_attach = EnumClass.ClassEnumItems[EnumItemIndex].AttachType != null;

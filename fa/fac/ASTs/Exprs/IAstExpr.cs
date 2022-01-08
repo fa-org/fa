@@ -259,6 +259,8 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
 
 		public static AstExprName_ClassEnum_New OptionalFromError (IToken _token, IAstType _type, fa_Error _err) {
+			if (_type is AstType_Class _cls_type && _cls_type.Class.FullName == "fa.Error")
+				return FromError (_token, _err);
 			var _err_expr = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
 			var _expr = AstExprName_ClassEnum_New.FindFromName (_token, _type.AstClass, "Err", _err_expr);
 			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
@@ -266,9 +268,9 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public static AstExprName_ClassEnum_New FromError (IToken _token, fa_Error _err) {
-			var _err_expr = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
-			_err_expr.ExpectType = _err_expr.GuessType ();
-			return _err_expr;
+			var _expr = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
+			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
+			return _expr;
 		}
 
 		public IAstExpr OptionalHasValue () {

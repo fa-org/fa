@@ -14,7 +14,7 @@ namespace fac.ASTs.Stmts {
 
 
 
-		public AstStmt_Goto GetRef () {
+		public AstStmt_Goto Goto () {
 			m_used = true;
 			return new AstStmt_Goto { Token = Token, Label = this };
 		}
