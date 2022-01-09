@@ -2,8 +2,12 @@ use fa;
 
 class Program {
 	public static void Main () {
-		int? n = null;
-		Console.Write ("{0}".Format (n ?? 12));
+		int[] n = [2, 3, 4];
+		n.Add ("12");
+		for int a = 0; a < n.Length; ++a {
+			int nn = n[a] ?? -1;
+			Console.WriteLine ("{0}".Format (nn));
+		}
 	}
 }
 
@@ -60,7 +64,14 @@ class Program {
 
 
 
-
+//use fa;
+//
+//class Program {
+//	public static void Main () {
+//		int? n = null;
+//		Console.Write ("{0}".Format (n ?? 12));
+//	}
+//}
 
 
 
