@@ -169,6 +169,20 @@ namespace fac.ASTs.Exprs {
 					throw new CodeException (_ceexpr.Token, "附带参数只能是一个");
 				_ceexpr.AttachExpr = Arguments[0];
 				return _ceexpr;
+			} else if (Value is AstExpr_ArrayAPI_Temp _aat_expr) {
+				if (_aat_expr.AccessType == ArrayApiType.Add) {
+					if (Arguments.Count != 1)
+						throw new CodeException (_aat_expr.Token, "Add方法只能传一个参数");
+					return AstExpr_ArrayAPI.Array_Add (_aat_expr.Value, Arguments[0]);
+				} else if (_aat_expr.AccessType == ArrayApiType.AddRange) {
+					if (Arguments.Count != 1)
+						throw new CodeException (_aat_expr.Token, "Add方法只能传一个参数");
+					return AstExpr_ArrayAPI.Array_AddRange (_aat_expr.Value, Arguments[0]);
+				} else if (_aat_expr.AccessType == ArrayApiType.RemoveAt) {
+					if (Arguments.Count != 1)
+						throw new CodeException (_aat_expr.Token, "Add方法只能传一个参数");
+					return AstExpr_ArrayAPI.Array_RemoveAt (_aat_expr.Value, Arguments[0]);
+				}
 			}
 			return this;
 		}

@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	public enum ArrayApiType { New, Length, Add, AddRange, _AccessItem }
+	public enum ArrayApiType { New, Length, Add, AddRange, RemoveAt, _AccessItem }
 	public class AstExpr_ArrayAPI: IAstExpr {
 		public IAstExpr Value { get; set; } = null;
 		public ArrayApiType AccessType { get; set; }
@@ -18,9 +18,15 @@ namespace fac.ASTs.Exprs {
 
 
 		public static IAstExpr Array_New (IAstType _type) => new AstExpr_ArrayAPI { AccessType = ArrayApiType.New, ExpectType = _type };
+
 		public static IAstExpr Array_Length (IAstExpr _array) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.Length, ExpectType = IAstType.FromName ("int") };
+
 		public static IAstExpr Array_Add (IAstExpr _array, IAstExpr _item) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.Add, AttachArgs = new List<IAstExpr> { _item }, ExpectType = new AstType_Void () };
+
 		public static IAstExpr Array_AddRange (IAstExpr _array, IAstExpr _items) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.AddRange, AttachArgs = new List<IAstExpr> { _items }, ExpectType = new AstType_Void () };
+
+		public static IAstExpr Array_RemoveAt (IAstExpr _array, IAstExpr _item) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.RemoveAt, AttachArgs = new List<IAstExpr> { _item }, ExpectType = new AstType_Void () };
+
 		public static IAstExpr Array_AccessItem (IAstExpr _array, IAstExpr _index, bool _pre_expand) {
 			IAstType _item_type = null;
 			if (!_pre_expand) {
@@ -62,6 +68,7 @@ namespace fac.ASTs.Exprs {
 				ArrayApiType.Length => Value.ExpectType is AstType_ArrayWrap ? $"{_b}.Count" : $"{_b}.Length",
 				ArrayApiType.Add => $"{_b}.Add ({_attach0})",
 				ArrayApiType.AddRange => $"{_b}.AddRange ({_attach0})",
+				ArrayApiType.RemoveAt => $"{_b}.RemoveAt ({_attach0})",
 				ArrayApiType._AccessItem => $"{_b} [{_attach0}]",
 				//AccessBuildInType.OPT_GetValue => $"{_b}.GetValue ()",
 				//AccessBuildInType.OPT_FromValue => $"{_exp}.FromValue ({_b})",
@@ -72,6 +79,6 @@ namespace fac.ASTs.Exprs {
 
 		public override bool AllowAssign () => AccessType == ArrayApiType._AccessItem && Value.AllowAssign ();
 
-		public bool IsChangeData () => AccessType == ArrayApiType.Add;
+		public bool IsChangeData () => AccessType != ArrayApiType.Length && AccessType != ArrayApiType._AccessItem;
 	}
 }

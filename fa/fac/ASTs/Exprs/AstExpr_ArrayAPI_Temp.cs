@@ -27,6 +27,12 @@ namespace fac.ASTs.Exprs {
 			return new AstExpr_ArrayAPI_Temp { Token = _array.Token, Value = _array, AccessType = ArrayApiType._AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
 		}
 
+		public static IAstExpr Array_Add (IAstExpr _array) => new AstExpr_ArrayAPI_Temp { Token = _array.Token, Value = _array, AccessType = ArrayApiType.Add };
+
+		public static IAstExpr Array_AddRange (IAstExpr _array) => new AstExpr_ArrayAPI_Temp { Token = _array.Token, Value = _array, AccessType = ArrayApiType.AddRange };
+
+		public static IAstExpr Array_RemoveAt (IAstExpr _array) => new AstExpr_ArrayAPI_Temp { Token = _array.Token, Value = _array, AccessType = ArrayApiType.RemoveAt };
+
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 			if (Value != null)
 				Value = Value.TraversalWrap (_trav);
@@ -78,7 +84,9 @@ namespace fac.ASTs.Exprs {
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExprAssign (IAstExpr _rval, (IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = InitExpand (_cache_err);
-			if (AccessType == ArrayApiType._AccessItem) {
+			if (AccessType == ArrayApiType.Add || AccessType == ArrayApiType.AddRange) {
+				throw new Exception ("不应执行此处代码");
+			} else if (AccessType == ArrayApiType._AccessItem) {
 				if (_cache_err == null)
 					throw new CodeException (Token, "数组随机访问可能为空值，需处理或忽略异常");
 
@@ -139,7 +147,9 @@ namespace fac.ASTs.Exprs {
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = InitExpand (_cache_err);
-			if (AccessType == ArrayApiType._AccessItem) {
+			if (AccessType == ArrayApiType.Add || AccessType == ArrayApiType.AddRange) {
+				throw new Exception ("不应执行此处代码");
+			} else if (AccessType == ArrayApiType._AccessItem) {
 				if (_cache_err == null || _cache_err == (null, null))
 					throw new CodeException (Token, "数组随机访问可能为空值，需处理异常");
 

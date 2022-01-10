@@ -3,7 +3,10 @@ use fa;
 class Program {
 	public static void Main () {
 		int[] n = [2, 3, 4];
-		n.Add ("12");
+		int[] n1 = [12, 13, 14];
+		n.Add (8);
+		n.AddRange (n1);
+		n.RemoveAt (0);
 		for int a = 0; a < n.Length; ++a {
 			int nn = n[a] ?? -1;
 			Console.WriteLine ("{0}".Format (nn));
