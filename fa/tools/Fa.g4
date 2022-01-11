@@ -163,16 +163,17 @@ idExt:						ids QuotJianL type (Comma type)* QuotJianR PointOp id;
 typeAfter:					(QuotFangL QuotFangR) | Qus;
 typeSingle:					ids (QuotJianL type (Comma type)* QuotJianR)?;
 typeMulti:					QuotYuanL typeVar (Comma typeVar)+ QuotYuanR;
-type:						(Mut | Params)? (typeSingle | typeMulti) typeAfter*;
+type:						(typeSingle | typeMulti) typeAfter*;
+typeWrap:					(Mut | Params)? type;
 
 
 
 //
 // list
 //
-typeVar:					type id?;
+typeVar:					typeWrap id?;
 typeVarList:				typeVar (Comma typeVar)*;
-typeVar2:					type? id;
+typeVar2:					typeWrap? id;
 typeVar2List:				typeVar2 (Comma typeVar2)*;
 //eTypeVar:					eType id?;
 //eTypeVarList:				eTypeVar (Comma eTypeVar)*;
@@ -224,9 +225,9 @@ switchExpr2:				Switch QuotHuaL switchExprPart2* switchExprPartLast QuotHuaR;
 quotExpr:					QuotYuanL expr QuotYuanR;
 exprOpt:					expr?;
 newExprItem:				id (Assign middleExpr)?;
-newExpr1:					New ids? QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
-newExpr2:					New ids? QuotYuanL (expr (Comma expr)*)? QuotYuanR;
-//newArray:					New ids? QuotFangL middleExpr QuotFangR;
+newExpr1:					New typeSingle QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
+newExpr2:					New typeSingle QuotYuanL (expr (Comma expr)*)? QuotYuanR;
+//newArray:					New typeSingle QuotFangL middleExpr QuotFangR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
 lambdaExpr:					QuotYuanL typeVar2List? QuotYuanR exprFuncDef (expr | (QuotHuaL stmt* QuotHuaR));

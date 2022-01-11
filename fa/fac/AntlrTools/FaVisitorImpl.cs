@@ -51,6 +51,7 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeSingle (FaParser.TypeSingleContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeMulti (FaParser.TypeMultiContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitType (FaParser.TypeContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeWrap (FaParser.TypeWrapContext context) => throw new NotImplementedException ();
 		public IAst VisitTypeVar (FaParser.TypeVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVar2 (FaParser.TypeVar2Context _ctx) => throw new NotImplementedException ();
