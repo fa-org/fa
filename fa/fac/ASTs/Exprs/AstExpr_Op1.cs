@@ -121,12 +121,10 @@ namespace fac.ASTs.Exprs {
 				// 参数1为类名
 				Func<IAstExpr, IAstType, IAstExpr> _access_func2 = (_obj, _typeexpr) => {
 					return _typeexpr switch {
-						AstType_Class _classexpr                          => _access_func (_obj, _classexpr.Class),
-						AstType_ArrayWrap when _access_name == "Length"   => AstExpr_ArrayAPI.Array_Length (_obj),
-						AstType_String    when _access_name == "Length"   => AstExpr_ArrayAPI.Array_Length (_obj),
-						AstType_ArrayWrap when _access_name == "Add"      => AstExpr_ArrayAPI_Temp.Array_Add (_obj),
-						AstType_ArrayWrap when _access_name == "AddRange" => AstExpr_ArrayAPI_Temp.Array_AddRange (_obj),
-						AstType_ArrayWrap when _access_name == "RemoveAt" => AstExpr_ArrayAPI_Temp.Array_RemoveAt (_obj),
+						AstType_Class _classexpr                        => _access_func (_obj, _classexpr.Class),
+						AstType_ArrayWrap when _access_name == "Length" => AstExpr_ArrayAPI.Array_Length (_obj),
+						AstType_String    when _access_name == "Length" => AstExpr_ArrayAPI.Array_Length (_obj),
+						AstType_ArrayWrap                               => AstExpr_ArrayAPI_Temp.Array_MakeMethodAccess (_obj, _access_name),
 						_ => throw new UnimplException (_typeexpr.Token),
 					};
 				};

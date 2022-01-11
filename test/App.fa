@@ -2,15 +2,7 @@ use fa;
 
 class Program {
 	public static void Main () {
-		int[] n = [2, 3, 4];
-		int[] n1 = [12, 13, 14];
-		n.Add (8);
-		n.AddRange (n1);
-		n.RemoveAt (0);
-		for int a = 0; a < n.Length; ++a {
-			int nn = n[a] ?? -1;
-			Console.WriteLine ("{0}".Format (nn));
-		}
+		Dictionary<int, string> _d = new Dictionary<int, string> ();
 	}
 }
 
@@ -63,7 +55,23 @@ class Program {
 
 
 
-
+//use fa;
+//
+//class Program {
+//	public static void Main () {
+//		int[] n = [2, 3, 4];
+//		int[] n1 = [12, 13, 14];
+//		n.Add (8);
+//		n.AddRange (n1);
+//		n.RemoveAt (0);
+//		int? p = n.IndexOf (4);
+//		Console.WriteLine ("{0}".Format (p ?? -1));
+//		//for int a = 0; a < n.Length; ++a {
+//		//	int nn = n[a] ?? -1;
+//		//	Console.WriteLine ("{0}".Format (nn));
+//		//}
+//	}
+//}
 
 
 

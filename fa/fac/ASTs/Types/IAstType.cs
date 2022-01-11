@@ -3,6 +3,7 @@ using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Structs;
+using fac.ASTs.Types.Mappings;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -66,6 +67,11 @@ namespace fac.ASTs.Types {
 					// 函数
 					if (_type_str == "Func") {
 						_ret = new AstType_Func { Token = _ctx.Start, Mut = _mut, ReturnType = _templates1[^1], ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
+					}
+
+					// 字典
+					if (_type_str == "Dictionary") {
+						_ret = new AstTypeMap_Dictionary { Token = _ctx.Start, Mut = _mut, KeyType = _templates1[0], ValueType = _templates1[1] };
 					}
 				}
 

@@ -59,7 +59,7 @@ namespace fac.ASTs.Exprs {
 			foreach (var _val in InitValues) {
 				var (_stmts1, _val1) = _val.ExpandExpr (_cache_err);
 				_stmts.AddRange (_stmts1);
-				_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (AstExpr_ArrayAPI.Array_Add (_defvar_stmt.GetRef (), _val1)));
+				_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (AstExpr_ArrayAPI.Array_MakeMethodAccess (_defvar_stmt.GetRef (), ArrayApiType.Add, _val1)));
 			}
 			return (_stmts, _defvar_stmt.GetRef ());
 		}

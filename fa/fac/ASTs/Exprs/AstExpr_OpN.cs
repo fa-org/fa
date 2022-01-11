@@ -173,16 +173,22 @@ namespace fac.ASTs.Exprs {
 				if (_aat_expr.AccessType == ArrayApiType.Add) {
 					if (Arguments.Count != 1)
 						throw new CodeException (_aat_expr.Token, "Add方法只能传一个参数");
-					return AstExpr_ArrayAPI.Array_Add (_aat_expr.Value, Arguments[0]);
 				} else if (_aat_expr.AccessType == ArrayApiType.AddRange) {
 					if (Arguments.Count != 1)
-						throw new CodeException (_aat_expr.Token, "Add方法只能传一个参数");
-					return AstExpr_ArrayAPI.Array_AddRange (_aat_expr.Value, Arguments[0]);
+						throw new CodeException (_aat_expr.Token, "AddRange方法只能传一个参数");
 				} else if (_aat_expr.AccessType == ArrayApiType.RemoveAt) {
 					if (Arguments.Count != 1)
-						throw new CodeException (_aat_expr.Token, "Add方法只能传一个参数");
-					return AstExpr_ArrayAPI.Array_RemoveAt (_aat_expr.Value, Arguments[0]);
+						throw new CodeException (_aat_expr.Token, "RemoveAt方法只能传一个参数");
+				} else if (_aat_expr.AccessType == ArrayApiType.IndexOf) {
+					if (Arguments.Count < 1 || Arguments.Count > 3)
+						throw new CodeException (_aat_expr.Token, "IndexOf方法只能传一至三个参数");
+				} else if (_aat_expr.AccessType == ArrayApiType.LastIndexOf) {
+					if (Arguments.Count < 1 || Arguments.Count > 3)
+						throw new CodeException (_aat_expr.Token, "LastIndexOf方法只能传一至三个参数");
+				} else {
+					throw new CodeException (_aat_expr.Token, $"未知的数组方法访问 {_aat_expr.AccessType}");
 				}
+				return AstExpr_ArrayAPI.Array_MakeMethodAccess (_aat_expr.Value, _aat_expr.AccessType, Arguments.ToArray ());
 			}
 			return this;
 		}

@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	public enum ArrayApiType { New, Length, Add, AddRange, RemoveAt, _AccessItem }
+	public enum ArrayApiType { _AccessItem, New, Length, Add, AddRange, RemoveAt, IndexOf, LastIndexOf }
 	public class AstExpr_ArrayAPI: IAstExpr {
 		public IAstExpr Value { get; set; } = null;
 		public ArrayApiType AccessType { get; set; }
@@ -21,11 +21,17 @@ namespace fac.ASTs.Exprs {
 
 		public static IAstExpr Array_Length (IAstExpr _array) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.Length, ExpectType = IAstType.FromName ("int") };
 
-		public static IAstExpr Array_Add (IAstExpr _array, IAstExpr _item) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.Add, AttachArgs = new List<IAstExpr> { _item }, ExpectType = new AstType_Void () };
-
-		public static IAstExpr Array_AddRange (IAstExpr _array, IAstExpr _items) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.AddRange, AttachArgs = new List<IAstExpr> { _items }, ExpectType = new AstType_Void () };
-
-		public static IAstExpr Array_RemoveAt (IAstExpr _array, IAstExpr _item) => new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = ArrayApiType.RemoveAt, AttachArgs = new List<IAstExpr> { _item }, ExpectType = new AstType_Void () };
+		public static AstExpr_ArrayAPI Array_MakeMethodAccess (IAstExpr _array, ArrayApiType _type, params IAstExpr[] _items) {
+			var _expect_type = _type switch {
+				ArrayApiType.Add => IAstType.FromName ("void"),
+				ArrayApiType.AddRange => IAstType.FromName ("void"),
+				ArrayApiType.RemoveAt => IAstType.FromName ("void"),
+				ArrayApiType.IndexOf => IAstType.FromName ("int"),
+				ArrayApiType.LastIndexOf => IAstType.FromName ("int"),
+				_ => throw new Exception ("不应执行此处代码"),
+			};
+			return new AstExpr_ArrayAPI { Token = _array.Token, Value = _array, AccessType = _type, AttachArgs = _items.ToList (), ExpectType = _expect_type };
+		}
 
 		public static IAstExpr Array_AccessItem (IAstExpr _array, IAstExpr _index, bool _pre_expand) {
 			IAstType _item_type = null;
@@ -62,17 +68,16 @@ namespace fac.ASTs.Exprs {
 		public override string GenerateCSharp (int _indent) {
 			var _b = Value?.GenerateCSharp (_indent) ?? "";
 			var _exp = ExpectType?.GenerateCSharp (_indent) ?? "";
-			var _attach0 = (AttachArgs?.Count ?? 0) > 0 ? AttachArgs[0].GenerateCSharp (_indent) : "";
+			var _attaches = AttachArgs != null ? string.Join (", ", from p in AttachArgs select p.GenerateCSharp (_indent)) : "";
 			return AccessType switch {
+				ArrayApiType._AccessItem => $"{_b} [{_attaches}]",
 				ArrayApiType.New => $"new {_exp} ()",
 				ArrayApiType.Length => Value.ExpectType is AstType_ArrayWrap ? $"{_b}.Count" : $"{_b}.Length",
-				ArrayApiType.Add => $"{_b}.Add ({_attach0})",
-				ArrayApiType.AddRange => $"{_b}.AddRange ({_attach0})",
-				ArrayApiType.RemoveAt => $"{_b}.RemoveAt ({_attach0})",
-				ArrayApiType._AccessItem => $"{_b} [{_attach0}]",
-				//AccessBuildInType.OPT_GetValue => $"{_b}.GetValue ()",
-				//AccessBuildInType.OPT_FromValue => $"{_exp}.FromValue ({_b})",
-				//AccessBuildInType.OPT_FromError => $"{_exp}.FromError ({_attach0})",
+				ArrayApiType.Add => $"{_b}.Add ({_attaches})",
+				ArrayApiType.AddRange => $"{_b}.AddRange ({_attaches})",
+				ArrayApiType.RemoveAt => $"{_b}.RemoveAt ({_attaches})",
+				ArrayApiType.IndexOf => $"{_b}.IndexOf ({_attaches})",
+				ArrayApiType.LastIndexOf => $"{_b}.LastIndexOf ({_attaches})",
 				_ => throw new NotImplementedException (),
 			};
 		}

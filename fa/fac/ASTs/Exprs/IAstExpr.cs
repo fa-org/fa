@@ -258,6 +258,7 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);
 		public static IAstExpr FromValue (IAstType _data_type, string _value) => new AstExpr_BaseValue { Token = null, DataType = _data_type, Value = _value, ExpectType = _data_type };
 
+		// 生成一个可选类型中存储具体错误的对象
 		public static AstExprName_ClassEnum_New OptionalFromError (IToken _token, IAstType _type, fa_Error _err) {
 			if (_type is AstType_Class _cls_type && _cls_type.Class.FullName == "fa.Error")
 				return FromError (_token, _err);
@@ -267,24 +268,28 @@ namespace fac.ASTs.Exprs {
 			return _expr;
 		}
 
+		// 生成一个错误类型的具体错误的对象
 		public static AstExprName_ClassEnum_New FromError (IToken _token, fa_Error _err) {
 			var _expr = AstExprName_ClassEnum_New.FindFromName (_token, AstType_OptionalWrap.ErrorClass, $"{_err}");
 			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
 			return _expr;
 		}
 
+		// 判断一个可选类型是否有值，生成 bool 类型对象
 		public IAstExpr OptionalHasValue () {
 			var _expr = AstExpr_Is.FromContext2 (Token, this, "Val");
 			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExpr_Is);
 			return _expr;
 		}
 
+		// 判断一个可选类型是否无值，生成 bool 类型对象
 		public IAstExpr OptionalNotHasValue () {
 			var _expr = AstExpr_Is.FromContext2 (Token, this, "Err");
 			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExpr_Is);
 			return _expr;
 		}
 
+		// 将一个非可选类型值转为可选类型值
 		public IAstExpr OptionalFromValue () {
 			if (ExpectType.IsOptional)
 				return this;
@@ -294,14 +299,17 @@ namespace fac.ASTs.Exprs {
 			return _expr1;
 		}
 
+		// 生成包含 Ok 值的 void? 类型对象
 		public static IAstExpr OptionalFromOk () {
 			var _expr = AstExprName_ClassEnum_New.FindFromName (null, AstType_OptionalWrap.VoidClass, "Ok");
 			_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExprName_ClassEnum_New);
 			return _expr;
 		}
 
+		// 访问可选类型对象的值
 		public IAstExpr AccessValue () => AstExprName_ClassEnum_Access.FromAccess (this, "Val");
 
+		// 访问可选类型对象的错误信息
 		public IAstExpr AccessError () => AstExprName_ClassEnum_Access.FromAccess (this, "Err");
 	}
 }
