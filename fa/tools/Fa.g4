@@ -161,7 +161,7 @@ idExt:						ids QuotJianL type (Comma type)* QuotJianR PointOp id;
 // type
 //
 typeAfter:					(QuotFangL QuotFangR) | Qus;
-typeSingle:					ids (QuotJianL type (Comma type)* QuotJianR)?;
+typeSingle:					ids (QuotJianL typeWrap (Comma typeWrap)* QuotJianR)?;
 typeMulti:					QuotYuanL typeVar (Comma typeVar)+ QuotYuanR;
 type:						(typeSingle | typeMulti) typeAfter*;
 typeWrap:					(Mut | Params)? type;
@@ -171,10 +171,12 @@ typeWrap:					(Mut | Params)? type;
 //
 // list
 //
-typeVar:					typeWrap id?;
+typeVar:					type id?;
 typeVarList:				typeVar (Comma typeVar)*;
-typeVar2:					typeWrap? id;
-typeVar2List:				typeVar2 (Comma typeVar2)*;
+typeWrapVar:				typeWrap id?;
+typeWrapVarList:			typeWrapVar (Comma typeWrapVar)*;
+typeWrapVar2:				typeWrap? id;
+typeWrapVar2List:			typeWrapVar2 (Comma typeWrapVar2)*;
 //eTypeVar:					eType id?;
 //eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 
@@ -230,7 +232,7 @@ newExpr2:					New typeSingle QuotYuanL (expr (Comma expr)*)? QuotYuanR;
 //newArray:					New typeSingle QuotFangL middleExpr QuotFangR;
 arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
 arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
-lambdaExpr:					QuotYuanL typeVar2List? QuotYuanR exprFuncDef (expr | (QuotHuaL stmt* QuotHuaR));
+lambdaExpr:					QuotYuanL typeWrapVar2List? QuotYuanR exprFuncDef (expr | (QuotHuaL stmt* QuotHuaR));
 strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr | idExt;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// Ç°×º - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
@@ -278,7 +280,7 @@ classVar:					publicLevel? Static? type id (Semi | tmpAssignExpr | classVarExt);
 //
 classFuncName:				id ((QuotFangL QuotFangR) | allOp2 | allAssign)?;
 classFuncBody:				(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
-classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeVarList? QuotYuanR classFuncBody;
+classFunc:					publicLevel? Static? type classFuncName QuotYuanL typeWrapVarList? QuotYuanR classFuncBody;
 //
 classEnum:					id (QuotYuanL type QuotYuanR)?;
 

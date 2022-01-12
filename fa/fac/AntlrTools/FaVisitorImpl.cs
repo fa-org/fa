@@ -54,8 +54,12 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeWrap (FaParser.TypeWrapContext context) => throw new NotImplementedException ();
 		public IAst VisitTypeVar (FaParser.TypeVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitTypeVar2 (FaParser.TypeVar2Context _ctx) => throw new NotImplementedException ();
-		public IAst VisitTypeVar2List (FaParser.TypeVar2ListContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeVar2 (FaParser.TypeWrapVar2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeVar2List (FaParser.TypeWrapVar2ListContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVar (FaParser.TypeWrapVarContext context) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVarList (FaParser.TypeWrapVarListContext context) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVar2 (FaParser.TypeWrapVar2Context context) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVar2List (FaParser.TypeWrapVar2ListContext context) => throw new NotImplementedException ();
 		public IAst VisitQuotStmtPart (FaParser.QuotStmtPartContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitQuotStmtExpr (FaParser.QuotStmtExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIfStmt (FaParser.IfStmtContext _ctx) => throw new NotImplementedException ();

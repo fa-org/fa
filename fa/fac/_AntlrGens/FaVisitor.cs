@@ -206,17 +206,29 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTypeVarList([NotNull] FaParser.TypeVarListContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.typeVar2"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.typeWrapVar"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitTypeVar2([NotNull] FaParser.TypeVar2Context context);
+	Result VisitTypeWrapVar([NotNull] FaParser.TypeWrapVarContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.typeVar2List"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.typeWrapVarList"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitTypeVar2List([NotNull] FaParser.TypeVar2ListContext context);
+	Result VisitTypeWrapVarList([NotNull] FaParser.TypeWrapVarListContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeWrapVar2"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeWrapVar2([NotNull] FaParser.TypeWrapVar2Context context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeWrapVar2List"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeWrapVar2List([NotNull] FaParser.TypeWrapVar2ListContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.quotStmtPart"/>.
 	/// </summary>

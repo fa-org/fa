@@ -18,8 +18,7 @@ namespace fac.ASTs.Exprs {
 
 		public static AstExpr_NewObject FromContext (FaParser.NewExpr1Context _ctx) {
 			var _expr = new AstExpr_NewObject { Token = _ctx.Start };
-			string _type_str = _ctx.ids ()?.GetText () ?? "";
-			_expr.DataType = _type_str != "" ? IAstType.FromName (_type_str) as AstType_Class : null;
+			_expr.DataType = _ctx.typeSingle () != null ? IAstType.FromContext (_ctx.typeSingle ()) as AstType_Class : null;
 			_expr.InitialValues = (from p in _ctx.newExprItem () select (_name: p.id ().GetText (), _value: FromContext (p.middleExpr ()))).ToList ();
 			return _expr;
 		}

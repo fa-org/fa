@@ -14,8 +14,8 @@ namespace fac.ASTs.Types {
 
 
 		private AstType_Class () { }
-		public static AstType_Class GetType (IToken _token, IAstClass _class, bool _mut = false) {
-			return new AstType_Class { Token = _token, Mut = _mut, Class = _class };
+		public static AstType_Class GetType (IToken _token, IAstClass _class) {
+			return new AstType_Class { Token = _token, Class = _class };
 		}
 
 		public override string ToString () {

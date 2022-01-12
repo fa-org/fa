@@ -16,7 +16,7 @@ namespace fac.ASTs.Structs {
 		public bool Static { init; get; }
 		public string Name { init; get; }
 		public IAstType ReturnType { get; set; }
-		public List<(IAstType _type, string _name)> Arguments { init; get; }
+		public List<(IAstType _type, ArgumentTypeExt _ext, string _name)> Arguments { init; get; }
 		public FaParser.ClassFuncBodyContext BodyRaw { init; get; }
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
 
@@ -40,9 +40,9 @@ namespace fac.ASTs.Structs {
 			Static = _src.Static;
 			Name = _src.Name;
 			ReturnType = _src.ReturnType is AstType_Placeholder _phtype ? _get_impl_type (_phtype.Name) : _src.ReturnType;
-			Arguments = new List<(IAstType _type, string _name)> ();
-			foreach (var (_type, _name) in _src.Arguments) {
-				Arguments.Add ((_type: _type is AstType_Placeholder _phtype1 ? _get_impl_type (_phtype1.Name) : _type, _name: _name));
+			Arguments = new List<(IAstType _type, ArgumentTypeExt _ext, string _name)> ();
+			foreach (var (_type, _ext, _name) in _src.Arguments) {
+				Arguments.Add ((_type is AstType_Placeholder _phtype1 ? _get_impl_type (_phtype1.Name) : _type, _ext, _name));
 			}
 			BodyRaw = _src.BodyRaw;
 		}
@@ -55,7 +55,7 @@ namespace fac.ASTs.Structs {
 			Static = _ctx.Static () != null;
 			Name = _ctx.classFuncName ().GetText ();
 			ReturnType = new AstType_TempType (_ctx.type ());
-			Arguments = AstElemParser.Parse (_ctx.typeVarList ());
+			Arguments = AstElemParser.Parse (_ctx.typeWrapVarList ());
 			BodyRaw = _ctx.classFuncBody ();
 		}
 
@@ -64,7 +64,7 @@ namespace fac.ASTs.Structs {
 				ReturnType = _ttype.GetRealType ();
 			for (int i = 0; i < Arguments.Count; ++i) {
 				if (Arguments[i]._type is AstType_TempType _ttype1)
-					Arguments[i] = (_type: _ttype1.GetRealType (), _name: Arguments[i]._name);
+					Arguments[i] = (_type: _ttype1.GetRealType (), _ext: Arguments[i]._ext, _name: Arguments[i]._name);
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace fac.ASTs.Structs {
 			foreach (var _arg in Arguments) {
 				//if (_arg._type is AstType_ArrayWrap _awrap && _awrap.Params)
 				//	_sb.Append ("params ");
-				if (_arg._type.Mut) {
+				if (_arg._ext == ArgumentTypeExt.Mut) {
 					_sb.Append ("ref ");
 				}
 				_sb.Append ($"{_arg._type.GenerateCSharp (_indent)} {_arg._name}, ");

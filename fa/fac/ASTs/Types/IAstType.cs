@@ -117,18 +117,14 @@ namespace fac.ASTs.Types {
 
 		public static List<IAstType> FromContexts (FaParser.TypeContext[] _ctxs) => (from p in _ctxs select FromContext (p)).ToList ();
 
-		public static (IAstType _type, ArgumentTypeExt _ext, string _name) FromContext (FaParser.TypeVarContext _ctx) {
-			// TODO 移除ext
-			var _ext = _ctx.typeWrap ().Mut () != null ? ArgumentTypeExt.Mut : (_ctx.typeWrap ().Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
-			return (_type: FromContext (_ctx.typeWrap ().type ()), _ext, _ctx.id () != null ? _ctx.id ().GetText () : "");
+		public static (IAstType _type, string _name) FromContext (FaParser.TypeVarContext _ctx) {
+			return (_type: FromContext (_ctx.type ()), _ctx.id () != null ? _ctx.id ().GetText () : "");
 		}
 
-		public static List<(IAstType _type, ArgumentTypeExt _ext, string _name)> FromContexts (FaParser.TypeVarContext[] _ctxs) {
-			var _list = new List<(IAstType _type, ArgumentTypeExt _ext, string _name)> ();
+		public static List<(IAstType _type, string _name)> FromContexts (FaParser.TypeVarContext[] _ctxs) {
+			var _list = new List<(IAstType _type, string _name)> ();
 			for (int i = 0; i < _ctxs.Length; ++i) {
-				var _wrap = _ctxs[i].typeWrap ();
-				var _type = FromContext (_wrap.type ());
-				var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
+				var _type = FromContext (_ctxs[i].type ());
 				var _name = _ctxs[i].id ()?.GetText () ?? "";
 				if (_name == "") {
 					_name = $"Item{i}";
@@ -138,7 +134,7 @@ namespace fac.ASTs.Types {
 							throw new CodeException (_ctxs[i].id ().Start, $"此位置无法使用 {_name} 作为命名元组的项名称");
 					}
 				}
-				_list.Add ((_type, _ext, _name));
+				_list.Add ((_type, _name));
 			}
 			return _list;
 		}
