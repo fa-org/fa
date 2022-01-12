@@ -14,6 +14,7 @@ using System.Text;
 
 namespace fac {
 	public enum PublicLevel { Public, Protected, Private }
+	public enum ArgumentTypeExt { None, Mut, Params }
 	public enum fa_Error { Null, DivideZero, IndexOutOfBounds, NotFound }
 
 

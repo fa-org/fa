@@ -13,10 +13,10 @@ namespace fac.ASTs.Types {
 
 
 		public override string ToString () => $"float{BitWidth}";
-		public static AstType_Float FromType (string _type_str, bool _mut, IToken _token) {
+		public static AstType_Float FromType (string _type_str, IToken _token) {
 			if (!sTypeNames.Contains (_type_str))
 				return null;
-			var _floattype = new AstType_Float { Token = _token, Mut = _mut };
+			var _floattype = new AstType_Float { Token = _token };
 			_floattype.BitWidth = int.Parse (_type_str.Replace ("float", ""));
 			return _floattype;
 		}

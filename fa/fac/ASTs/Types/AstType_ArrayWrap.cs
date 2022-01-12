@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
 	public class AstType_ArrayWrap: IAstType {
-		public bool Params { get; set; }
 		public IAstType ItemType { init; get; }
 
 

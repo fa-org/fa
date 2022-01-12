@@ -14,11 +14,11 @@ namespace fac.ASTs.Types {
 
 
 		public override string ToString () => $"{(IsSign ? "" : "u")}int{BitWidth}";
-		public static AstType_Integer FromType (string _type_str, bool _mut, IToken _token) {
+		public static AstType_Integer FromType (string _type_str, IToken _token) {
 			if (!sTypeNames.Contains (_type_str))
 				return null;
 			_type_str = sTypeMap.ContainsKey (_type_str) ? sTypeMap[_type_str] : _type_str;
-			var _inttype = new AstType_Integer { Token = _token, Mut = _mut };
+			var _inttype = new AstType_Integer { Token = _token };
 			_inttype.IsSign = _type_str[0] != 'u';
 			_inttype.BitWidth = int.Parse (_type_str.Replace ("u", "").Replace ("int", ""));
 			return _inttype;
