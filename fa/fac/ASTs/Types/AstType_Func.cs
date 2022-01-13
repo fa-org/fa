@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 namespace fac.ASTs.Types {
 	public class AstType_Func: IAstType {
 		public IAstType ReturnType { get; set; }
-		public List<IAstType> ArgumentTypes { get; set; }
+		public List<(IAstType _type, ArgumentTypeExt _ext)> ArgumentTypes { get; set; }
 
 
 
 		public override string ToString () {
-			var _list = new List<IAstType> ();
+			var _list = new List<(IAstType _type, ArgumentTypeExt _ext)> ();
 			_list.AddRange (ArgumentTypes);
-			_list.Add (ReturnType);
+			_list.Add ((_type: ReturnType, _ext: ArgumentTypeExt.None));
 			return $"Func<{string.Join (", ", _list)}>";
 		}
 		//public static AstType_Func FromType (string _type_str, IToken _token, List<IAstType> _templates) {
@@ -33,14 +33,18 @@ namespace fac.ASTs.Types {
 		//}
 
 		public override string GenerateCSharp (int _indent) {
-			if (ReturnType is AstType_Void) {
-				return $"Action<{string.Join (", ", from p in ArgumentTypes select p.GenerateCSharp (_indent))}>";
-			} else {
-				var _list = new List<IAstType> ();
+			string _func_type = "Action";
+			List<(IAstType _type, ArgumentTypeExt _ext)> _list = ArgumentTypes;
+			if (ReturnType is not AstType_Void) {
+				_func_type = "Func";
+				_list = new List<(IAstType _type, ArgumentTypeExt _ext)> ();
 				_list.AddRange (ArgumentTypes);
-				_list.Add (ReturnType);
-				return $"Func<{string.Join (", ", from p in _list select p.GenerateCSharp (_indent))}>";
+				_list.Add ((_type: ReturnType, _ext: ArgumentTypeExt.None));
 			}
+			return @$"{_func_type}<{string.Join (", ", from p in _list
+													   let _s1 = (p._ext == ArgumentTypeExt.Mut ? "ref " : "")
+													   let _s2 = p._type.GenerateCSharp (_indent)
+													   select $"{_s1}{_s2}")}>";
 		}
 	}
 }

@@ -29,64 +29,7 @@ namespace fac.ASTs.Types {
 		public static IAstType FromContext (FaParser.TypeContext _ctx) {
 			IAstType _ret = null;
 			if (_ctx.typeSingle () != null) {
-				// id<xxx>、id?
-				string _type_str = _ctx.typeSingle ().ids ().GetText ();
-
-				var _templates1 = FromContexts (_ctx.typeSingle ().type ());
-				if ((_templates1?.Count ?? 0) == 0) {
-					// 基本数据类型
-					var _floattype = AstType_Float.FromType (_type_str, _ctx.Start);
-					if (_floattype != null)
-						_ret = _floattype;
-					var _inttype = AstType_Integer.FromType (_type_str, _ctx.Start);
-					if (_inttype != null)
-						_ret = _inttype;
-					if (_type_str == "var") {
-						return null;
-					} else if (_type_str == "any") {
-						_ret = new AstType_Any { Token = _ctx.Start };
-					} else if (_type_str == "bool") {
-						_ret = new AstType_Bool { Token = _ctx.Start };
-					} else if (_type_str == "string") {
-						_ret = new AstType_String { Token = _ctx.Start };
-					} else if (_type_str == "void") {
-						_ret = new AstType_Void { Token = _ctx.Start };
-					}
-				} else {
-					// 函数
-					if (_type_str == "Func") {
-						_ret = new AstType_Func { Token = _ctx.Start, ReturnType = _templates1[^1], ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
-					}
-
-					// 字典
-					if (_type_str == "Dictionary") {
-						_ret = new AstTypeMap_Dictionary { Token = _ctx.Start, KeyType = _templates1[0], ValueType = _templates1[1] };
-					}
-				}
-
-				// 类
-				if (_ret == null) {
-					var _classes = Info.GetClassFromName (_type_str, _templates1);
-					if (_classes.Count == 1) {
-						_ret = AstType_Class.GetType (_ctx.Start, _classes[0]);
-					} else if (_classes.Count > 1) {
-						throw new CodeException (_ctx.Start, $"不明确的符号 {_type_str}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
-					}
-				}
-
-				// 模板
-				if (_ret == null && _type_str[0] == 'T') {
-					if (Info.CurrentClass is AstTemplateClassInst _cls_inst) {
-						_ret = _cls_inst.GetImplType (_type_str);
-					} else if (Info.CurrentClass is AstTemplateEnumInst _enum_inst) {
-						_ret = _enum_inst.GetImplType (_type_str);
-					} else {
-						_ret = new AstType_Placeholder { Token = _ctx.Start, Name = _type_str };
-					}
-				}
-
-				if (_ret == null)
-					throw new CodeException (_ctx.Start, $"无法识别的类型 {_type_str}");
+				_ret = FromContext (_ctx.typeSingle ());
 			} else if (_ctx.typeMulti () != null) {
 				var _tuple_types = FromContexts (_ctx.typeMulti ().typeVar ());
 				_ret = new AstType_Tuple { Token = _ctx.Start, TupleTypes = _tuple_types };
@@ -103,6 +46,75 @@ namespace fac.ASTs.Types {
 					throw new UnimplException (_after_ctx.Start);
 				}
 			}
+			return _ret;
+		}
+
+		public static IAstType FromContext (FaParser.TypeSingleContext _ctx) {
+			IAstType _ret = null;
+			// id<xxx>、id?
+			string _type_str = _ctx.ids ().GetText ();
+
+			var _templates1 = FromContexts (_ctx.typeWrap ());
+			if ((_templates1?.Count ?? 0) == 0) {
+				// 基本数据类型
+				var _floattype = AstType_Float.FromType (_type_str, _ctx.Start);
+				if (_floattype != null)
+					_ret = _floattype;
+				var _inttype = AstType_Integer.FromType (_type_str, _ctx.Start);
+				if (_inttype != null)
+					_ret = _inttype;
+				if (_type_str == "var") {
+					return null;
+				} else if (_type_str == "any") {
+					_ret = new AstType_Any { Token = _ctx.Start };
+				} else if (_type_str == "bool") {
+					_ret = new AstType_Bool { Token = _ctx.Start };
+				} else if (_type_str == "string") {
+					_ret = new AstType_String { Token = _ctx.Start };
+				} else if (_type_str == "void") {
+					_ret = new AstType_Void { Token = _ctx.Start };
+				}
+			} else {
+				// 函数
+				if (_type_str == "Func") {
+					if (_templates1[^1]._ext != ArgumentTypeExt.None)
+						throw new CodeException (_ctx.Start, $"附加类型错误");
+					_ret = new AstType_Func { Token = _ctx.Start, ReturnType = _templates1[^1]._type, ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
+				}
+
+				if ((from p in _templates1 where p._ext != ArgumentTypeExt.None select 1).Any ())
+					throw new CodeException (_ctx.Start, $"附加类型错误");
+
+				// 字典
+				if (_type_str == "Dictionary") {
+					_ret = new AstTypeMap_Dictionary { Token = _ctx.Start, KeyType = _templates1[0]._type, ValueType = _templates1[1]._type };
+				}
+			}
+
+			// 类
+			if (_ret == null) {
+				var _templates = _templates1 != null ? (from p in _templates1 select p._type).ToList () : null;
+				var _classes = Info.GetClassFromName (_type_str, _templates);
+				if (_classes.Count == 1) {
+					_ret = AstType_Class.GetType (_ctx.Start, _classes[0]);
+				} else if (_classes.Count > 1) {
+					throw new CodeException (_ctx.Start, $"不明确的符号 {_type_str}。可能为{string.Join ('、', from p in _classes select p.FullName)}");
+				}
+			}
+
+			// 模板
+			if (_ret == null && _type_str[0] == 'T') {
+				if (Info.CurrentClass is AstTemplateClassInst _cls_inst) {
+					_ret = _cls_inst.GetImplType (_type_str);
+				} else if (Info.CurrentClass is AstTemplateEnumInst _enum_inst) {
+					_ret = _enum_inst.GetImplType (_type_str);
+				} else {
+					_ret = new AstType_Placeholder { Token = _ctx.Start, Name = _type_str };
+				}
+			}
+
+			if (_ret == null)
+				throw new CodeException (_ctx.Start, $"无法识别的类型 {_type_str}");
 			return _ret;
 		}
 
@@ -139,6 +151,37 @@ namespace fac.ASTs.Types {
 			return _list;
 		}
 
+		public static List<(IAstType _type, ArgumentTypeExt _ext)> FromContexts (FaParser.TypeWrapContext[] _ctxs) => (from p in _ctxs
+			let _type = FromContext (p.type ())
+			let _ext = p.Mut () != null ? ArgumentTypeExt.Mut : (p.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None)
+			select (_type: _type, _ext: _ext)).ToList ();
+
+		public static (IAstType _type, ArgumentTypeExt _ext, string _name) FromContext (FaParser.TypeWrapVarContext _ctx) {
+			var _wrap = _ctx.typeWrap ();
+			var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
+			return (_type: FromContext (_wrap.type ()), _ext: _ext, _name: _ctx.id () != null ? _ctx.id ().GetText () : "");
+		}
+
+		public static List<(IAstType _type, ArgumentTypeExt _ext, string _name)> FromContexts (FaParser.TypeWrapVarContext[] _ctxs) {
+			var _list = new List<(IAstType _type, ArgumentTypeExt _ext, string _name)> ();
+			for (int i = 0; i < _ctxs.Length; ++i) {
+				var _wrap = _ctxs[i].typeWrap ();
+				var _type = FromContext (_wrap.type ());
+				var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
+				var _name = _ctxs[i].id ()?.GetText () ?? "";
+				if (_name == "") {
+					_name = $"Item{i}";
+				} else if (_name.StartsWith ("Item")) {
+					if (int.TryParse (_name[4..], out int n)) {
+						if (n != i)
+							throw new CodeException (_ctxs[i].id ().Start, $"此位置无法使用 {_name} 作为命名元组的项名称");
+					}
+				}
+				_list.Add ((_type, _ext, _name));
+			}
+			return _list;
+		}
+
 		public bool IsSame (IAstType _other) {
 			if (_other == null)
 				return false;
@@ -150,7 +193,7 @@ namespace fac.ASTs.Types {
 				AstType_Func _functype1 when _other is AstType_Func _functype2 => new Func<bool> (() => {
 					if (_functype1.ArgumentTypes.Count != _functype2.ArgumentTypes.Count)
 						return false;
-					if ((from _p in _functype1.ArgumentTypes.Zip (_functype2.ArgumentTypes) where !_p.First.IsSame (_p.Second) select 1).Any ())
+					if ((from _p in _functype1.ArgumentTypes.Zip (_functype2.ArgumentTypes) where !(_p.First._type.IsSame (_p.Second._type) && _p.First._ext == _p.Second._ext) select 1).Any ())
 						return false;
 					return _functype1.ReturnType.IsSame (_functype2.ReturnType);
 				}).Invoke (),

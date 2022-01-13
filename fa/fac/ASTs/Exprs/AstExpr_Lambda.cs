@@ -37,10 +37,10 @@ namespace fac.ASTs.Exprs {
 				if (_functype.ArgumentTypes.Count != Arguments.Count)
 					throw new CodeException (Token, $"lambda 表达式参数数量与期望不匹配，期望 {_functype.ArgumentTypes.Count} 个参数，实际 {Arguments.Count} 个参数");
 				for (int i = 0; i < Arguments.Count; ++i) {
-					if (_functype.ArgumentTypes[i] != null) {
-						if (Arguments[i]._type != null && (!Arguments[i]._type.IsSame (_functype.ArgumentTypes[i])))
+					if (_functype.ArgumentTypes[i]._type != null) {
+						if (Arguments[i]._type != null && (!(Arguments[i]._type.IsSame (_functype.ArgumentTypes[i]._type) && Arguments[i]._ext == _functype.ArgumentTypes[i]._ext)))
 							throw new CodeException (Token, $"lambda 表达式第 {i} 个参数类型不匹配，期望 {_functype.ArgumentTypes[i]}，实际 {Arguments[i]._type}");
-						Arguments[i] = (_type: _functype.ArgumentTypes[i], _ext: Arguments[i]._ext, _name: Arguments[i]._name);
+						Arguments[i] = (_type: Arguments[i]._type, _ext: Arguments[i]._ext, _name: Arguments[i]._name);
 					}
 				}
 				BodyCodes = TypeFuncs.GetFuncBodyCodes (Token, ReturnType, LambdaExprCtx.expr (), LambdaExprCtx.stmt ());

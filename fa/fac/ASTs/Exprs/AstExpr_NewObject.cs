@@ -25,7 +25,7 @@ namespace fac.ASTs.Exprs {
 
 		public static AstExpr_NewObject FromContext (FaParser.NewExpr2Context _ctx) {
 			var _expr = new AstExpr_NewObject { Token = _ctx.Start };
-			_expr.DataType = IAstType.FromName (_ctx.ids ().GetText ()) as AstType_Class;
+			_expr.DataType = IAstType.FromContext (_ctx.typeSingle ()) as AstType_Class;
 			_expr.ConstructorArguments = (from p in _ctx.expr () select FromContext (p)).ToList ();
 			return _expr;
 		}
