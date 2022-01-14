@@ -2,6 +2,7 @@
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
+using fac.ASTs.Types.Mappings;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;

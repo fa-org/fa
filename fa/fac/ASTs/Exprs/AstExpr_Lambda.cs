@@ -68,7 +68,7 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstType GuessType () {
-			return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select p._type).ToList () };
+			return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = (from p in Arguments select (p._type, p._ext)).ToList () };
 		}
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {

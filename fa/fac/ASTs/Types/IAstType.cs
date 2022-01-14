@@ -207,6 +207,7 @@ namespace fac.ASTs.Types {
 				}).Invoke (),
 				AstType_Void when _other is AstType_Void => true,
 				AstType_TempType _ttype1 when _other is AstType_TempType _ttype2 => _ttype1.Name == _ttype2.Name && _ttype1.TypeRaw == _ttype2.TypeRaw,
+				AstTypeMap_Dictionary _dictype1 when _other is AstTypeMap_Dictionary _dictype2 => _dictype1.KeyType.IsSame (_dictype2.KeyType) && _dictype1.ValueType.IsSame (_dictype2.ValueType),
 				_ => false,
 			};
 		}

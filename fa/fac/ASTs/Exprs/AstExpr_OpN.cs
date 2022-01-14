@@ -18,31 +18,31 @@ namespace fac.ASTs.Exprs {
 
 		private bool CheckArguments (AstType_Func _functype) {
 			bool _success = true;
-			if (_functype.ArgumentTypes.Count > 0 && _functype.ArgumentTypes[^1] is AstType_ArrayWrap _arrtype && _arrtype.Params) {
+			if (_functype.ArgumentTypes.Count > 0 && _functype.ArgumentTypes[^1]._type is AstType_ArrayWrap _arr_type && _functype.ArgumentTypes[^1]._ext == ArgumentTypeExt.Params) {
 				if (Arguments.Count < _functype.ArgumentTypes.Count - 1)
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
 				for (int i = 0; i < _functype.ArgumentTypes.Count - 1; ++i)
-					_success &= Arguments[i].TraversalCalcTypeWrap (_functype.ArgumentTypes[i], a => Arguments[i] = a);
+					_success &= Arguments[i].TraversalCalcTypeWrap (_functype.ArgumentTypes[i]._type, a => Arguments[i] = a);
 				if (_functype.ArgumentTypes.Count == Arguments.Count) {
 					var _type1 = Arguments[^1].GuessType ();
 					if (_type1 == null) {
 						return false;
-					} else if (_type1.IsSame (_arrtype)) {
+					} else if (_type1.IsSame (_arr_type)) {
 						try {
-							_success &= Arguments[^1].TraversalCalcTypeWrap (_functype.ArgumentTypes[^1], a => Arguments[^1] = a);
+							_success &= Arguments[^1].TraversalCalcTypeWrap (_arr_type, a => Arguments[^1] = a);
 							return _success;
 						} catch (Exception) {
 						}
 					}
 				}
 				for (int i = _functype.ArgumentTypes.Count - 1; i < Arguments.Count; ++i) {
-					_success &= Arguments[i].TraversalCalcTypeWrap (_arrtype.ItemType, a => Arguments[i] = a);
+					_success &= Arguments[i].TraversalCalcTypeWrap (_arr_type.ItemType, a => Arguments[i] = a);
 				}
 			} else {
 				if (_functype.ArgumentTypes.Count != Arguments.Count)
 					throw new CodeException (Token, "函数调用传入的参数数量不匹配");
 				for (int i = 0; i < _functype.ArgumentTypes.Count; ++i) {
-					_success &= Arguments[i].TraversalCalcTypeWrap (_functype.ArgumentTypes[i], a => Arguments[i] = a);
+					_success &= Arguments[i].TraversalCalcTypeWrap (_functype.ArgumentTypes[i]._type, a => Arguments[i] = a);
 				}
 			}
 			return _success;
@@ -116,7 +116,7 @@ namespace fac.ASTs.Exprs {
 			//if (Value is AstExprName_ClassFunc _funcexpr && _funcexpr.ThisObject != null)
 			//	_arg_types = _arg_types.Skip (1).ToList ();
 			// 如果最后一个参数为params列表
-			if (_arg_types.Count > 0 && _arg_types[^1] is AstType_ArrayWrap _awrap && _awrap.Params && Value is not AstExprName_BuildIn) {
+			if (_arg_types.Count > 0 && _arg_types[^1]._type is AstType_ArrayWrap _awrap && _arg_types[^1]._ext == ArgumentTypeExt.Params && Value is not AstExprName_BuildIn) {
 				bool _process_last = _arg_types.Count == Arguments.Count && Arguments[^1].ExpectType.IsSame (_awrap);
 				if (!_process_last) {
 					// 用户未处理
@@ -139,7 +139,7 @@ namespace fac.ASTs.Exprs {
 			for (int i = 0; i < Arguments.Count; ++i) {
 				_b = Arguments[i].GenerateCSharp (_indent);
 				if (Value is not AstExprName_BuildIn) {
-					if (_arg_types[i].Mut)
+					if (_arg_types[i]._ext == ArgumentTypeExt.Mut)
 						_sb.Append ($"ref ");
 				}
 				_sb.Append ($"{_b}, ");

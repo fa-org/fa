@@ -2,7 +2,9 @@ use fa;
 
 class Program {
 	public static void Main () {
-		Dictionary<int, string> _d = new Dictionary<int, string> ();
+		Dictionary<int, string> _d = new Dictionary<int, string> {};
+		_d[13] = "hello";
+		Console.WriteLine (_d[13]);
 	}
 }
 

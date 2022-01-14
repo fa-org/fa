@@ -2,6 +2,7 @@
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
+using fac.ASTs.Types.Mappings;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -20,9 +21,11 @@ namespace fac.ASTs.Exprs {
 		public static IAstExpr Array_AccessItem (IAstExpr _array, IAstExpr _index, bool _pre_expand) {
 			IAstType _item_type = null;
 			if (!_pre_expand) {
-				if (_array.ExpectType is not AstType_ArrayWrap)
+				if (_array.ExpectType is AstType_ArrayWrap _arr_type) {
+					_item_type = _arr_type.ItemType;
+				} else {
 					throw new CodeException (_array.Token, "类型必须指定为数组类型");
-				_item_type = (_array.ExpectType as AstType_ArrayWrap).ItemType;
+				}
 			}
 			return new AstExpr_ArrayAPI_Temp { Token = _array.Token, Value = _array, AccessType = ArrayApiType._AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
 		}
@@ -47,19 +50,26 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			bool _success = true;
 			if (Value != null) {
 				if (!Value.TraversalCalcTypeWrap (null, a => Value = a))
-					_success &= false;
-			}
-			if (AttachArgs != null) {
-				_success &= AttachArgs.TraversalCalcTypeWrap ();
-			}
-			if (ExpectType == null) {
-				if (AccessType == ArrayApiType._AccessItem) {
-					ExpectType = (Value.ExpectType as AstType_ArrayWrap).ItemType;
+					return null;
+				if (Value.ExpectType is AstType_ArrayWrap _arr_wrap) {
+					AttachArgs[0].TraversalCalcTypeWrap (IAstType.FromName ("int"), a => AttachArgs[0] = a);
+					ExpectType = _arr_wrap.ItemType;
+				} else if (Value.ExpectType is AstTypeMap_Dictionary _dic_type) {
+					//AttachArgs[0].TraversalCalcTypeWrap (_dic_type.KeyType, a => AttachArgs[0] = a);
+					//ExpectType = _dic_type.ValueType
 				}
 			}
+			return AstExprTypeCast.Make (this, _expect_type);
+			//if (AttachArgs != null) {
+			//	_success &= AttachArgs.TraversalCalcTypeWrap ();
+			//}
+			//if (ExpectType == null) {
+			//	if (AccessType == ArrayApiType._AccessItem) {
+			//		ExpectType = (Value.ExpectType as AstType_ArrayWrap).ItemType;
+			//	}
+			//}
 			return _success ? AstExprTypeCast.Make (this, _expect_type) : null;
 		}
 

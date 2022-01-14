@@ -1,6 +1,7 @@
 ﻿using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Types;
+using fac.ASTs.Types.Mappings;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
 	public class AstExpr_NewObject: IAstExpr {
-		public AstType_Class DataType { get; set; }
+		public IAstType DataType { get; set; }
 		public List<(string _name, IAstExpr _value)> InitialValues { get; set; } = null; // 结构体初值，当有值时ConstructorArguments为空
 		public List<IAstExpr> ConstructorArguments { get; set; } = null;                 // 构造函数参数，当有值时InitialValues为空
 
@@ -41,25 +42,27 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
 			if (DataType == null) {
-				if (_expect_type == null || _expect_type is not AstType_Class)
+				if (_expect_type == null)
 					throw new CodeException (Token, "无法猜测对象类型");
-				DataType = _expect_type as AstType_Class;
+				DataType = _expect_type;
 			}
 			if (InitialValues != null) {
 				bool _success = true;
 				var _default_init_vals = new List<(string _name, IAstExpr _value)> ();
-				foreach (var _vars in DataType.Class.ClassVars) {
-					int i = 0;
-					for (; i < InitialValues.Count; ++i) {
-						if (InitialValues[i]._name != _vars.Name)
-							continue;
-						_success &= InitialValues[i]._value.TraversalCalcTypeWrap (_vars.DataType, a => InitialValues[i] = (_name: _vars.Name, _value: a));
-						break;
-					}
-					if (i == InitialValues.Count) {
-						if (_vars.DefaultValue == null)
-							throw new CodeException (Token, $"未指定成员变量 {_vars.Name} 的初始值");
-						_success &= _vars.DefaultValue.TraversalCalcTypeWrap (_vars.DataType, a => _default_init_vals.Add ((_name: _vars.Name, _value: a)));
+				if (DataType is AstType_Class _cls_type) {
+					foreach (var _vars in _cls_type.Class.ClassVars) {
+						int i = 0;
+						for (; i < InitialValues.Count; ++i) {
+							if (InitialValues[i]._name != _vars.Name)
+								continue;
+							_success &= InitialValues[i]._value.TraversalCalcTypeWrap (_vars.DataType, a => InitialValues[i] = (_name: _vars.Name, _value: a));
+							break;
+						}
+						if (i == InitialValues.Count) {
+							if (_vars.DefaultValue == null)
+								throw new CodeException (Token, $"未指定成员变量 {_vars.Name} 的初始值");
+							_success &= _vars.DefaultValue.TraversalCalcTypeWrap (_vars.DataType, a => _default_init_vals.Add ((_name: _vars.Name, _value: a)));
+						}
 					}
 				}
 				if (!_success)
@@ -96,7 +99,12 @@ namespace fac.ASTs.Exprs {
 
 		public override string GenerateCSharp (int _indent) {
 			StringBuilder _sb = new StringBuilder ();
-			_sb.Append ($"new {DataType.Class.CSharpFullName}");
+			if (DataType is AstType_Class _cls_type) {
+				_sb.Append ($"new {_cls_type.Class.CSharpFullName}");
+			} else {
+				_sb.Append ($"new {DataType.GenerateCSharp (_indent)}");
+			}
+
 			if (InitialValues != null) {
 				_sb.Append ($" {{ ");
 				foreach (var _init in InitialValues) {

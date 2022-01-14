@@ -22,11 +22,11 @@ namespace fac.ASTs.Structs {
 
 		public AstType_Func FuncType {
 			get {
-				var _args = new List<IAstType> ();
+				var _args = new List<(IAstType _type, ArgumentTypeExt _ext)> ();
 				if (!Static) {
-					_args.Add (AstType_Class.GetType (Token, ParentClass));
+					_args.Add ((_type: AstType_Class.GetType (Token, ParentClass), _ext: ArgumentTypeExt.None));
 				}
-				_args.AddRange (from p in Arguments select p._type);
+				_args.AddRange (from p in Arguments select (_type: p._type, _ext: p._ext));
 				return new AstType_Func { Token = Token, ReturnType = ReturnType, ArgumentTypes = _args };
 			}
 		}
