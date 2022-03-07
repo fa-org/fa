@@ -349,8 +349,11 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-
-
 # fa compile temp folder
 _build/
+
+# IntelliJ Platform IDEs project specific settings files
+*.idea
+
+# macOS File System
 .DS_Store
