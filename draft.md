@@ -42,18 +42,18 @@ public class Xxx {
 
 ```fa
 public class ClassA {
-	public int MemberA = 0;
-	public int MemberA0;
+	public int MemberA = 0
+	public int MemberA0
 	public int MemberA1 { get; set; }
-	public int MemberA2 { get; set; } = 2;
+	public int MemberA2 { get; set; } = 2
 }
 public class ClassB {
-	public int MemberB = 0;
+	public int MemberB = 0
 }
 public class C: ClassA pa, ClassB pb {
 	void test () {
-		pa.MemberA = 10;
-		pb.MemberB = 20;
+		pa.MemberA = 10
+		pb.MemberB = 20
 	}
 }
 ```
@@ -61,17 +61,17 @@ public class C: ClassA pa, ClassB pb {
 - 定义成员变量
 	+ 定义普通成员变量
 		* `public string name1;`
-		* 成员变量在构造时必须指定初值，比如 `var a = new MyObj { name1 = "Alice" };`
+		* 成员变量在构造时必须指定初值，比如 `var a = new MyObj { name1 = "Alice" }`
 	+ 定义成员变量带默认值
-		* `public string name2 = "Bob";`
+		* `public string name2 = "Bob"`
 		* 成员变量在构造时可指定初值可不指定
 	+ 定义自定权限成员变量
 		* `public string name3 { get; private set; }`
 		* 成员变量在构造时必须指定初值，另外无法在外部赋值
 	+ 定义自定权限成员变量带默认值
-		* `public string name4 { get; private set; } = "Carol";`
+		* `public string name4 { get; private set; } = "Carol"`
 	+ 定义静态成员变量
-		* `public static string name5 = "Dave";`
+		* `public static string name5 = "Dave"`
 - 定义成员方法
 	+ 普通成员方法
 		* `public void func () {}`
@@ -82,11 +82,11 @@ public class C: ClassA pa, ClassB pb {
 	+ 实现代码
 		```fa
 		class A {
-			public int i = 55;
+			public int i = 55
 		}
 
 		interface IFunc {
-			public int func ();
+			public int func ()
 		}
 
 		class B: IFunc {
@@ -95,8 +95,8 @@ public class C: ClassA pa, ClassB pb {
 
 		class MyCls: A a, B b {
 			public void test_calc () {
-				a.i = 43;
-				this.a.i = 34;
+				a.i = 43
+				this.a.i = 34
 			}
 		}
 		```
@@ -151,13 +151,13 @@ public class C: ClassA pa, ClassB pb {
 ```fa
 public interface ISchool {
 	// 定义抽象方法
-	public void AddStudent (string name, int32 age);
+	public void AddStudent (string name, int32 age)
 
 	// 定义抽象getter/setter
 	public string name { get; set; }
 
 	// 定义默认方法
-	public void GetSchoolCount () => 20;
+	public void GetSchoolCount () => 20
 
 	// 定义抽象getter/setter
 	public string SchoolName { get => "meow school"; }
@@ -180,13 +180,13 @@ private enum StringData {
 // StringData _data;
 // 访问方式1：
 switch _data {
-	Name (_name): Console.WriteLine (_name);
-	Age (_age): Console.WriteLine ($"{_age}");
-	Animal: Console.WriteLine ("animal");
+	Name (_name): Console.WriteLine (_name)
+	Age (_age): Console.WriteLine ($"{_age}")
+	Animal: Console.WriteLine ("animal")
 }
 // 访问方式2
-string _name = _data.Name ?? "kangkang";
-_data.Name = "michael";
+string _name = _data.Name ?? "kangkang"
+_data.Name = "michael"
 ```
 
 ## 异常处理
@@ -199,38 +199,38 @@ _data.Name = "michael";
 
 ```fa
 int32? calc_div (int32 a) {
-	int32? x = a / 0;                                   // 执行后x的值为null
-	int32 y = a / 0 ? 1;                                // 执行后y的值为1
-	int32 z = a / 0;                                    // 执行后函数直接返回，返回值为null
-	int32 z = (a / 0).unwrap (new DeviceZeroError ());  // 等价上一句
-	int32? zz = new DeviceZeroError ();                 // 赋值一个错误（同时指定值为null）
-	throw new DeviceZeroError ();                       // 抛异常
+	int32? x = a / 0                                   // 执行后x的值为null
+	int32 y = a / 0 ? 1                                // 执行后y的值为1
+	int32 z = a / 0                                    // 执行后函数直接返回，返回值为null
+	int32 z = (a / 0).unwrap (new DeviceZeroError ())  // 等价上一句
+	int32? zz = new DeviceZeroError ()                 // 赋值一个错误（同时指定值为null）
+	throw new DeviceZeroError ()                       // 抛异常
 }
 
 int32? calc_div_wrap1 (int32 a) {
-	return calc_div (a);
+	return calc_div (a)
 }
 
 int32? calc_div_wrap2 (int32 a) {
-	int32? b = calc_div_wrap1 (a);
+	int32? b = calc_div_wrap1 (a)
 
 	// 错误处理方式1
 	switch b {
-		int32 (_b) => Console.WriteLine ("{b}");
+		int32 (_b) => Console.WriteLine ("{b}")
 		Error (_e) => {
-			Console.WriteLine ("遇到异常：{_e.Message}");
-			Console.WriteLine ("{_e.Stack}");
+			Console.WriteLine ("遇到异常：{_e.Message}")
+			Console.WriteLine ("{_e.Stack}")
 		}
 	}
 
 	// 错误处理方式2
 	if b is valid {
 		// 此处b临时升级为int32类型（假如b的值有被修改那么临时升级措施失效）
-		Console.WriteLine ("{b}");
+		Console.WriteLine ("{b}")
 	} else {
 		// 此处b临时升级为Error类型
-		Console.WriteLine ("遇到异常：{b.Message}");
-		Console.WriteLine ("{b.Stack}");
+		Console.WriteLine ("遇到异常：{b.Message}")
+		Console.WriteLine ("{b.Stack}")
 	}
 }
 ```
