@@ -7,18 +7,25 @@ grammar Fa;
 //
 
 Break:						'break';
+Class:						'class';
 Continue:					'continue';
 Do:							'do';
 Else:						'else';
 For:						'for';
 If:							'if';
+Internal:					'internal';
 Namespace:					'namespace';
+Private:					'private';
+Protected:					'protected';
+Public:						'public';
 Return:						'return';
 Switch:						'switch';
 Use:						'use';
 When:						'when';
 While:						'while';
 Func:						'func';
+Yield:						'yield';
+PublicLevel:				Internal | Private | Protected | Public;
 
 
 
@@ -175,7 +182,15 @@ expr:						middleExpr (allAssign middleExpr)*;
 // stmt
 //
 fnStmt:						Func Id QuotYuanL Id* QuotYuanR QuotHuaL stmt* QuotHuaR;
-stmt:						(fnStmt | (Return? expr?) | Break | Continue) endStmt;
+stmt:						(fnStmt | ((Return | Yield)? expr?) | Break | Continue) endStmt;
+
+
+
+//
+// class
+//
+classItemStmt:				PublicLevel? type Id;
+classStmt:					PublicLevel? Class Id QuotHuaL classItemStmt* QuotHuaR;
 
 
 
