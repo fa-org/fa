@@ -13,10 +13,39 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="antlr_gen">
+      <UniqueIdentifier>{c758919e-4c43-47ac-a1c0-456f6d7ef04f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fac.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="antlr_gen\FaBaseVisitor.cpp">
+      <Filter>antlr_gen</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr_gen\FaLexer.cpp">
+      <Filter>antlr_gen</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr_gen\FaParser.cpp">
+      <Filter>antlr_gen</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr_gen\FaVisitor.cpp">
+      <Filter>antlr_gen</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="antlr_gen\FaBaseVisitor.h">
+      <Filter>antlr_gen</Filter>
+    </ClInclude>
+    <ClInclude Include="antlr_gen\FaLexer.h">
+      <Filter>antlr_gen</Filter>
+    </ClInclude>
+    <ClInclude Include="antlr_gen\FaParser.h">
+      <Filter>antlr_gen</Filter>
+    </ClInclude>
+    <ClInclude Include="antlr_gen\FaVisitor.h">
+      <Filter>antlr_gen</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

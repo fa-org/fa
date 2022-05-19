@@ -139,7 +139,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="antlr_gen\FaBaseVisitor.cpp" />
+    <ClCompile Include="antlr_gen\FaLexer.cpp" />
+    <ClCompile Include="antlr_gen\FaParser.cpp" />
+    <ClCompile Include="antlr_gen\FaVisitor.cpp" />
     <ClCompile Include="fac.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="antlr_gen\FaBaseVisitor.h" />
+    <ClInclude Include="antlr_gen\FaLexer.h" />
+    <ClInclude Include="antlr_gen\FaParser.h" />
+    <ClInclude Include="antlr_gen\FaVisitor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

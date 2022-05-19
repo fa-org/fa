@@ -20,7 +20,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "draft", "draft", "{67BE836D
 		..\draft\README.md = ..\draft\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fac.Test", "fac.Test\fac.Test.csproj", "{AE1C37BF-B461-4DF9-8896-5EC5E60638E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fac.Test", "fac.Test\fac.Test.csproj", "{AE1C37BF-B461-4DF9-8896-5EC5E60638E7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fa", "fa\fa.vcxproj", "{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,16 @@ Global
 		{AE1C37BF-B461-4DF9-8896-5EC5E60638E7}.Release|x64.Build.0 = Release|Any CPU
 		{AE1C37BF-B461-4DF9-8896-5EC5E60638E7}.Release|x86.ActiveCfg = Release|Any CPU
 		{AE1C37BF-B461-4DF9-8896-5EC5E60638E7}.Release|x86.Build.0 = Release|Any CPU
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Debug|x64.ActiveCfg = Debug|x64
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Debug|x64.Build.0 = Debug|x64
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Debug|x86.ActiveCfg = Debug|Win32
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Debug|x86.Build.0 = Debug|Win32
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Release|Any CPU.ActiveCfg = Release|Win32
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Release|x64.ActiveCfg = Release|x64
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Release|x64.Build.0 = Release|x64
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Release|x86.ActiveCfg = Release|Win32
+		{6EA01B50-14E9-4E5D-A9A0-9D63FD505FBF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

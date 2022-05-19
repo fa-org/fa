@@ -8,7 +8,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{446B4919-EEDF-43B9-8D8B-0899BC86974A}"
 	ProjectSection(SolutionItems) = preProject
 		draft.md = draft.md
-		Fa.g4 = Fa.g4
+		tools\Fa.g4 = tools\Fa.g4
+		tools\generate.bat = tools\generate.bat
 		manual.md = manual.md
 		README.md = README.md
 	EndProjectSection
