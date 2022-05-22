@@ -124,7 +124,7 @@ literal:					BoolLiteral | NumLiteral | StringLiteral;
 fragment NUM:				[0-9];
 fragment NUMs:				NUM ('_' | NUM)*;
 fragment HEX:				NUM | [a-fA-F];
-fragment ID_BEGIN:			[a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
+fragment ID_BEGIN:			[a-zA-Z_@] | ('\\u' HEX HEX HEX HEX);
 fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
 Id:							ID_BEGIN ID_AFTER*;
 

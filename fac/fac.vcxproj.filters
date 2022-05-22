@@ -16,9 +16,12 @@
     <Filter Include="antlr_gen">
       <UniqueIdentifier>{c758919e-4c43-47ac-a1c0-456f6d7ef04f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\tools">
+      <UniqueIdentifier>{eb82fbab-4ca3-4d90-8c23-1e8859c928f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="fac.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="antlr_gen\FaBaseVisitor.cpp">
@@ -46,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="antlr_gen\FaVisitor.h">
       <Filter>antlr_gen</Filter>
+    </ClInclude>
+    <ClInclude Include="tools\File.hpp">
+      <Filter>头文件\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="FaCodeVisitor.hpp">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
