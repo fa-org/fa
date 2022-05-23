@@ -1,5 +1,5 @@
 
-// Generated from ../Fa.g4 by ANTLR 4.9.3
+// Generated from Fa.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -33,14 +33,14 @@ public:
     RuleShiftROp = 4, RuleEndStmt = 5, RuleLtOp = 6, RuleLtEqualOp = 7, 
     RuleGtOp = 8, RuleGtEqualOp = 9, RuleEqualOp = 10, RuleNotEqualOp = 11, 
     RuleExprFuncDef = 12, RuleSelfOp2 = 13, RuleCompareOp2 = 14, RuleAllOp2 = 15, 
-    RuleLiteral = 16, RuleQuotStmtPart = 17, RuleIfStmt = 18, RuleWhileStmt = 19, 
-    RuleWhileStmt2 = 20, RuleForStmt = 21, RuleForStmt2 = 22, RuleSwitchStmtPart = 23, 
-    RuleSwitchStmt = 24, RuleExprOpt = 25, RuleQuotExpr = 26, RuleFnExpr = 27, 
-    RuleClassExprItem = 28, RuleClassExpr = 29, RuleStrongExprBase = 30, 
-    RuleStrongExprPrefix = 31, RuleStrongExprSuffix = 32, RuleStrongExpr = 33, 
-    RuleMiddleExpr = 34, RuleExpr = 35, RuleFnStmt = 36, RuleStmt = 37, 
-    RuleClassItemFuncExt = 38, RuleClassItemStmt = 39, RuleClassStmt = 40, 
-    RuleUseStmt = 41, RuleNamespaceStmt = 42, RuleProgram = 43
+    RuleLiteral = 16, RuleIds = 17, RuleQuotStmtPart = 18, RuleIfStmt = 19, 
+    RuleWhileStmt = 20, RuleWhileStmt2 = 21, RuleForStmt = 22, RuleForStmt2 = 23, 
+    RuleSwitchStmtPart = 24, RuleSwitchStmt = 25, RuleExprOpt = 26, RuleQuotExpr = 27, 
+    RuleFnExpr = 28, RuleClassExprItem = 29, RuleClassExpr = 30, RuleStrongExprBase = 31, 
+    RuleStrongExprPrefix = 32, RuleStrongExprSuffix = 33, RuleStrongExpr = 34, 
+    RuleMiddleExpr = 35, RuleExpr = 36, RuleFnStmt = 37, RuleStmt = 38, 
+    RuleClassItemFuncExt = 39, RuleClassItemStmt = 40, RuleClassStmt = 41, 
+    RuleUseStmt = 42, RuleNamespaceStmt = 43, RuleProgram = 44
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -70,6 +70,7 @@ public:
   class CompareOp2Context;
   class AllOp2Context;
   class LiteralContext;
+  class IdsContext;
   class QuotStmtPartContext;
   class IfStmtContext;
   class WhileStmtContext;
@@ -361,6 +362,22 @@ public:
   };
 
   LiteralContext* literal();
+
+  class  IdsContext : public antlr4::ParserRuleContext {
+  public:
+    IdsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<antlr4::tree::TerminalNode *> Id();
+    antlr4::tree::TerminalNode* Id(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> PointOp();
+    antlr4::tree::TerminalNode* PointOp(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  IdsContext* ids();
 
   class  QuotStmtPartContext : public antlr4::ParserRuleContext {
   public:
@@ -802,12 +819,10 @@ public:
     UseStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Use();
-    std::vector<antlr4::tree::TerminalNode *> Id();
-    antlr4::tree::TerminalNode* Id(size_t i);
+    IdsContext *ids();
     EndStmtContext *endStmt();
+    antlr4::tree::TerminalNode *Id();
     antlr4::tree::TerminalNode *Assign();
-    std::vector<antlr4::tree::TerminalNode *> PointOp();
-    antlr4::tree::TerminalNode* PointOp(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -841,8 +856,7 @@ public:
     antlr4::tree::TerminalNode *EOF();
     std::vector<UseStmtContext *> useStmt();
     UseStmtContext* useStmt(size_t i);
-    std::vector<NamespaceStmtContext *> namespaceStmt();
-    NamespaceStmtContext* namespaceStmt(size_t i);
+    NamespaceStmtContext *namespaceStmt();
     std::vector<ClassStmtContext *> classStmt();
     ClassStmtContext* classStmt(size_t i);
 

@@ -1,4 +1,4 @@
-java -jar antlr-4.9.3-complete.jar -Dlanguage=Cpp -no-listener -visitor -o ../fac/antlr_gen ../Fa.g4
+java -jar antlr-4.9.3-complete.jar -Dlanguage=Cpp -no-listener -visitor -o ../fac/antlr_gen Fa.g4
 pause
 
 :: falang.moe 109 (zhujike.com

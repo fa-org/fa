@@ -1,5 +1,5 @@
 
-// Generated from ../Fa.g4 by ANTLR 4.9.3
+// Generated from Fa.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -52,6 +52,8 @@ public:
     virtual antlrcpp::Any visitAllOp2(FaParser::AllOp2Context *context) = 0;
 
     virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *context) = 0;
+
+    virtual antlrcpp::Any visitIds(FaParser::IdsContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *context) = 0;
 

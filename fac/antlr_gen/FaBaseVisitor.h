@@ -1,5 +1,5 @@
 
-// Generated from ../Fa.g4 by ANTLR 4.9.3
+// Generated from Fa.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -80,6 +80,10 @@ public:
   }
 
   virtual antlrcpp::Any visitLiteral(FaParser::LiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitIds(FaParser::IdsContext *ctx) override {
     return visitChildren(ctx);
   }
 
