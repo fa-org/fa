@@ -9,7 +9,8 @@
 
 struct FaCodeVisitor: public FaBaseVisitor {
 	antlrcpp::Any visitProgram (FaParser::ProgramContext *ctx) override {
-		return visitChildren (ctx);
+		std::vector<std::string> _uses;
+		//return visitChildren (ctx);
 	}
 };
 

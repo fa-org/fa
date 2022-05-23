@@ -15,6 +15,8 @@ struct File {
 		//m_bytes = std::string ((std::istreambuf_iterator<char> (ifs)), std::istreambuf_iterator<char> ()); // low performance
 		ifs.seekg (0, std::ios::end);
 		size_t _fsz = (size_t) ifs.tellg ();
+		if (_fsz == std::string::npos)
+			return "";
 		ifs.seekg (0, std::ios::beg);
 		std::string _data;
 		_data.resize (_fsz);

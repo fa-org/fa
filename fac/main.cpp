@@ -28,6 +28,8 @@ int main () {
 	auto _parser = std::make_shared<FaParser> (_cts.get ());
 	FaCodeVisitor _visitor {};
 
+	_visitor.visit (_parser->program ());
+
 	//std::filesystem::current_path ("D:\\fa_tmp");
 	return 0;
 }
