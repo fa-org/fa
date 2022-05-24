@@ -19,6 +19,9 @@
     <Filter Include="头文件\tools">
       <UniqueIdentifier>{eb82fbab-4ca3-4d90-8c23-1e8859c928f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\ASTs">
+      <UniqueIdentifier>{4c1c8304-6970-4834-ba09-3603a9315662}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -55,6 +58,24 @@
     </ClInclude>
     <ClInclude Include="FaCodeVisitor.hpp">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\AstProgram.hpp">
+      <Filter>头文件\ASTs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\AstClass.hpp">
+      <Filter>头文件\ASTs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\AstEnum.hpp">
+      <Filter>头文件\ASTs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\AstEnumItem.hpp">
+      <Filter>头文件\ASTs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\AstType.hpp">
+      <Filter>头文件\ASTs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\AstClassVar.hpp">
+      <Filter>头文件\ASTs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -182,6 +182,12 @@
     <ClInclude Include="antlr_gen\FaLexer.h" />
     <ClInclude Include="antlr_gen\FaParser.h" />
     <ClInclude Include="antlr_gen\FaVisitor.h" />
+    <ClInclude Include="ASTs\AstClass.hpp" />
+    <ClInclude Include="ASTs\AstClassVar.hpp" />
+    <ClInclude Include="ASTs\AstEnum.hpp" />
+    <ClInclude Include="ASTs\AstEnumItem.hpp" />
+    <ClInclude Include="ASTs\AstProgram.hpp" />
+    <ClInclude Include="ASTs\AstType.hpp" />
     <ClInclude Include="FaCodeVisitor.hpp" />
     <ClInclude Include="tools\File.hpp" />
   </ItemGroup>
