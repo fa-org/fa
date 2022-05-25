@@ -21,7 +21,7 @@ struct AstProgram {
 
 	AstProgram (FaParser::ProgramContext *ctx) {
 		for (auto _use_stmt : ctx->useStmt ())
-			m_uses.push_back ({ _use_stmt->Id () ? _use_stmt->Id ()->getText () : "", _use_stmt->ids ()->getText () });
+			m_uses.push_back ({ _use_stmt->ids () ? _use_stmt->ids ()->getText () : "", _use_stmt->ids ()->getText () });
 		//
 		m_namespace = ctx->namespaceStmt ()->getText ();
 		//

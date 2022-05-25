@@ -1,4 +1,5 @@
-﻿#include <filesystem>
+﻿#include <conio.h>
+#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -19,7 +20,6 @@
 
 int main () {
 	std::string _code = File::ReadAllText ("main.fa");
-	std::string _namespace = "global";
 
 	auto _stream = std::make_shared<antlr4::ANTLRInputStream> (_code);
 	auto _lexer = std::make_shared<FaLexer> (_stream.get ());
@@ -28,8 +28,10 @@ int main () {
 	auto _parser = std::make_shared<FaParser> (_cts.get ());
 	FaCodeVisitor _visitor {};
 
-	_visitor.visit (_parser->program ());
+	std::shared_ptr<AstProgram> _ast_program = _visitor.visit (_parser->program ()).as<std::shared_ptr<AstProgram>> ();
 
 	//std::filesystem::current_path ("D:\\fa_tmp");
+	std::cout << "parse success.\n";
+	::_getch ();
 	return 0;
 }
