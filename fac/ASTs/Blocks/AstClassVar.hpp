@@ -6,13 +6,15 @@
 #include <memory>
 #include <string>
 
-#include "AstType.hpp"
+#include "../Types/AstType.hpp"
+#include "../../Common.hpp"
 
 
 
 struct AstClassVar {
-	std::shared_ptr<AstType> m_type;
+	PublicLevel m_level;
 	std::string m_name = "";
+	std::shared_ptr<AstType> m_type;
 };
 
 

@@ -151,9 +151,9 @@ literal:					BoolLiteral | intNum | floatNum | String1Literal;
 
 fragment NUM:				[0-9];
 fragment HEX:				NUM | [a-fA-F];
-//fragment ID_BEGIN:			[a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-//fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-RawId:						('@' | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX)) (NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX))*;
+fragment ID_BEGIN:			[a-zA-Z_@] | ('\\u' HEX HEX HEX HEX);
+fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
+RawId:						ID_BEGIN ID_AFTER*;
 id:							Underline | RawId;
 ids:						id (PointOp id)*;
 idExt:						ids QuotJianL type (Comma type)* QuotJianR PointOp id;
@@ -279,13 +279,9 @@ classEnum:					id (QuotYuanL type QuotYuanR) endStmt2?;
 classItemFuncExtBody:		(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
 classItemFuncExt:			QuotYuanL typeWrapVarList? QuotYuanR classItemFuncExtBody;
 classItem:					publicLevel? Static? type id classItemFuncExt? endStmt;
-classFuncItem:				publicLevel? Static? type id classItemFuncExt endStmt;
 //
-enumStmt:					publicLevel? Enum id classTemplates? QuotHuaL classEnum* classFuncItem* QuotHuaR;
-classStmt:					publicLevel? Class id classTemplates? classParent? QuotHuaL classItem* QuotHuaR;
-
-
-//
+enumBlock:					publicLevel? Enum id classTemplates? QuotHuaL classEnum* classItem* QuotHuaR;
+classBlock:					publicLevel? Class id classTemplates? classParent? QuotHuaL classItem* QuotHuaR;
 
 
 
@@ -297,7 +293,7 @@ callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
 importStmt:					AImport type callConvention id QuotYuanL typeVarList QuotYuanR endStmt;
 libStmt:					ALib String1Literal endStmt;
 namespaceStmt:				Namespace ids endStmt;
-program:					(useStmt | importStmt | libStmt | namespaceStmt)* (enumStmt | classStmt)*;
+program:					(useStmt | importStmt | libStmt)* namespaceStmt? (enumBlock | classBlock)*;
 
 
 

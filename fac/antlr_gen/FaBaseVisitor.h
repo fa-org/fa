@@ -335,15 +335,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassFuncItem(FaParser::ClassFuncItemContext *ctx) override {
+  virtual antlrcpp::Any visitEnumBlock(FaParser::EnumBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEnumStmt(FaParser::EnumStmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *ctx) override {
+  virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 

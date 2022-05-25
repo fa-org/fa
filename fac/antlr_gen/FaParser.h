@@ -52,10 +52,9 @@ public:
     RuleExpr = 67, RuleTmpAssignExpr = 68, RuleIdAssignExpr = 69, RuleDefVarStmt = 70, 
     RuleNormalStmt = 71, RuleStmt = 72, RulePublicLevel = 73, RuleClassTemplates = 74, 
     RuleClassParent = 75, RuleClassEnum = 76, RuleClassItemFuncExtBody = 77, 
-    RuleClassItemFuncExt = 78, RuleClassItem = 79, RuleClassFuncItem = 80, 
-    RuleEnumStmt = 81, RuleClassStmt = 82, RuleUseStmt = 83, RuleCallConvention = 84, 
-    RuleImportStmt = 85, RuleLibStmt = 86, RuleNamespaceStmt = 87, RuleProgram = 88, 
-    RuleProgramEntry = 89
+    RuleClassItemFuncExt = 78, RuleClassItem = 79, RuleEnumBlock = 80, RuleClassBlock = 81, 
+    RuleUseStmt = 82, RuleCallConvention = 83, RuleImportStmt = 84, RuleLibStmt = 85, 
+    RuleNamespaceStmt = 86, RuleProgram = 87, RuleProgramEntry = 88
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -148,9 +147,8 @@ public:
   class ClassItemFuncExtBodyContext;
   class ClassItemFuncExtContext;
   class ClassItemContext;
-  class ClassFuncItemContext;
-  class EnumStmtContext;
-  class ClassStmtContext;
+  class EnumBlockContext;
+  class ClassBlockContext;
   class UseStmtContext;
   class CallConventionContext;
   class ImportStmtContext;
@@ -1513,27 +1511,9 @@ public:
 
   ClassItemContext* classItem();
 
-  class  ClassFuncItemContext : public antlr4::ParserRuleContext {
+  class  EnumBlockContext : public antlr4::ParserRuleContext {
   public:
-    ClassFuncItemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    TypeContext *type();
-    IdContext *id();
-    ClassItemFuncExtContext *classItemFuncExt();
-    EndStmtContext *endStmt();
-    PublicLevelContext *publicLevel();
-    antlr4::tree::TerminalNode *Static();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ClassFuncItemContext* classFuncItem();
-
-  class  EnumStmtContext : public antlr4::ParserRuleContext {
-  public:
-    EnumStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    EnumBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Enum();
     IdContext *id();
@@ -1543,19 +1523,19 @@ public:
     ClassTemplatesContext *classTemplates();
     std::vector<ClassEnumContext *> classEnum();
     ClassEnumContext* classEnum(size_t i);
-    std::vector<ClassFuncItemContext *> classFuncItem();
-    ClassFuncItemContext* classFuncItem(size_t i);
+    std::vector<ClassItemContext *> classItem();
+    ClassItemContext* classItem(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  EnumStmtContext* enumStmt();
+  EnumBlockContext* enumBlock();
 
-  class  ClassStmtContext : public antlr4::ParserRuleContext {
+  class  ClassBlockContext : public antlr4::ParserRuleContext {
   public:
-    ClassStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ClassBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Class();
     IdContext *id();
@@ -1572,7 +1552,7 @@ public:
    
   };
 
-  ClassStmtContext* classStmt();
+  ClassBlockContext* classBlock();
 
   class  UseStmtContext : public antlr4::ParserRuleContext {
   public:
@@ -1664,12 +1644,11 @@ public:
     ImportStmtContext* importStmt(size_t i);
     std::vector<LibStmtContext *> libStmt();
     LibStmtContext* libStmt(size_t i);
-    std::vector<NamespaceStmtContext *> namespaceStmt();
-    NamespaceStmtContext* namespaceStmt(size_t i);
-    std::vector<EnumStmtContext *> enumStmt();
-    EnumStmtContext* enumStmt(size_t i);
-    std::vector<ClassStmtContext *> classStmt();
-    ClassStmtContext* classStmt(size_t i);
+    NamespaceStmtContext *namespaceStmt();
+    std::vector<EnumBlockContext *> enumBlock();
+    EnumBlockContext* enumBlock(size_t i);
+    std::vector<ClassBlockContext *> classBlock();
+    ClassBlockContext* classBlock(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

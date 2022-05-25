@@ -179,11 +179,9 @@ public:
 
     virtual antlrcpp::Any visitClassItem(FaParser::ClassItemContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassFuncItem(FaParser::ClassFuncItemContext *context) = 0;
+    virtual antlrcpp::Any visitEnumBlock(FaParser::EnumBlockContext *context) = 0;
 
-    virtual antlrcpp::Any visitEnumStmt(FaParser::EnumStmtContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassStmt(FaParser::ClassStmtContext *context) = 0;
+    virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *context) = 0;
 
     virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *context) = 0;
 

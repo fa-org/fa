@@ -22,6 +22,18 @@
     <Filter Include="头文件\ASTs">
       <UniqueIdentifier>{4c1c8304-6970-4834-ba09-3603a9315662}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\ASTs\Types">
+      <UniqueIdentifier>{2b6b10f0-8a0d-49f3-aefc-32c0c4d86552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ASTs\Stmts">
+      <UniqueIdentifier>{9f47ed46-f041-426d-8a2d-597070258615}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ASTs\Blocks">
+      <UniqueIdentifier>{f8259d9f-88cd-4348-972e-66660cd974a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ASTs\Exprs">
+      <UniqueIdentifier>{6fad3cd9-d4b3-47f5-89a5-b5049d302eea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -38,6 +50,12 @@
     </ClCompile>
     <ClCompile Include="antlr_gen\FaVisitor.cpp">
       <Filter>antlr_gen</Filter>
+    </ClCompile>
+    <ClCompile Include="AstStmt.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AstExpr.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -59,23 +77,41 @@
     <ClInclude Include="FaCodeVisitor.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\AstProgram.hpp">
-      <Filter>头文件\ASTs</Filter>
+    <ClInclude Include="Common.hpp">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\AstClass.hpp">
-      <Filter>头文件\ASTs</Filter>
+    <ClInclude Include="ASTs\Blocks\AstEnum.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\AstEnum.hpp">
-      <Filter>头文件\ASTs</Filter>
+    <ClInclude Include="ASTs\Blocks\AstProgram.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\AstEnumItem.hpp">
-      <Filter>头文件\ASTs</Filter>
+    <ClInclude Include="ASTs\Blocks\AstClass.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\AstType.hpp">
-      <Filter>头文件\ASTs</Filter>
+    <ClInclude Include="ASTs\Blocks\AstClassFunc.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\AstClassVar.hpp">
-      <Filter>头文件\ASTs</Filter>
+    <ClInclude Include="ASTs\Blocks\AstEnumItem.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstClassVar.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Exception.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt.hpp">
+      <Filter>头文件\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr.hpp">
+      <Filter>头文件\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstReturnStmt.hpp">
+      <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

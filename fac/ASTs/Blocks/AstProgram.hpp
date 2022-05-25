@@ -10,6 +10,7 @@
 
 #include "AstEnum.hpp"
 #include "AstClass.hpp"
+#include "../../Exception.hpp"
 
 
 
@@ -22,9 +23,12 @@ struct AstProgram {
 	AstProgram (FaParser::ProgramContext *ctx) {
 		for (auto _use_stmt : ctx->useStmt ())
 			m_uses.push_back ({ _use_stmt->ids () ? _use_stmt->ids ()->getText () : "", _use_stmt->ids ()->getText () });
-		//
-		m_namespace = ctx->namespaceStmt ()->getText ();
-		//
+		if (ctx->namespaceStmt ())
+			m_namespace = ctx->namespaceStmt ()->getText ();
+		for (auto _enum : ctx->enumBlock ())
+			m_enums.push_back (std::make_shared<AstEnum> (_enum));
+		for (auto _class : ctx->classBlock ())
+			m_classes.push_back (std::make_shared<AstClass> (_class));
 	}
 };
 
