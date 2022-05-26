@@ -43,6 +43,38 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitQuotFangL(FaParser::QuotFangLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotFangR(FaParser::QuotFangRContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotJianL(FaParser::QuotJianLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotJianR(FaParser::QuotJianRContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotHuaL(FaParser::QuotHuaLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotHuaR(FaParser::QuotHuaRContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotYuanL(FaParser::QuotYuanLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQuotYuanR(FaParser::QuotYuanRContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitLtOp(FaParser::LtOpContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -311,15 +343,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassTemplates(FaParser::ClassTemplatesContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitClassEnum(FaParser::ClassEnumContext *ctx) override {
+  virtual antlrcpp::Any visitEnumItem(FaParser::EnumItemContext *ctx) override {
     return visitChildren(ctx);
   }
 

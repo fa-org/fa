@@ -1,1 +1,7 @@
 use fa
+
+class Program {
+	static void Main () {
+		return
+	}
+}

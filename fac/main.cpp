@@ -28,7 +28,7 @@ int main () {
 	auto _parser = std::make_shared<FaParser> (_cts.get ());
 	FaCodeVisitor _visitor {};
 
-	std::shared_ptr<AstProgram> _ast_program = _visitor.visit (_parser->program ()).as<std::shared_ptr<AstProgram>> ();
+	std::shared_ptr<AstProgram> _ast_program = _visitor.visit (_parser->programEntry ()).as<std::shared_ptr<AstProgram>> ();
 
 	//std::filesystem::current_path ("D:\\fa_tmp");
 	std::cout << "parse success.\n";

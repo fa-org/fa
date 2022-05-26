@@ -92,8 +92,8 @@ QusQusOp:					Qus Qus;
 StarStarOp:					StarOp StarOp;
 AndAndOp:					AndOp AndOp;
 OrOrOp:						OrOp OrOp;
-shiftLOp:					QuotJianL QuotJianL;
-shiftROp:					QuotJianR QuotJianR;
+shiftLOp:					quotJianL quotJianL;
+shiftROp:					quotJianR quotJianR;
 
 // 三元或其他
 Qus:						'?';
@@ -103,27 +103,27 @@ Colon:						':';
 NewLine:					'\n';
 Semi:						';';
 Underline:					'_';
-endStmt:					NewLine | Semi;
-endStmt2:					NewLine | Comma;
+endStmt:					(NewLine | Semi)+;
+endStmt2:					(NewLine | Comma)+;
 
 // 括号
-QuotFangL:					'[';
-QuotFangR:					']';
-QuotJianL:					'<';
-QuotJianR:					'>';
-QuotHuaL:					'{';
-QuotHuaR:					'}';
-QuotYuanL:					'(';
-QuotYuanR:					')';
+quotFangL:					'[' endStmt?;
+quotFangR:					endStmt? ']';
+quotJianL:					'<' endStmt?;
+quotJianR:					endStmt? '>';
+quotHuaL:					'{' endStmt?;
+quotHuaR:					endStmt? '}';
+quotYuanL:					'(' endStmt?;
+quotYuanR:					endStmt? ')';
 
 // 比较   TODO
-ltOp:						QuotJianL;
-ltEqualOp:					QuotJianL Assign;
-gtOp:						QuotJianR;
-gtEqualOp:					QuotJianR Assign;
+ltOp:						quotJianL;
+ltEqualOp:					quotJianL Assign;
+gtOp:						quotJianR;
+gtEqualOp:					quotJianR Assign;
 equalOp:					Assign Assign;
 notEqualOp:					Exclam Assign;
-exprFuncDef:				Assign QuotJianR;
+exprFuncDef:				Assign quotJianR;
 
 
 selfOp2:					AddOp | SubOp | StarOp | DivOp | StarStarOp | ModOp | AndOp | OrOp | XorOp | AndAndOp | OrOrOp | shiftLOp | shiftROp;
@@ -156,16 +156,16 @@ fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
 RawId:						ID_BEGIN ID_AFTER*;
 id:							Underline | RawId;
 ids:						id (PointOp id)*;
-idExt:						ids QuotJianL type (Comma type)* QuotJianR PointOp id;
+idExt:						ids quotJianL type (Comma type)* quotJianR PointOp id;
 
 
 
 //
 // type
 //
-typeAfter:					(QuotFangL QuotFangR) | Qus;
-typeSingle:					ids (QuotJianL typeWrap (Comma typeWrap)* QuotJianR)?;
-typeMulti:					QuotYuanL typeVar (Comma typeVar)+ QuotYuanR;
+typeAfter:					(quotFangL quotFangR) | Qus;
+typeSingle:					ids (quotJianL typeWrap (Comma typeWrap)* quotJianR)?;
+typeMulti:					quotYuanL typeVar (Comma typeVar)+ quotYuanR;
 type:						(typeSingle | typeMulti) typeAfter*;
 typeWrap:					(Mut | Params)? type;
 
@@ -188,8 +188,8 @@ typeWrapVar2List:			typeWrapVar2 (Comma typeWrapVar2)*;
 //
 // if
 //
-quotStmtPart:				QuotHuaL stmt* QuotHuaR;
-quotStmtExpr:				QuotHuaL stmt* expr QuotHuaR;
+quotStmtPart:				quotHuaL stmt* quotHuaR;
+quotStmtExpr:				quotHuaL stmt* expr quotHuaR;
 ifStmt:						If expr quotStmtPart (Else If expr quotStmtPart)* (Else quotStmtPart)?;
 ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr;
 
@@ -198,10 +198,10 @@ ifExpr:						If expr quotStmtExpr (Else If expr quotStmtExpr)* Else quotStmtExpr
 //
 // loop
 //
-whileStmt:					While expr QuotHuaL stmt* QuotHuaR;
-whileStmt2:					Do QuotHuaL stmt* QuotHuaR While expr;
-forStmt:					For stmt expr Semi (expr (Comma expr)*)? QuotHuaL stmt* QuotHuaR;
-forStmt2:					For type id Colon expr QuotHuaL stmt* QuotHuaR;
+whileStmt:					While expr quotHuaL stmt* quotHuaR;
+whileStmt2:					Do quotHuaL stmt* quotHuaR While expr;
+forStmt:					For stmt expr Semi (expr (Comma expr)*)? quotHuaL stmt* quotHuaR;
+forStmt2:					For type id Colon expr quotHuaL stmt* quotHuaR;
 
 
 
@@ -213,36 +213,36 @@ quotStmtExprWrap:			quotStmtExpr | expr;
 switchExprPartLast:			Underline exprFuncDef quotStmtExprWrap Comma;
 //
 switchStmtPart:				expr (When expr)? exprFuncDef stmt;
-switchStmt:					Switch expr QuotHuaL switchStmtPart* QuotHuaR;
+switchStmt:					Switch expr quotHuaL switchStmtPart* quotHuaR;
 switchStmtPart2:			When expr exprFuncDef stmt;
-switchStmt2:				Switch QuotHuaL switchStmtPart2* switchStmtPart2Last QuotHuaR;
+switchStmt2:				Switch quotHuaL switchStmtPart2* switchStmtPart2Last quotHuaR;
 //
 switchExprPart:				expr (When expr)? exprFuncDef quotStmtExprWrap Comma;
-switchExpr:					Switch expr QuotHuaL switchExprPart* switchExprPartLast QuotHuaR;
+switchExpr:					Switch expr quotHuaL switchExprPart* switchExprPartLast quotHuaR;
 switchExprPart2:			When expr exprFuncDef quotStmtExprWrap Comma;
-switchExpr2:				Switch QuotHuaL switchExprPart2* switchExprPartLast QuotHuaR;
+switchExpr2:				Switch quotHuaL switchExprPart2* switchExprPartLast quotHuaR;
 
 
 
 //
 // expr
 //
-quotExpr:					QuotYuanL expr QuotYuanR;
+quotExpr:					quotYuanL expr quotYuanR;
 exprOpt:					expr?;
 newExprItem:				id (Assign middleExpr)?;
-newExpr1:					New typeSingle QuotHuaL (newExprItem (Comma newExprItem)*)? QuotHuaR;
-newExpr2:					New typeSingle QuotYuanL (expr (Comma expr)*)? QuotYuanR;
-//newArray:					New typeSingle QuotFangL middleExpr QuotFangR;
-arrayExpr1:					QuotFangL expr PointPoint expr (Step expr)? QuotFangR;
-arrayExpr2:					QuotFangL expr (Comma expr)* QuotFangR;
-lambdaExpr:					QuotYuanL typeWrapVar2List? QuotYuanR exprFuncDef (expr | (QuotHuaL stmt* QuotHuaR));
+newExpr1:					New typeSingle quotHuaL (newExprItem (Comma newExprItem)*)? quotHuaR;
+newExpr2:					New typeSingle quotYuanL (expr (Comma expr)*)? quotYuanR;
+//newArray:					New typeSingle quotFangL middleExpr quotFangR;
+arrayExpr1:					quotFangL expr PointPoint expr (Step expr)? quotFangR;
+arrayExpr2:					quotFangL expr (Comma expr)* quotFangR;
+lambdaExpr:					quotYuanL typeWrapVar2List? quotYuanR exprFuncDef (expr | (quotHuaL stmt* quotHuaR));
 strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr | idExt;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// 前缀 - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp															// 后缀 ++ --
-							| (QuotYuanL (expr (Comma expr)*)? QuotYuanR)									//     Write ("")
-							| (QuotFangL (exprOpt (Colon exprOpt)*) QuotFangR)								//     list [12]
+							| (quotYuanL (expr (Comma expr)*)? quotYuanR)									//     Write ("")
+							| (quotFangL (exprOpt (Colon exprOpt)*) quotFangR)								//     list [12]
 							| (PointOp id)																	//     wnd.Name
-							| (Is ids (QuotYuanL id QuotYuanR)?)											//     _a is EnumA (_val)
+							| (Is ids (quotYuanL id quotYuanR)?)											//     _a is EnumA (_val)
 							;
 strongExpr:					strongExprPrefix* strongExprBase strongExprSuffix*;
 middleExpr:					strongExpr (allOp2 strongExpr)*;												//     a == 24    a + b - c
@@ -272,16 +272,16 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 // class
 //
 publicLevel:				Public | Internal | Protected | Private;
-classTemplates:				QuotJianL type (Comma type)* QuotJianR;
-classParent:				Colon ids (Comma ids)*;
+//classTemplates:				quotJianL id (Comma id)* quotJianR;
+//classParent:				Colon ids (Comma ids)*;
 //
-classEnum:					id (QuotYuanL type QuotYuanR) endStmt2?;
-classItemFuncExtBody:		(exprFuncDef expr Semi) | (QuotHuaL stmt* QuotHuaR);
-classItemFuncExt:			QuotYuanL typeWrapVarList? QuotYuanR classItemFuncExtBody;
+enumItem:					id (quotYuanL type (Comma type)* quotYuanR) endStmt2?;
+classItemFuncExtBody:		(exprFuncDef expr Semi) | (quotHuaL stmt* quotHuaR);
+classItemFuncExt:			quotYuanL typeWrapVarList? quotYuanR classItemFuncExtBody;
 classItem:					publicLevel? Static? type id classItemFuncExt? endStmt;
 //
-enumBlock:					publicLevel? Enum id classTemplates? QuotHuaL classEnum* classItem* QuotHuaR;
-classBlock:					publicLevel? Class id classTemplates? classParent? QuotHuaL classItem* QuotHuaR;
+enumBlock:					publicLevel? Enum id quotHuaL enumItem+ classItem* quotHuaR endStmt;
+classBlock:					publicLevel? Class id quotHuaL classItem* quotHuaR endStmt;
 
 
 
@@ -290,7 +290,7 @@ classBlock:					publicLevel? Class id classTemplates? classParent? QuotHuaL clas
 //
 useStmt:					Use ids endStmt;
 callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
-importStmt:					AImport type callConvention id QuotYuanL typeVarList QuotYuanR endStmt;
+importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endStmt;
 libStmt:					ALib String1Literal endStmt;
 namespaceStmt:				Namespace ids endStmt;
 program:					(useStmt | importStmt | libStmt)* namespaceStmt? (enumBlock | classBlock)*;
@@ -310,5 +310,5 @@ programEntry:				program EOF;
 // skips
 //
 Comment1:					'/*' .*? '*/' -> channel (HIDDEN);
-Comment2:					'//' ~ [\r\n]* -> channel (HIDDEN);
-WS:							[ \t\r\n]+ -> channel (HIDDEN);
+Comment2:					'//' ~ [\n]* -> channel (HIDDEN);
+WS:							[ \t\r]+ -> channel (HIDDEN);

@@ -24,11 +24,15 @@ struct AstClass {
 		m_name = _ctx->id ()->getText ();
 		for (auto _item : _ctx->classItem ()) {
 			if (_item->classItemFuncExt ()) {
-				m_funcs.push_back (std::make_shared<AstClassFunc> (_item));
+				m_funcs.push_back (AstClassFunc::FromCtx (_item));
 			} else {
-				m_vars.push_back (std::make_shared<AstClassVar> (_item));
+				m_vars.push_back (AstClassVar::FromCtx (_item));
 			}
 		}
+	}
+
+	static std::shared_ptr<AstClass> FromCtx (FaParser::ClassBlockContext *_ctx) {
+		return std::make_shared<AstClass> (_ctx);
 	}
 };
 

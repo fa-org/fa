@@ -175,8 +175,8 @@
     <ClCompile Include="antlr_gen\FaLexer.cpp" />
     <ClCompile Include="antlr_gen\FaParser.cpp" />
     <ClCompile Include="antlr_gen\FaVisitor.cpp" />
-    <ClCompile Include="AstExpr.cpp" />
-    <ClCompile Include="AstStmt.cpp" />
+    <ClCompile Include="IAstExpr.cpp" />
+    <ClCompile Include="IAstStmt.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -188,12 +188,13 @@
     <ClInclude Include="ASTs\Blocks\AstClassFunc.hpp" />
     <ClInclude Include="ASTs\Blocks\AstClassVar.hpp" />
     <ClInclude Include="ASTs\Blocks\AstEnum.hpp" />
+    <ClInclude Include="ASTs\Blocks\AstEnumFunc.hpp" />
     <ClInclude Include="ASTs\Blocks\AstEnumItem.hpp" />
     <ClInclude Include="ASTs\Blocks\AstProgram.hpp" />
-    <ClInclude Include="ASTs\Exprs\AstExpr.hpp" />
+    <ClInclude Include="ASTs\Exprs\IAstExpr.hpp" />
     <ClInclude Include="ASTs\Stmts\AstReturnStmt.hpp" />
-    <ClInclude Include="ASTs\Stmts\AstStmt.hpp" />
-    <ClInclude Include="ASTs\Types\AstType.hpp" />
+    <ClInclude Include="ASTs\Stmts\IAstStmt.hpp" />
+    <ClInclude Include="ASTs\Types\IAstType.hpp" />
     <ClInclude Include="Common.hpp" />
     <ClInclude Include="Exception.hpp" />
     <ClInclude Include="FaCodeVisitor.hpp" />

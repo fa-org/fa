@@ -14,8 +14,8 @@
 
 
 struct FaCodeVisitor: public FaBaseVisitor {
-	antlrcpp::Any visitProgram (FaParser::ProgramContext *ctx) override {
-		return std::make_shared<AstProgram> (ctx);
+	antlrcpp::Any visitProgramEntry (FaParser::ProgramEntryContext *_ctx) override {
+		return AstProgram::FromCtx (_ctx->program ());
 	}
 };
 

@@ -7,13 +7,22 @@
 #include <string>
 #include <vector>
 
-#include "AstType.hpp"
+#include "../Types/IAstType.hpp"
 
 
 
 struct AstEnumItem {
 	std::string m_name = "";
-	std::vector<std::shared_ptr<AstType>> m_attach_types;
+	std::vector<std::shared_ptr<IAstType>> m_attach_types;
+
+	AstEnumItem (FaParser::EnumItemContext *_ctx) {
+		m_name = _ctx->id ()->getText ();
+		m_attach_types = IAstType::FromCtx (_ctx->type ());
+	}
+
+	static std::shared_ptr<AstEnumItem> FromCtx (FaParser::EnumItemContext *_ctx) {
+		return std::make_shared<AstEnumItem> (_ctx);
+	}
 };
 
 

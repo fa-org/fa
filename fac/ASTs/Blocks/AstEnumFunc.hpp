@@ -1,5 +1,5 @@
-#ifndef __AST_CLASS_FUNC_HPP__
-#define __AST_CLASS_FUNC_HPP__
+#ifndef __AST_ENUM_FUNC_HPP__
+#define __AST_ENUM_FUNC_HPP__
 
 
 
@@ -14,7 +14,7 @@
 
 
 
-struct AstClassFunc {
+struct AstEnumFunc {
 	PublicLevel m_level;
 	std::string m_name;
 	std::shared_ptr<IAstType> m_ret_type;
@@ -22,7 +22,7 @@ struct AstClassFunc {
 	std::vector<std::string> m_arg_names;
 	std::vector<std::shared_ptr<IAstStmt>> m_contents;
 
-	AstClassFunc (FaParser::ClassItemContext *_ctx) {
+	AstEnumFunc (FaParser::ClassItemContext *_ctx) {
 		if (!_ctx->classItemFuncExt ())
 			throw Exception ("It's looks not a func");
 		m_level = GetPublicLevel (_ctx->publicLevel ());
@@ -31,11 +31,11 @@ struct AstClassFunc {
 		m_contents = IAstStmt::FromCtx (_ctx->classItemFuncExt ()->classItemFuncExtBody ());
 	}
 
-	static std::shared_ptr<AstClassFunc> FromCtx (FaParser::ClassItemContext *_ctx) {
-		return std::make_shared<AstClassFunc> (_ctx);
+	static std::shared_ptr<AstEnumFunc> FromCtx (FaParser::ClassItemContext *_ctx) {
+		return std::make_shared<AstEnumFunc> (_ctx);
 	}
 };
 
 
 
-#endif //__AST_CLASS_FUNC_HPP__
+#endif //__AST_ENUM_FUNC_HPP__

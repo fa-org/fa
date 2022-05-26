@@ -6,15 +6,19 @@
 #include <memory>
 #include <vector>
 
-#include "AstStmt.hpp"
-#include "../Exprs/AstExpr.hpp"
+#include "IAstStmt.hpp"
+#include "../Exprs/IAstExpr.hpp"
 
 
 
-struct AstReturnStmt: public AstStmt {
-	std::shared_ptr<AstExpr> m_expr;
+struct AstReturnStmt: public IAstStmt {
+	std::shared_ptr<IAstExpr> m_expr;
 
-	AstReturnStmt (std::shared_ptr<AstExpr> _expr): m_expr (_expr) {}
+	AstReturnStmt (std::shared_ptr<IAstExpr> _expr): m_expr (_expr) {}
+
+	static std::shared_ptr<IAstStmt> FromExpr (std::shared_ptr<IAstExpr> _expr) {
+		return std::shared_ptr<IAstStmt> ((IAstStmt *) new AstReturnStmt (_expr));
+	}
 };
 
 

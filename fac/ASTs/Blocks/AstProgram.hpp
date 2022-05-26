@@ -25,10 +25,16 @@ struct AstProgram {
 			m_uses.push_back ({ _use_stmt->ids () ? _use_stmt->ids ()->getText () : "", _use_stmt->ids ()->getText () });
 		if (ctx->namespaceStmt ())
 			m_namespace = ctx->namespaceStmt ()->getText ();
-		for (auto _enum : ctx->enumBlock ())
-			m_enums.push_back (std::make_shared<AstEnum> (_enum));
-		for (auto _class : ctx->classBlock ())
-			m_classes.push_back (std::make_shared<AstClass> (_class));
+		for (auto _enum : ctx->enumBlock ()) {
+			m_enums.push_back (AstEnum::FromCtx (_enum));
+		}
+		for (auto _class : ctx->classBlock ()) {
+			m_classes.push_back (AstClass::FromCtx (_class));
+		}
+	}
+
+	static std::shared_ptr<AstProgram> FromCtx (FaParser::ProgramContext *_ctx) {
+		return std::make_shared<AstProgram> (_ctx);
 	}
 };
 

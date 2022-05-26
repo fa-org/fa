@@ -33,6 +33,22 @@ public:
 
     virtual antlrcpp::Any visitEndStmt2(FaParser::EndStmt2Context *context) = 0;
 
+    virtual antlrcpp::Any visitQuotFangL(FaParser::QuotFangLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotFangR(FaParser::QuotFangRContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotJianL(FaParser::QuotJianLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotJianR(FaParser::QuotJianRContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotHuaL(FaParser::QuotHuaLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotHuaR(FaParser::QuotHuaRContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotYuanL(FaParser::QuotYuanLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQuotYuanR(FaParser::QuotYuanRContext *context) = 0;
+
     virtual antlrcpp::Any visitLtOp(FaParser::LtOpContext *context) = 0;
 
     virtual antlrcpp::Any visitLtEqualOp(FaParser::LtEqualOpContext *context) = 0;
@@ -167,11 +183,7 @@ public:
 
     virtual antlrcpp::Any visitPublicLevel(FaParser::PublicLevelContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassTemplates(FaParser::ClassTemplatesContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassParent(FaParser::ClassParentContext *context) = 0;
-
-    virtual antlrcpp::Any visitClassEnum(FaParser::ClassEnumContext *context) = 0;
+    virtual antlrcpp::Any visitEnumItem(FaParser::EnumItemContext *context) = 0;
 
     virtual antlrcpp::Any visitClassItemFuncExtBody(FaParser::ClassItemFuncExtBodyContext *context) = 0;
 

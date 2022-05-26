@@ -51,10 +51,10 @@
     <ClCompile Include="antlr_gen\FaVisitor.cpp">
       <Filter>antlr_gen</Filter>
     </ClCompile>
-    <ClCompile Include="AstStmt.cpp">
+    <ClCompile Include="IAstStmt.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="AstExpr.cpp">
+    <ClCompile Include="IAstExpr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,20 +98,23 @@
     <ClInclude Include="ASTs\Blocks\AstClassVar.hpp">
       <Filter>头文件\ASTs\Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\Types\AstType.hpp">
+    <ClInclude Include="ASTs\Types\IAstType.hpp">
       <Filter>头文件\ASTs\Types</Filter>
     </ClInclude>
     <ClInclude Include="Exception.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\Stmts\AstStmt.hpp">
+    <ClInclude Include="ASTs\Stmts\IAstStmt.hpp">
       <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\Exprs\AstExpr.hpp">
+    <ClInclude Include="ASTs\Exprs\IAstExpr.hpp">
       <Filter>头文件\ASTs\Exprs</Filter>
     </ClInclude>
     <ClInclude Include="ASTs\Stmts\AstReturnStmt.hpp">
       <Filter>头文件\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstEnumFunc.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
