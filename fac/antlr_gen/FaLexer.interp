@@ -166,7 +166,7 @@ Qus
 Comma
 ColonColon
 Colon
-NewLine
+Lf
 Semi
 Underline
 BoolLiteral
@@ -255,7 +255,7 @@ Qus
 Comma
 ColonColon
 Colon
-NewLine
+Lf
 Semi
 Underline
 SimpleEscape

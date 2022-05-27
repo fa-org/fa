@@ -26,6 +26,7 @@ struct AstEnumFunc {
 		if (!_ctx->classItemFuncExt ())
 			throw Exception ("It's looks not a func");
 		m_level = GetPublicLevel (_ctx->publicLevel ());
+		m_name = _ctx->id ()->getText ();
 		m_ret_type = IAstType::FromCtx (_ctx->type ());
 		std::tie (m_arg_types, m_arg_names) = IAstType::FromCtx (_ctx->classItemFuncExt ()->typeWrapVarList ());
 		m_contents = IAstStmt::FromCtx (_ctx->classItemFuncExt ()->classItemFuncExtBody ());

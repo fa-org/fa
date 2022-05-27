@@ -25,7 +25,7 @@ public:
     Exclam = 58, PointPoint = 59, PointOp = 60, AddOp = 61, SubOp = 62, 
     StarOp = 63, DivOp = 64, ModOp = 65, OrOp = 66, AndOp = 67, XorOp = 68, 
     QusQusOp = 69, StarStarOp = 70, AndAndOp = 71, OrOrOp = 72, Qus = 73, 
-    Comma = 74, ColonColon = 75, Colon = 76, NewLine = 77, Semi = 78, Underline = 79, 
+    Comma = 74, ColonColon = 75, Colon = 76, Lf = 77, Semi = 78, Underline = 79, 
     BoolLiteral = 80, IntLiteral = 81, FloatLiteral = 82, String1Literal = 83, 
     RawId = 84, Comment1 = 85, Comment2 = 86, WS = 87
   };

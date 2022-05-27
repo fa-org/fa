@@ -6,16 +6,14 @@
 #include <memory>
 #include <vector>
 
+#include "../IAst.hpp"
 
 
-struct IAstStmt {
+
+struct IAstStmt: public IAst  {
 	static std::shared_ptr<IAstStmt> FromCtx (FaParser::StmtContext *_ctx);
 	static std::vector<std::shared_ptr<IAstStmt>> FromCtx (std::vector<FaParser::StmtContext *> _ctxs);
 	static std::vector<std::shared_ptr<IAstStmt>> FromCtx (FaParser::ClassItemFuncExtBodyContext *_ctx);
-
-protected:
-	IAstStmt () {}
-	IAstStmt (const IAstStmt &) = delete;
 };
 
 

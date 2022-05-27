@@ -92,38 +92,46 @@ QusQusOp:					Qus Qus;
 StarStarOp:					StarOp StarOp;
 AndAndOp:					AndOp AndOp;
 OrOrOp:						OrOp OrOp;
-shiftLOp:					quotJianL quotJianL;
-shiftROp:					quotJianR quotJianR;
+shiftLOp:					qJianL qJianL;
+shiftROp:					qJianR qJianR;
 
 // 三元或其他
 Qus:						'?';
 Comma:						',';
 ColonColon:					'::';
 Colon:						':';
-NewLine:					'\n';
+Lf:							'\n';
 Semi:						';';
 Underline:					'_';
-endStmt:					(NewLine | Semi)+;
-endStmt2:					(NewLine | Comma)+;
+endl:						(Lf | Semi)+;
+endl2:						(Lf | Comma)+;
 
 // 括号
-quotFangL:					'[' endStmt?;
-quotFangR:					endStmt? ']';
-quotJianL:					'<' endStmt?;
-quotJianR:					endStmt? '>';
-quotHuaL:					'{' endStmt?;
-quotHuaR:					endStmt? '}';
-quotYuanL:					'(' endStmt?;
-quotYuanR:					endStmt? ')';
+qFangL:						'[';
+qFangR:						']';
+qJianL:						'<';
+qJianR:						'>';
+qHuaL:						'{';
+qHuaR:						'}';
+qYuanL:						'(';
+qYuanR:						')';
+quotFangL:					qFangL endl?;
+quotFangR:					endl? qFangR;
+quotJianL:					qJianL endl?;
+quotJianR:					endl? qJianR;
+quotHuaL:					qHuaL endl?;
+quotHuaR:					endl? qHuaR;
+quotYuanL:					qYuanL endl?;
+quotYuanR:					endl? qYuanR;
 
 // 比较   TODO
-ltOp:						quotJianL;
-ltEqualOp:					quotJianL Assign;
-gtOp:						quotJianR;
-gtEqualOp:					quotJianR Assign;
+ltOp:						qJianL;
+ltEqualOp:					qJianL Assign;
+gtOp:						qJianR;
+gtEqualOp:					qJianR Assign;
 equalOp:					Assign Assign;
 notEqualOp:					Exclam Assign;
-exprFuncDef:				Assign quotJianR;
+exprFuncDef:				Assign qJianR;
 
 
 selfOp2:					AddOp | SubOp | StarOp | DivOp | StarStarOp | ModOp | AndOp | OrOp | XorOp | AndAndOp | OrOrOp | shiftLOp | shiftROp;
@@ -254,16 +262,16 @@ expr:						middleExpr (allAssign middleExpr)*;
 //
 // define variable
 //
-tmpAssignExpr:				Assign middleExpr endStmt;
+tmpAssignExpr:				Assign middleExpr endl;
 idAssignExpr:				id Assign expr;
-defVarStmt:					type idAssignExpr (Comma idAssignExpr)* endStmt;
+defVarStmt:					type idAssignExpr (Comma idAssignExpr)* endl;
 
 
 
 //
 // stmt
 //
-normalStmt:					((Return? expr?) | Break | Continue) endStmt;
+normalStmt:					((Return? expr?) | Break | Continue) endl;
 stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | defVarStmt | normalStmt;
 
 
@@ -275,24 +283,24 @@ publicLevel:				Public | Internal | Protected | Private;
 //classTemplates:				quotJianL id (Comma id)* quotJianR;
 //classParent:				Colon ids (Comma ids)*;
 //
-enumItem:					id (quotYuanL type (Comma type)* quotYuanR) endStmt2?;
+enumItem:					id (quotYuanL type (Comma type)* quotYuanR) endl2?;
 classItemFuncExtBody:		(exprFuncDef expr Semi) | (quotHuaL stmt* quotHuaR);
 classItemFuncExt:			quotYuanL typeWrapVarList? quotYuanR classItemFuncExtBody;
-classItem:					publicLevel? Static? type id classItemFuncExt? endStmt;
+classItem:					publicLevel? Static? type id classItemFuncExt? endl;
 //
-enumBlock:					publicLevel? Enum id quotHuaL enumItem+ classItem* quotHuaR endStmt;
-classBlock:					publicLevel? Class id quotHuaL classItem* quotHuaR endStmt;
+enumBlock:					publicLevel? Enum id quotHuaL enumItem+ classItem* quotHuaR endl;
+classBlock:					publicLevel? Class id quotHuaL classItem* quotHuaR endl;
 
 
 
 //
 // file
 //
-useStmt:					Use ids endStmt;
+useStmt:					Use (id Assign)? ids endl;
 callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
-importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endStmt;
-libStmt:					ALib String1Literal endStmt;
-namespaceStmt:				Namespace ids endStmt;
+importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
+libStmt:					ALib String1Literal endl;
+namespaceStmt:				Namespace ids endl;
 program:					(useStmt | importStmt | libStmt)* namespaceStmt? (enumBlock | classBlock)*;
 
 

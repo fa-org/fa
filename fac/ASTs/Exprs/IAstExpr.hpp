@@ -6,14 +6,12 @@
 #include <memory>
 #include <vector>
 
+#include "../IAst.hpp"
 
 
-struct IAstExpr {
+
+struct IAstExpr: public IAst {
 	static std::shared_ptr<IAstExpr> FromCtx (FaParser::ExprContext *_ctx);
-
-protected:
-	IAstExpr () {}
-	IAstExpr (const IAstExpr &) = delete;
 };
 
 

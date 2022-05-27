@@ -70,10 +70,10 @@ std::vector<std::string> FaLexer::_ruleNames = {
   "AndAndAssign", "OrOrAssign", "ReverseOp", "AddAddOp", "SubSubOp", "Exclam", 
   "PointPoint", "PointOp", "AddOp", "SubOp", "StarOp", "DivOp", "ModOp", 
   "OrOp", "AndOp", "XorOp", "QusQusOp", "StarStarOp", "AndAndOp", "OrOrOp", 
-  "Qus", "Comma", "ColonColon", "Colon", "NewLine", "Semi", "Underline", 
-  "SimpleEscape", "HexEscape", "UniEscape", "Schar", "BoolLiteral", "IntLiteral", 
-  "FloatLiteral", "String1Literal", "NUM", "HEX", "ID_BEGIN", "ID_AFTER", 
-  "RawId", "Comment1", "Comment2", "WS"
+  "Qus", "Comma", "ColonColon", "Colon", "Lf", "Semi", "Underline", "SimpleEscape", 
+  "HexEscape", "UniEscape", "Schar", "BoolLiteral", "IntLiteral", "FloatLiteral", 
+  "String1Literal", "NUM", "HEX", "ID_BEGIN", "ID_AFTER", "RawId", "Comment1", 
+  "Comment2", "WS"
 };
 
 std::vector<std::string> FaLexer::_channelNames = {
@@ -108,8 +108,8 @@ std::vector<std::string> FaLexer::_symbolicNames = {
   "ReverseOp", "AddAddOp", "SubSubOp", "Exclam", "PointPoint", "PointOp", 
   "AddOp", "SubOp", "StarOp", "DivOp", "ModOp", "OrOp", "AndOp", "XorOp", 
   "QusQusOp", "StarStarOp", "AndAndOp", "OrOrOp", "Qus", "Comma", "ColonColon", 
-  "Colon", "NewLine", "Semi", "Underline", "BoolLiteral", "IntLiteral", 
-  "FloatLiteral", "String1Literal", "RawId", "Comment1", "Comment2", "WS"
+  "Colon", "Lf", "Semi", "Underline", "BoolLiteral", "IntLiteral", "FloatLiteral", 
+  "String1Literal", "RawId", "Comment1", "Comment2", "WS"
 };
 
 dfa::Vocabulary FaLexer::_vocabulary(_literalNames, _symbolicNames);

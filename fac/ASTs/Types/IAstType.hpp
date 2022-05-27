@@ -8,12 +8,13 @@
 #include <tuple>
 #include <vector>
 
+#include "../IAst.hpp"
 #include "../../Common.hpp"
 #include "../../Exception.hpp"
 
 
 
-struct IAstType {
+struct IAstType: public IAst {
 	bool m_mut = false;
 	bool m_params = false;
 
@@ -57,10 +58,12 @@ struct IAstType {
 	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarListContext *_ctx) {
 		std::vector<std::shared_ptr<IAstType>> _types;
 		std::vector<std::string> _names;
-		for (auto _item_ctx : _ctx->typeWrapVar ()) {
-			auto [_type, _name] = FromCtx (_item_ctx);
-			_types.push_back (_type);
-			_names.push_back (_name);
+		if (_ctx) {
+			for (auto _item_ctx : _ctx->typeWrapVar ()) {
+				auto [_type, _name] = FromCtx (_item_ctx);
+				_types.push_back (_type);
+				_names.push_back (_name);
+			}
 		}
 		return { _types, _names };
 	}
@@ -68,17 +71,15 @@ struct IAstType {
 	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVar2ListContext *_ctx) {
 		std::vector<std::shared_ptr<IAstType>> _types;
 		std::vector<std::string> _names;
-		for (auto _item_ctx : _ctx->typeWrapVar2 ()) {
-			auto [_type, _name] = FromCtx (_item_ctx);
-			_types.push_back (_type);
-			_names.push_back (_name);
+		if (_ctx) {
+			for (auto _item_ctx : _ctx->typeWrapVar2 ()) {
+				auto [_type, _name] = FromCtx (_item_ctx);
+				_types.push_back (_type);
+				_names.push_back (_name);
+			}
 		}
 		return { _types, _names };
 	}
-
-protected:
-	IAstType () {}
-	IAstType (const IAstType &) = delete;
 };
 
 

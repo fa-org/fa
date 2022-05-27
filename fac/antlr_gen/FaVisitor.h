@@ -29,9 +29,25 @@ public:
 
     virtual antlrcpp::Any visitShiftROp(FaParser::ShiftROpContext *context) = 0;
 
-    virtual antlrcpp::Any visitEndStmt(FaParser::EndStmtContext *context) = 0;
+    virtual antlrcpp::Any visitEndl(FaParser::EndlContext *context) = 0;
 
-    virtual antlrcpp::Any visitEndStmt2(FaParser::EndStmt2Context *context) = 0;
+    virtual antlrcpp::Any visitEndl2(FaParser::Endl2Context *context) = 0;
+
+    virtual antlrcpp::Any visitQFangL(FaParser::QFangLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQFangR(FaParser::QFangRContext *context) = 0;
+
+    virtual antlrcpp::Any visitQJianL(FaParser::QJianLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQJianR(FaParser::QJianRContext *context) = 0;
+
+    virtual antlrcpp::Any visitQHuaL(FaParser::QHuaLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQHuaR(FaParser::QHuaRContext *context) = 0;
+
+    virtual antlrcpp::Any visitQYuanL(FaParser::QYuanLContext *context) = 0;
+
+    virtual antlrcpp::Any visitQYuanR(FaParser::QYuanRContext *context) = 0;
 
     virtual antlrcpp::Any visitQuotFangL(FaParser::QuotFangLContext *context) = 0;
 

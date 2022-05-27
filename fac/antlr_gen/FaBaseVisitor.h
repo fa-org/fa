@@ -35,11 +35,43 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEndStmt(FaParser::EndStmtContext *ctx) override {
+  virtual antlrcpp::Any visitEndl(FaParser::EndlContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEndStmt2(FaParser::EndStmt2Context *ctx) override {
+  virtual antlrcpp::Any visitEndl2(FaParser::Endl2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQFangL(FaParser::QFangLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQFangR(FaParser::QFangRContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQJianL(FaParser::QJianLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQJianR(FaParser::QJianRContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQHuaL(FaParser::QHuaLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQHuaR(FaParser::QHuaRContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQYuanL(FaParser::QYuanLContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitQYuanR(FaParser::QYuanRContext *ctx) override {
     return visitChildren(ctx);
   }
 

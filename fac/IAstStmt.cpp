@@ -8,7 +8,8 @@
 
 std::shared_ptr<IAstStmt> IAstStmt::FromCtx (FaParser::StmtContext *_ctx) {
 	// TODO
-	throw Exception::NotImplement ();
+	//throw Exception::NotImplement ();
+	return std::shared_ptr<IAstStmt> (new IAstStmt ());
 }
 
 

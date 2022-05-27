@@ -116,5 +116,41 @@
     <ClInclude Include="ASTs\Blocks\AstEnumFunc.hpp">
       <Filter>头文件\ASTs\Blocks</Filter>
     </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_void.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_tuple_wrap.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_array_wrap.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_bool.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_class.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_enum.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_float.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_int.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_option_wrap.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_string.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_temp.hpp">
+      <Filter>头文件\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\IAst.hpp">
+      <Filter>头文件\ASTs</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -22,15 +22,13 @@ struct AstProgram {
 
 	AstProgram (FaParser::ProgramContext *ctx) {
 		for (auto _use_stmt : ctx->useStmt ())
-			m_uses.push_back ({ _use_stmt->ids () ? _use_stmt->ids ()->getText () : "", _use_stmt->ids ()->getText () });
+			m_uses.push_back ({ _use_stmt->id () ? _use_stmt->id ()->getText () : "", _use_stmt->ids ()->getText () });
 		if (ctx->namespaceStmt ())
 			m_namespace = ctx->namespaceStmt ()->getText ();
-		for (auto _enum : ctx->enumBlock ()) {
+		for (auto _enum : ctx->enumBlock ())
 			m_enums.push_back (AstEnum::FromCtx (_enum));
-		}
-		for (auto _class : ctx->classBlock ()) {
+		for (auto _class : ctx->classBlock ())
 			m_classes.push_back (AstClass::FromCtx (_class));
-		}
 	}
 
 	static std::shared_ptr<AstProgram> FromCtx (FaParser::ProgramContext *_ctx) {
