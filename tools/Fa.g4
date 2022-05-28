@@ -172,7 +172,7 @@ idExt:						ids quotJianL type (Comma type)* quotJianR PointOp id;
 // type
 //
 typeAfter:					(quotFangL quotFangR) | Qus;
-typeSingle:					ids (quotJianL typeWrap (Comma typeWrap)* quotJianR)?;
+typeSingle:					ids (quotJianL type (Comma type)* quotJianR)?;
 typeMulti:					quotYuanL typeVar (Comma typeVar)+ quotYuanR;
 type:						(typeSingle | typeMulti) typeAfter*;
 typeWrap:					(Mut | Params)? type;

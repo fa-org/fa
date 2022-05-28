@@ -57,6 +57,9 @@
     <ClCompile Include="IAstExpr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="IAstType.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="antlr_gen\FaBaseVisitor.h">
@@ -110,7 +113,7 @@
     <ClInclude Include="ASTs\Exprs\IAstExpr.hpp">
       <Filter>头文件\ASTs\Exprs</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\Stmts\AstReturnStmt.hpp">
+    <ClInclude Include="ASTs\Stmts\AstStmt_return.hpp">
       <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
     <ClInclude Include="ASTs\Blocks\AstEnumFunc.hpp">
@@ -151,6 +154,15 @@
     </ClInclude>
     <ClInclude Include="ASTs\IAst.hpp">
       <Filter>头文件\ASTs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_expr_wrap.hpp">
+      <Filter>头文件\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_continue.hpp">
+      <Filter>头文件\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_break.hpp">
+      <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

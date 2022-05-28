@@ -177,6 +177,7 @@
     <ClCompile Include="antlr_gen\FaVisitor.cpp" />
     <ClCompile Include="IAstExpr.cpp" />
     <ClCompile Include="IAstStmt.cpp" />
+    <ClCompile Include="IAstType.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -193,7 +194,10 @@
     <ClInclude Include="ASTs\Blocks\AstProgram.hpp" />
     <ClInclude Include="ASTs\Exprs\IAstExpr.hpp" />
     <ClInclude Include="ASTs\IAst.hpp" />
-    <ClInclude Include="ASTs\Stmts\AstReturnStmt.hpp" />
+    <ClInclude Include="ASTs\Stmts\AstStmt_break.hpp" />
+    <ClInclude Include="ASTs\Stmts\AstStmt_continue.hpp" />
+    <ClInclude Include="ASTs\Stmts\AstStmt_expr_wrap.hpp" />
+    <ClInclude Include="ASTs\Stmts\AstStmt_return.hpp" />
     <ClInclude Include="ASTs\Stmts\IAstStmt.hpp" />
     <ClInclude Include="ASTs\Types\AstType_temp.hpp" />
     <ClInclude Include="ASTs\Types\AstType_array_wrap.hpp" />

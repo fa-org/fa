@@ -780,8 +780,8 @@ public:
     virtual size_t getRuleIndex() const override;
     IdsContext *ids();
     QuotJianLContext *quotJianL();
-    std::vector<TypeWrapContext *> typeWrap();
-    TypeWrapContext* typeWrap(size_t i);
+    std::vector<TypeContext *> type();
+    TypeContext* type(size_t i);
     QuotJianRContext *quotJianR();
     std::vector<antlr4::tree::TerminalNode *> Comma();
     antlr4::tree::TerminalNode* Comma(size_t i);

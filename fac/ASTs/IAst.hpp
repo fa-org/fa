@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include "../antlr_gen/FaParser.h"
+
 
 
 struct IAst {
