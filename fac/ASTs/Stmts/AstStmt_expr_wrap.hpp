@@ -15,7 +15,8 @@ struct AstStmt_expr_wrap: public IAstStmt {
 	std::shared_ptr<IAstExpr> m_expr;
 
 	AstStmt_expr_wrap (std::shared_ptr<IAstExpr> _expr): m_expr (_expr) {}
-	std::string GenCppCode () override { return std::format ("{};", m_expr->GenCppCode ()); }
+
+	std::string GenCppCode (size_t _indent) override { return std::format ("{}{};\n", Indent (_indent), m_expr->GenCppCode ()); }
 
 	static std::shared_ptr<IAstStmt> FromExpr (std::shared_ptr<IAstExpr> _expr) {
 		return std::shared_ptr<IAstStmt> ((IAstStmt *) new AstStmt_expr_wrap (_expr));

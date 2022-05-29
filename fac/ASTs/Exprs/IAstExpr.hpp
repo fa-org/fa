@@ -7,10 +7,15 @@
 #include <vector>
 
 #include "../IAst.hpp"
+#include "../../Exception.hpp"
 
 
 
 struct IAstExpr: public IAst {
+	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
+
+	virtual std::string GenCppCode () = 0;
+
 	static std::shared_ptr<IAstExpr> FromCtx (FaParser::ExprContext *_ctx);
 };
 

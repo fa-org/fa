@@ -10,7 +10,7 @@
 
 
 struct IAst {
-	virtual std::string GenCppCode () = 0;
+	virtual std::string GenCppCode (size_t _indent) = 0;
 };
 
 #endif //__IAST_HPP__

@@ -12,7 +12,7 @@
 
 
 struct AstStmt_break: public IAstStmt {
-	std::string GenCppCode () override { return "break;"; }
+	std::string GenCppCode (size_t _indent) override { return std::format ("{}break;\n", Indent (_indent)); }
 };
 
 

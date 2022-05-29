@@ -13,6 +13,10 @@ struct AstType_int: public IAstType {
 
 	AstType_int (size_t _bit_width, bool _sign): m_bit_width (_bit_width), m_sign (_sign) {}
 	std::string GenCppCode () override { return std::format ("{}int{}_t", m_sign ? "" : "u", m_bit_width); }
+
+	static std::shared_ptr<IAstType> Make (size_t _bit_width, bool _sign) {
+		return std::shared_ptr<IAstType> ((IAstType *) new AstType_int { _bit_width, _sign });
+	}
 };
 
 

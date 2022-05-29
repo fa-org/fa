@@ -18,6 +18,9 @@ struct IAstType: public IAst {
 	bool m_mut = false;
 	bool m_params = false;
 
+	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
+	virtual std::string GenCppCode () = 0;
+
 	static std::tuple<std::shared_ptr<IAstType>, std::string> FromCtx (FaParser::TypeVarContext *_ctx);
 	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (std::vector<FaParser::TypeVarContext *> _ctx);
 	static std::shared_ptr<IAstType> FromCtx (FaParser::TypeSingleContext *_ctx);

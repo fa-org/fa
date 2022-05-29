@@ -18,6 +18,7 @@ inline PublicLevel GetPublicLevel (FaParser::PublicLevelContext *_ctx) {
 }
 inline std::string GetId (FaParser::IdContext *_ctx) { return _ctx ? _ctx->getText () : ""; }
 inline std::string GetId (FaParser::IdsContext *_ctx) { return _ctx ? _ctx->getText () : ""; }
+inline std::string Indent (size_t _indent) { return std::string (_indent * 4, ' '); }
 
 
 

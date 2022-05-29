@@ -9,6 +9,10 @@
 
 struct AstType_bool: public IAstType {
 	std::string GenCppCode () override { return "bool"; }
+
+	static std::shared_ptr<IAstType> Make () {
+		return std::shared_ptr<IAstType> ((IAstType *) new AstType_bool {});
+	}
 };
 
 

@@ -7,17 +7,22 @@
 #include <string>
 #include <vector>
 
+#include "../IAst.hpp"
 #include "../Types/IAstType.hpp"
 
 
 
-struct AstEnumItem {
+struct AstEnumItem: public IAst {
 	std::string m_name = "";
 	std::vector<std::shared_ptr<IAstType>> m_attach_types;
 
 	AstEnumItem (FaParser::EnumItemContext *_ctx) {
-		m_name = _ctx->id ()->getText ();
+		m_name = GetId (_ctx->id ());
 		m_attach_types = IAstType::FromCtx (_ctx->type ());
+	}
+
+	std::string GenCppCode (size_t _indent) override {
+		throw NOT_IMPLEMENT ();
 	}
 
 	static std::shared_ptr<AstEnumItem> FromCtx (FaParser::EnumItemContext *_ctx) {

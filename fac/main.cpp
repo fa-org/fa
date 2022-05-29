@@ -19,19 +19,29 @@
 
 
 int main () {
-	std::string _code = File::ReadAllText ("main.fa");
+	try {
+		// parse
+		std::string _code = File::ReadAllText ("main.fa");
 
-	auto _stream = std::make_shared<antlr4::ANTLRInputStream> (_code);
-	auto _lexer = std::make_shared<FaLexer> (_stream.get ());
-	auto _cts = std::make_shared<antlr4::CommonTokenStream> (_lexer.get ());
-	_cts->fill ();
-	auto _parser = std::make_shared<FaParser> (_cts.get ());
-	FaCodeVisitor _visitor {};
+		auto _stream = std::make_shared<antlr4::ANTLRInputStream> (_code);
+		auto _lexer = std::make_shared<FaLexer> (_stream.get ());
+		auto _cts = std::make_shared<antlr4::CommonTokenStream> (_lexer.get ());
+		_cts->fill ();
+		auto _parser = std::make_shared<FaParser> (_cts.get ());
+		FaCodeVisitor _visitor {};
+		std::shared_ptr<AstProgram> _ast_program = _visitor.visit (_parser->programEntry ()).as<std::shared_ptr<AstProgram>> ();
 
-	std::shared_ptr<AstProgram> _ast_program = _visitor.visit (_parser->programEntry ()).as<std::shared_ptr<AstProgram>> ();
+		// generate
+		std::filesystem::current_path ("D:\\fa_tmp");
+		_code = _ast_program->GenCppCode (0);
+		std::cout << _code;
 
-	//std::filesystem::current_path ("D:\\fa_tmp");
-	std::cout << "parse success.\n";
+	} catch (std::exception &_e) {
+		std::cout << std::format ("catch exception: {}\n", _e.what ());
+	} catch (...) {
+		std::cout << "catch exception: unknown\n";
+	}
+		std::cout << "press any key to exit\n";
 	::_getch ();
 	return 0;
 }

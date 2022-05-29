@@ -7,12 +7,13 @@
 #include <string>
 #include <vector>
 
+#include "../IAst.hpp"
 #include "AstEnumItem.hpp"
 #include "AstEnumFunc.hpp"
 
 
 
-struct AstEnum {
+struct AstEnum: public IAst {
 	PublicLevel m_level;
 	std::string m_name = "";
 	std::vector<std::shared_ptr<AstEnumItem>> m_items;
@@ -20,11 +21,15 @@ struct AstEnum {
 
 	AstEnum (FaParser::EnumBlockContext *_ctx) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
-		m_name = _ctx->id ()->getText ();
+		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->enumItem ())
 			m_items.push_back (AstEnumItem::FromCtx (_item));
 		for (auto _item : _ctx->classItem ())
 			m_funcs.push_back (AstEnumFunc::FromCtx (_item));
+	}
+
+	std::string GenCppCode (size_t _indent) override {
+		throw NOT_IMPLEMENT ();
 	}
 
 	static std::shared_ptr<AstEnum> FromCtx (FaParser::EnumBlockContext *_ctx) {

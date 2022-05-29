@@ -17,11 +17,13 @@ struct Exception: public std::exception {
 	//}
 	const char* what() const noexcept override { return m_err.c_str (); }
 
-	static Exception NotImplement () { return Exception ("not implement"); }
+	static Exception NotImplement (const char *_file, int _line) { return Exception (std::format ("not implement in {}:{}", _file, _line)); }
 
 private:
 	std::string m_err = "";
 };
+
+#define NOT_IMPLEMENT() Exception::NotImplement(__FILE__, __LINE__)
 
 
 

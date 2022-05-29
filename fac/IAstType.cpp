@@ -18,7 +18,9 @@
 
 
 std::tuple<std::shared_ptr<IAstType>, std::string> IAstType::FromCtx (FaParser::TypeVarContext *_ctx) {
-
+	if (!_ctx)
+		return { nullptr, "" };
+	throw NOT_IMPLEMENT ();
 }
 
 
@@ -37,38 +39,39 @@ std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> IAs
 
 
 std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeSingleContext *_ctx) {
-	std::string _id = _ctx->ids ()->getText ();
+	std::string _id = GetId (_ctx->ids ());
 	if (!_ctx->quotJianL ()) {
 		static std::map<std::string, std::function<std::shared_ptr<IAstType> ()>> s_base_types {
-			{ "bool",    [] () { return std::make_shared<AstType_bool> (); } },
-			{ "float32", [] () { return std::make_shared<AstType_float> (32); } },
-			{ "float64", [] () { return std::make_shared<AstType_float> (64); } },
-			{ "int",     [] () { return std::make_shared<AstType_int> (32, true); } },
-			{ "int8",    [] () { return std::make_shared<AstType_int> (8, true); } },
-			{ "int16",   [] () { return std::make_shared<AstType_int> (16, true); } },
-			{ "int32",   [] () { return std::make_shared<AstType_int> (32, true); } },
-			{ "int64",   [] () { return std::make_shared<AstType_int> (64, true); } },
-			{ "uint",    [] () { return std::make_shared<AstType_int> (32, false); } },
-			{ "uint8",   [] () { return std::make_shared<AstType_int> (8, false); } },
-			{ "uint16",  [] () { return std::make_shared<AstType_int> (16, false); } },
-			{ "uint32",  [] () { return std::make_shared<AstType_int> (32, false); } },
-			{ "uint64",  [] () { return std::make_shared<AstType_int> (64, false); } },
-			{ "string",  [] () { return std::make_shared<AstType_string> (); } },
-			{ "void",    [] () { return std::make_shared<AstType_void> (); } },
+			{ "bool",    [] () { return AstType_bool::Make (); } },
+			{ "float32", [] () { return AstType_float::Make (32); } },
+			{ "float64", [] () { return AstType_float::Make (64); } },
+			{ "int",     [] () { return AstType_int::Make (32, true); } },
+			{ "int8",    [] () { return AstType_int::Make (8, true); } },
+			{ "int16",   [] () { return AstType_int::Make (16, true); } },
+			{ "int32",   [] () { return AstType_int::Make (32, true); } },
+			{ "int64",   [] () { return AstType_int::Make (64, true); } },
+			{ "uint",    [] () { return AstType_int::Make (32, false); } },
+			{ "uint8",   [] () { return AstType_int::Make (8, false); } },
+			{ "uint16",  [] () { return AstType_int::Make (16, false); } },
+			{ "uint32",  [] () { return AstType_int::Make (32, false); } },
+			{ "uint64",  [] () { return AstType_int::Make (64, false); } },
+			{ "string",  [] () { return AstType_string::Make (); } },
+			{ "void",    [] () { return AstType_void::Make (); } },
 		};
 		if (s_base_types.contains (_id))
 			return s_base_types [_id] ();
-		return std::make_shared<AstType_temp> (_id);
+		return AstType_temp::Make (_id);
 	} else {
 	}
 
-	throw Exception::NotImplement ();
+	throw NOT_IMPLEMENT ();
 }
 
 
 
 std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeMultiContext *_ctx) {
-	return std::make_shared<AstType_tuple_wrap> (FromCtx (_ctx->typeVar ()));
+	auto [_types, _names] = FromCtx (_ctx->typeVar ());
+	return AstType_tuple_wrap::Make (_types, _names);
 }
 
 

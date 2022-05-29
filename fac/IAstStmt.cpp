@@ -9,7 +9,7 @@
 
 
 
-std::shared_ptr<IAstStmt> FromCtx (FaParser::NormalStmtContext *_ctx) {
+std::shared_ptr<IAstStmt> IAstStmt::FromCtx (FaParser::NormalStmtContext *_ctx) {
 	if (_ctx->Return ()) {
 		return AstStmt_return::FromExpr (IAstExpr::FromCtx (_ctx->expr ()));
 	} else if (_ctx->expr ()) {
@@ -19,6 +19,7 @@ std::shared_ptr<IAstStmt> FromCtx (FaParser::NormalStmtContext *_ctx) {
 	} else if (_ctx->Continue ()) {
 		return std::make_shared<AstStmt_continue> ();
 	}
+	throw NOT_IMPLEMENT ();
 }
 
 
@@ -27,7 +28,7 @@ std::shared_ptr<IAstStmt> IAstStmt::FromCtx (FaParser::StmtContext *_ctx) {
 	if (_ctx->normalStmt ()) {
 		return FromCtx (_ctx->normalStmt ());
 	} else {
-		throw Exception::NotImplement ();
+		throw NOT_IMPLEMENT ();
 	}
 }
 

@@ -12,7 +12,7 @@
 
 
 struct AstStmt_continue: public IAstStmt {
-	std::string GenCppCode () override { return "continue;"; }
+	std::string GenCppCode (size_t _indent) override { return std::format ("{}continue;\n", Indent (_indent)); }
 };
 
 

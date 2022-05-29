@@ -15,10 +15,14 @@
 
 struct AstType_tuple_wrap: public IAstType {
 	std::vector<std::shared_ptr<IAstType>> m_base_types;
+	std::vector<std::string> m_base_names;
 
-	AstType_tuple_wrap (std::vector<std::shared_ptr<IAstType>> _base_types): m_base_types (_base_types) {}
+	AstType_tuple_wrap (std::vector<std::shared_ptr<IAstType>> _base_types, std::vector<std::string> _base_names) {
+		m_base_types.assign (_base_types.begin (), _base_types.end ());
+		m_base_names.assign (_base_names.begin (), _base_names.end ());
+	}
 	std::string GenCppCode () override {
-		std::stringstream _ss;
+		std::stringstream _ss {};
 		_ss << "std::tuple<";
 		for (size_t i = 0; i < m_base_types.size (); ++i) {
 			if (i > 0)
@@ -27,6 +31,10 @@ struct AstType_tuple_wrap: public IAstType {
 		}
 		_ss << ">";
 		return _ss.str ();
+	}
+
+	static std::shared_ptr<IAstType> Make (std::vector<std::shared_ptr<IAstType>> _base_types, std::vector<std::string> _base_names) {
+		return std::shared_ptr<IAstType> ((IAstType *) new AstType_tuple_wrap { _base_types, _base_names });
 	}
 };
 
