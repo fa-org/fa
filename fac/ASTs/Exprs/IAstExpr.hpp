@@ -12,11 +12,13 @@
 
 
 struct IAstExpr: public IAst {
-	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
+	IAstExpr (antlr4::Token *_token): IAst (_token) {}
 
-	virtual std::string GenCppCode () = 0;
-
+	static std::shared_ptr<IAstExpr> FromCtx (FaParser::StrongExprBaseContext *_ctx);
+	static std::shared_ptr<IAstExpr> FromCtx (FaParser::StrongExprContext *_ctx);
+	static std::shared_ptr<IAstExpr> FromCtx (FaParser::MiddleExprContext *_ctx);
 	static std::shared_ptr<IAstExpr> FromCtx (FaParser::ExprContext *_ctx);
+	static std::vector<std::shared_ptr<IAstExpr>> FromCtx (std::vector < FaParser::ExprContext *> _ctx);
 };
 
 

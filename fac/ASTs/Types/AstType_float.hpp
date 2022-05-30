@@ -10,11 +10,12 @@
 struct AstType_float: public IAstType {
 	size_t m_bit_width;
 
-	AstType_float (size_t _bit_width): m_bit_width (_bit_width) {}
+	AstType_float (antlr4::Token *_token, size_t _bit_width): IAstType (_token), m_bit_width (_bit_width) {}
+
 	std::string GenCppCode () override { return m_bit_width == 32 ? "float" : "double"; }
 
-	static std::shared_ptr<IAstType> Make (size_t _bit_width) {
-		return std::shared_ptr<IAstType> ((IAstType *) new AstType_float { _bit_width });
+	static std::shared_ptr<IAstType> Make (antlr4::Token *_token, size_t _bit_width) {
+		return std::shared_ptr<IAstType> ((IAstType *) new AstType_float { _token, _bit_width });
 	}
 };
 

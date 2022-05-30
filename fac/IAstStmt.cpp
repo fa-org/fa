@@ -11,9 +11,9 @@
 
 std::shared_ptr<IAstStmt> IAstStmt::FromCtx (FaParser::NormalStmtContext *_ctx) {
 	if (_ctx->Return ()) {
-		return AstStmt_return::FromExpr (IAstExpr::FromCtx (_ctx->expr ()));
+		return AstStmt_return::FromExpr (_ctx->Return ()->getSymbol (), IAstExpr::FromCtx (_ctx->expr ()));
 	} else if (_ctx->expr ()) {
-		return AstStmt_expr_wrap::FromExpr (IAstExpr::FromCtx (_ctx->expr ()));
+		return AstStmt_expr_wrap::FromExpr (_ctx->expr ()->start, IAstExpr::FromCtx (_ctx->expr ()));
 	} else if (_ctx->Break ()) {
 		return std::make_shared<AstStmt_break> ();
 	} else if (_ctx->Continue ()) {
@@ -46,7 +46,7 @@ std::vector<std::shared_ptr<IAstStmt>> IAstStmt::FromCtx (std::vector<FaParser::
 std::vector<std::shared_ptr<IAstStmt>> IAstStmt::FromCtx (FaParser::ClassItemFuncExtBodyContext *_ctx) {
 	if (_ctx->expr ()) {
 		std::vector<std::shared_ptr<IAstStmt>> _v;
-		_v.push_back (AstStmt_return::FromExpr (IAstExpr::FromCtx (_ctx->expr ())));
+		_v.push_back (AstStmt_return::FromExpr (_ctx->start, IAstExpr::FromCtx (_ctx->expr ())));
 		return _v;
 	} else {
 		return FromCtx (_ctx->stmt ());

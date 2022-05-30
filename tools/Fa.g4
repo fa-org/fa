@@ -159,9 +159,9 @@ literal:					BoolLiteral | intNum | floatNum | String1Literal;
 
 fragment NUM:				[0-9];
 fragment HEX:				NUM | [a-fA-F];
-fragment ID_BEGIN:			[a-zA-Z_@] | ('\\u' HEX HEX HEX HEX);
+fragment ID_BEGIN:			[a-zA-Z@] | ('\\u' HEX HEX HEX HEX);
 fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
-RawId:						ID_BEGIN ID_AFTER*;
+RawId:						(ID_BEGIN ID_AFTER*) | ('_' ID_AFTER+);
 id:							Underline | RawId;
 ids:						id (PointOp id)*;
 idExt:						ids quotJianL type (Comma type)* quotJianR PointOp id;

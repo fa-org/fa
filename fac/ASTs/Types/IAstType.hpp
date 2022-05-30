@@ -18,6 +18,8 @@ struct IAstType: public IAst {
 	bool m_mut = false;
 	bool m_params = false;
 
+	IAstType (antlr4::Token *_token): IAst (_token) {}
+
 	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
 	virtual std::string GenCppCode () = 0;
 

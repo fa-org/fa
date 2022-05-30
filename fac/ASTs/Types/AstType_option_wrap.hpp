@@ -12,7 +12,7 @@
 struct AstType_option_wrap: public IAstType {
 	std::shared_ptr<IAstType> m_base_type;
 
-	AstType_option_wrap (std::shared_ptr<IAstType> _base_type): m_base_type (_base_type) {
+	AstType_option_wrap (antlr4::Token *_token, std::shared_ptr<IAstType> _base_type): IAstType (_token), m_base_type (_base_type) {
 		if (dynamic_cast<AstType_option_wrap *> (_base_type.get ()))
 			throw Exception ("option wrap cannot assign option wrap base type");
 	}

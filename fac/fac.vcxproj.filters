@@ -164,5 +164,14 @@
     <ClInclude Include="ASTs\Stmts\AstStmt_break.hpp">
       <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_op2.hpp">
+      <Filter>头文件\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_op1.hpp">
+      <Filter>头文件\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_invoke.hpp">
+      <Filter>头文件\ASTs\Exprs</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

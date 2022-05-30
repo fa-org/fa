@@ -18,11 +18,12 @@ struct AstClassVar: public IAst {
 	std::string m_name = "";
 	std::shared_ptr<IAstType> m_type;
 
-	AstClassVar (FaParser::ClassItemContext *_ctx) {
+	AstClassVar (FaParser::ClassItemContext *_ctx): IAst (_ctx->id ()->start) {
 		if (_ctx->classItemFuncExt ())
 			throw Exception ("It's looks not a var");
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_type = IAstType::FromCtx (_ctx->type ());
+		m_name = GetId (_ctx->id ());
 	}
 
 	std::string GenCppCode (size_t _indent) override {

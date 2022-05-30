@@ -21,7 +21,7 @@ struct AstClass: public IAst {
 	std::vector<std::shared_ptr<AstClassVar>> m_vars;
 	std::vector<std::shared_ptr<AstClassFunc>> m_funcs;
 
-	AstClass (FaParser::ClassBlockContext *_ctx) {
+	AstClass (FaParser::ClassBlockContext *_ctx): IAst (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->classItem ()) {
@@ -35,7 +35,7 @@ struct AstClass: public IAst {
 
 	std::string GenCppCode (size_t _indent) override {
 		std::stringstream _ss {};
-		_ss << std::format ("{}struct {} {{\n", Indent (_indent), m_name);
+		_ss << std::format ("{}class {} {{\n", Indent (_indent), m_name);
 		_ss << std::format ("{}public:\n", Indent (_indent));
 		for (auto _var : m_vars)
 			_ss << _var->GenCppCode (_indent + 1);

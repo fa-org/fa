@@ -11,7 +11,8 @@
 struct AstType_class: public IAstType {
 	std::shared_ptr<AstClass> m_class;
 
-	AstType_class (std::shared_ptr<AstClass> _class): m_class (_class) {}
+	AstType_class (antlr4::Token *_token, std::shared_ptr<AstClass> _class): IAstType (_token), m_class (_class) {}
+
 	std::string GenCppCode () override { return m_class->m_name; }
 };
 

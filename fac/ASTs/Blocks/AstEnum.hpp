@@ -19,7 +19,7 @@ struct AstEnum: public IAst {
 	std::vector<std::shared_ptr<AstEnumItem>> m_items;
 	std::vector<std::shared_ptr<AstEnumFunc>> m_funcs;
 
-	AstEnum (FaParser::EnumBlockContext *_ctx) {
+	AstEnum (FaParser::EnumBlockContext *_ctx): IAst (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->enumItem ())

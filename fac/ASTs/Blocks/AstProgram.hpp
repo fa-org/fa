@@ -23,14 +23,14 @@ struct AstProgram: public IAst {
 	std::vector<std::shared_ptr<AstEnum>> m_enums;
 	std::vector<std::shared_ptr<AstClass>> m_classes;
 
-	AstProgram (FaParser::ProgramContext *ctx) {
-		for (auto _use_stmt : ctx->useStmt ())
+	AstProgram (FaParser::ProgramContext *_ctx): IAst (_ctx->start) {
+		for (auto _use_stmt : _ctx->useStmt ())
 			m_uses.push_back ({ GetId (_use_stmt->id ()), GetId (_use_stmt->ids ()) });
-		if (ctx->namespaceStmt ())
-			m_namespace = GetId (ctx->namespaceStmt ()->ids ());
-		for (auto _enum : ctx->enumBlock ())
+		if (_ctx->namespaceStmt ())
+			m_namespace = GetId (_ctx->namespaceStmt ()->ids ());
+		for (auto _enum : _ctx->enumBlock ())
 			m_enums.push_back (AstEnum::FromCtx (_enum));
-		for (auto _class : ctx->classBlock ())
+		for (auto _class : _ctx->classBlock ())
 			m_classes.push_back (AstClass::FromCtx (_class));
 	}
 

@@ -24,7 +24,7 @@ struct AstClassFunc: public IAst {
 	std::vector<std::string> m_arg_names;
 	std::vector<std::shared_ptr<IAstStmt>> m_contents;
 
-	AstClassFunc (FaParser::ClassItemContext *_ctx) {
+	AstClassFunc (FaParser::ClassItemContext *_ctx): IAst (_ctx->id ()->start) {
 		if (!_ctx->classItemFuncExt ())
 			throw Exception ("It's looks not a func");
 		m_level = GetPublicLevel (_ctx->publicLevel ());

@@ -13,7 +13,8 @@
 struct AstType_array_wrap: public IAstType {
 	std::shared_ptr<IAstType> m_base_type;
 
-	AstType_array_wrap (std::shared_ptr<IAstType> _base_type): m_base_type (_base_type) {}
+	AstType_array_wrap (antlr4::Token *_token, std::shared_ptr<IAstType> _base_type): IAstType (_token), m_base_type (_base_type) {}
+
 	std::string GenCppCode () override { return std::format ("{}[]", m_base_type->GenCppCode ()); }
 };
 

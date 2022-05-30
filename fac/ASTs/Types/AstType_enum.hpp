@@ -11,7 +11,8 @@
 struct AstType_enum: public IAstType {
 	std::shared_ptr<AstEnum> m_enum;
 
-	AstType_enum (std::shared_ptr<AstEnum> _enum): m_enum (_enum) {}
+	AstType_enum (antlr4::Token *_token, std::shared_ptr<AstEnum> _enum): IAstType (_token), m_enum (_enum) {}
+
 	std::string GenCppCode () override { return m_enum->m_name; }
 };
 
