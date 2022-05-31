@@ -15,11 +15,15 @@
 
 #include "tools/File.hpp"
 #include "FaCodeVisitor.hpp"
+//#include <Windows.h>
+extern "C" int __stdcall SetConsoleOutputCP (unsigned int);
+#pragma comment (lib, "Kernel32.lib")
 
 
 
 int main () {
-	try {
+	::SetConsoleOutputCP (65001);
+	//try {
 		// parse
 		std::string _code = File::ReadAllText ("main.fa");
 
@@ -35,13 +39,12 @@ int main () {
 		std::filesystem::current_path ("D:\\fa_tmp");
 		_code = _ast_program->GenCppCode (0);
 		std::cout << _code;
-
-	} catch (std::exception &_e) {
-		std::cout << std::format ("catch exception: {}\n", _e.what ());
-	} catch (...) {
-		std::cout << "catch exception: unknown\n";
-	}
-		std::cout << "press any key to exit\n";
+	//} catch (std::exception &_e) {
+	//	std::cout << std::format ("catch exception: {}\n", _e.what ());
+	//} catch (...) {
+	//	std::cout << "catch exception: unknown\n";
+	//}
+	std::cout << "\n\n\npress any key to exit\n";
 	::_getch ();
 	return 0;
 }

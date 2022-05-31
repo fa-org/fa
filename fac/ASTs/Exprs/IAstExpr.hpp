@@ -19,6 +19,9 @@ struct IAstExpr: public IAst {
 	static std::shared_ptr<IAstExpr> FromCtx (FaParser::MiddleExprContext *_ctx);
 	static std::shared_ptr<IAstExpr> FromCtx (FaParser::ExprContext *_ctx);
 	static std::vector<std::shared_ptr<IAstExpr>> FromCtx (std::vector < FaParser::ExprContext *> _ctx);
+	static std::shared_ptr<IAstExpr> FromCtx (FaParser::ExprOptContext *_ctx);
+	static std::vector<std::shared_ptr<IAstExpr>> FromCtx (std::vector < FaParser::ExprOptContext *> _ctx);
+	static std::shared_ptr<IAstExpr> FromCtx (FaParser::LiteralContext *_ctx);
 };
 
 

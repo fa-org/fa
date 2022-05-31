@@ -14,9 +14,10 @@
 struct AstExpr_invoke: public IAstExpr {
 	std::shared_ptr<IAstExpr> m_base;
 	std::vector<std::shared_ptr<IAstExpr>> m_args;
+	std::string m_op;
 
-	AstExpr_invoke (antlr4::Token *_token, std::shared_ptr<IAstExpr> _base, std::vector<std::shared_ptr<IAstExpr>> _args):
-		IAstExpr (_token), m_base (_base), m_args (_args) {}
+	AstExpr_invoke (antlr4::Token *_token, std::shared_ptr<IAstExpr> _base, std::vector<std::shared_ptr<IAstExpr>> _args, std::string _op):
+		IAstExpr (_token), m_base (_base), m_args (_args), m_op (_op) {}
 
 	std::string GenCppCode (size_t _indent) override {
 		std::stringstream _ss {};
@@ -30,8 +31,8 @@ struct AstExpr_invoke: public IAstExpr {
 		return _ss.str ();
 	}
 
-	static std::shared_ptr<IAstExpr> Make (antlr4::Token *_token, std::shared_ptr<IAstExpr> _base, std::vector<std::shared_ptr<IAstExpr>> _args) {
-		return std::shared_ptr<IAstExpr> ((IAstExpr *) new AstExpr_invoke { _token, _base, _args });
+	static std::shared_ptr<IAstExpr> Make (antlr4::Token *_token, std::shared_ptr<IAstExpr> _base, std::vector<std::shared_ptr<IAstExpr>> _args, std::string _op) {
+		return std::shared_ptr<IAstExpr> ((IAstExpr *) new AstExpr_invoke { _token, _base, _args, _op });
 	}
 };
 

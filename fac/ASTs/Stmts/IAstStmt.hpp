@@ -14,7 +14,7 @@ struct IAstStmt: public IAst  {
 	IAstStmt (antlr4::Token *_token): IAst (_token) {}
 
 	static std::shared_ptr<IAstStmt> FromCtx (FaParser::NormalStmtContext *_ctx);
-	static std::shared_ptr<IAstStmt> FromCtx (FaParser::StmtContext *_ctx);
+	static std::vector<std::shared_ptr<IAstStmt>> FromCtx (FaParser::StmtContext *_ctx);
 	static std::vector<std::shared_ptr<IAstStmt>> FromCtx (std::vector<FaParser::StmtContext *> _ctxs);
 	static std::vector<std::shared_ptr<IAstStmt>> FromCtx (FaParser::ClassItemFuncExtBodyContext *_ctx);
 };

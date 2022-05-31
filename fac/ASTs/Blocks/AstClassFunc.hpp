@@ -18,6 +18,7 @@
 
 struct AstClassFunc: public IAst {
 	PublicLevel m_level;
+	bool m_static;
 	std::string m_name;
 	std::shared_ptr<IAstType> m_ret_type;
 	std::vector<std::shared_ptr<IAstType>> m_arg_types;
@@ -28,6 +29,7 @@ struct AstClassFunc: public IAst {
 		if (!_ctx->classItemFuncExt ())
 			throw Exception ("It's looks not a func");
 		m_level = GetPublicLevel (_ctx->publicLevel ());
+		m_static = !!_ctx->Static ();
 		m_name = GetId (_ctx->id ());
 		m_ret_type = IAstType::FromCtx (_ctx->type ());
 		std::tie (m_arg_types, m_arg_names) = IAstType::FromCtx (_ctx->classItemFuncExt ()->typeWrapVarList ());
@@ -36,7 +38,7 @@ struct AstClassFunc: public IAst {
 
 	std::string GenCppCode (size_t _indent) override {
 		std::stringstream _ss {};
-		_ss << std::format ("{}{} {} (", Indent (_indent), m_ret_type->GenCppCode (), m_name);
+		_ss << std::format ("{}{}{} {} (", Indent (_indent), m_static ? "static " : "", m_ret_type->GenCppCode (), m_name);
 		for (size_t i = 0; i < m_arg_types.size (); ++i) {
 			if (i > 0)
 				_ss << ", ";

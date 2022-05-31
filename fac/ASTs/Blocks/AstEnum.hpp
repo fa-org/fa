@@ -9,7 +9,7 @@
 
 #include "../IAst.hpp"
 #include "AstEnumItem.hpp"
-#include "AstEnumFunc.hpp"
+#include "AstClassFunc.hpp"
 
 
 
@@ -17,15 +17,24 @@ struct AstEnum: public IAst {
 	PublicLevel m_level;
 	std::string m_name = "";
 	std::vector<std::shared_ptr<AstEnumItem>> m_items;
-	std::vector<std::shared_ptr<AstEnumFunc>> m_funcs;
+	std::vector<std::shared_ptr<AstClassFunc>> m_funcs;
 
 	AstEnum (FaParser::EnumBlockContext *_ctx): IAst (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->enumItem ())
 			m_items.push_back (AstEnumItem::FromCtx (_item));
-		for (auto _item : _ctx->classItem ())
-			m_funcs.push_back (AstEnumFunc::FromCtx (_item));
+		for (auto _item : _ctx->classItemFunc ())
+			m_funcs.push_back (AstClassFunc::FromCtx (_item));
+	}
+
+	AstEnum (FaParser::EnumBlock2Context *_ctx): IAst (_ctx->id ()->start) {
+		m_level = GetPublicLevel (_ctx->publicLevel ());
+		m_name = GetId (_ctx->id ());
+		for (auto _item : _ctx->enumItem ())
+			m_items.push_back (AstEnumItem::FromCtx (_item));
+		for (auto _item : _ctx->classItem2 ())
+			m_funcs.push_back (AstClassFunc::FromCtx (_item));
 	}
 
 	std::string GenCppCode (size_t _indent) override {
@@ -33,6 +42,10 @@ struct AstEnum: public IAst {
 	}
 
 	static std::shared_ptr<AstEnum> FromCtx (FaParser::EnumBlockContext *_ctx) {
+		return std::make_shared<AstEnum> (_ctx);
+	}
+
+	static std::shared_ptr<AstEnum> FromCtx (FaParser::EnumBlock2Context *_ctx) {
 		return std::make_shared<AstEnum> (_ctx);
 	}
 };

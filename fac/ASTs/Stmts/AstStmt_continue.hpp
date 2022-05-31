@@ -12,7 +12,13 @@
 
 
 struct AstStmt_continue: public IAstStmt {
+	AstStmt_continue (antlr4::Token *_token): IAstStmt (_token) {}
+
 	std::string GenCppCode (size_t _indent) override { return std::format ("{}continue;\n", Indent (_indent)); }
+
+	static std::shared_ptr<IAstStmt> Make (antlr4::Token *_token) {
+		return std::shared_ptr<IAstStmt> ((IAstStmt *) new AstStmt_continue { _token });
+	}
 };
 
 

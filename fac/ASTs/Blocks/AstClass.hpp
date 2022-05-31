@@ -24,8 +24,19 @@ struct AstClass: public IAst {
 	AstClass (FaParser::ClassBlockContext *_ctx): IAst (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
-		for (auto _item : _ctx->classItem ()) {
-			if (_item->classItemFuncExt ()) {
+		for (auto _item : _ctx->classItemVar ()) {
+			m_vars.push_back (AstClassVar::FromCtx (_item));
+		}
+		for (auto _item : _ctx->classItemFunc ()) {
+			m_funcs.push_back (AstClassFunc::FromCtx (_item));
+		}
+	}
+
+	AstClass (FaParser::ClassBlock2Context *_ctx): IAst (_ctx->id ()->start) {
+		m_level = GetPublicLevel (_ctx->publicLevel ());
+		m_name = GetId (_ctx->id ());
+		for (auto _item : _ctx->classItem2 ()) {
+			if (_item->classItemFuncExt2 ()) {
 				m_funcs.push_back (AstClassFunc::FromCtx (_item));
 			} else {
 				m_vars.push_back (AstClassVar::FromCtx (_item));
@@ -46,6 +57,10 @@ struct AstClass: public IAst {
 	}
 
 	static std::shared_ptr<AstClass> FromCtx (FaParser::ClassBlockContext *_ctx) {
+		return std::make_shared<AstClass> (_ctx);
+	}
+
+	static std::shared_ptr<AstClass> FromCtx (FaParser::ClassBlock2Context *_ctx) {
 		return std::make_shared<AstClass> (_ctx);
 	}
 };

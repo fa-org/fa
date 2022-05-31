@@ -116,9 +116,6 @@
     <ClInclude Include="ASTs\Stmts\AstStmt_return.hpp">
       <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
-    <ClInclude Include="ASTs\Blocks\AstEnumFunc.hpp">
-      <Filter>头文件\ASTs\Blocks</Filter>
-    </ClInclude>
     <ClInclude Include="ASTs\Types\AstType_void.hpp">
       <Filter>头文件\ASTs\Types</Filter>
     </ClInclude>
@@ -172,6 +169,15 @@
     </ClInclude>
     <ClInclude Include="ASTs\Exprs\AstExpr_invoke.hpp">
       <Filter>头文件\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_temp_id.hpp">
+      <Filter>头文件\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_value.hpp">
+      <Filter>头文件\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_define_var.hpp">
+      <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

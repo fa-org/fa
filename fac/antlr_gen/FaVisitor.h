@@ -97,8 +97,6 @@ public:
 
     virtual antlrcpp::Any visitIds(FaParser::IdsContext *context) = 0;
 
-    virtual antlrcpp::Any visitIdExt(FaParser::IdExtContext *context) = 0;
-
     virtual antlrcpp::Any visitTypeAfter(FaParser::TypeAfterContext *context) = 0;
 
     virtual antlrcpp::Any visitTypeSingle(FaParser::TypeSingleContext *context) = 0;
@@ -113,13 +111,17 @@ public:
 
     virtual antlrcpp::Any visitTypeVarList(FaParser::TypeVarListContext *context) = 0;
 
-    virtual antlrcpp::Any visitTypeWrapVar(FaParser::TypeWrapVarContext *context) = 0;
+    virtual antlrcpp::Any visitTypeWrapVar1(FaParser::TypeWrapVar1Context *context) = 0;
 
-    virtual antlrcpp::Any visitTypeWrapVarList(FaParser::TypeWrapVarListContext *context) = 0;
+    virtual antlrcpp::Any visitTypeWrapVarList1(FaParser::TypeWrapVarList1Context *context) = 0;
 
     virtual antlrcpp::Any visitTypeWrapVar2(FaParser::TypeWrapVar2Context *context) = 0;
 
-    virtual antlrcpp::Any visitTypeWrapVar2List(FaParser::TypeWrapVar2ListContext *context) = 0;
+    virtual antlrcpp::Any visitTypeWrapVarList2(FaParser::TypeWrapVarList2Context *context) = 0;
+
+    virtual antlrcpp::Any visitTypeWrapVar3(FaParser::TypeWrapVar3Context *context) = 0;
+
+    virtual antlrcpp::Any visitTypeWrapVarList3(FaParser::TypeWrapVarList3Context *context) = 0;
 
     virtual antlrcpp::Any visitQuotStmtPart(FaParser::QuotStmtPartContext *context) = 0;
 
@@ -187,11 +189,13 @@ public:
 
     virtual antlrcpp::Any visitExpr(FaParser::ExprContext *context) = 0;
 
-    virtual antlrcpp::Any visitTmpAssignExpr(FaParser::TmpAssignExprContext *context) = 0;
-
     virtual antlrcpp::Any visitIdAssignExpr(FaParser::IdAssignExprContext *context) = 0;
 
     virtual antlrcpp::Any visitDefVarStmt(FaParser::DefVarStmtContext *context) = 0;
+
+    virtual antlrcpp::Any visitIdAssignExpr2(FaParser::IdAssignExpr2Context *context) = 0;
+
+    virtual antlrcpp::Any visitDefVarStmt2(FaParser::DefVarStmt2Context *context) = 0;
 
     virtual antlrcpp::Any visitNormalStmt(FaParser::NormalStmtContext *context) = 0;
 
@@ -199,17 +203,27 @@ public:
 
     virtual antlrcpp::Any visitPublicLevel(FaParser::PublicLevelContext *context) = 0;
 
-    virtual antlrcpp::Any visitEnumItem(FaParser::EnumItemContext *context) = 0;
-
     virtual antlrcpp::Any visitClassItemFuncExtBody(FaParser::ClassItemFuncExtBodyContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemFuncExt(FaParser::ClassItemFuncExtContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemFuncExt1(FaParser::ClassItemFuncExt1Context *context) = 0;
 
-    virtual antlrcpp::Any visitClassItem(FaParser::ClassItemContext *context) = 0;
+    virtual antlrcpp::Any visitClassItemVar(FaParser::ClassItemVarContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassItemFunc(FaParser::ClassItemFuncContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *context) = 0;
+
+    virtual antlrcpp::Any visitClassItemFuncExt2(FaParser::ClassItemFuncExt2Context *context) = 0;
+
+    virtual antlrcpp::Any visitClassItem2(FaParser::ClassItem2Context *context) = 0;
+
+    virtual antlrcpp::Any visitClassBlock2(FaParser::ClassBlock2Context *context) = 0;
+
+    virtual antlrcpp::Any visitEnumItem(FaParser::EnumItemContext *context) = 0;
 
     virtual antlrcpp::Any visitEnumBlock(FaParser::EnumBlockContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *context) = 0;
+    virtual antlrcpp::Any visitEnumBlock2(FaParser::EnumBlock2Context *context) = 0;
 
     virtual antlrcpp::Any visitUseStmt(FaParser::UseStmtContext *context) = 0;
 

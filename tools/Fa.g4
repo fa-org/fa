@@ -25,7 +25,7 @@ Const:						'const';
 Do:							'do';
 Else:						'else';
 Enum:						'enum';
-FaMain:						'FaMain';
+Fn:							'Fn';
 For:						'for';
 If:							'if';
 Is:							'is';
@@ -44,6 +44,7 @@ Step:						'step';
 Switch:						'switch';
 Unsigned:					'unsigned';
 Use:						'use';
+Var:						'var';
 When:						'when';
 While:						'while';
 
@@ -159,12 +160,11 @@ literal:					BoolLiteral | intNum | floatNum | String1Literal;
 
 fragment NUM:				[0-9];
 fragment HEX:				NUM | [a-fA-F];
-fragment ID_BEGIN:			[a-zA-Z@] | ('\\u' HEX HEX HEX HEX);
-fragment ID_AFTER:			NUM | [a-zA-Z_] | ('\\u' HEX HEX HEX HEX);
+fragment ID_BEGIN:			[a-zA-Z@] | [\u0080-\u{10FFFF}];
+fragment ID_AFTER:			NUM | [a-zA-Z_] | [\u0080-\u{10FFFF}];
 RawId:						(ID_BEGIN ID_AFTER*) | ('_' ID_AFTER+);
 id:							Underline | RawId;
 ids:						id (PointOp id)*;
-idExt:						ids quotJianL type (Comma type)* quotJianR PointOp id;
 
 
 
@@ -184,10 +184,12 @@ typeWrap:					(Mut | Params)? type;
 //
 typeVar:					type id?;
 typeVarList:				typeVar (Comma typeVar)*;
-typeWrapVar:				typeWrap id?;
-typeWrapVarList:			typeWrapVar (Comma typeWrapVar)*;
-typeWrapVar2:				typeWrap? id;
-typeWrapVar2List:			typeWrapVar2 (Comma typeWrapVar2)*;
+typeWrapVar1:				id Colon typeWrap;
+typeWrapVarList1:			typeWrapVar1 (Comma typeWrapVar1)*;
+typeWrapVar2:				typeWrap id?;
+typeWrapVarList2:			typeWrapVar2 (Comma typeWrapVar2)*;
+typeWrapVar3:				typeWrap? id;
+typeWrapVarList3:			typeWrapVar3 (Comma typeWrapVar3)*;
 //eTypeVar:					eType id?;
 //eTypeVarList:				eTypeVar (Comma eTypeVar)*;
 
@@ -243,8 +245,8 @@ newExpr2:					New typeSingle quotYuanL (expr (Comma expr)*)? quotYuanR;
 //newArray:					New typeSingle quotFangL middleExpr quotFangR;
 arrayExpr1:					quotFangL expr PointPoint expr (Step expr)? quotFangR;
 arrayExpr2:					quotFangL expr (Comma expr)* quotFangR;
-lambdaExpr:					quotYuanL typeWrapVar2List? quotYuanR exprFuncDef (expr | (quotHuaL stmt* quotHuaR));
-strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr | idExt;
+lambdaExpr:					quotYuanL typeWrapVarList3? quotYuanR exprFuncDef (expr | (quotHuaL stmt* quotHuaR));
+strongExprBase:				(ColonColon? ids) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// Ç°×º - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (quotYuanL (expr (Comma expr)*)? quotYuanR)									//     Write ("")
@@ -262,9 +264,10 @@ expr:						middleExpr (allAssign middleExpr)*;
 //
 // define variable
 //
-tmpAssignExpr:				Assign middleExpr endl;
-idAssignExpr:				id Assign expr;
-defVarStmt:					type idAssignExpr (Comma idAssignExpr)* endl;
+idAssignExpr:				id Colon type Assign expr;
+defVarStmt:					Var idAssignExpr (Comma idAssignExpr)* endl;
+idAssignExpr2:				id Assign expr;
+defVarStmt2:				type idAssignExpr2 (Comma idAssignExpr2)* endl;
 
 
 
@@ -272,7 +275,7 @@ defVarStmt:					type idAssignExpr (Comma idAssignExpr)* endl;
 // stmt
 //
 normalStmt:					((Return? expr?) | Break | Continue) endl;
-stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | defVarStmt | normalStmt;
+stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart | switchStmt2 | switchStmt | defVarStmt | defVarStmt2 | normalStmt;
 
 
 
@@ -282,14 +285,19 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 publicLevel:				Public | Internal | Protected | Private;
 //classTemplates:				quotJianL id (Comma id)* quotJianR;
 //classParent:				Colon ids (Comma ids)*;
+classItemFuncExtBody:		(exprFuncDef expr Semi) | (quotHuaL stmt* quotHuaR);
+//
+classItemFuncExt1:			quotYuanL typeWrapVarList1? quotYuanR Colon type classItemFuncExtBody;
+classItemVar:				publicLevel? Static? id Colon type (Assign middleExpr)? endl;
+classItemFunc:				publicLevel? Static? Fn id classItemFuncExt1? endl;
+classBlock:					publicLevel? Class id quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
+classItemFuncExt2:			quotYuanL typeWrapVarList2? quotYuanR classItemFuncExtBody;
+classItem2:					publicLevel? Static? type id classItemFuncExt2? endl;
+classBlock2:				publicLevel? Class id quotHuaL classItem2* quotHuaR endl;
 //
 enumItem:					id (quotYuanL type (Comma type)* quotYuanR) endl2?;
-classItemFuncExtBody:		(exprFuncDef expr Semi) | (quotHuaL stmt* quotHuaR);
-classItemFuncExt:			quotYuanL typeWrapVarList? quotYuanR classItemFuncExtBody;
-classItem:					publicLevel? Static? type id classItemFuncExt? endl;
-//
-enumBlock:					publicLevel? Enum id quotHuaL enumItem+ classItem* quotHuaR endl;
-classBlock:					publicLevel? Class id quotHuaL classItem* quotHuaR endl;
+enumBlock:					publicLevel? Enum id quotHuaL enumItem+ classItemFunc* quotHuaR endl;
+enumBlock2:					publicLevel? Enum id quotHuaL enumItem+ classItem2* quotHuaR endl;
 
 
 
@@ -301,7 +309,7 @@ callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
 importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
 libStmt:					ALib String1Literal endl;
 namespaceStmt:				Namespace ids endl;
-program:					(useStmt | importStmt | libStmt)* namespaceStmt? (enumBlock | classBlock)*;
+program:					(useStmt | importStmt | libStmt)* namespaceStmt? (enumBlock | enumBlock2 | classBlock | classBlock2)*;
 
 
 

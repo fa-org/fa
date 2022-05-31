@@ -171,10 +171,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitIdExt(FaParser::IdExtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitTypeAfter(FaParser::TypeAfterContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -203,11 +199,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitTypeWrapVar(FaParser::TypeWrapVarContext *ctx) override {
+  virtual antlrcpp::Any visitTypeWrapVar1(FaParser::TypeWrapVar1Context *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitTypeWrapVarList(FaParser::TypeWrapVarListContext *ctx) override {
+  virtual antlrcpp::Any visitTypeWrapVarList1(FaParser::TypeWrapVarList1Context *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -215,7 +211,15 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitTypeWrapVar2List(FaParser::TypeWrapVar2ListContext *ctx) override {
+  virtual antlrcpp::Any visitTypeWrapVarList2(FaParser::TypeWrapVarList2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeWrapVar3(FaParser::TypeWrapVar3Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTypeWrapVarList3(FaParser::TypeWrapVarList3Context *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -351,15 +355,19 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitTmpAssignExpr(FaParser::TmpAssignExprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitIdAssignExpr(FaParser::IdAssignExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitDefVarStmt(FaParser::DefVarStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitIdAssignExpr2(FaParser::IdAssignExpr2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitDefVarStmt2(FaParser::DefVarStmt2Context *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -375,19 +383,39 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEnumItem(FaParser::EnumItemContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitClassItemFuncExtBody(FaParser::ClassItemFuncExtBodyContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassItemFuncExt(FaParser::ClassItemFuncExtContext *ctx) override {
+  virtual antlrcpp::Any visitClassItemFuncExt1(FaParser::ClassItemFuncExt1Context *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassItem(FaParser::ClassItemContext *ctx) override {
+  virtual antlrcpp::Any visitClassItemVar(FaParser::ClassItemVarContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassItemFunc(FaParser::ClassItemFuncContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassItemFuncExt2(FaParser::ClassItemFuncExt2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassItem2(FaParser::ClassItem2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitClassBlock2(FaParser::ClassBlock2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitEnumItem(FaParser::EnumItemContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -395,7 +423,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitClassBlock(FaParser::ClassBlockContext *ctx) override {
+  virtual antlrcpp::Any visitEnumBlock2(FaParser::EnumBlock2Context *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -41,26 +41,26 @@ std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> IAs
 std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeSingleContext *_ctx) {
 	std::string _id = GetId (_ctx->ids ());
 	if (!_ctx->quotJianL ()) {
-		static std::map<std::string, std::function<std::shared_ptr<IAstType> ()>> s_base_types {
-			{ "bool",    [] () { return AstType_bool::Make (); } },
-			{ "float32", [] () { return AstType_float::Make (32); } },
-			{ "float64", [] () { return AstType_float::Make (64); } },
-			{ "int",     [] () { return AstType_int::Make (32, true); } },
-			{ "int8",    [] () { return AstType_int::Make (8, true); } },
-			{ "int16",   [] () { return AstType_int::Make (16, true); } },
-			{ "int32",   [] () { return AstType_int::Make (32, true); } },
-			{ "int64",   [] () { return AstType_int::Make (64, true); } },
-			{ "uint",    [] () { return AstType_int::Make (32, false); } },
-			{ "uint8",   [] () { return AstType_int::Make (8, false); } },
-			{ "uint16",  [] () { return AstType_int::Make (16, false); } },
-			{ "uint32",  [] () { return AstType_int::Make (32, false); } },
-			{ "uint64",  [] () { return AstType_int::Make (64, false); } },
-			{ "string",  [] () { return AstType_string::Make (); } },
-			{ "void",    [] () { return AstType_void::Make (); } },
+		static std::map<std::string, std::function<std::shared_ptr<IAstType> (antlr4::Token *)>> s_base_types {
+			{ "bool",    [] (antlr4::Token *_token) { return AstType_bool::Make (_token); } },
+			{ "float32", [] (antlr4::Token *_token) { return AstType_float::Make (_token, 32); } },
+			{ "float64", [] (antlr4::Token *_token) { return AstType_float::Make (_token, 64); } },
+			{ "int",     [] (antlr4::Token *_token) { return AstType_int::Make (_token, 32, true); } },
+			{ "int8",    [] (antlr4::Token *_token) { return AstType_int::Make (_token, 8, true); } },
+			{ "int16",   [] (antlr4::Token *_token) { return AstType_int::Make (_token, 16, true); } },
+			{ "int32",   [] (antlr4::Token *_token) { return AstType_int::Make (_token, 32, true); } },
+			{ "int64",   [] (antlr4::Token *_token) { return AstType_int::Make (_token, 64, true); } },
+			{ "uint",    [] (antlr4::Token *_token) { return AstType_int::Make (_token, 32, false); } },
+			{ "uint8",   [] (antlr4::Token *_token) { return AstType_int::Make (_token, 8, false); } },
+			{ "uint16",  [] (antlr4::Token *_token) { return AstType_int::Make (_token, 16, false); } },
+			{ "uint32",  [] (antlr4::Token *_token) { return AstType_int::Make (_token, 32, false); } },
+			{ "uint64",  [] (antlr4::Token *_token) { return AstType_int::Make (_token, 64, false); } },
+			{ "string",  [] (antlr4::Token *_token) { return AstType_string::Make (_token); } },
+			{ "void",    [] (antlr4::Token *_token) { return AstType_void::Make (_token); } },
 		};
 		if (s_base_types.contains (_id))
-			return s_base_types [_id] ();
-		return AstType_temp::Make (_id);
+			return s_base_types [_id] (_ctx->start);
+		return AstType_temp::Make (_ctx->start, _id);
 	} else {
 	}
 
@@ -71,7 +71,7 @@ std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeSingleContext *_ctx) 
 
 std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeMultiContext *_ctx) {
 	auto [_types, _names] = FromCtx (_ctx->typeVar ());
-	return AstType_tuple_wrap::Make (_types, _names);
+	return AstType_tuple_wrap::Make (_ctx->start, _types, _names);
 }
 
 
@@ -85,9 +85,9 @@ std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeContext *_ctx) {
 	}
 	for (auto _after : _ctx->typeAfter ()) {
 		if (_after->quotFangL ()) {
-			_ret = std::make_shared<AstType_array_wrap> (_ret);
+			_ret = AstType_array_wrap::Make (_after->start, _ret);
 		} else {
-			_ret = std::make_shared<AstType_option_wrap> (_ret);
+			_ret = AstType_option_wrap::Make (_after->start, _ret);
 		}
 	}
 	return _ret;
@@ -125,7 +125,13 @@ std::vector<std::shared_ptr<IAstType>> IAstType::FromCtx (std::vector<FaParser::
 
 
 std::tuple<std::shared_ptr<IAstType>, std::string> IAstType::FromCtx (FaParser::TypeWrapVarContext *_ctx) {
-	return { FromCtx (_ctx->typeWrap ()), GetId (_ctx->id ()) };
+	if (_ctx->typeWrapVar_t1 ()) {
+		return { FromCtx (_ctx->typeWrapVar_t1 ()->typeWrap ()), GetId (_ctx->typeWrapVar_t1 ()->id ()) };
+	} else if (_ctx->typeWrapVar_t2 ()) {
+		return { FromCtx (_ctx->typeWrapVar_t2 ()->typeWrap ()), GetId (_ctx->typeWrapVar_t2 ()->id ()) };
+	} else {
+		throw NOT_IMPLEMENT ();
+	}
 }
 
 
