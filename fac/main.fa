@@ -9,8 +9,8 @@ class Program {
 	static void func1 (int32 a) {}
 
 	static void Main () {
-		int32 i = 12;
-		var j: int32 = 24;
-		return;
+		int32 i = 12
+		var j: int32 = 24
+		return
 	}
 }
