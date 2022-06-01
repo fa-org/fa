@@ -27,8 +27,6 @@ struct AstClassVar: public IAst {
 	}
 
 	AstClassVar (FaParser::ClassItemVarContext *_ctx): IAst (_ctx->id ()->start) {
-		if (_ctx->classItemFuncExt ())
-			throw Exception ("It's looks not a var");
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_type = IAstType::FromCtx (_ctx->type ());
 		m_name = GetId (_ctx->id ());
@@ -38,7 +36,11 @@ struct AstClassVar: public IAst {
 		return std::format ("{}{} {};\n", Indent (_indent), m_type->GenCppCode (), m_name);
 	}
 
-	static std::shared_ptr<AstClassVar> FromCtx (FaParser::ClassItemContext *_ctx) {
+	static std::shared_ptr<AstClassVar> FromCtx (FaParser::ClassItem2Context *_ctx) {
+		return std::make_shared<AstClassVar> (_ctx);
+	}
+
+	static std::shared_ptr<AstClassVar> FromCtx (FaParser::ClassItemVarContext *_ctx) {
 		return std::make_shared<AstClassVar> (_ctx);
 	}
 };

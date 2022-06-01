@@ -205,8 +205,6 @@ public:
 
     virtual antlrcpp::Any visitClassItemFuncExtBody(FaParser::ClassItemFuncExtBodyContext *context) = 0;
 
-    virtual antlrcpp::Any visitClassItemFuncExt1(FaParser::ClassItemFuncExt1Context *context) = 0;
-
     virtual antlrcpp::Any visitClassItemVar(FaParser::ClassItemVarContext *context) = 0;
 
     virtual antlrcpp::Any visitClassItemFunc(FaParser::ClassItemFuncContext *context) = 0;

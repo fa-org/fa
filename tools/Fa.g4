@@ -25,7 +25,6 @@ Const:						'const';
 Do:							'do';
 Else:						'else';
 Enum:						'enum';
-Fn:							'Fn';
 For:						'for';
 If:							'if';
 Is:							'is';
@@ -287,9 +286,8 @@ publicLevel:				Public | Internal | Protected | Private;
 //classParent:				Colon ids (Comma ids)*;
 classItemFuncExtBody:		(exprFuncDef expr Semi) | (quotHuaL stmt* quotHuaR);
 //
-classItemFuncExt1:			quotYuanL typeWrapVarList1? quotYuanR Colon type classItemFuncExtBody;
 classItemVar:				publicLevel? Static? id Colon type (Assign middleExpr)? endl;
-classItemFunc:				publicLevel? Static? Fn id classItemFuncExt1? endl;
+classItemFunc:				publicLevel? Static? id quotYuanL typeWrapVarList1? quotYuanR Colon type classItemFuncExtBody endl;
 classBlock:					publicLevel? Class id quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
 classItemFuncExt2:			quotYuanL typeWrapVarList2? quotYuanR classItemFuncExtBody;
 classItem2:					publicLevel? Static? type id classItemFuncExt2? endl;

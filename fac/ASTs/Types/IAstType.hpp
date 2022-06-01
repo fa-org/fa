@@ -31,10 +31,10 @@ struct IAstType: public IAst {
 	static std::vector<std::shared_ptr<IAstType>> FromCtx (std::vector<FaParser::TypeContext *> _ctxs);
 	static std::shared_ptr<IAstType> FromCtx (FaParser::TypeWrapContext *_ctx);
 	static std::vector<std::shared_ptr<IAstType>> FromCtx (std::vector<FaParser::TypeWrapContext *> _ctxs);
-	static std::tuple<std::shared_ptr<IAstType>, std::string> FromCtx (FaParser::TypeWrapVarContext *_ctx);
+	static std::tuple<std::shared_ptr<IAstType>, std::string> FromCtx (FaParser::TypeWrapVar1Context *_ctx);
 	static std::tuple<std::shared_ptr<IAstType>, std::string> FromCtx (FaParser::TypeWrapVar2Context *_ctx);
-	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarListContext *_ctx);
-	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVar2ListContext *_ctx);
+	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarList1Context *_ctx);
+	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarList2Context *_ctx);
 };
 
 

@@ -15,19 +15,19 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, AImport = 9, ALib = 10, Break = 11, CC__Cdecl = 12, CC__FastCall = 13, 
     CC__StdCall = 14, Continue = 15, Class = 16, Const = 17, Do = 18, Else = 19, 
-    Enum = 20, Fn = 21, For = 22, If = 23, Is = 24, Internal = 25, Mut = 26, 
-    Namespace = 27, New = 28, Params = 29, Public = 30, Protected = 31, 
-    Private = 32, Return = 33, Signed = 34, Static = 35, Step = 36, Switch = 37, 
-    Unsigned = 38, Use = 39, Var = 40, When = 41, While = 42, Assign = 43, 
-    AddAssign = 44, SubAssign = 45, StarAssign = 46, DivAssign = 47, ModAssign = 48, 
-    OrAssign = 49, AndAssign = 50, XorAssign = 51, QusQusAssign = 52, StarStarAssign = 53, 
-    AndAndAssign = 54, OrOrAssign = 55, ReverseOp = 56, AddAddOp = 57, SubSubOp = 58, 
-    Exclam = 59, PointPoint = 60, PointOp = 61, AddOp = 62, SubOp = 63, 
-    StarOp = 64, DivOp = 65, ModOp = 66, OrOp = 67, AndOp = 68, XorOp = 69, 
-    QusQusOp = 70, StarStarOp = 71, AndAndOp = 72, OrOrOp = 73, Qus = 74, 
-    Comma = 75, ColonColon = 76, Colon = 77, Lf = 78, Semi = 79, Underline = 80, 
-    BoolLiteral = 81, IntLiteral = 82, FloatLiteral = 83, String1Literal = 84, 
-    RawId = 85, Comment1 = 86, Comment2 = 87, WS = 88
+    Enum = 20, For = 21, If = 22, Is = 23, Internal = 24, Mut = 25, Namespace = 26, 
+    New = 27, Params = 28, Public = 29, Protected = 30, Private = 31, Return = 32, 
+    Signed = 33, Static = 34, Step = 35, Switch = 36, Unsigned = 37, Use = 38, 
+    Var = 39, When = 40, While = 41, Assign = 42, AddAssign = 43, SubAssign = 44, 
+    StarAssign = 45, DivAssign = 46, ModAssign = 47, OrAssign = 48, AndAssign = 49, 
+    XorAssign = 50, QusQusAssign = 51, StarStarAssign = 52, AndAndAssign = 53, 
+    OrOrAssign = 54, ReverseOp = 55, AddAddOp = 56, SubSubOp = 57, Exclam = 58, 
+    PointPoint = 59, PointOp = 60, AddOp = 61, SubOp = 62, StarOp = 63, 
+    DivOp = 64, ModOp = 65, OrOp = 66, AndOp = 67, XorOp = 68, QusQusOp = 69, 
+    StarStarOp = 70, AndAndOp = 71, OrOrOp = 72, Qus = 73, Comma = 74, ColonColon = 75, 
+    Colon = 76, Lf = 77, Semi = 78, Underline = 79, BoolLiteral = 80, IntLiteral = 81, 
+    FloatLiteral = 82, String1Literal = 83, RawId = 84, Comment1 = 85, Comment2 = 86, 
+    WS = 87
   };
 
   enum {
@@ -55,11 +55,11 @@ public:
     RuleStrongExprSuffix = 81, RuleStrongExpr = 82, RuleMiddleExpr = 83, 
     RuleExpr = 84, RuleIdAssignExpr = 85, RuleDefVarStmt = 86, RuleIdAssignExpr2 = 87, 
     RuleDefVarStmt2 = 88, RuleNormalStmt = 89, RuleStmt = 90, RulePublicLevel = 91, 
-    RuleClassItemFuncExtBody = 92, RuleClassItemFuncExt1 = 93, RuleClassItemVar = 94, 
-    RuleClassItemFunc = 95, RuleClassBlock = 96, RuleClassItemFuncExt2 = 97, 
-    RuleClassItem2 = 98, RuleClassBlock2 = 99, RuleEnumItem = 100, RuleEnumBlock = 101, 
-    RuleEnumBlock2 = 102, RuleUseStmt = 103, RuleCallConvention = 104, RuleImportStmt = 105, 
-    RuleLibStmt = 106, RuleNamespaceStmt = 107, RuleProgram = 108, RuleProgramEntry = 109
+    RuleClassItemFuncExtBody = 92, RuleClassItemVar = 93, RuleClassItemFunc = 94, 
+    RuleClassBlock = 95, RuleClassItemFuncExt2 = 96, RuleClassItem2 = 97, 
+    RuleClassBlock2 = 98, RuleEnumItem = 99, RuleEnumBlock = 100, RuleEnumBlock2 = 101, 
+    RuleUseStmt = 102, RuleCallConvention = 103, RuleImportStmt = 104, RuleLibStmt = 105, 
+    RuleNamespaceStmt = 106, RuleProgram = 107, RuleProgramEntry = 108
   };
 
   explicit FaParser(antlr4::TokenStream *input);
@@ -165,7 +165,6 @@ public:
   class StmtContext;
   class PublicLevelContext;
   class ClassItemFuncExtBodyContext;
-  class ClassItemFuncExt1Context;
   class ClassItemVarContext;
   class ClassItemFuncContext;
   class ClassBlockContext;
@@ -1693,24 +1692,6 @@ public:
 
   ClassItemFuncExtBodyContext* classItemFuncExtBody();
 
-  class  ClassItemFuncExt1Context : public antlr4::ParserRuleContext {
-  public:
-    ClassItemFuncExt1Context(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    QuotYuanLContext *quotYuanL();
-    QuotYuanRContext *quotYuanR();
-    antlr4::tree::TerminalNode *Colon();
-    TypeContext *type();
-    ClassItemFuncExtBodyContext *classItemFuncExtBody();
-    TypeWrapVarList1Context *typeWrapVarList1();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ClassItemFuncExt1Context* classItemFuncExt1();
-
   class  ClassItemVarContext : public antlr4::ParserRuleContext {
   public:
     ClassItemVarContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -1735,12 +1716,16 @@ public:
   public:
     ClassItemFuncContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *Fn();
     IdContext *id();
+    QuotYuanLContext *quotYuanL();
+    QuotYuanRContext *quotYuanR();
+    antlr4::tree::TerminalNode *Colon();
+    TypeContext *type();
+    ClassItemFuncExtBodyContext *classItemFuncExtBody();
     EndlContext *endl();
     PublicLevelContext *publicLevel();
     antlr4::tree::TerminalNode *Static();
-    ClassItemFuncExt1Context *classItemFuncExt1();
+    TypeWrapVarList1Context *typeWrapVarList1();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

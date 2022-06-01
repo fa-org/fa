@@ -124,14 +124,8 @@ std::vector<std::shared_ptr<IAstType>> IAstType::FromCtx (std::vector<FaParser::
 
 
 
-std::tuple<std::shared_ptr<IAstType>, std::string> IAstType::FromCtx (FaParser::TypeWrapVarContext *_ctx) {
-	if (_ctx->typeWrapVar_t1 ()) {
-		return { FromCtx (_ctx->typeWrapVar_t1 ()->typeWrap ()), GetId (_ctx->typeWrapVar_t1 ()->id ()) };
-	} else if (_ctx->typeWrapVar_t2 ()) {
-		return { FromCtx (_ctx->typeWrapVar_t2 ()->typeWrap ()), GetId (_ctx->typeWrapVar_t2 ()->id ()) };
-	} else {
-		throw NOT_IMPLEMENT ();
-	}
+std::tuple<std::shared_ptr<IAstType>, std::string> IAstType::FromCtx (FaParser::TypeWrapVar1Context *_ctx) {
+	return { FromCtx (_ctx->typeWrap ()), GetId (_ctx->id ()) };
 }
 
 
@@ -142,11 +136,11 @@ std::tuple<std::shared_ptr<IAstType>, std::string> IAstType::FromCtx (FaParser::
 
 
 
-std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> IAstType::FromCtx (FaParser::TypeWrapVarListContext *_ctx) {
+std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> IAstType::FromCtx (FaParser::TypeWrapVarList1Context *_ctx) {
 	std::vector<std::shared_ptr<IAstType>> _types;
 	std::vector<std::string> _names;
 	if (_ctx) {
-		for (auto _item_ctx : _ctx->typeWrapVar ()) {
+		for (auto _item_ctx : _ctx->typeWrapVar1 ()) {
 			auto [_type, _name] = FromCtx (_item_ctx);
 			_types.push_back (_type);
 			_names.push_back (_name);
@@ -157,7 +151,7 @@ std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> IAs
 
 
 
-std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> IAstType::FromCtx (FaParser::TypeWrapVar2ListContext *_ctx) {
+std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> IAstType::FromCtx (FaParser::TypeWrapVarList2Context *_ctx) {
 	std::vector<std::shared_ptr<IAstType>> _types;
 	std::vector<std::string> _names;
 	if (_ctx) {
