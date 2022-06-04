@@ -40,6 +40,7 @@ struct AstProgram: public IAst {
 
 	std::string GenCppCode (size_t) override {
 		std::stringstream _ss {};
+		_ss << "#include <cstdint>\n";
 		_ss << "#include <iostream>\n";
 		_ss << "#include <string>\n";
 		_ss << "\n";

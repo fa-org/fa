@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\GitHub\vcpkg\installed\$(PlatformTarget)-windows-static\include\antlr4-runtime;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -181,6 +181,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="antlr_gen\antlr4-runtime.h" />
     <ClInclude Include="antlr_gen\FaBaseVisitor.h" />
     <ClInclude Include="antlr_gen\FaLexer.h" />
     <ClInclude Include="antlr_gen\FaParser.h" />

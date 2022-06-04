@@ -263,7 +263,7 @@ expr:						middleExpr (allAssign middleExpr)*;
 //
 // define variable
 //
-idAssignExpr:				id Colon type Assign expr;
+idAssignExpr:				id (Colon type)? Assign expr;
 defVarStmt:					Var idAssignExpr (Comma idAssignExpr)* endl;
 idAssignExpr2:				id Assign expr;
 defVarStmt2:				type idAssignExpr2 (Comma idAssignExpr2)* endl;

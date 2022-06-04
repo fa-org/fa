@@ -77,6 +77,8 @@ std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeMultiContext *_ctx) {
 
 
 std::shared_ptr<IAstType> IAstType::FromCtx (FaParser::TypeContext *_ctx) {
+	if (!_ctx)
+		return nullptr;
 	std::shared_ptr<IAstType> _ret;
 	if (_ctx->typeSingle ()) {
 		_ret = FromCtx (_ctx->typeSingle ());

@@ -1554,10 +1554,10 @@ public:
     IdAssignExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     IdContext *id();
-    antlr4::tree::TerminalNode *Colon();
-    TypeContext *type();
     antlr4::tree::TerminalNode *Assign();
     ExprContext *expr();
+    antlr4::tree::TerminalNode *Colon();
+    TypeContext *type();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

@@ -179,5 +179,8 @@
     <ClInclude Include="ASTs\Stmts\AstStmt_define_var.hpp">
       <Filter>头文件\ASTs\Stmts</Filter>
     </ClInclude>
+    <ClInclude Include="antlr_gen\antlr4-runtime.h">
+      <Filter>antlr_gen</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
