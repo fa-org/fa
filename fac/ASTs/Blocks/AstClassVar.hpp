@@ -16,7 +16,7 @@
 struct AstClassVar: public IAst {
 	PublicLevel m_level;
 	std::string m_name = "";
-	std::shared_ptr<IAstType> m_type;
+	PAstType m_type;
 
 	AstClassVar (FaParser::ClassItem2Context *_ctx): IAst (_ctx->id ()->start) {
 		if (_ctx->classItemFuncExt2 ())

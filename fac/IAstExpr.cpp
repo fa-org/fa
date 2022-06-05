@@ -13,7 +13,7 @@
 
 
 
-std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::StrongExprBaseContext *_ctx) {
+PAstExpr IAstExpr::FromCtx (FaParser::StrongExprBaseContext *_ctx) {
 	if (_ctx->ids ()) {
 		return AstExpr_temp_id::Make (_ctx->start, _ctx->getText ());
 	} else if (_ctx->literal ()) {
@@ -26,7 +26,7 @@ std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::StrongExprBaseContext *_c
 
 
 
-std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::StrongExprContext *_ctx) {
+PAstExpr IAstExpr::FromCtx (FaParser::StrongExprContext *_ctx) {
 	auto _ret = FromCtx (_ctx->strongExprBase ());
 	for (auto _suffix : _ctx->strongExprSuffix ()) {
 		if (_suffix->AddAddOp () || _suffix->SubSubOp ()) {
@@ -51,7 +51,7 @@ std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::StrongExprContext *_ctx) 
 
 
 
-std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::MiddleExprContext *_ctx) {
+PAstExpr IAstExpr::FromCtx (FaParser::MiddleExprContext *_ctx) {
 	if (!_ctx)
 		return nullptr;
 	auto _middles = _ctx->strongExpr ();
@@ -64,7 +64,7 @@ std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::MiddleExprContext *_ctx) 
 
 
 
-std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::ExprContext *_ctx) {
+PAstExpr IAstExpr::FromCtx (FaParser::ExprContext *_ctx) {
 	if (!_ctx)
 		return nullptr;
 	auto _middles = _ctx->middleExpr ();
@@ -77,8 +77,8 @@ std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::ExprContext *_ctx) {
 
 
 
-std::vector<std::shared_ptr<IAstExpr>> IAstExpr::FromCtx (std::vector<FaParser::ExprContext *> _ctx) {
-	std::vector<std::shared_ptr<IAstExpr>> _v;
+std::vector<PAstExpr> IAstExpr::FromCtx (std::vector<FaParser::ExprContext *> _ctx) {
+	std::vector<PAstExpr> _v;
 	for (auto _item : _ctx)
 		_v.push_back (FromCtx (_item));
 	return _v;
@@ -86,7 +86,7 @@ std::vector<std::shared_ptr<IAstExpr>> IAstExpr::FromCtx (std::vector<FaParser::
 
 
 
-std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::ExprOptContext *_ctx) {
+PAstExpr IAstExpr::FromCtx (FaParser::ExprOptContext *_ctx) {
 	if (!_ctx)
 		return nullptr;
 	return FromCtx (_ctx->expr ());
@@ -94,8 +94,8 @@ std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::ExprOptContext *_ctx) {
 
 
 
-std::vector<std::shared_ptr<IAstExpr>> IAstExpr::FromCtx (std::vector < FaParser::ExprOptContext *> _ctx) {
-	std::vector<std::shared_ptr<IAstExpr>> _v;
+std::vector<PAstExpr> IAstExpr::FromCtx (std::vector < FaParser::ExprOptContext *> _ctx) {
+	std::vector<PAstExpr> _v;
 	for (auto _item : _ctx)
 		_v.push_back (FromCtx (_item));
 	return _v;
@@ -103,7 +103,7 @@ std::vector<std::shared_ptr<IAstExpr>> IAstExpr::FromCtx (std::vector < FaParser
 
 
 
-std::shared_ptr<IAstExpr> IAstExpr::FromCtx (FaParser::LiteralContext *_ctx) {
+PAstExpr IAstExpr::FromCtx (FaParser::LiteralContext *_ctx) {
 	if (_ctx->BoolLiteral ()) {
 		return AstExpr_value::Make (_ctx->start, AstType_bool::Make (_ctx->start), _ctx->getText ());
 	} else if (_ctx->intNum ()) {

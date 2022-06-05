@@ -11,11 +11,11 @@
 
 
 struct AstExpr_op1: public IAstExpr {
-	std::shared_ptr<IAstExpr> m_base;
+	PAstExpr m_base;
 	std::string m_op;
 	bool m_prefix;
 
-	AstExpr_op1 (antlr4::Token *_token, std::shared_ptr<IAstExpr> _base, std::string _op, bool _prefix):
+	AstExpr_op1 (antlr4::Token *_token, PAstExpr _base, std::string _op, bool _prefix):
 		IAstExpr (_token), m_base (_base), m_op (_op), m_prefix (_prefix) {}
 
 	std::string GenCppCode (size_t _indent) override {
@@ -26,8 +26,8 @@ struct AstExpr_op1: public IAstExpr {
 		}
 	}
 
-	static std::shared_ptr<IAstExpr> Make (antlr4::Token *_token, std::shared_ptr<IAstExpr> _base, std::string _op, bool _prefix) {
-		return std::shared_ptr<IAstExpr> ((IAstExpr *) new AstExpr_op1 { _token, _base, _op, _prefix });
+	static PAstExpr Make (antlr4::Token *_token, PAstExpr _base, std::string _op, bool _prefix) {
+		return new AstExpr_op1 { _token, _base, _op, _prefix };
 	}
 };
 

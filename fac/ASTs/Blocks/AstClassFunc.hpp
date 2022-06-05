@@ -20,10 +20,10 @@ struct AstClassFunc: public IAst {
 	PublicLevel m_level;
 	bool m_static;
 	std::string m_name;
-	std::shared_ptr<IAstType> m_ret_type;
-	std::vector<std::shared_ptr<IAstType>> m_arg_types;
+	PAstType m_ret_type;
+	std::vector<PAstType> m_arg_types;
 	std::vector<std::string> m_arg_names;
-	std::vector<std::shared_ptr<IAstStmt>> m_contents;
+	std::vector<PAstStmt> m_contents;
 
 	AstClassFunc (FaParser::ClassItemFuncContext *_ctx): IAst (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());

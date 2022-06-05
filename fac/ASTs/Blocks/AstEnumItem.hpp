@@ -14,7 +14,7 @@
 
 struct AstEnumItem: public IAst {
 	std::string m_name = "";
-	std::vector<std::shared_ptr<IAstType>> m_attach_types;
+	std::vector<PAstType> m_attach_types;
 
 	AstEnumItem (FaParser::EnumItemContext *_ctx): IAst (_ctx->id ()->start) {
 		m_name = GetId (_ctx->id ());

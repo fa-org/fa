@@ -12,16 +12,16 @@
 
 
 struct AstExpr_value: public IAstExpr {
-	std::shared_ptr<IAstType> m_type;
+	PAstType m_type;
 	std::string m_value;
 
-	AstExpr_value (antlr4::Token *_token, std::shared_ptr<IAstType> _type, std::string _value):
+	AstExpr_value (antlr4::Token *_token, PAstType _type, std::string _value):
 		IAstExpr (_token), m_type (_type), m_value (_value) {}
 
 	std::string GenCppCode (size_t _indent) override { return m_value; }
 
-	static std::shared_ptr<IAstExpr> Make (antlr4::Token *_token, std::shared_ptr<IAstType> _type, std::string _value) {
-		return std::shared_ptr<IAstExpr> ((IAstExpr *) new AstExpr_value { _token, _type, _value });
+	static PAstExpr Make (antlr4::Token *_token, PAstType _type, std::string _value) {
+		return new AstExpr_value { _token, _type, _value };
 	}
 };
 

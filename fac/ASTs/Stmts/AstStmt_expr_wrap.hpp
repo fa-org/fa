@@ -13,14 +13,14 @@
 
 
 struct AstStmt_expr_wrap: public IAstStmt {
-	std::shared_ptr<IAstExpr> m_expr;
+	PAstExpr m_expr;
 
-	AstStmt_expr_wrap (antlr4::Token *_token, std::shared_ptr<IAstExpr> _expr): IAstStmt (_token),  m_expr (_expr) {}
+	AstStmt_expr_wrap (antlr4::Token *_token, PAstExpr _expr): IAstStmt (_token),  m_expr (_expr) {}
 
 	std::string GenCppCode (size_t _indent) override { return std::format ("{}{};\n", Indent (_indent), m_expr->GenCppCode (_indent)); }
 
-	static std::shared_ptr<IAstStmt> FromExpr (antlr4::Token *_token, std::shared_ptr<IAstExpr> _expr) {
-		return std::shared_ptr<IAstStmt> ((IAstStmt *) new AstStmt_expr_wrap { _token, _expr });
+	static PAstStmt FromExpr (antlr4::Token *_token, PAstExpr _expr) {
+		return new AstStmt_expr_wrap { _token, _expr };
 	}
 };
 

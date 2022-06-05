@@ -15,8 +15,8 @@ struct AstType_int: public IAstType {
 
 	std::string GenCppCode () override { return std::format ("{}int{}_t", m_sign ? "" : "u", m_bit_width); }
 
-	static std::shared_ptr<IAstType> Make (antlr4::Token *_token, size_t _bit_width, bool _sign) {
-		return std::shared_ptr<IAstType> ((IAstType *) new AstType_int { _token, _bit_width, _sign });
+	static PAstType Make (antlr4::Token *_token, size_t _bit_width, bool _sign) {
+		return new AstType_int { _token, _bit_width, _sign };
 	}
 };
 

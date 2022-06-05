@@ -12,8 +12,8 @@ struct AstType_string: public IAstType {
 
 	AstType_string (antlr4::Token *_token): IAstType (_token) {}
 
-	static std::shared_ptr<IAstType> Make (antlr4::Token *_token) {
-		return std::shared_ptr<IAstType> ((IAstType *) new AstType_string { _token });
+	static PAstType Make (antlr4::Token *_token) {
+		return new AstType_string { _token };
 	}
 };
 

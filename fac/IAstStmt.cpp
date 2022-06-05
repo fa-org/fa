@@ -11,7 +11,7 @@
 
 
 
-std::shared_ptr<IAstStmt> IAstStmt::FromCtx (FaParser::NormalStmtContext *_ctx) {
+PAstStmt IAstStmt::FromCtx (FaParser::NormalStmtContext *_ctx) {
 	if (_ctx->Return ()) {
 		return AstStmt_return::FromExpr (_ctx->start, IAstExpr::FromCtx (_ctx->expr ()));
 	} else if (_ctx->expr ()) {
@@ -26,8 +26,8 @@ std::shared_ptr<IAstStmt> IAstStmt::FromCtx (FaParser::NormalStmtContext *_ctx) 
 
 
 
-std::vector<std::shared_ptr<IAstStmt>> IAstStmt::FromCtx (FaParser::StmtContext *_ctx) {
-	std::vector<std::shared_ptr<IAstStmt>> _v;
+std::vector<PAstStmt> IAstStmt::FromCtx (FaParser::StmtContext *_ctx) {
+	std::vector<PAstStmt> _v;
 	if (_ctx->defVarStmt ()) {
 		for (auto _item : _ctx->defVarStmt ()->idAssignExpr ()) {
 			auto _type = IAstType::FromCtx (_item->type ());
@@ -54,8 +54,8 @@ std::vector<std::shared_ptr<IAstStmt>> IAstStmt::FromCtx (FaParser::StmtContext 
 
 
 
-std::vector<std::shared_ptr<IAstStmt>> IAstStmt::FromCtx (std::vector<FaParser::StmtContext *> _ctxs) {
-	std::vector<std::shared_ptr<IAstStmt>> _v;
+std::vector<PAstStmt> IAstStmt::FromCtx (std::vector<FaParser::StmtContext *> _ctxs) {
+	std::vector<PAstStmt> _v;
 	for (auto _ctx : _ctxs) {
 		auto _v2 = FromCtx (_ctx);
 		_v.insert (_v.end (), _v2.begin (), _v2.end ());
@@ -65,9 +65,9 @@ std::vector<std::shared_ptr<IAstStmt>> IAstStmt::FromCtx (std::vector<FaParser::
 
 
 
-std::vector<std::shared_ptr<IAstStmt>> IAstStmt::FromCtx (FaParser::ClassItemFuncExtBodyContext *_ctx) {
+std::vector<PAstStmt> IAstStmt::FromCtx (FaParser::ClassItemFuncExtBodyContext *_ctx) {
 	if (_ctx->expr ()) {
-		std::vector<std::shared_ptr<IAstStmt>> _v;
+		std::vector<PAstStmt> _v;
 		_v.push_back (AstStmt_return::FromExpr (_ctx->start, IAstExpr::FromCtx (_ctx->expr ())));
 		return _v;
 	} else {

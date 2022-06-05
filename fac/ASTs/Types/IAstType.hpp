@@ -14,6 +14,11 @@
 
 
 
+struct IAstType;
+struct PAstType: public std::shared_ptr<IAstType> {
+	PAstType (IAstType *_type = nullptr): std::shared_ptr<IAstType> (_type) {}
+};
+
 struct IAstType: public IAst {
 	bool m_mut = false;
 	bool m_params = false;
@@ -23,18 +28,18 @@ struct IAstType: public IAst {
 	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
 	virtual std::string GenCppCode () = 0;
 
-	static std::tuple<std::shared_ptr<IAstType>, std::string> FromCtx (FaParser::TypeVarContext *_ctx);
-	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (std::vector<FaParser::TypeVarContext *> _ctx);
-	static std::shared_ptr<IAstType> FromCtx (FaParser::TypeSingleContext *_ctx);
-	static std::shared_ptr<IAstType> FromCtx (FaParser::TypeMultiContext *_ctx);
-	static std::shared_ptr<IAstType> FromCtx (FaParser::TypeContext *_ctx);
-	static std::vector<std::shared_ptr<IAstType>> FromCtx (std::vector<FaParser::TypeContext *> _ctxs);
-	static std::shared_ptr<IAstType> FromCtx (FaParser::TypeWrapContext *_ctx);
-	static std::vector<std::shared_ptr<IAstType>> FromCtx (std::vector<FaParser::TypeWrapContext *> _ctxs);
-	static std::tuple<std::shared_ptr<IAstType>, std::string> FromCtx (FaParser::TypeWrapVar1Context *_ctx);
-	static std::tuple<std::shared_ptr<IAstType>, std::string> FromCtx (FaParser::TypeWrapVar2Context *_ctx);
-	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarList1Context *_ctx);
-	static std::tuple<std::vector<std::shared_ptr<IAstType>>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarList2Context *_ctx);
+	static std::tuple<PAstType, std::string> FromCtx (FaParser::TypeVarContext *_ctx);
+	static std::tuple<std::vector<PAstType>, std::vector<std::string>> FromCtx (std::vector<FaParser::TypeVarContext *> _ctx);
+	static PAstType FromCtx (FaParser::TypeSingleContext *_ctx);
+	static PAstType FromCtx (FaParser::TypeMultiContext *_ctx);
+	static PAstType FromCtx (FaParser::TypeContext *_ctx);
+	static std::vector<PAstType> FromCtx (std::vector<FaParser::TypeContext *> _ctxs);
+	static PAstType FromCtx (FaParser::TypeWrapContext *_ctx);
+	static std::vector<PAstType> FromCtx (std::vector<FaParser::TypeWrapContext *> _ctxs);
+	static std::tuple<PAstType, std::string> FromCtx (FaParser::TypeWrapVar1Context *_ctx);
+	static std::tuple<PAstType, std::string> FromCtx (FaParser::TypeWrapVar2Context *_ctx);
+	static std::tuple<std::vector<PAstType>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarList1Context *_ctx);
+	static std::tuple<std::vector<PAstType>, std::vector<std::string>> FromCtx (FaParser::TypeWrapVarList2Context *_ctx);
 };
 
 

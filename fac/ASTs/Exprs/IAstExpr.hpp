@@ -11,17 +11,22 @@
 
 
 
+struct IAstExpr;
+struct PAstExpr: public std::shared_ptr<IAstExpr> {
+	PAstExpr (IAstExpr *_expr = nullptr): std::shared_ptr<IAstExpr> (_expr) {}
+};
+
 struct IAstExpr: public IAst {
 	IAstExpr (antlr4::Token *_token): IAst (_token) {}
 
-	static std::shared_ptr<IAstExpr> FromCtx (FaParser::StrongExprBaseContext *_ctx);
-	static std::shared_ptr<IAstExpr> FromCtx (FaParser::StrongExprContext *_ctx);
-	static std::shared_ptr<IAstExpr> FromCtx (FaParser::MiddleExprContext *_ctx);
-	static std::shared_ptr<IAstExpr> FromCtx (FaParser::ExprContext *_ctx);
-	static std::vector<std::shared_ptr<IAstExpr>> FromCtx (std::vector < FaParser::ExprContext *> _ctx);
-	static std::shared_ptr<IAstExpr> FromCtx (FaParser::ExprOptContext *_ctx);
-	static std::vector<std::shared_ptr<IAstExpr>> FromCtx (std::vector < FaParser::ExprOptContext *> _ctx);
-	static std::shared_ptr<IAstExpr> FromCtx (FaParser::LiteralContext *_ctx);
+	static PAstExpr FromCtx (FaParser::StrongExprBaseContext *_ctx);
+	static PAstExpr FromCtx (FaParser::StrongExprContext *_ctx);
+	static PAstExpr FromCtx (FaParser::MiddleExprContext *_ctx);
+	static PAstExpr FromCtx (FaParser::ExprContext *_ctx);
+	static std::vector<PAstExpr> FromCtx (std::vector<FaParser::ExprContext *> _ctx);
+	static PAstExpr FromCtx (FaParser::ExprOptContext *_ctx);
+	static std::vector<PAstExpr> FromCtx (std::vector<FaParser::ExprOptContext *> _ctx);
+	static PAstExpr FromCtx (FaParser::LiteralContext *_ctx);
 };
 
 

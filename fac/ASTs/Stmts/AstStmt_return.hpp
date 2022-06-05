@@ -14,9 +14,9 @@
 
 
 struct AstStmt_return: public IAstStmt {
-	std::shared_ptr<IAstExpr> m_expr;
+	PAstExpr m_expr;
 
-	AstStmt_return (antlr4::Token *_token, std::shared_ptr<IAstExpr> _expr): IAstStmt (_token), m_expr (_expr) {}
+	AstStmt_return (antlr4::Token *_token, PAstExpr _expr): IAstStmt (_token), m_expr (_expr) {}
 
 	std::string GenCppCode (size_t _indent) override {
 		if (m_expr) {
@@ -26,8 +26,8 @@ struct AstStmt_return: public IAstStmt {
 		}
 	}
 
-	static std::shared_ptr<IAstStmt> FromExpr (antlr4::Token *_token, std::shared_ptr<IAstExpr> _expr) {
-		return std::shared_ptr<IAstStmt> ((IAstStmt *) new AstStmt_return { _token, _expr });
+	static PAstStmt FromExpr (antlr4::Token *_token, PAstExpr _expr) {
+		return new AstStmt_return { _token, _expr };
 	}
 };
 

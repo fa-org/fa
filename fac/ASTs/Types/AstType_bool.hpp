@@ -12,8 +12,8 @@ struct AstType_bool: public IAstType {
 
 	std::string GenCppCode () override { return "bool"; }
 
-	static std::shared_ptr<IAstType> Make (antlr4::Token *_token) {
-		return std::shared_ptr<IAstType> ((IAstType *) new AstType_bool { _token });
+	static PAstType Make (antlr4::Token *_token) {
+		return new AstType_bool { _token };
 	}
 };
 

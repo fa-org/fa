@@ -18,8 +18,8 @@ struct AstExpr_temp_id: public IAstExpr {
 
 	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
 
-	static std::shared_ptr<IAstExpr> Make (antlr4::Token *_token, std::string _id) {
-		return std::shared_ptr<IAstExpr> ((IAstExpr *) new AstExpr_temp_id { _token, _id });
+	static PAstExpr Make (antlr4::Token *_token, std::string _id) {
+		return new AstExpr_temp_id { _token, _id };
 	}
 };
 

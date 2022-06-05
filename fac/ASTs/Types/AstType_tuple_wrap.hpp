@@ -14,10 +14,10 @@
 
 
 struct AstType_tuple_wrap: public IAstType {
-	std::vector<std::shared_ptr<IAstType>> m_base_types;
+	std::vector<PAstType> m_base_types;
 	std::vector<std::string> m_base_names;
 
-	AstType_tuple_wrap (antlr4::Token *_token, std::vector<std::shared_ptr<IAstType>> _base_types, std::vector<std::string> _base_names): IAstType (_token) {
+	AstType_tuple_wrap (antlr4::Token *_token, std::vector<PAstType> _base_types, std::vector<std::string> _base_names): IAstType (_token) {
 		m_base_types.assign (_base_types.begin (), _base_types.end ());
 		m_base_names.assign (_base_names.begin (), _base_names.end ());
 	}
@@ -33,8 +33,8 @@ struct AstType_tuple_wrap: public IAstType {
 		return _ss.str ();
 	}
 
-	static std::shared_ptr<IAstType> Make (antlr4::Token *_token, std::vector<std::shared_ptr<IAstType>> _base_types, std::vector<std::string> _base_names) {
-		return std::shared_ptr<IAstType> ((IAstType *) new AstType_tuple_wrap { _token, _base_types, _base_names });
+	static PAstType Make (antlr4::Token *_token, std::vector<PAstType> _base_types, std::vector<std::string> _base_names) {
+		return new AstType_tuple_wrap { _token, _base_types, _base_names };
 	}
 };
 
