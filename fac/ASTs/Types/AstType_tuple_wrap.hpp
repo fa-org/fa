@@ -21,16 +21,22 @@ struct AstType_tuple_wrap: public IAstType {
 		m_base_types.assign (_base_types.begin (), _base_types.end ());
 		m_base_names.assign (_base_names.begin (), _base_names.end ());
 	}
-	std::string GenCppCode () override {
+
+	std::string GenCppCode (size_t _indent) override {
 		std::stringstream _ss {};
 		_ss << "std::tuple<";
 		for (size_t i = 0; i < m_base_types.size (); ++i) {
 			if (i > 0)
 				_ss << ", ";
-			_ss << m_base_types [i]->GenCppCode ();
+			_ss << m_base_types [i]->GenCppCode (_indent);
 		}
 		_ss << ">";
 		return _ss.str ();
+	}
+
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {
+		for (auto &_type : m_base_types)
+			_cb (_type);
 	}
 
 	static PAstType Make (antlr4::Token *_token, std::vector<PAstType> _base_types, std::vector<std::string> _base_names) {

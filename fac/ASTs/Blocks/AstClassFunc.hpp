@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "../IAst.hpp"
+#include "IAstBlock.hpp"
 #include "../Stmts/IAstStmt.hpp"
 #include "../Types/IAstType.hpp"
 #include "../../Common.hpp"
@@ -16,7 +16,7 @@
 
 
 
-struct AstClassFunc: public IAst {
+struct AstClassFunc: public IAstBlock {
 	PublicLevel m_level;
 	bool m_static;
 	std::string m_name;
@@ -25,7 +25,7 @@ struct AstClassFunc: public IAst {
 	std::vector<std::string> m_arg_names;
 	std::vector<PAstStmt> m_contents;
 
-	AstClassFunc (FaParser::ClassItemFuncContext *_ctx): IAst (_ctx->id ()->start) {
+	AstClassFunc (FaParser::ClassItemFuncContext *_ctx): IAstBlock (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_static = !!_ctx->Static ();
 		m_name = GetId (_ctx->id ());
@@ -34,7 +34,7 @@ struct AstClassFunc: public IAst {
 		m_contents = IAstStmt::FromCtx (_ctx->classItemFuncExtBody ());
 	}
 
-	AstClassFunc (FaParser::ClassItem2Context *_ctx): IAst (_ctx->id ()->start) {
+	AstClassFunc (FaParser::ClassItem2Context *_ctx): IAstBlock (_ctx->id ()->start) {
 		if (!_ctx->classItemFuncExt2 ())
 			throw Exception ("It's looks not a func");
 		m_level = GetPublicLevel (_ctx->publicLevel ());
@@ -47,11 +47,11 @@ struct AstClassFunc: public IAst {
 
 	std::string GenCppCode (size_t _indent) override {
 		std::stringstream _ss {};
-		_ss << std::format ("{}{}{} {} (", Indent (_indent), m_static ? "static " : "", m_ret_type->GenCppCode (), m_name);
+		_ss << std::format ("{}{}{} {} (", Indent (_indent), m_static ? "static " : "", m_ret_type->GenCppCode (_indent), m_name);
 		for (size_t i = 0; i < m_arg_types.size (); ++i) {
 			if (i > 0)
 				_ss << ", ";
-			_ss << std::format ("{} {}", m_arg_types [i]->GenCppCode (), m_arg_names [i]);
+			_ss << std::format ("{} {}", m_arg_types [i]->GenCppCode (_indent), m_arg_names [i]);
 		}
 		_ss << ") {\n";
 		for (auto _content : m_contents)

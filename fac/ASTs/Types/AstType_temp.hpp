@@ -13,15 +13,13 @@ struct AstType_temp: public IAstType {
 
 	AstType_temp (antlr4::Token *_token, std::string _name): IAstType (_token), m_name (_name) {}
 	AstType_temp (antlr4::Token *_token, std::string _name, std::vector<PAstType> _templates): IAstType (_token), m_name (_name), m_templates (_templates) {}
-	std::string GenCppCode () override { throw Exception ("cannot gen code at uncomplete type"); }
+	std::string GenCppCode (size_t _indent) override { throw Exception ("cannot gen code at uncomplete type"); }
 
-	static PAstType Make (antlr4::Token *_token, std::string _name) {
-		return PAstType ((IAstType *) new AstType_temp { _token, _name });
-	}
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
 
-	static PAstType Make (antlr4::Token *_token, std::string _name, std::vector<PAstType> _templates) {
-		return new AstType_temp { _token, _name, _templates };
-	}
+	static PAstType Make (antlr4::Token *_token, std::string _name) { return new AstType_temp { _token, _name }; }
+
+	static PAstType Make (antlr4::Token *_token, std::string _name, std::vector<PAstType> _templates) { return new AstType_temp { _token, _name, _templates }; }
 };
 
 

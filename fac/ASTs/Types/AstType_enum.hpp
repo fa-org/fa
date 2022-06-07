@@ -13,11 +13,11 @@ struct AstType_enum: public IAstType {
 
 	AstType_enum (antlr4::Token *_token, std::shared_ptr<AstEnum> _enum): IAstType (_token), m_enum (_enum) {}
 
-	std::string GenCppCode () override { return m_enum->m_name; }
+	std::string GenCppCode (size_t _indent) override { return m_enum->m_name; }
 
-	static PAstType Make (antlr4::Token *_token, std::shared_ptr<AstEnum> _enum) {
-		return new AstType_enum { _token, _enum };
-	}
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	static PAstType Make (antlr4::Token *_token, std::shared_ptr<AstEnum> _enum) { return new AstType_enum { _token, _enum }; }
 };
 
 

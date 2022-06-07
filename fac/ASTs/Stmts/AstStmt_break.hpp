@@ -16,6 +16,12 @@ struct AstStmt_break: public IAstStmt {
 
 	std::string GenCppCode (size_t _indent) override { return std::format ("{}break;\n", Indent (_indent)); }
 
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {}
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
 	static PAstStmt Make (antlr4::Token *_token) {
 		return new AstStmt_break { _token };
 	}

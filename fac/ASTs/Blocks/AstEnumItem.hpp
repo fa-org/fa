@@ -7,16 +7,16 @@
 #include <string>
 #include <vector>
 
-#include "../IAst.hpp"
+#include "IAstBlock.hpp"
 #include "../Types/IAstType.hpp"
 
 
 
-struct AstEnumItem: public IAst {
+struct AstEnumItem: public IAstBlock {
 	std::string m_name = "";
 	std::vector<PAstType> m_attach_types;
 
-	AstEnumItem (FaParser::EnumItemContext *_ctx): IAst (_ctx->id ()->start) {
+	AstEnumItem (FaParser::EnumItemContext *_ctx): IAstBlock (_ctx->id ()->start) {
 		m_name = GetId (_ctx->id ());
 		m_attach_types = IAstType::FromCtx (_ctx->type ());
 	}

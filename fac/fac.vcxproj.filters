@@ -182,5 +182,8 @@
     <ClInclude Include="antlr_gen\antlr4-runtime.h">
       <Filter>antlr_gen</Filter>
     </ClInclude>
+    <ClInclude Include="ASTs\Blocks\IAstBlock.hpp">
+      <Filter>头文件\ASTs\Blocks</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

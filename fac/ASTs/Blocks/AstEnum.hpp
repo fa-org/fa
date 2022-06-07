@@ -7,19 +7,19 @@
 #include <string>
 #include <vector>
 
-#include "../IAst.hpp"
+#include "IAstBlock.hpp"
 #include "AstEnumItem.hpp"
 #include "AstClassFunc.hpp"
 
 
 
-struct AstEnum: public IAst {
+struct AstEnum: public IAstBlock {
 	PublicLevel m_level;
 	std::string m_name = "";
 	std::vector<std::shared_ptr<AstEnumItem>> m_items;
 	std::vector<std::shared_ptr<AstClassFunc>> m_funcs;
 
-	AstEnum (FaParser::EnumBlockContext *_ctx): IAst (_ctx->id ()->start) {
+	AstEnum (FaParser::EnumBlockContext *_ctx): IAstBlock (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->enumItem ())
@@ -28,7 +28,7 @@ struct AstEnum: public IAst {
 			m_funcs.push_back (AstClassFunc::FromCtx (_item));
 	}
 
-	AstEnum (FaParser::EnumBlock2Context *_ctx): IAst (_ctx->id ()->start) {
+	AstEnum (FaParser::EnumBlock2Context *_ctx): IAstBlock (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->enumItem ())

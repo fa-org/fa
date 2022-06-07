@@ -3,6 +3,7 @@
 
 
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -25,8 +26,8 @@ struct IAstType: public IAst {
 
 	IAstType (antlr4::Token *_token): IAst (_token) {}
 
-	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
-	virtual std::string GenCppCode () = 0;
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {}
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
 
 	static std::tuple<PAstType, std::string> FromCtx (FaParser::TypeVarContext *_ctx);
 	static std::tuple<std::vector<PAstType>, std::vector<std::string>> FromCtx (std::vector<FaParser::TypeVarContext *> _ctx);

@@ -13,11 +13,11 @@ struct AstType_class: public IAstType {
 
 	AstType_class (antlr4::Token *_token, std::shared_ptr<AstClass> _class): IAstType (_token), m_class (_class) {}
 
-	std::string GenCppCode () override { return m_class->m_name; }
+	std::string GenCppCode (size_t _indent) override { return m_class->m_name; }
 
-	static PAstType Make (antlr4::Token *_token, std::shared_ptr<AstClass> _class) {
-		return new AstType_class { _token, _class };
-	}
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	static PAstType Make (antlr4::Token *_token, std::shared_ptr<AstClass> _class) { return new AstType_class { _token, _class }; }
 };
 
 

@@ -13,11 +13,11 @@ struct AstType_int: public IAstType {
 
 	AstType_int (antlr4::Token *_token, size_t _bit_width, bool _sign): IAstType (_token), m_bit_width (_bit_width), m_sign (_sign) {}
 
-	std::string GenCppCode () override { return std::format ("{}int{}_t", m_sign ? "" : "u", m_bit_width); }
+	std::string GenCppCode (size_t _indent) override { return std::format ("{}int{}_t", m_sign ? "" : "u", m_bit_width); }
 
-	static PAstType Make (antlr4::Token *_token, size_t _bit_width, bool _sign) {
-		return new AstType_int { _token, _bit_width, _sign };
-	}
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	static PAstType Make (antlr4::Token *_token, size_t _bit_width, bool _sign) { return new AstType_int { _token, _bit_width, _sign }; }
 };
 
 

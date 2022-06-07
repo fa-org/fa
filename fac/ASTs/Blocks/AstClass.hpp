@@ -10,12 +10,12 @@
 
 #include "AstClassVar.hpp"
 #include "AstClassFunc.hpp"
-#include "../IAst.hpp"
+#include "IAstBlock.hpp"
 #include "../../Common.hpp"
 
 
 
-struct AstClass: public IAst {
+struct AstClass: public IAstBlock {
 	PublicLevel m_level;
 	std::string m_name = "";
 	std::vector<std::shared_ptr<AstClassVar>> m_vars;

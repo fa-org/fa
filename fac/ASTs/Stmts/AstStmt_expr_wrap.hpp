@@ -19,6 +19,12 @@ struct AstStmt_expr_wrap: public IAstStmt {
 
 	std::string GenCppCode (size_t _indent) override { return std::format ("{}{};\n", Indent (_indent), m_expr->GenCppCode (_indent)); }
 
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override { _cb (m_expr); }
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
 	static PAstStmt FromExpr (antlr4::Token *_token, PAstExpr _expr) {
 		return new AstStmt_expr_wrap { _token, _expr };
 	}

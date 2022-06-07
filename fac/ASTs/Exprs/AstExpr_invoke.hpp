@@ -31,6 +31,16 @@ struct AstExpr_invoke: public IAstExpr {
 		return _ss.str ();
 	}
 
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {
+		_cb (m_base);
+		for (auto &_arg : m_args)
+			_cb (_arg);
+	}
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
 	static PAstExpr Make (antlr4::Token *_token, PAstExpr _base, std::vector<PAstExpr> _args, std::string _op) {
 		return new AstExpr_invoke { _token, _base, _args, _op };
 	}

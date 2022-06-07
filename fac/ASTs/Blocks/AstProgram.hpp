@@ -11,19 +11,19 @@
 
 #include "AstEnum.hpp"
 #include "AstClass.hpp"
-#include "../IAst.hpp"
+#include "IAstBlock.hpp"
 #include "../../Exception.hpp"
 #include "../../Common.hpp"
 
 
 
-struct AstProgram: public IAst {
+struct AstProgram: public IAstBlock {
 	std::vector<std::tuple<std::string, std::string>> m_uses;
 	std::string m_namespace = "";
 	std::vector<std::shared_ptr<AstEnum>> m_enums;
 	std::vector<std::shared_ptr<AstClass>> m_classes;
 
-	AstProgram (FaParser::ProgramContext *_ctx): IAst (_ctx->start) {
+	AstProgram (FaParser::ProgramContext *_ctx): IAstBlock (_ctx->start) {
 		for (auto _use_stmt : _ctx->useStmt ())
 			m_uses.push_back ({ GetId (_use_stmt->id ()), GetId (_use_stmt->ids ()) });
 		if (_ctx->namespaceStmt ())

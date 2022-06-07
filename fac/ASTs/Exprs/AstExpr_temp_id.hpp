@@ -18,9 +18,13 @@ struct AstExpr_temp_id: public IAstExpr {
 
 	std::string GenCppCode (size_t _indent) override { throw NOT_IMPLEMENT (); }
 
-	static PAstExpr Make (antlr4::Token *_token, std::string _id) {
-		return new AstExpr_temp_id { _token, _id };
-	}
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {}
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
+	static PAstExpr Make (antlr4::Token *_token, std::string _id) { return new AstExpr_temp_id { _token, _id }; }
 };
 
 

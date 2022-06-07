@@ -192,6 +192,7 @@
     <ClInclude Include="ASTs\Blocks\AstEnum.hpp" />
     <ClInclude Include="ASTs\Blocks\AstEnumItem.hpp" />
     <ClInclude Include="ASTs\Blocks\AstProgram.hpp" />
+    <ClInclude Include="ASTs\Blocks\IAstBlock.hpp" />
     <ClInclude Include="ASTs\Exprs\AstExpr_invoke.hpp" />
     <ClInclude Include="ASTs\Exprs\AstExpr_op1.hpp" />
     <ClInclude Include="ASTs\Exprs\AstExpr_op2.hpp" />

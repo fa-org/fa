@@ -12,11 +12,11 @@ struct AstType_float: public IAstType {
 
 	AstType_float (antlr4::Token *_token, size_t _bit_width): IAstType (_token), m_bit_width (_bit_width) {}
 
-	std::string GenCppCode () override { return m_bit_width == 32 ? "float" : "double"; }
+	std::string GenCppCode (size_t _indent) override { return m_bit_width == 32 ? "float" : "double"; }
 
-	static PAstType Make (antlr4::Token *_token, size_t _bit_width) {
-		return new AstType_float { _token, _bit_width };
-	}
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	static PAstType Make (antlr4::Token *_token, size_t _bit_width) { return new AstType_float { _token, _bit_width }; }
 };
 
 

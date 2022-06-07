@@ -24,6 +24,12 @@ struct AstExpr_op2: public IAstExpr {
 		return _s;
 	}
 
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override { _cb (m_left); _cb (m_right); }
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
 	static PAstExpr Make (antlr4::Token *_token, PAstExpr _left, std::string _op, PAstExpr _right) {
 		return new AstExpr_op2 { _token, _left, _op, _right };
 	}

@@ -20,9 +20,13 @@ struct AstExpr_value: public IAstExpr {
 
 	std::string GenCppCode (size_t _indent) override { return m_value; }
 
-	static PAstExpr Make (antlr4::Token *_token, PAstType _type, std::string _value) {
-		return new AstExpr_value { _token, _type, _value };
-	}
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override { _cb (m_type); }
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {}
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
+	static PAstExpr Make (antlr4::Token *_token, PAstType _type, std::string _value) { return new AstExpr_value { _token, _type, _value }; }
 };
 
 
