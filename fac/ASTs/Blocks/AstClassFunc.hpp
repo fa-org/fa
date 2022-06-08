@@ -45,6 +45,10 @@ struct AstClassFunc: public IAstBlock {
 		m_contents = IAstStmt::FromCtx (_ctx->classItemFuncExt2 ()->classItemFuncExtBody ());
 	}
 
+	void ProcessCode () override {
+		throw NOT_IMPLEMENT ();
+	}
+
 	std::string GenCppCode (size_t _indent) override {
 		std::stringstream _ss {};
 		_ss << std::format ("{}{}{} {} (", Indent (_indent), m_static ? "static " : "", m_ret_type->GenCppCode (_indent), m_name);

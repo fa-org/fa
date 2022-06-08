@@ -15,6 +15,8 @@ struct IAstBlock: public IAst {
 	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
 	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {}
 	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
+	virtual void ProcessCode () = 0;
 };
 
 

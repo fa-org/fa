@@ -38,6 +38,13 @@ struct AstProgram: public IAstBlock {
 			m_classes.push_back (AstClass::FromCtx (_class));
 	}
 
+	void ProcessCode () override {
+		for (auto &_enum : m_enums)
+			_enum->ProcessCode ();
+		for (auto &_class : m_classes)
+			_class->ProcessCode ();
+	}
+
 	std::string GenCppCode (size_t) override {
 		std::stringstream _ss {};
 		_ss << "#include <cstdint>\n";

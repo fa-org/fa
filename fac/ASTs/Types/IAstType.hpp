@@ -18,6 +18,8 @@
 struct IAstType;
 struct PAstType: public std::shared_ptr<IAstType> {
 	PAstType (IAstType *_type = nullptr): std::shared_ptr<IAstType> (_type) {}
+
+	void ProcessCode ();
 };
 
 struct IAstType: public IAst {

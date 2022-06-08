@@ -17,6 +17,20 @@
 
 
 
+void PAstType::ProcessCode () {
+	if (auto _array_wrap = dynamic_cast<AstType_array_wrap *> (get ())) {
+		_array_wrap->m_base_type->ProcessCode ();
+	} else if (auto _option_wrap = dynamic_cast<AstType_option_wrap *> (get ())) {
+		throw NOT_IMPLEMENT ();
+	} else if (auto _temp = dynamic_cast<AstType_temp *> (get ())) {
+		throw NOT_IMPLEMENT ();
+	} else if (auto _tuple_wrap = dynamic_cast<AstType_tuple_wrap *> (get ())) {
+		throw NOT_IMPLEMENT ();
+	}
+}
+
+
+
 std::tuple<PAstType, std::string> IAstType::FromCtx (FaParser::TypeVarContext *_ctx) {
 	if (!_ctx)
 		return { nullptr, "" };

@@ -37,6 +37,13 @@ struct AstEnum: public IAstBlock {
 			m_funcs.push_back (AstClassFunc::FromCtx (_item));
 	}
 
+	void ProcessCode () override {
+		for (auto &_item : m_items)
+			_item->ProcessCode ();
+		for (auto &_func : m_funcs)
+			_func->ProcessCode ();
+	}
+
 	std::string GenCppCode (size_t _indent) override {
 		throw NOT_IMPLEMENT ();
 	}

@@ -21,6 +21,11 @@ struct AstEnumItem: public IAstBlock {
 		m_attach_types = IAstType::FromCtx (_ctx->type ());
 	}
 
+	void ProcessCode () override {
+		for (auto &_attach_type : m_attach_types)
+			_attach_type->ProcessCode ();
+	}
+
 	std::string GenCppCode (size_t _indent) override {
 		throw NOT_IMPLEMENT ();
 	}

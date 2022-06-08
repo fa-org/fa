@@ -21,7 +21,7 @@ struct AstClass: public IAstBlock {
 	std::vector<std::shared_ptr<AstClassVar>> m_vars;
 	std::vector<std::shared_ptr<AstClassFunc>> m_funcs;
 
-	AstClass (FaParser::ClassBlockContext *_ctx): IAst (_ctx->id ()->start) {
+	AstClass (FaParser::ClassBlockContext *_ctx): IAstBlock (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->classItemVar ()) {
@@ -32,7 +32,7 @@ struct AstClass: public IAstBlock {
 		}
 	}
 
-	AstClass (FaParser::ClassBlock2Context *_ctx): IAst (_ctx->id ()->start) {
+	AstClass (FaParser::ClassBlock2Context *_ctx): IAstBlock (_ctx->id ()->start) {
 		m_level = GetPublicLevel (_ctx->publicLevel ());
 		m_name = GetId (_ctx->id ());
 		for (auto _item : _ctx->classItem2 ()) {
@@ -42,6 +42,13 @@ struct AstClass: public IAstBlock {
 				m_vars.push_back (AstClassVar::FromCtx (_item));
 			}
 		}
+	}
+
+	void ProcessCode () override {
+		for (auto &_var : m_vars)
+			_var->ProcessCode ();
+		for (auto &_func : m_funcs)
+			_func->ProcessCode ();
 	}
 
 	std::string GenCppCode (size_t _indent) override {

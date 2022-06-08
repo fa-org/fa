@@ -32,6 +32,10 @@ struct AstClassVar: public IAstBlock {
 		m_name = GetId (_ctx->id ());
 	}
 
+	void ProcessCode () override {
+		throw NOT_IMPLEMENT ();
+	}
+
 	std::string GenCppCode (size_t _indent) override {
 		return std::format ("{}{} {};\n", Indent (_indent), m_type->GenCppCode (_indent), m_name);
 	}
