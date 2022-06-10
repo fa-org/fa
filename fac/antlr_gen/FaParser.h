@@ -1782,6 +1782,8 @@ public:
     PublicLevelContext *publicLevel();
     antlr4::tree::TerminalNode *Static();
     ClassItemFuncExt2Context *classItemFuncExt2();
+    antlr4::tree::TerminalNode *Assign();
+    MiddleExprContext *middleExpr();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

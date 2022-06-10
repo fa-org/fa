@@ -37,6 +37,7 @@ int main () {
 	std::shared_ptr<AstProgram> _ast_program = _visitor.visit (_parser->programEntry ()).as<std::shared_ptr<AstProgram>> ();
 
 	// generate
+	_ast_program->ProcessCode ();
 	_code = _ast_program->GenCppCode (0);
 	std::cout << _code;
 	//} catch (std::exception &_e) {

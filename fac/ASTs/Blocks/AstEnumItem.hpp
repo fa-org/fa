@@ -23,7 +23,7 @@ struct AstEnumItem: public IAstBlock {
 
 	void ProcessCode () override {
 		for (auto &_attach_type : m_attach_types)
-			_attach_type->ProcessCode ();
+			_attach_type.ProcessCode ();
 	}
 
 	std::string GenCppCode (size_t _indent) override {

@@ -19,6 +19,24 @@ struct AstExpr_invoke: public IAstExpr {
 	AstExpr_invoke (antlr4::Token *_token, PAstExpr _base, std::vector<PAstExpr> _args, std::string _op):
 		IAstExpr (_token), m_base (_base), m_args (_args), m_op (_op) {}
 
+
+
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {
+		_cb (m_base);
+		for (auto &_arg : m_args)
+			_cb (_arg);
+	}
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
+
+
+	PAstType GuessType () override { throw NOT_IMPLEMENT (); }
+
+	void ProcessCode (PAstType _type) override { throw NOT_IMPLEMENT (); }
+
 	std::string GenCppCode (size_t _indent) override {
 		std::stringstream _ss {};
 		_ss << std::format ("{} (", m_base->GenCppCode (_indent));
@@ -31,15 +49,7 @@ struct AstExpr_invoke: public IAstExpr {
 		return _ss.str ();
 	}
 
-	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
 
-	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {
-		_cb (m_base);
-		for (auto &_arg : m_args)
-			_cb (_arg);
-	}
-
-	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
 
 	static PAstExpr Make (antlr4::Token *_token, PAstExpr _base, std::vector<PAstExpr> _args, std::string _op) {
 		return new AstExpr_invoke { _token, _base, _args, _op };

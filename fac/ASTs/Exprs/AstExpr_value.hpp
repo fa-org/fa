@@ -18,13 +18,30 @@ struct AstExpr_value: public IAstExpr {
 	AstExpr_value (antlr4::Token *_token, PAstType _type, std::string _value):
 		IAstExpr (_token), m_type (_type), m_value (_value) {}
 
+
+
+	PAstType GuessType () override { return m_real_type ? m_real_type : m_type; }
+
+	void ProcessCode (PAstType _type) override {
+		if (m_real_type) {
+			throw NOT_IMPLEMENT ();
+		} else if (m_type.IsSame (_type)) {
+			m_real_type = _type;
+			return;
+		} else {
+			throw NOT_IMPLEMENT ();
+		}
+	}
+
 	std::string GenCppCode (size_t _indent) override { return m_value; }
 
+
+
 	void GetChildTypes (std::function<void (PAstType &)> _cb) override { _cb (m_type); }
-
 	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override {}
-
 	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
+
 
 	static PAstExpr Make (antlr4::Token *_token, PAstType _type, std::string _value) { return new AstExpr_value { _token, _type, _value }; }
 };

@@ -18,6 +18,20 @@ struct AstExpr_op1: public IAstExpr {
 	AstExpr_op1 (antlr4::Token *_token, PAstExpr _base, std::string _op, bool _prefix):
 		IAstExpr (_token), m_base (_base), m_op (_op), m_prefix (_prefix) {}
 
+
+
+	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
+
+	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override { _cb (m_base); }
+
+	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
+
+
+
+	PAstType GuessType () override { throw NOT_IMPLEMENT (); }
+
+	void ProcessCode (PAstType _type) override { throw NOT_IMPLEMENT (); }
+
 	std::string GenCppCode (size_t _indent) override {
 		if (m_prefix) {
 			return std::format ("{}{}", m_op, m_base->GenCppCode (_indent));
@@ -26,11 +40,7 @@ struct AstExpr_op1: public IAstExpr {
 		}
 	}
 
-	void GetChildTypes (std::function<void (PAstType &)> _cb) override {}
 
-	void GetChildExprs (std::function<void (PAstExpr &)> _cb) override { _cb (m_base); }
-
-	void GetChildStmts (std::function<void (PAstStmt &)> _cb) override {}
 
 	static PAstExpr Make (antlr4::Token *_token, PAstExpr _base, std::string _op, bool _prefix) {
 		return new AstExpr_op1 { _token, _base, _op, _prefix };

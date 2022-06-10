@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "../IAst.hpp"
+#include "../Types/IAstType.hpp"
 #include "../../Exception.hpp"
 
 
@@ -17,7 +18,12 @@ struct PAstExpr: public std::shared_ptr<IAstExpr> {
 };
 
 struct IAstExpr: public IAst {
+	PAstType m_real_type;
+
 	IAstExpr (antlr4::Token *_token): IAst (_token) {}
+
+	virtual PAstType GuessType () = 0;
+	virtual void ProcessCode (PAstType _type) = 0;
 
 	static PAstExpr FromCtx (FaParser::StrongExprBaseContext *_ctx);
 	static PAstExpr FromCtx (FaParser::StrongExprContext *_ctx);
