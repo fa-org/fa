@@ -21,7 +21,7 @@ namespace fac.ASTs.Structs {
 
 
 
-		public static AstTemplateClass FromContext (FaParser.ClassStmtContext _ctx) {
+		public static AstTemplateClass FromContext (FaParser.ClassBlockContext _ctx) {
 			var _templates = (from p in _ctx.classTemplates ().type () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList ();
 			foreach (var _var in _templates) {
 				if (_var.Name[0] != 'T')
@@ -32,9 +32,26 @@ namespace fac.ASTs.Structs {
 				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
 				Templates = _templates,
-				ClassVars = (from p in _ctx.classVar () select new AstClassVar (p)).ToList (),
+				ClassVars = (from p in _ctx.classItemVar () select new AstClassVar (p)).ToList (),
 			};
-			_ret.ClassFuncs = (from p in _ctx.classFunc () select new AstClassFunc (_ret, p)).ToList ();
+			_ret.ClassFuncs = (from p in _ctx.classItemFunc () select new AstClassFunc (_ret, p)).ToList ();
+			return _ret;
+		}
+
+		public static AstTemplateClass FromContext (FaParser.ClassBlock2Context _ctx) {
+			var _templates = (from p in _ctx.classTemplates ().type () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList ();
+			foreach (var _var in _templates) {
+				if (_var.Name[0] != 'T')
+					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
+			}
+			var _ret = new AstTemplateClass {
+				Token = _ctx.Start,
+				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
+				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
+				Templates = _templates,
+				ClassVars = (from p in _ctx.classItem2 () where p.classItemFuncExt2 () == null select new AstClassVar (p)).ToList (),
+			};
+			_ret.ClassFuncs = (from p in _ctx.classItem2 () where p.classItemFuncExt2 () != null select new AstClassFunc (_ret, p)).ToList ();
 			return _ret;
 		}
 

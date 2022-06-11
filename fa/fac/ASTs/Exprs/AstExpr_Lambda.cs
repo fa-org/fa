@@ -27,7 +27,7 @@ namespace fac.ASTs.Exprs {
 		/// <remarks>lambda表达式特殊性在于，必须悉知类型才能解析，此处独立出一个函数用于指定类型</remarks>
 		/// <param name="_expect_type"></param>
 		public void InitLambda (IAstType _expect_type) {
-			Arguments = (from p in LambdaExprCtx.typeWrapVar2List ().typeWrapVar2 ()
+			Arguments = (from p in LambdaExprCtx.typeWrapVarList3 ().typeWrapVar3 ()
 						 let _wrap = p.typeWrap ()
 						 let _type = _wrap.type () != null ? IAstType.FromContext (_wrap.type ()) : null
 						 let _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None)

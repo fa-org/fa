@@ -19,13 +19,23 @@ namespace fac.ASTs.Structs {
 
 
 		public AstClassVar () { }
-		public AstClassVar (FaParser.ClassVarContext _ctx) {
+		public AstClassVar (FaParser.ClassItem2Context _ctx) {
+			if (_ctx.classItemFuncExt2 () != null)
+				throw new NotImplementedException ();
 			Token = _ctx.Start;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
 			DataType = new AstType_TempType (_ctx.type ());
 			Name = _ctx.id ().GetText ();
-			DefaultValueRaw = (_ctx.classVarExt () != null ? _ctx.classVarExt ().tmpAssignExpr () : _ctx.tmpAssignExpr ())?.middleExpr ();
+			DefaultValueRaw = _ctx.middleExpr ();
+		}
+		public AstClassVar (FaParser.ClassItemVarContext _ctx) {
+			Token = _ctx.Start;
+			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
+			Static = _ctx.Static () != null;
+			DataType = new AstType_TempType (_ctx.type ());
+			Name = _ctx.id ().GetText ();
+			DefaultValueRaw = _ctx.middleExpr ();
 		}
 
 		public void ProcessType () {

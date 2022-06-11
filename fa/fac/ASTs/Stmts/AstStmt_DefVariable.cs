@@ -21,8 +21,21 @@ namespace fac.ASTs.Stmts {
 
 		public static List<IAstStmt> FromContext (FaParser.DefVarStmtContext _ctx) {
 			List<IAstStmt> _stmts = new List<IAstStmt> ();
-			var _type = IAstType.FromContext (_ctx.type ());
 			foreach (var _var_ctx in _ctx.idAssignExpr ()) {
+				var _type = IAstType.FromContext (_var_ctx.type ());
+				var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start, DataType = _type, VarName = _var_ctx.id ().GetText () };
+				_varstmt.Expr = FromContext (_var_ctx.expr ());
+				if (_varstmt.Expr is AstExpr_Lambda _lambdaexpr)
+					_lambdaexpr.InitLambda (_type);
+				_stmts.Add (_varstmt);
+			}
+			return _stmts;
+		}
+
+		public static List<IAstStmt> FromContext (FaParser.DefVarStmt2Context _ctx) {
+			List<IAstStmt> _stmts = new List<IAstStmt> ();
+			var _type = IAstType.FromContext (_ctx.type ());
+			foreach (var _var_ctx in _ctx.idAssignExpr2 ()) {
 				var _varstmt = new AstStmt_DefVariable { Token = _ctx.Start, DataType = _type, VarName = _var_ctx.id ().GetText () };
 				_varstmt.Expr = FromContext (_var_ctx.expr ());
 				if (_varstmt.Expr is AstExpr_Lambda _lambdaexpr)

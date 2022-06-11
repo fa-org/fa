@@ -156,13 +156,65 @@ namespace fac.ASTs.Types {
 			let _ext = p.Mut () != null ? ArgumentTypeExt.Mut : (p.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None)
 			select (_type: _type, _ext: _ext)).ToList ();
 
-		public static (IAstType _type, ArgumentTypeExt _ext, string _name) FromContext (FaParser.TypeWrapVarContext _ctx) {
+		public static (IAstType _type, ArgumentTypeExt _ext, string _name) FromContext (FaParser.TypeWrapVar1Context _ctx) {
 			var _wrap = _ctx.typeWrap ();
 			var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
 			return (_type: FromContext (_wrap.type ()), _ext: _ext, _name: _ctx.id () != null ? _ctx.id ().GetText () : "");
 		}
 
-		public static List<(IAstType _type, ArgumentTypeExt _ext, string _name)> FromContexts (FaParser.TypeWrapVarContext[] _ctxs) {
+		public static (IAstType _type, ArgumentTypeExt _ext, string _name) FromContext (FaParser.TypeWrapVar2Context _ctx) {
+			var _wrap = _ctx.typeWrap ();
+			var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
+			return (_type: FromContext (_wrap.type ()), _ext: _ext, _name: _ctx.id () != null ? _ctx.id ().GetText () : "");
+		}
+
+		public static (IAstType _type, ArgumentTypeExt _ext, string _name) FromContext (FaParser.TypeWrapVar3Context _ctx) {
+			var _wrap = _ctx.typeWrap ();
+			var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
+			return (_type: FromContext (_wrap.type ()), _ext: _ext, _name: _ctx.id () != null ? _ctx.id ().GetText () : "");
+		}
+
+		public static List<(IAstType _type, ArgumentTypeExt _ext, string _name)> FromContexts (FaParser.TypeWrapVar1Context[] _ctxs) {
+			var _list = new List<(IAstType _type, ArgumentTypeExt _ext, string _name)> ();
+			for (int i = 0; i < _ctxs.Length; ++i) {
+				var _wrap = _ctxs[i].typeWrap ();
+				var _type = FromContext (_wrap.type ());
+				var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
+				var _name = _ctxs[i].id ()?.GetText () ?? "";
+				if (_name == "") {
+					_name = $"Item{i}";
+				} else if (_name.StartsWith ("Item")) {
+					if (int.TryParse (_name[4..], out int n)) {
+						if (n != i)
+							throw new CodeException (_ctxs[i].id ().Start, $"此位置无法使用 {_name} 作为命名元组的项名称");
+					}
+				}
+				_list.Add ((_type, _ext, _name));
+			}
+			return _list;
+		}
+
+		public static List<(IAstType _type, ArgumentTypeExt _ext, string _name)> FromContexts (FaParser.TypeWrapVar2Context[] _ctxs) {
+			var _list = new List<(IAstType _type, ArgumentTypeExt _ext, string _name)> ();
+			for (int i = 0; i < _ctxs.Length; ++i) {
+				var _wrap = _ctxs[i].typeWrap ();
+				var _type = FromContext (_wrap.type ());
+				var _ext = _wrap.Mut () != null ? ArgumentTypeExt.Mut : (_wrap.Params () != null ? ArgumentTypeExt.Params : ArgumentTypeExt.None);
+				var _name = _ctxs[i].id ()?.GetText () ?? "";
+				if (_name == "") {
+					_name = $"Item{i}";
+				} else if (_name.StartsWith ("Item")) {
+					if (int.TryParse (_name[4..], out int n)) {
+						if (n != i)
+							throw new CodeException (_ctxs[i].id ().Start, $"此位置无法使用 {_name} 作为命名元组的项名称");
+					}
+				}
+				_list.Add ((_type, _ext, _name));
+			}
+			return _list;
+		}
+
+		public static List<(IAstType _type, ArgumentTypeExt _ext, string _name)> FromContexts (FaParser.TypeWrapVar3Context[] _ctxs) {
 			var _list = new List<(IAstType _type, ArgumentTypeExt _ext, string _name)> ();
 			for (int i = 0; i < _ctxs.Length; ++i) {
 				var _wrap = _ctxs[i].typeWrap ();

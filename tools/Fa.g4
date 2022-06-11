@@ -171,7 +171,7 @@ ids:						id (PointOp id)*;
 // type
 //
 typeAfter:					(quotFangL quotFangR) | Qus;
-typeSingle:					ids (quotJianL type (Comma type)* quotJianR)?;
+typeSingle:					ids (quotJianL typeWrap (Comma typeWrap)* quotJianR)?;
 typeMulti:					quotYuanL typeVar (Comma typeVar)+ quotYuanR;
 type:						(typeSingle | typeMulti) typeAfter*;
 typeWrap:					(Mut | Params)? type;
@@ -282,20 +282,20 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 // class
 //
 publicLevel:				Public | Internal | Protected | Private;
-//classTemplates:				quotJianL id (Comma id)* quotJianR;
+classTemplates:				quotJianL type (Comma type)* quotJianR;
 //classParent:				Colon ids (Comma ids)*;
-classItemFuncExtBody:		(exprFuncDef expr Semi) | (quotHuaL stmt* quotHuaR);
+classItemFuncExtBody:		(exprFuncDef expr endl) | (quotHuaL stmt* quotHuaR);
 //
 classItemVar:				publicLevel? Static? id Colon type (Assign middleExpr)? endl;
 classItemFunc:				publicLevel? Static? id quotYuanL typeWrapVarList1? quotYuanR Colon type classItemFuncExtBody endl;
-classBlock:					publicLevel? Class id quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
+classBlock:					publicLevel? Class id classTemplates? quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
 classItemFuncExt2:			quotYuanL typeWrapVarList2? quotYuanR classItemFuncExtBody;
 classItem2:					publicLevel? Static? type id (classItemFuncExt2 | (Assign middleExpr))? endl;
-classBlock2:				publicLevel? Class id quotHuaL classItem2* quotHuaR endl;
+classBlock2:				publicLevel? Class id classTemplates? quotHuaL classItem2* quotHuaR endl;
 //
-enumItem:					id (quotYuanL type (Comma type)* quotYuanR) endl2?;
-enumBlock:					publicLevel? Enum id quotHuaL enumItem+ classItemFunc* quotHuaR endl;
-enumBlock2:					publicLevel? Enum id quotHuaL enumItem+ classItem2* quotHuaR endl;
+enumItem:					id (quotYuanL type quotYuanR)? endl2;
+enumBlock:					publicLevel? Enum id classTemplates? quotHuaL enumItem+ classItemFunc* quotHuaR endl;
+enumBlock2:					publicLevel? Enum id classTemplates? quotHuaL enumItem+ classItem2* quotHuaR endl;
 
 
 
@@ -307,7 +307,7 @@ callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
 importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
 libStmt:					ALib String1Literal endl;
 namespaceStmt:				Namespace ids endl;
-program:					(useStmt | importStmt | libStmt)* namespaceStmt? (enumBlock | enumBlock2 | classBlock | classBlock2)*;
+program:					(useStmt | importStmt | libStmt)* namespaceStmt* (enumBlock | enumBlock2 | classBlock | classBlock2)*;
 
 
 
@@ -315,8 +315,8 @@ program:					(useStmt | importStmt | libStmt)* namespaceStmt? (enumBlock | enumB
 // entry
 //
 programEntry:				program EOF;
-//classFuncItemEntry:			classFuncItem EOF;
-//typeEntry:					type EOF;
+classItemFuncEntry:			(classItemFunc | classItem2) EOF;
+typeEntry:					type EOF;
 
 
 

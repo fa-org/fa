@@ -70,7 +70,7 @@ namespace fac.ASTs.Exprs {
 			//		ExpectType = (Value.ExpectType as AstType_ArrayWrap).ItemType;
 			//	}
 			//}
-			return _success ? AstExprTypeCast.Make (this, _expect_type) : null;
+			//return _success ? AstExprTypeCast.Make (this, _expect_type) : null;
 		}
 
 		public override IAstType GuessType () {

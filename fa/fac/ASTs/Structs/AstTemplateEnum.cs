@@ -21,13 +21,13 @@ namespace fac.ASTs.Structs {
 
 
 
-		public static AstTemplateEnum FromContext (FaParser.EnumStmtContext _ctx) {
+		public static AstTemplateEnum FromContext (FaParser.EnumBlockContext _ctx) {
 			var _templates = (from p in _ctx.classTemplates ().type () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList ();
 			foreach (var _var in _templates) {
 				if (_var.Name[0] != 'T')
 					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
 			}
-			var _enum_items = (from p in _ctx.classEnum () select new AstEnumItem (p)).ToList ();
+			var _enum_items = (from p in _ctx.enumItem () select new AstEnumItem (p)).ToList ();
 			var _types = (from p in _enum_items where p.AttachType != null select p.AttachType).ToList ();
 			for (int i = 0; i < _types.Count - 1; ++i) {
 				for (int j = i + 1; j < _types.Count; ++j) {
@@ -46,7 +46,36 @@ namespace fac.ASTs.Structs {
 				ClassVars = _vars,
 				ClassFuncs = new List<AstClassFunc> (),
 			};
-			_ret.ClassFuncs.AddRange (from p in _ctx.classFunc () select new AstClassFunc (_ret, p));
+			_ret.ClassFuncs.AddRange (from p in _ctx.classItemFunc () select new AstClassFunc (_ret, p));
+			return _ret;
+		}
+
+		public static AstTemplateEnum FromContext (FaParser.EnumBlock2Context _ctx) {
+			var _templates = (from p in _ctx.classTemplates ().type () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList ();
+			foreach (var _var in _templates) {
+				if (_var.Name[0] != 'T')
+					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
+			}
+			var _enum_items = (from p in _ctx.enumItem () select new AstEnumItem (p)).ToList ();
+			var _types = (from p in _enum_items where p.AttachType != null select p.AttachType).ToList ();
+			for (int i = 0; i < _types.Count - 1; ++i) {
+				for (int j = i + 1; j < _types.Count; ++j) {
+					if (_types[i].IsSame (_types[j]))
+						_types.RemoveAt (j--);
+				}
+			}
+			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "__index__" } };
+			_vars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
+			var _ret = new AstTemplateEnum {
+				Token = _ctx.Start,
+				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
+				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
+				ClassEnumItems = _enum_items,
+				Templates = _templates,
+				ClassVars = _vars,
+				ClassFuncs = new List<AstClassFunc> (),
+			};
+			_ret.ClassFuncs.AddRange (from p in _ctx.classItem2 () select new AstClassFunc (_ret, p));
 			return _ret;
 		}
 

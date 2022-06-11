@@ -14,10 +14,10 @@ namespace fac.ASTs.Structs {
 		public IAstClass ParentClass { get; set; }
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
-		public string Name { init; get; }
+		public string Name { get; set; }
 		public IAstType ReturnType { get; set; }
 		public List<(IAstType _type, ArgumentTypeExt _ext, string _name)> Arguments { init; get; }
-		public FaParser.ClassFuncBodyContext BodyRaw { init; get; }
+		public FaParser.ClassItemFuncExtBodyContext BodyRaw { init; get; }
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
 
 		public AstType_Func FuncType {
@@ -46,17 +46,31 @@ namespace fac.ASTs.Structs {
 			}
 			BodyRaw = _src.BodyRaw;
 		}
-		public AstClassFunc (IAstClass _parent_class, FaParser.ClassFuncContext _ctx) {
+
+		public AstClassFunc (IAstClass _parent_class, FaParser.ClassItemFuncContext _ctx) {
 			if (_parent_class == null)
 				throw new NotImplementedException ();
 			Token = _ctx.Start;
 			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
-			Name = _ctx.classFuncName ().GetText ();
+			Name = _ctx.id ().GetText ();
 			ReturnType = new AstType_TempType (_ctx.type ());
-			Arguments = AstElemParser.Parse (_ctx.typeWrapVarList ());
-			BodyRaw = _ctx.classFuncBody ();
+			Arguments = AstElemParser.Parse (_ctx.typeWrapVarList1 ());
+			BodyRaw = _ctx.classItemFuncExtBody ();
+		}
+
+		public AstClassFunc (IAstClass _parent_class, FaParser.ClassItem2Context _ctx) {
+			if (_ctx.classItemFuncExt2 () == null)
+				throw new NotImplementedException ();
+			Token = _ctx.Start;
+			ParentClass = _parent_class;
+			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
+			Static = _ctx.Static () != null;
+			Name = _ctx.id ().GetText ();
+			ReturnType = new AstType_TempType (_ctx.type ());
+			Arguments = AstElemParser.Parse (_ctx.classItemFuncExt2 ().typeWrapVarList2 ());
+			BodyRaw = _ctx.classItemFuncExt2 ().classItemFuncExtBody ();
 		}
 
 		public void ProcessType () {

@@ -159,12 +159,12 @@ namespace fac.ASTs.Exprs {
 					_tmp_expr.Operator = _suffix_ctx.GetText ();
 					_tmp_expr.IsPrefix = false;
 					_expr = _tmp_expr;
-				} else if (_suffix_ctx.QuotYuanL () != null) {
+				} else if (_suffix_ctx.quotYuanL () != null) {
 					var _tmp_expr = new AstExpr_OpN { Token = _ctx.Start };
 					_tmp_expr.Value = _expr;
 					_tmp_expr.Arguments = (from p in _suffix_ctx.expr () select FromContext (p)).ToList ();
 					_expr = _tmp_expr;
-				} else if (_suffix_ctx.QuotFangL () != null) {
+				} else if (_suffix_ctx.quotFangL () != null) {
 					//var _arr = _expr;
 					var _args = (from p in _suffix_ctx.exprOpt () select p.expr () != null ? FromContext (p.expr ()) : null).ToList ();
 					if (_args.Count != 1)
@@ -185,8 +185,8 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public static IAstExpr FromContext (FaParser.StrongExprBaseContext _ctx) {
-			if (_ctx.id () != null) {
-				string _id = $"{(_ctx.ColonColon () != null ? "::" : "")}{_ctx.id ().GetText ()}";
+			if (_ctx.ids () != null) {
+				string _id = $"{(_ctx.ColonColon () != null ? "::" : "")}{_ctx.ids ().GetText ()}";
 				if (_id != "null") {
 					return new AstExpr_BaseId { Token = _ctx.Start, Id = _id };
 				} else {
@@ -248,8 +248,8 @@ namespace fac.ASTs.Exprs {
 				return AstExpr_Switch.FromContext (_ctx.switchExpr ());
 			} else if (_ctx.lambdaExpr () != null) {
 				return new AstExpr_Lambda { Token = _ctx.Start, LambdaExprCtx = _ctx.lambdaExpr () };
-			} else if (_ctx.idExt () != null) {
-				return AstExprName_ClassEnum_New._FindFromNameUncheckAttach (_ctx.Start, _ctx.idExt ().GetText ());
+			//} else if (_ctx.idExt () != null) {
+			//	return AstExprName_ClassEnum_New._FindFromNameUncheckAttach (_ctx.Start, _ctx.idExt ().GetText ());
 			} else {
 				throw new UnimplException (_ctx);
 			}

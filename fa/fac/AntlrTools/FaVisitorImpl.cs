@@ -23,7 +23,6 @@ namespace fac.AntlrTools {
 			} throw new NotImplementedException ();
 		}
 		public IAst VisitProgramEntry (FaParser.ProgramEntryContext _ctx) => new AstProgram (_ctx.program ());
-		public IAst VisitClassFuncEntry (FaParser.ClassFuncEntryContext _ctx) => new AstClassFunc (Info.CurrentClass, _ctx.classFunc ());
 		public IAst VisitTypeEntry (FaParser.TypeEntryContext _ctx) => IAstType.FromContext (_ctx.type ());
 		public IAst VisitShiftLAssign (FaParser.ShiftLAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitShiftRAssign (FaParser.ShiftRAssignContext _ctx) => throw new NotImplementedException ();
@@ -46,20 +45,16 @@ namespace fac.AntlrTools {
 		public IAst VisitLiteral (FaParser.LiteralContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitId (FaParser.IdContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIds (FaParser.IdsContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitIdExt (FaParser.IdExtContext _ctx) => throw new NotImplementedException ();
+		//public IAst VisitIdExt (FaParser.IdExtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeAfter (FaParser.TypeAfterContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeSingle (FaParser.TypeSingleContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeMulti (FaParser.TypeMultiContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitType (FaParser.TypeContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitTypeWrap (FaParser.TypeWrapContext context) => throw new NotImplementedException ();
+		public IAst VisitTypeWrap (FaParser.TypeWrapContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVar (FaParser.TypeVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVarList (FaParser.TypeVarListContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeVar2 (FaParser.TypeWrapVar2Context _ctx) => throw new NotImplementedException ();
-		public IAst VisitTypeVar2List (FaParser.TypeWrapVar2ListContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitTypeWrapVar (FaParser.TypeWrapVarContext context) => throw new NotImplementedException ();
-		public IAst VisitTypeWrapVarList (FaParser.TypeWrapVarListContext context) => throw new NotImplementedException ();
-		public IAst VisitTypeWrapVar2 (FaParser.TypeWrapVar2Context context) => throw new NotImplementedException ();
-		public IAst VisitTypeWrapVar2List (FaParser.TypeWrapVar2ListContext context) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVar2 (FaParser.TypeWrapVar2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitQuotStmtPart (FaParser.QuotStmtPartContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitQuotStmtExpr (FaParser.QuotStmtExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIfStmt (FaParser.IfStmtContext _ctx) => throw new NotImplementedException ();
@@ -93,23 +88,11 @@ namespace fac.AntlrTools {
 		public IAst VisitStrongExpr (FaParser.StrongExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitMiddleExpr (FaParser.MiddleExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitExpr (FaParser.ExprContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitTmpAssignExpr (FaParser.TmpAssignExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIdAssignExpr (FaParser.IdAssignExprContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitDefVarStmt (FaParser.DefVarStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNormalStmt (FaParser.NormalStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitStmt (FaParser.StmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitPublicLevel (FaParser.PublicLevelContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassTemplates (FaParser.ClassTemplatesContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassParent (FaParser.ClassParentContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitEnumStmt (FaParser.EnumStmtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassStmt (FaParser.ClassStmtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassVarExtFunc (FaParser.ClassVarExtFuncContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassVarExt (FaParser.ClassVarExtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassVar (FaParser.ClassVarContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassFuncName (FaParser.ClassFuncNameContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassFuncBody (FaParser.ClassFuncBodyContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassFunc (FaParser.ClassFuncContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassEnum (FaParser.ClassEnumContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitCallConvention (FaParser.CallConventionContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitImportStmt (FaParser.ImportStmtContext _ctx) => throw new NotImplementedException ();
@@ -118,5 +101,45 @@ namespace fac.AntlrTools {
 		public IAst VisitProgram (FaParser.ProgramContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTerminal (ITerminalNode node) => throw new NotImplementedException ();
 		public IAst VisitErrorNode (IErrorNode node) => throw new NotImplementedException ();
+
+		public IAst VisitEndl (FaParser.EndlContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitEndl2 (FaParser.Endl2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitQFangL (FaParser.QFangLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQFangR (FaParser.QFangRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQJianL (FaParser.QJianLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQJianR (FaParser.QJianRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQHuaL (FaParser.QHuaLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQHuaR (FaParser.QHuaRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQYuanL (FaParser.QYuanLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQYuanR (FaParser.QYuanRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotFangL (FaParser.QuotFangLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotFangR (FaParser.QuotFangRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotJianL (FaParser.QuotJianLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotJianR (FaParser.QuotJianRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotHuaL (FaParser.QuotHuaLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotHuaR (FaParser.QuotHuaRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotYuanL (FaParser.QuotYuanLContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitQuotYuanR (FaParser.QuotYuanRContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVar1 (FaParser.TypeWrapVar1Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVarList1 (FaParser.TypeWrapVarList1Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVarList2 (FaParser.TypeWrapVarList2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVar3 (FaParser.TypeWrapVar3Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeWrapVarList3 (FaParser.TypeWrapVarList3Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitIdAssignExpr2 (FaParser.IdAssignExpr2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitDefVarStmt2 (FaParser.DefVarStmt2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassItemFuncExtBody (FaParser.ClassItemFuncExtBodyContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassItemVar (FaParser.ClassItemVarContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassItemFunc (FaParser.ClassItemFuncContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassBlock (FaParser.ClassBlockContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassItemFuncExt2 (FaParser.ClassItemFuncExt2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassItem2 (FaParser.ClassItem2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassBlock2 (FaParser.ClassBlock2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitEnumItem (FaParser.EnumItemContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitEnumBlock (FaParser.EnumBlockContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitEnumBlock2 (FaParser.EnumBlock2Context _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassTemplates (FaParser.ClassTemplatesContext _ctx) => throw new NotImplementedException ();
+
+		public IAst VisitClassItemFuncEntry (FaParser.ClassItemFuncEntryContext _ctx) => _ctx.classItemFunc () != null ?
+			new AstClassFunc (Info.CurrentClass, _ctx.classItemFunc ()) : new AstClassFunc (Info.CurrentClass, _ctx.classItem2 ());
 	}
 }
