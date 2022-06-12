@@ -70,15 +70,20 @@ namespace fac.ASTs.Stmts {
 				_stmts.Add (_t);
 			} else if (_ctx.defVarStmt () != null) {
 				return AstStmt_DefVariable.FromContext (_ctx.defVarStmt ());
+			} else if (_ctx.defVarStmt2 () != null) {
+				return AstStmt_DefVariable.FromContext (_ctx.defVarStmt2 ());
 			} else if (_ctx.normalStmt () != null) {
 				if (_ctx.normalStmt ().Continue () != null) {
 					_stmts.Add (AstStmt_ExprWrap.MakeContinue (_ctx.Start));
 				} else if (_ctx.normalStmt ().Break () != null) {
 					_stmts.Add (AstStmt_ExprWrap.MakeBreak (_ctx.Start));
-				} else if (_ctx.normalStmt ().Return () != null) {
-					_stmts.Add (AstStmt_Return.MakeFromExpr (FromContext (_ctx.normalStmt ().expr ())));
 				} else {
-					_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (FromContext (_ctx.normalStmt ().expr ())));
+					var _expr_raw = _ctx.normalStmt ().expr ();
+					if (_ctx.normalStmt ().Return () != null) {
+						_stmts.Add (AstStmt_Return.MakeFromExpr (FromContext (_expr_raw)));
+					} else if (_expr_raw != null) {
+						_stmts.Add (AstStmt_ExprWrap.MakeFromExpr (FromContext (_expr_raw)));
+					}
 				}
 			} else {
 				throw new UnimplException (_ctx.Start);

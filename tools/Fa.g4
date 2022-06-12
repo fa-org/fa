@@ -32,6 +32,7 @@ Internal:					'internal';
 Mut:						'mut';
 Namespace:					'namespace';
 New:						'new';
+Operator:					'operator';
 Params:						'params';
 Public:						'public';
 Protected:					'protected';
@@ -245,7 +246,7 @@ newExpr2:					New typeSingle quotYuanL (expr (Comma expr)*)? quotYuanR;
 arrayExpr1:					quotFangL expr PointPoint expr (Step expr)? quotFangR;
 arrayExpr2:					quotFangL expr (Comma expr)* quotFangR;
 lambdaExpr:					quotYuanL typeWrapVarList3? quotYuanR exprFuncDef (expr | (quotHuaL stmt* quotHuaR));
-strongExprBase:				(ColonColon? ids) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr;
+strongExprBase:				(ColonColon? id) | literal | ifExpr | quotExpr | newExpr1 | newExpr2 | arrayExpr1 | arrayExpr2 | switchExpr2 | switchExpr | lambdaExpr;
 strongExprPrefix:			SubOp | AddAddOp | SubSubOp | ReverseOp | Exclam;								// Ç°×º - ++ -- ~ !
 strongExprSuffix			: AddAddOp | SubSubOp															// ºó×º ++ --
 							| (quotYuanL (expr (Comma expr)*)? quotYuanR)									//     Write ("")
@@ -282,15 +283,16 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 // class
 //
 publicLevel:				Public | Internal | Protected | Private;
+classItemName:				id | (Operator allOp2);
 classTemplates:				quotJianL type (Comma type)* quotJianR;
 //classParent:				Colon ids (Comma ids)*;
-classItemFuncExtBody:		(exprFuncDef expr endl) | (quotHuaL stmt* quotHuaR);
+classItemFuncExtBody:		(exprFuncDef expr) | (quotHuaL stmt* quotHuaR);
 //
-classItemVar:				publicLevel? Static? id Colon type (Assign middleExpr)? endl;
-classItemFunc:				publicLevel? Static? id quotYuanL typeWrapVarList1? quotYuanR Colon type classItemFuncExtBody endl;
+classItemVar:				publicLevel? Static? classItemName Colon type (Assign middleExpr)? endl;
+classItemFunc:				publicLevel? Static? classItemName quotYuanL typeWrapVarList1? quotYuanR Colon type classItemFuncExtBody endl;
 classBlock:					publicLevel? Class id classTemplates? quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
 classItemFuncExt2:			quotYuanL typeWrapVarList2? quotYuanR classItemFuncExtBody;
-classItem2:					publicLevel? Static? type id (classItemFuncExt2 | (Assign middleExpr))? endl;
+classItem2:					publicLevel? Static? type classItemName (classItemFuncExt2 | (Assign middleExpr))? endl;
 classBlock2:				publicLevel? Class id classTemplates? quotHuaL classItem2* quotHuaR endl;
 //
 enumItem:					id (quotYuanL type quotYuanR)? endl2;

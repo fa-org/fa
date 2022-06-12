@@ -138,8 +138,8 @@ namespace fac.AntlrTools {
 		public IAst VisitEnumBlock (FaParser.EnumBlockContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitEnumBlock2 (FaParser.EnumBlock2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassTemplates (FaParser.ClassTemplatesContext _ctx) => throw new NotImplementedException ();
-
 		public IAst VisitClassItemFuncEntry (FaParser.ClassItemFuncEntryContext _ctx) => _ctx.classItemFunc () != null ?
 			new AstClassFunc (Info.CurrentClass, _ctx.classItemFunc ()) : new AstClassFunc (Info.CurrentClass, _ctx.classItem2 ());
+		public IAst VisitClassItemName (FaParser.ClassItemNameContext _ctx) => throw new NotImplementedException ();
 	}
 }

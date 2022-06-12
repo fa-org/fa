@@ -46,7 +46,7 @@ namespace fac.ASTs.Structs {
 			Info.CurrentClass = _ret;
 			Info.CurrentFuncVariables = null;
 			var _sb = new StringBuilder ();
-			_sb.Append (@$"public static bool operator_eq ({_name} _l, {_name} _r) {{
+			_sb.Append (@$"public static bool operator== ({_name} _l, {_name} _r) {{
 	if (_l.__index__ != _r.__index__) {{
 		return false
 	}} ");
@@ -65,9 +65,7 @@ namespace fac.ASTs.Structs {
 	}}");
 			_sb.AppendLine (@$"}}");
 			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
-			_ret.ClassFuncs[^1].Name = "operator==";
-			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator_neq ({_name} _l, {_name} _r) => !(_l == _r);"));
-			_ret.ClassFuncs[^1].Name = "operator!=";
+			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
 			_ret.ClassFuncs.AddRange (from p in _ctx.classItemFunc () select new AstClassFunc (_ret, p));
 			return _ret;
 		}
@@ -97,7 +95,7 @@ namespace fac.ASTs.Structs {
 			Info.CurrentClass = _ret;
 			Info.CurrentFuncVariables = null;
 			var _sb = new StringBuilder ();
-			_sb.AppendLine (@$"public static bool operator_eq ({_name} _l, {_name} _r) {{
+			_sb.AppendLine (@$"public static bool operator== ({_name} _l, {_name} _r) {{
 	if (_l.__index__ != _r.__index__) {{
 		return false
 	}} ");
@@ -111,14 +109,12 @@ namespace fac.ASTs.Structs {
 				}
 				_sb.Append ($"	}} ");
 			}
-			_sb.AppendLine (@$" else {{
+			_sb.AppendLine (@$"else {{
 		return false;
 	}}");
 			_sb.AppendLine (@$"}}");
 			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
-			_ret.ClassFuncs[^1].Name = "operator==";
-			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator_neq ({_name} _l, {_name} _r) => !(_l == _r);"));
-			_ret.ClassFuncs[^1].Name = "operator!=";
+			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
 			_ret.ClassFuncs.AddRange (from p in _ctx.classItem2 () select new AstClassFunc (_ret, p));
 			return _ret;
 		}

@@ -54,7 +54,7 @@ namespace fac.ASTs.Structs {
 			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
-			Name = _ctx.id ().GetText ();
+			Name = _ctx.classItemName ().GetText ();
 			ReturnType = new AstType_TempType (_ctx.type ());
 			Arguments = AstElemParser.Parse (_ctx.typeWrapVarList1 ());
 			BodyRaw = _ctx.classItemFuncExtBody ();
@@ -67,7 +67,7 @@ namespace fac.ASTs.Structs {
 			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
-			Name = _ctx.id ().GetText ();
+			Name = _ctx.classItemName ().GetText ();
 			ReturnType = new AstType_TempType (_ctx.type ());
 			Arguments = AstElemParser.Parse (_ctx.classItemFuncExt2 ().typeWrapVarList2 ());
 			BodyRaw = _ctx.classItemFuncExt2 ().classItemFuncExtBody ();

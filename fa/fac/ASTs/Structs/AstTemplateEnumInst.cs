@@ -51,18 +51,22 @@ namespace fac.ASTs.Structs {
 			string _name = FullName.StartsWith ("fa.") ? FullName[3..] : FullName;
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"public static bool operator== ({_name} _l, {_name} _r) {{");
-			_sb.AppendLine ($"    if (_l.__index__ != _r.__index__) {{ return false; }}");
+			_sb.Append (@$"    if (_l.__index__ != _r.__index__) {{
+		return false;
+	}} ");
 			for (int i = 0; i < ClassEnumItems.Count; ++i) {
-				_sb.Append ($"    else if (_l.__index__ == {i}) {{ ");
+				_sb.AppendLine ($"else if (_l.__index__ == {i}) {{");
 				if (ClassEnumItems[i].AttachType == null) {
-					_sb.Append ($"return true;");
+					_sb.AppendLine ($"		return true");
 				} else {
 					var _real_var_index = GetRealAttachVarPos (i);
-					_sb.Append ($"return _l.{ClassVars[_real_var_index].Name} == _r.{ClassVars[_real_var_index].Name};");
+					_sb.AppendLine ($"		return _l.{ClassVars[_real_var_index].Name} == _r.{ClassVars[_real_var_index].Name}");
 				}
-				_sb.AppendLine ($" }}");
+				_sb.Append ($"	}} ");
 			}
-			_sb.AppendLine ($"    else {{ return false; }}");
+			_sb.AppendLine (@$"else {{
+		return false;
+	}}");
 			_sb.AppendLine (@$"}}");
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
 			ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));

@@ -77,13 +77,20 @@ namespace fac.ASTs.Types {
 			} else {
 				// 函数
 				if (_type_str == "Func") {
-					if (_templates1[^1]._ext != ArgumentTypeExt.None)
-						throw new CodeException (_ctx.Start, $"附加类型错误");
+					for (int i = 0; i < _templates1.Count; ++i) {
+						if (i == _templates1.Count - 1) {
+							if (_templates1 [i]._ext != ArgumentTypeExt.None)
+								throw new CodeException (_ctx.Start, $"附加类型错误");
+						} else if (i < _templates1.Count - 2) {
+							if (_templates1[i]._ext == ArgumentTypeExt.Params)
+								throw new CodeException (_ctx.Start, $"附加类型错误");
+						}
+					}
 					_ret = new AstType_Func { Token = _ctx.Start, ReturnType = _templates1[^1]._type, ArgumentTypes = _templates1.Take (_templates1.Count - 1).ToList () };
+				} else {
+					if ((from p in _templates1 where p._ext != ArgumentTypeExt.None select 1).Any ())
+						throw new CodeException (_ctx.Start, $"附加类型错误");
 				}
-
-				if ((from p in _templates1 where p._ext != ArgumentTypeExt.None select 1).Any ())
-					throw new CodeException (_ctx.Start, $"附加类型错误");
 
 				// 字典
 				if (_type_str == "Dictionary") {

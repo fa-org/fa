@@ -185,8 +185,8 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public static IAstExpr FromContext (FaParser.StrongExprBaseContext _ctx) {
-			if (_ctx.ids () != null) {
-				string _id = $"{(_ctx.ColonColon () != null ? "::" : "")}{_ctx.ids ().GetText ()}";
+			if (_ctx.id () != null) {
+				string _id = $"{(_ctx.ColonColon () != null ? "::" : "")}{_ctx.id ().GetText ()}";
 				if (_id != "null") {
 					return new AstExpr_BaseId { Token = _ctx.Start, Id = _id };
 				} else {

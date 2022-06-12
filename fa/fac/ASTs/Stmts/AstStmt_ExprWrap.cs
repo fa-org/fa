@@ -31,6 +31,8 @@ namespace fac.ASTs.Stmts {
 		public static AstStmt_ExprWrap MakeOp2 (IAstExpr _val1, string _op, IAstExpr _val2, IAstType _expect_type) => new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeOp2 (_val1, _op, _val2, _expect_type) };
 		public static AstStmt_ExprWrap MakeCondition (IAstExpr _val1, string _op, IAstExpr _val2) => new AstStmt_ExprWrap { Token = _val1.Token, Expr = AstExpr_Op2.MakeCondition (_val1, _op, _val2) };
 		public static AstStmt_ExprWrap MakeFromExpr (IAstExpr _val) {
+			if (_val == null)
+				_val = null;
 			if (_val is AstExpr_Op2 _op2expr && (_op2expr.Value1 is AstExprName_Ignore || (_op2expr.Value1 is AstExpr_BaseId _idexpr && _idexpr.Id == "_")) && _op2expr.Operator == "=") {
 				return new AstStmt_ExprWrap { Token = _val.Token, Expr = _op2expr.Value2, IgnoreError = true };
 			} else {

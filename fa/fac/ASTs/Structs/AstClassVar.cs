@@ -26,7 +26,7 @@ namespace fac.ASTs.Structs {
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
 			DataType = new AstType_TempType (_ctx.type ());
-			Name = _ctx.id ().GetText ();
+			Name = _ctx.classItemName ().GetText ();
 			DefaultValueRaw = _ctx.middleExpr ();
 		}
 		public AstClassVar (FaParser.ClassItemVarContext _ctx) {
@@ -34,7 +34,7 @@ namespace fac.ASTs.Structs {
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
 			DataType = new AstType_TempType (_ctx.type ());
-			Name = _ctx.id ().GetText ();
+			Name = _ctx.classItemName ().GetText ();
 			DefaultValueRaw = _ctx.middleExpr ();
 		}
 

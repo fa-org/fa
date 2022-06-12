@@ -584,6 +584,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitPublicLevel([NotNull] FaParser.PublicLevelContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.classItemName"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitClassItemName([NotNull] FaParser.ClassItemNameContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.classTemplates"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
