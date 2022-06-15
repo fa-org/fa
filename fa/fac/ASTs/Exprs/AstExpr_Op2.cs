@@ -120,24 +120,24 @@ namespace fac.ASTs.Exprs {
 			if (Operator == "??") {
 				var _tmp_stmt = new AstStmt_DefVariable { DataType = Value2.ExpectType };
 				_stmts.Add (_tmp_stmt);
-				//var (_stmts1, _expr1) = Value1.OptionalHasValue ().ExpandExpr (_cache_err);
-				//_stmts.AddRange (_stmts1);
-				//_stmts.Add (new AstStmt_If {
-				//	Token = Token,
-				//	Condition = _expr1,
-				//	IfTrueCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err),
-				//	IfFalseCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err),
-				//});
+				var (_stmts1, _expr1) = Value1.OptionalHasValue ().ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = _expr1,
+					IfTrueCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err),
+					IfFalseCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err),
+				});
 
-				AstStmt_Label _label1 = new AstStmt_Label (), _label2 = new AstStmt_Label ();
-				var _nouse_cache_err = new AstStmt_DefVariable { DataType = IAstType.FromName ("fa.Error") };
-				_stmts.Add (_nouse_cache_err);
-				var _cache_err1 = (_var: _nouse_cache_err.GetRef (), _pos: _label1);
-				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err1));
-				_stmts.Add (_label2.Goto ());
-				_stmts.Add (_label1);
-				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err));
-				_stmts.Add (_label2);
+				//AstStmt_Label _label1 = new AstStmt_Label (), _label2 = new AstStmt_Label ();
+				//var _nouse_cache_err = new AstStmt_DefVariable { DataType = IAstType.FromName ("fa.Error") };
+				//_stmts.Add (_nouse_cache_err);
+				//var _cache_err1 = (_var: _nouse_cache_err.GetRef (), _pos: _label1);
+				//_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err1));
+				//_stmts.Add (_label2.Goto ());
+				//_stmts.Add (_label1);
+				//_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err));
+				//_stmts.Add (_label2);
 				return (_stmts, _tmp_stmt.GetRef ());
 			} else {
 				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);

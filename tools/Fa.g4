@@ -295,9 +295,13 @@ classItemFuncExt2:			quotYuanL typeWrapVarList2? quotYuanR classItemFuncExtBody;
 classItem2:					publicLevel? Static? type classItemName (classItemFuncExt2 | (Assign middleExpr))? endl;
 classBlock2:				publicLevel? Class id classTemplates? quotHuaL classItem2* quotHuaR endl;
 //
-enumItem:					id (quotYuanL type quotYuanR)? endl2;
-enumBlock:					publicLevel? Enum id classTemplates? quotHuaL enumItem+ classItemFunc* quotHuaR endl;
-enumBlock2:					publicLevel? Enum id classTemplates? quotHuaL enumItem+ classItem2* quotHuaR endl;
+enumItem:					id (quotYuanL type quotYuanR)?;
+enumBlock:					publicLevel? Enum id classTemplates? quotHuaL
+							(((enumItem endl2)* enumItem) | ((enumItem endl2)+ classItemFunc*))
+							quotHuaR endl;
+enumBlock2:					publicLevel? Enum id classTemplates? quotHuaL
+							(((enumItem endl2)* enumItem) | ((enumItem endl2)+ classItem2*))
+							quotHuaR endl;
 
 
 
@@ -309,7 +313,7 @@ callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
 importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
 libStmt:					ALib String1Literal endl;
 namespaceStmt:				Namespace ids endl;
-program:					(useStmt | importStmt | libStmt)* namespaceStmt* (enumBlock | enumBlock2 | classBlock | classBlock2)*;
+program:					endl* (useStmt | importStmt | libStmt)* namespaceStmt* (enumBlock | enumBlock2 | classBlock | classBlock2)*;
 
 
 

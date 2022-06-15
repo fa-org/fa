@@ -1,10 +1,19 @@
 use fa
 
-//class Program {
-//	public static void Main () {
-//		Console.WriteLine ("hello world")
-//	}
-//}
+enum TestEnum { A, B, C }
+
+class Program {
+	public static void Main () {
+		TestEnum e = TestEnum.B;
+		if e == TestEnum.A {
+			Console.Write ("error");
+		} else if e == TestEnum.B {
+			Console.Write ("TestIf8");
+		} else {
+			Console.Write ("error");
+		}
+	}
+}
 
 
 
@@ -36,12 +45,14 @@ use fa
 ////	public int _color;
 ////}
 
-class Program {
-	public static void Main () {
-		int? n = null
-		Console.Write ("{0}".Format (n ?? 123))
-	}
-}
+//class Program {
+//	public static void Main () {
+//		int? n = null
+//		Console.Write ("{0} ".Format (n ?? 123))
+//		n = 100
+//		Console.Write ("{0}".Format (n ?? 124))
+//	}
+//}
 
 
 

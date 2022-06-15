@@ -55,8 +55,14 @@ namespace fac.ASTs.Stmts {
 					return null;
 
 				// 异常强制处理
-				if (Expr.ExpectType.IsOptional && (!IgnoreError) && (!Info.CurrentReturnType ().IsOptional))
-					throw new CodeException (Token, "此处未处理异常必须处理");
+				if (Expr.ExpectType.IsOptional && (!IgnoreError) && (!Info.CurrentReturnType ().IsOptional)) {
+					if (Expr is AstExpr_Op2 _op2_expr) {
+						if (!_op2_expr.Value1.ExpectType.IsSame (_op2_expr.Value2.ExpectType))
+							throw new CodeException (Token, "TODO");
+					} else {
+						throw new CodeException (Token, "此处未处理异常必须处理");
+					}
+				}
 			}
 			return this;
 		}
