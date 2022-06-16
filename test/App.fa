@@ -1,267 +1,41 @@
 use fa
 
-enum TestEnum { A, B, C }
-
 class Program {
+	public static void Sort (mut int[] numbers) {
+		_ = QuickSort (numbers, 0, numbers.Length - 1);
+	}
+
+	private static void? QuickSort (mut int[] numbers, int left, int right) {
+		if left > right {
+			return;
+		}
+		int middle = numbers [(left + right) / 2];
+		int i = left - 1;
+		int j = right + 1;
+		while true {
+			while (numbers[++i] < middle) {}
+			while (numbers[--j] > middle) {}
+			if i >= j {
+				break;
+			}
+			Swap(numbers, i, j);
+		}
+		QuickSort(numbers, left, i - 1);
+		QuickSort(numbers, j + 1, right);
+	}
+
+	private static void? Swap (mut int[] numbers, int i, int j) {
+		int number = numbers[i];
+		numbers[i] = numbers[j];
+		numbers[j] = number;
+	}
+
 	public static void Main () {
-		TestEnum e = TestEnum.B;
-		if e == TestEnum.A {
-			Console.Write ("error");
-		} else if e == TestEnum.B {
-			Console.Write ("TestIf8");
-		} else {
-			Console.Write ("error");
+		int[] n = [45, 4123, 213, 42, 123, 53, 22];
+		Sort (n);
+		for int a = 0; a < n.Length; ++a {
+			int nn = n[a] ?? -1;
+			Console.Write ("{0} ".Format (nn));
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-//class Program {
-//	public static void Main () {
-//		Dictionary<int, string> _d = new Dictionary<int, string> {};
-//		_d[13] = "hello";
-//		Console.WriteLine (_d[13]);
-//	}
-//}
-
-
-//use fa;
-//
-//namespace std;
-//
-////class RB_Node<T> {
-////	public RB_Node? _left = null;
-////	public RB_Node? _right;
-////	public RB_Node? _parent;
-////	public T _data;
-////	public int _color;
-////}
-
-//class Program {
-//	public static void Main () {
-//		int? n = null
-//		Console.Write ("{0} ".Format (n ?? 123))
-//		n = 100
-//		Console.Write ("{0}".Format (n ?? 124))
-//	}
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//use fa;
-//
-//class Program {
-//	public static void Main () {
-//		int[] n = [2, 3, 4];
-//		int[] n1 = [12, 13, 14];
-//		n.Add (8);
-//		n.AddRange (n1);
-//		n.RemoveAt (0);
-//		int? p = n.IndexOf (4);
-//		Console.WriteLine ("{0}".Format (p ?? -1));
-//		//for int a = 0; a < n.Length; ++a {
-//		//	int nn = n[a] ?? -1;
-//		//	Console.WriteLine ("{0}".Format (nn));
-//		//}
-//	}
-//}
-
-
-
-//use fa;
-//
-//class Program {
-//	public static void Main () {
-//		int? n = null;
-//		Console.Write ("{0}".Format (n ?? 12));
-//	}
-//}
-
-
-
-//class Program {
-//	public static void Main () {
-//		int[] n = [45, 4123, 213, 42];
-//		for int a = 0; a < n.Length; ++a {
-//			int nn = n[a] ?? -1;
-//			Console.WriteLine ("{0}".Format (nn));
-//		}
-//	}
-//}
-
-//class Program {
-//	public static void Main () {
-//		int[] n = [45, 4123, 213, 42];
-//		_ = n [3] = 1234;
-//		int x = n [3] ?? -1;
-//		Console.WriteLine ("{0}".Format (x));
-//	}
-//}
-
-
-
-
-
-
-
-//class Program {
-//	public static void Main () {
-//		int[] n = [45, 4123, 213, 42, 123, 53, 22, 98989];
-//		for int i = 0; i < n.Length; ++i {
-//			Console.WriteLine ("{0}".Format (n[i]));
-//		}
-//	}
-//}
-
-//class Program {
-//	public static void Main () {
-//		int[] n = [45, 4123, 213, 42];
-//		n [3] = 1234;
-//		Console.WriteLine ("{0}".Format (n [3]));
-//	}
-//}
-
-//class Program {
-//	public static void Main () {
-//		int c = 10;
-//		Func<int, int, int> _add = (a, b) => a+b+c;
-//		int n = _add (3, 5);
-//		Console.WriteLine ("{0}".Format (n));
-//	}
-//}
-
-//class Program {
-//	public static void Main () {
-//		Func<int, int, int> _add = (a, b) => a+b;
-//		int n = _add (3, 5);
-//		Console.WriteLine ("{0}".Format (n));
-//	}
-//}
-
-//class Program {
-//	public static void Main () {
-//		int[] bbb = [10, 12, 32];
-//		Console.WriteLine ("{0}".Format (bbb.Length));
-//	}
-//}
-
-//class Program {
-//	public static void? test () {
-//		int? n = 5 / 1;
-//		int x = n? + 10;
-//	}
-//	public static void Main () {
-//		test ();       // 编译报错，提示需处理
-//		_ = test ();   // 忽略错误，编译成功
-//	}
-//}
-
-//////////////////////////////////////// TODO 暂未测试 ////////////////////////////////////////////
-//class Program {
-//	public static void? test () {
-//		int i = (5 / 0)?;     // ?运算符将可空的值转为不可空值，为空时候函数返回空
-//		int i = (5 / 0) ?? 0; // ??运算符在识别到
-//		int? i2 = 5 / 0;      // 
-//		_ = 5 / 0;            //
-//	}
-//
-//	public static void Main () {
-//		test ();              // 容易失误导致忽略，此处编译错误
-//		_ = test ();          // 强制忽略错误
-//		test ()?;             // 遇到错误则返回（要求调用者所在函数返回类型带?）
-//	}
-//}
-//////////////////////////////////////// TODO 暂未测试 ////////////////////////////////////////////
-
-
-
-
-
-//enum TestEnum { A, B, C }
-//class Program {
-//	public static void Main () {
-//		TestEnum e = TestEnum.B;
-//		string s = if (e == TestEnum.A) {
-//			"error1"
-//		} else if (e == TestEnum.B) {
-//			"hello"
-//		} else {
-//			"error2"
-//		};
-//        Console.WriteLine (s);
-//	}
-//}
-
-//enum TestEnum { A, B (int), C }
-//class Program {
-//	public static void Main () {
-//		TestEnum e = TestEnum.B (2);
-//		if (e == TestEnum.A) {
-//			Console.WriteLine ("error1");
-//		} else if (e == TestEnum.B (6)) {
-//			Console.WriteLine ("error2");
-//		} else if (e == TestEnum.B (2)) {
-//			Console.WriteLine ("hello");
-//		} else {
-//			Console.WriteLine ("error3");
-//		}
-//	}
-//}
-
-//class Program {
-//	public static void test (params int[] a) {
-//		for int i : a {
-//			Console.WriteLine ("{0}".Format (i));
-//		}
-//	}
-//
-//	public static void Main () {
-//		int aaa = 10;
-//		test (aaa, 12, 32);
-//		int[] bbb = [10, 12, 32];
-//		test (bbb);
-//	}
-//}
-
-
-
-//class Program {
-//	public static void test (mut int a) {
-//		a = 5;
-//	}
-//
-//	public static void Main () {
-//		int aaa = 10;
-//		test (aaa);
-//		Console.WriteLine ("hello {0}".Format (aaa));
-//	}
-//}
-
-
-

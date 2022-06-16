@@ -220,16 +220,16 @@ forStmt2:					For type id Colon expr quotHuaL stmt* quotHuaR;
 //
 switchStmtPart2Last:		Underline exprFuncDef stmt;
 quotStmtExprWrap:			quotStmtExpr | expr;
-switchExprPartLast:			Underline exprFuncDef quotStmtExprWrap Comma;
+switchExprPartLast:			Underline exprFuncDef quotStmtExprWrap endl2?;
 //
 switchStmtPart:				expr (When expr)? exprFuncDef stmt;
 switchStmt:					Switch expr quotHuaL switchStmtPart* quotHuaR;
 switchStmtPart2:			When expr exprFuncDef stmt;
 switchStmt2:				Switch quotHuaL switchStmtPart2* switchStmtPart2Last quotHuaR;
 //
-switchExprPart:				expr (When expr)? exprFuncDef quotStmtExprWrap Comma;
+switchExprPart:				expr (When expr)? exprFuncDef quotStmtExprWrap endl2;
 switchExpr:					Switch expr quotHuaL switchExprPart* switchExprPartLast quotHuaR;
-switchExprPart2:			When expr exprFuncDef quotStmtExprWrap Comma;
+switchExprPart2:			When expr exprFuncDef quotStmtExprWrap endl2;
 switchExpr2:				Switch quotHuaL switchExprPart2* switchExprPartLast quotHuaR;
 
 
@@ -240,9 +240,9 @@ switchExpr2:				Switch quotHuaL switchExprPart2* switchExprPartLast quotHuaR;
 quotExpr:					quotYuanL expr quotYuanR;
 exprOpt:					expr?;
 newExprItem:				id (Assign middleExpr)?;
-newExpr1:					New typeSingle quotHuaL (newExprItem (Comma newExprItem)*)? quotHuaR;
-newExpr2:					New typeSingle quotYuanL (expr (Comma expr)*)? quotYuanR;
-//newArray:					New typeSingle quotFangL middleExpr quotFangR;
+newExpr1:					New typeSingle? quotHuaL (newExprItem (Comma newExprItem)*)? quotHuaR;
+newExpr2:					New typeSingle? quotYuanL (expr (Comma expr)*)? quotYuanR;
+//newArray:					New typeSingle? quotFangL middleExpr quotFangR;
 arrayExpr1:					quotFangL expr PointPoint expr (Step expr)? quotFangR;
 arrayExpr2:					quotFangL expr (Comma expr)* quotFangR;
 lambdaExpr:					quotYuanL typeWrapVarList3? quotYuanR exprFuncDef (expr | (quotHuaL stmt* quotHuaR));
