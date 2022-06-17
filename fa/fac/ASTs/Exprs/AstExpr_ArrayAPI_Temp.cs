@@ -163,7 +163,7 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = InitExpand (_cache_err);
 			if (AccessType == ArrayApiType._AccessItem) {
-				if (_cache_err == null || _cache_err == (null, null))
+				if (_cache_err == null || _cache_err == (null, null)) // TODO 这个错误需 ?? 运算符给前者指定 _catch_err
 					throw new CodeException (Token, "数组随机访问可能为空值，需处理异常");
 
 				/* 生成逻辑： val [n]
