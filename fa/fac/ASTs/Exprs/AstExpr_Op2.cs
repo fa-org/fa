@@ -118,26 +118,45 @@ namespace fac.ASTs.Exprs {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			var _stmts = new List<IAstStmt> { };
 			if (Operator == "??") {
+				// 存储最终结果的变量
 				var _tmp_stmt = new AstStmt_DefVariable { DataType = Value2.ExpectType };
 				_stmts.Add (_tmp_stmt);
-				//var (_stmts1, _expr1) = Value1.OptionalHasValue ().ExpandExpr (_cache_err);
-				//_stmts.AddRange (_stmts1);
-				//_stmts.Add (new AstStmt_If {
-				//	Token = Token,
-				//	Condition = _expr1,
-				//	IfTrueCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err),
-				//	IfFalseCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err),
-				//});
 
-				AstStmt_Label _label1 = new AstStmt_Label (), _label2 = new AstStmt_Label ();
+				// 提供Value1计算错误处理方式，错误后直接赋Value2的值
+				AstStmt_Label _label1 = new AstStmt_Label ();
 				var _nouse_cache_err = new AstStmt_DefVariable { DataType = IAstType.FromName ("fa.Error") };
 				_stmts.Add (_nouse_cache_err);
-				var _cache_err1 = (_var: _nouse_cache_err.GetRef (), _pos: _label1);
-				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err1));
-				_stmts.Add (_label2.Goto ());
-				_stmts.Add (_label1);
-				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err));
-				_stmts.Add (_label2);
+				(IAstExprName _var, AstStmt_Label _pos)? _cache_err1 = (_var: _nouse_cache_err.GetRef (), _pos: _label1);
+
+				// 计算Value1的值
+				var _tmp_value1 = new AstStmt_DefVariable { DataType = Value1.ExpectType };
+				_stmts.Add (_tmp_value1);
+				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_value1.GetRef (), Value1).ExpandStmt (_cache_err1));
+
+				// 如果为空则赋Value2
+				var (_stmts1, _expr1) = _tmp_value1.GetRef ().OptionalHasValue ().ExpandExpr (_cache_err);
+				_stmts.AddRange (_stmts1);
+				var _false_codes = new List<IAstStmt> ();
+				{
+					_false_codes.Add (_label1);
+					_false_codes.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err));
+				}
+				_stmts.Add (new AstStmt_If {
+					Token = Token,
+					Condition = _expr1,
+					IfTrueCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _tmp_value1.GetRef ()).ExpandStmt (_cache_err),
+					IfFalseCodes = _false_codes,
+				});
+
+				//AstStmt_Label _label1 = new AstStmt_Label (), _label2 = new AstStmt_Label ();
+				//var _nouse_cache_err = new AstStmt_DefVariable { DataType = IAstType.FromName ("fa.Error") };
+				//_stmts.Add (_nouse_cache_err);
+				//var _cache_err1 = (_var: _nouse_cache_err.GetRef (), _pos: _label1);
+				//_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value1).ExpandStmt (_cache_err1));
+				//_stmts.Add (_label2.Goto ());
+				//_stmts.Add (_label1);
+				//_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err));
+				//_stmts.Add (_label2);
 				return (_stmts, _tmp_stmt.GetRef ());
 			} else {
 				var (_stmts1, _val1) = Value2.ExpandExpr (_cache_err);
