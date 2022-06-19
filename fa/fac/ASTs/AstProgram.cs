@@ -71,14 +71,17 @@ namespace fac.ASTs {
 			return _b;
 		}
 
-		public override string GenerateCSharp (int _indent) {
+		private void _generate_init () {
 			Info.CurrentFile = CurrentFile;
 			Info.CurrentSourceCode = CurrentSourceCode;
 			Info.CurrentNamespace = CurrentNamespace;
 			Info.CurrentUses = CurrentUses;
 			Info.CurrentExternApis = CurrentExternApis;
 			Log.Mark (LogMark.Build);
-			//
+		}
+
+		public override string GenerateCSharp (int _indent) {
+			_generate_init ();
 			if (CurrentClasses.Count == 0)
 				return "";
 			var _sb = new StringBuilder ();
