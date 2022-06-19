@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.31313.79
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{73DA93B9-FC90-489B-8687-3634CCB69AFB}"
 	ProjectSection(SolutionItems) = preProject
+		..\test\App.fa = ..\test\App.fa
 		..\draft.md = ..\draft.md
 		..\tools\Fa.g4 = ..\tools\Fa.g4
 		..\tools\generate_cs.bat = ..\tools\generate_cs.bat
