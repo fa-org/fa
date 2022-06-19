@@ -123,7 +123,7 @@ namespace fac.ASTs.Exprs {
 				_stmts.Add (_tmp_stmt);
 
 				// 提供Value1计算错误处理方式，错误后直接赋Value2的值
-				AstStmt_Label _label1 = new AstStmt_Label ();
+				AstStmt_Label _label1 = new AstStmt_Label (), _label2 = new AstStmt_Label ();
 				var _nouse_cache_err = new AstStmt_DefVariable { DataType = IAstType.FromName ("fa.Error") };
 				_stmts.Add (_nouse_cache_err);
 				(IAstExprName _var, AstStmt_Label _pos)? _cache_err1 = (_var: _nouse_cache_err.GetRef (), _pos: _label1);
@@ -136,17 +136,20 @@ namespace fac.ASTs.Exprs {
 				// 如果为空则赋Value2
 				var (_stmts1, _expr1) = _tmp_value1.GetRef ().OptionalHasValue ().ExpandExpr (_cache_err);
 				_stmts.AddRange (_stmts1);
-				var _false_codes = new List<IAstStmt> ();
+				var _true_codes = new List<IAstStmt> ();
 				{
-					_false_codes.Add (_label1);
-					_false_codes.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err));
+					_true_codes.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _tmp_value1.GetRef ()).ExpandStmt (_cache_err));
+					_true_codes.Add (_label2.Goto ());
 				}
 				_stmts.Add (new AstStmt_If {
 					Token = Token,
 					Condition = _expr1,
-					IfTrueCodes = AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), _tmp_value1.GetRef ()).ExpandStmt (_cache_err),
-					IfFalseCodes = _false_codes,
+					IfTrueCodes = _true_codes,
+					IfFalseCodes = new List<IAstStmt> (),
 				});
+				_stmts.Add (_label1);
+				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_stmt.GetRef (), Value2).ExpandStmt (_cache_err));
+				_stmts.Add (_label2);
 
 				//AstStmt_Label _label1 = new AstStmt_Label (), _label2 = new AstStmt_Label ();
 				//var _nouse_cache_err = new AstStmt_DefVariable { DataType = IAstType.FromName ("fa.Error") };
