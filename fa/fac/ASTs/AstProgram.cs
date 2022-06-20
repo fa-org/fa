@@ -50,8 +50,13 @@ namespace fac.ASTs {
 			// 处理当前文件引用的外部接口
 			CurrentExternApis = Info.CurrentExternApis = (from p in _ctx.importStmt () select new ExternApi (p)).ToList ();
 
+			// 处理导入类
+			CurrentClasses = new List<IAstClass> ();
+			CurrentClasses.AddRange (from p in _ctx.interfaceBlock () select IAstClass.FromContext (p));
+			CurrentClasses.AddRange (from p in _ctx.interfaceBlock2 () select IAstClass.FromContext (p));
+
 			// 处理枚举
-			CurrentClasses = (from p in _ctx.enumBlock () select IAstClass.FromContext (p)).ToList ();
+			CurrentClasses.AddRange (from p in _ctx.enumBlock () select IAstClass.FromContext (p));
 			CurrentClasses.AddRange (from p in _ctx.enumBlock2 () select IAstClass.FromContext (p));
 
 			// 处理类

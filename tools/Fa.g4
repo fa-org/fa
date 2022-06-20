@@ -28,6 +28,7 @@ Enum:						'enum';
 For:						'for';
 If:							'if';
 Is:							'is';
+Interface:					'interface';
 Internal:					'internal';
 Mut:						'mut';
 Namespace:					'namespace';
@@ -306,6 +307,21 @@ enumBlock2:					publicLevel? Enum id classTemplates? quotHuaL
 
 
 //
+// interface
+//
+importItem:					id Assign literal;
+importItems:				(importItem endl2)* importItem endl2?;
+importPart:					AImport quotYuanL importItems? quotYuanR endl;
+interfaceItemVar:			publicLevel? Static? classItemName Colon type endl;
+interfaceItemFunc:			publicLevel? Static? classItemName quotYuanL typeWrapVarList1? quotYuanR Colon type endl;
+interfaceBlock:				importPart publicLevel? Interface id classTemplates? quotHuaL (interfaceItemVar | interfaceItemFunc)* quotHuaR endl;
+interfaceItemVar2:			publicLevel? Static? type classItemName endl;
+interfaceItemFunc2:			publicLevel? Static? type classItemName quotYuanL typeWrapVarList1? quotYuanR endl;
+interfaceBlock2:			importPart publicLevel? Interface id classTemplates? quotHuaL (interfaceItemVar2 | interfaceItemFunc2)* quotHuaR endl;
+
+
+
+//
 // file
 //
 useStmt:					Use (id Assign)? ids endl;
@@ -313,7 +329,7 @@ callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
 importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
 libStmt:					ALib String1Literal endl;
 namespaceStmt:				Namespace ids endl;
-program:					endl* (useStmt | importStmt | libStmt)* namespaceStmt* (enumBlock | enumBlock2 | classBlock | classBlock2)*;
+program:					endl* (useStmt | importStmt | libStmt)* namespaceStmt* (interfaceBlock | interfaceBlock2 | enumBlock | enumBlock2 | classBlock | classBlock2)*;
 
 
 

@@ -31,6 +31,8 @@ namespace fac.ASTs {
 		// 获取设置模板参数的模板类型实例
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null);
 
+		public static IAstClass FromContext (FaParser.InterfaceBlockContext _ctx) => AstInterface.FromContext (_ctx);
+		public static IAstClass FromContext (FaParser.InterfaceBlock2Context _ctx) => AstInterface.FromContext (_ctx);
 		public static IAstClass FromContext (FaParser.EnumBlockContext _ctx) => _ctx.classTemplates () != null ? AstTemplateEnum.FromContext (_ctx) : AstEnum.FromContext (_ctx);
 		public static IAstClass FromContext (FaParser.EnumBlock2Context _ctx) => _ctx.classTemplates () != null ? AstTemplateEnum.FromContext (_ctx) : AstEnum.FromContext (_ctx);
 		public static IAstClass FromContext (FaParser.ClassBlockContext _ctx) => _ctx.classTemplates () != null ? AstTemplateClass.FromContext (_ctx) : AstClass.FromContext (_ctx);
