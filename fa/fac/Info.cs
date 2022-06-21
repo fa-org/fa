@@ -7,7 +7,6 @@ using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
 using fac.ASTs.Structs;
 using fac.ASTs.Types;
-using fac.Structures;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,11 +22,6 @@ namespace fac {
 		/// 项目源码路径
 		/// </summary>
 		public static string SrcPath = "";
-
-		/// <summary>
-		/// 项目引用的外部库
-		/// </summary>
-		public static HashSet<string> ExternLibs = new HashSet<string> ();
 
 		/// <summary>
 		/// 项目编译输出路径
@@ -139,11 +133,6 @@ namespace fac {
 		/// 当前命名空间引用
 		/// </summary>
 		public static List<string> CurrentUses { set; get; } = null;
-
-		/// <summary>
-		/// 当前外部API
-		/// </summary>
-		public static List<ExternApi> CurrentExternApis { set; get; } = null;
 
 		/// <summary>
 		/// 当前AST节点迭代方式

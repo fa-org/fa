@@ -10,27 +10,54 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
-	public class AstClass: IAst, IAstClass {
+	public class AstInterfaceInst: IAst, IAstClass {
+		public AstInterface Class { init; get; }
+		public List<IAstType> Templates { init; get; }
+
 		public string FullName { init; get; }
-		public PublicLevel Level { init; get; }
-		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
+		public string CSharpFullName {
+			get {
+				int p = FullName.IndexOf ('<');
+				var _left = FullName[..p].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__");
+				var _right = FullName[p..].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__").Replace (".", "__dot__");
+				return $"{_left}{_right}";
+			}
+		}
+		public List<AstEnumItem> ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
-		public List<AstClassFunc> ClassFuncs { get; set; }
+		public List<AstClassFunc> ClassFuncs { init; get; }
 		private bool m_compiled = false;
 
 
 
-		private AstClass () { }
-		public static AstClass FromContext (FaParser.ClassBlockContext _ctx) {
-			var _ret = new AstClass {
-				Token = _ctx.Start,
-				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
-				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
-				ClassVars = (from p in _ctx.classItemVar () select new AstClassVar (p)).ToList (),
-			};
-			_ret.ClassFuncs = (from p in _ctx.classItemFunc () select new AstClassFunc (_ret, p)).ToList ();
-			return _ret;
+		public AstInterfaceInst (IToken _token, AstInterface _class, List<IAstType> _templates, string _fullname) {
+			Token = _token;
+			Class = _class;
+			Templates = _templates;
+			FullName = _fullname;
+			ClassVars = new List<AstClassVar> ();
+			foreach (var _var in Class.ClassVars) {
+				if (_var.DataType is AstType_Placeholder _phtype) {
+					ClassVars.Add (new AstClassVar { Token = _var.Token, Level = _var.Level, Static = _var.Static, DataType = GetImplType (_phtype.Name), Name = _var.Name, DefaultValueRaw = _var.DefaultValueRaw });
+				} else {
+					ClassVars.Add (_var);
+				}
+			}
+			ClassFuncs = new List<AstClassFunc> ();
+			foreach (var _func in Class.ClassFuncs) {
+				ClassFuncs.Add (new AstClassFunc (this, _func, GetImplType));
+			}
 		}
+
+		public IAstType GetImplType (string _ttype_name) {
+			for (int i = 0; i < Class.Templates.Count; ++i) {
+				if (_ttype_name == Class.Templates[i].Name)
+					return Templates[i];
+			}
+			return null;
+		}
+
+		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class.GetInst (Templates));
 
 		public void ProcessType () {
 			Info.CurrentClass = this;
@@ -48,6 +75,7 @@ namespace fac.ASTs.Structs {
 			m_compiled = true;
 
 			Info.CurrentClass = this;
+			Info.CurrentFuncVariables = null;
 
 			// Antlr转AST
 			foreach (var _var in ClassVars)
@@ -57,7 +85,7 @@ namespace fac.ASTs.Structs {
 
 			// 处理AST
 			for (int i = 0; i < ExprTraversals.TraversalTypes.Count; ++i) {
-				Info.CurrentTraversalType = ExprTraversals.TraversalTypes [i];
+				Info.CurrentTraversalType = ExprTraversals.TraversalTypes[i];
 
 				// 类成员变量默认初始化值
 				for (int j = 0; j < ClassVars.Count; ++j) {
@@ -102,8 +130,7 @@ namespace fac.ASTs.Structs {
 			Info.CurrentFuncVariables = null;
 			//
 			var _sb = new StringBuilder ();
-			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} class {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
-			_sb.AppendLine ($" {{");
+			_sb.AppendLine ($"{_indent.Indent ()}{Class.Level.ToString ().ToLower ()} class {CSharpFullName[(CSharpFullName.LastIndexOf ('.') + 1)..]} {{");
 			foreach (var _var in ClassVars)
 				_sb.Append (_var.GenerateCSharp (_indent + 1));
 			foreach (var _func in ClassFuncs)
@@ -112,11 +139,13 @@ namespace fac.ASTs.Structs {
 			return _sb.ToString ();
 		}
 
+		public int GetRealAttachVarPos (int _enum_index) => -1;
+
 		public int GetTemplateNum () => 0;
 
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
 			if ((_templates?.Count ?? 0) > 0)
-				throw new CodeException (_token, $"非泛型类型无法指定模板参数");
+				throw new CodeException (_token, $"泛型类型无法再次指定模板参数");
 			return this;
 		}
 	}

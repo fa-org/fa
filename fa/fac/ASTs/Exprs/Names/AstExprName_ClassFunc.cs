@@ -1,4 +1,5 @@
-﻿using fac.ASTs.Types;
+﻿using fac.ASTs.Structs;
+using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
 using System.Collections.Generic;

@@ -13,8 +13,7 @@ grammar Fa;
 //
 // keyword
 //
-AImport:					'@import';
-ALib:						'@lib';
+Annotation:					'annotation';
 Break:						'break';
 CC__Cdecl:					'__cdecl';
 CC__FastCall:				'__fastcall';
@@ -42,6 +41,7 @@ Return:						'return';
 Signed:						'signed';
 Static:						'static';
 Step:						'step';
+SwitchExpr:					'switchexpr';
 Switch:						'switch';
 Unsigned:					'unsigned';
 Use:						'use';
@@ -161,10 +161,11 @@ literal:					BoolLiteral | intNum | floatNum | String1Literal;
 
 fragment NUM:				[0-9];
 fragment HEX:				NUM | [a-fA-F];
-fragment ID_BEGIN:			[a-zA-Z@] | [\u0080-\u{10FFFF}];
+fragment ID_BEGIN:			[a-zA-Z] | [\u0080-\u{10FFFF}];
 fragment ID_AFTER:			NUM | [a-zA-Z_] | [\u0080-\u{10FFFF}];
+PrepId:						'@' ID_AFTER+;
 RawId:						(ID_BEGIN ID_AFTER*) | ('_' ID_AFTER+);
-id:							Underline | RawId;
+id:							Underline | PrepId | RawId;
 ids:						id (PointOp id)*;
 
 
@@ -229,9 +230,9 @@ switchStmtPart2:			When expr exprFuncDef stmt;
 switchStmt2:				Switch quotHuaL switchStmtPart2* switchStmtPart2Last quotHuaR;
 //
 switchExprPart:				expr (When expr)? exprFuncDef quotStmtExprWrap endl2;
-switchExpr:					Switch expr quotHuaL switchExprPart* switchExprPartLast quotHuaR;
+switchExpr:					SwitchExpr expr quotHuaL switchExprPart* switchExprPartLast quotHuaR;
 switchExprPart2:			When expr exprFuncDef quotStmtExprWrap endl2;
-switchExpr2:				Switch quotHuaL switchExprPart2* switchExprPartLast quotHuaR;
+switchExpr2:				SwitchExpr quotHuaL switchExprPart2* switchExprPartLast quotHuaR;
 
 
 
@@ -265,9 +266,9 @@ expr:						middleExpr (allAssign middleExpr)*;
 //
 // define variable
 //
-idAssignExpr:				id (Colon type)? Assign expr;
+idAssignExpr:				id (Colon type)? Assign middleExpr;
 defVarStmt:					Var idAssignExpr (Comma idAssignExpr)* endl;
-idAssignExpr2:				id Assign expr;
+idAssignExpr2:				id Assign middleExpr;
 defVarStmt2:				type idAssignExpr2 (Comma idAssignExpr2)* endl;
 
 
@@ -281,43 +282,43 @@ stmt:						ifStmt | whileStmt | whileStmt2 | forStmt | forStmt2 | quotStmtPart |
 
 
 //
-// class
+// blocks base
 //
 publicLevel:				Public | Internal | Protected | Private;
-classItemName:				id | (Operator allOp2);
-classTemplates:				quotJianL type (Comma type)* quotJianR;
+blockTemplates:				quotJianL id (Comma id)* quotJianR;
+itemName:					id | (Operator allOp2);
+typeNameTuple:				(itemName Colon type) | (type itemName);
+typeNameArgsTuple:			(itemName blockTemplates? quotYuanL typeWrapVarList1? quotYuanR Colon type) | (type itemName blockTemplates? quotYuanL typeWrapVarList2? quotYuanR);
+funcBody:					(exprFuncDef expr) | (quotHuaL stmt* quotHuaR);
 //classParent:				Colon ids (Comma ids)*;
-classItemFuncExtBody:		(exprFuncDef expr) | (quotHuaL stmt* quotHuaR);
+
+
+
 //
-classItemVar:				publicLevel? Static? classItemName Colon type (Assign middleExpr)? endl;
-classItemFunc:				publicLevel? Static? classItemName quotYuanL typeWrapVarList1? quotYuanR Colon type classItemFuncExtBody endl;
-classBlock:					publicLevel? Class id classTemplates? quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
-classItemFuncExt2:			quotYuanL typeWrapVarList2? quotYuanR classItemFuncExtBody;
-classItem2:					publicLevel? Static? type classItemName (classItemFuncExt2 | (Assign middleExpr))? endl;
-classBlock2:				publicLevel? Class id classTemplates? quotHuaL classItem2* quotHuaR endl;
+// annotation
+//
+annoBlock:					publicLevel? Annotation id quotHuaL (classItemVar)* quotHuaR endl;
+//
+annoArg:					id Assign literal;
+annoUsingPart:				PrepId (quotYuanL (annoArg endl2)* annoArg endl2? quotYuanR)? endl;
+
+
+
+//
+// class
+//
+//
+interfaceItemFunc:			annoUsingPart* publicLevel? Static? typeNameArgsTuple endl;
+interfaceBlock:				annoUsingPart* publicLevel? Interface id blockTemplates? quotHuaL (classItemVar | interfaceItemFunc)* quotHuaR endl;
+//
+classItemVar:				publicLevel? Static? typeNameTuple (Assign middleExpr)? endl;
+classItemFunc:				publicLevel? Static? typeNameArgsTuple funcBody endl;
+classBlock:					annoUsingPart* publicLevel? Class id blockTemplates? quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
 //
 enumItem:					id (quotYuanL type quotYuanR)?;
-enumBlock:					publicLevel? Enum id classTemplates? quotHuaL
+enumBlock:					annoUsingPart* publicLevel? Enum id blockTemplates? quotHuaL
 							(((enumItem endl2)* enumItem) | ((enumItem endl2)+ classItemFunc*))
 							quotHuaR endl;
-enumBlock2:					publicLevel? Enum id classTemplates? quotHuaL
-							(((enumItem endl2)* enumItem) | ((enumItem endl2)+ classItem2*))
-							quotHuaR endl;
-
-
-
-//
-// interface
-//
-importItem:					id Assign literal;
-importItems:				(importItem endl2)* importItem endl2?;
-importPart:					AImport quotYuanL importItems? quotYuanR endl;
-interfaceItemVar:			publicLevel? Static? classItemName Colon type endl;
-interfaceItemFunc:			publicLevel? Static? classItemName quotYuanL typeWrapVarList1? quotYuanR Colon type endl;
-interfaceBlock:				importPart publicLevel? Interface id classTemplates? quotHuaL (interfaceItemVar | interfaceItemFunc)* quotHuaR endl;
-interfaceItemVar2:			publicLevel? Static? type classItemName endl;
-interfaceItemFunc2:			publicLevel? Static? type classItemName quotYuanL typeWrapVarList1? quotYuanR endl;
-interfaceBlock2:			importPart publicLevel? Interface id classTemplates? quotHuaL (interfaceItemVar2 | interfaceItemFunc2)* quotHuaR endl;
 
 
 
@@ -325,11 +326,11 @@ interfaceBlock2:			importPart publicLevel? Interface id classTemplates? quotHuaL
 // file
 //
 useStmt:					Use (id Assign)? ids endl;
-callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
-importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
-libStmt:					ALib String1Literal endl;
+//callConvention:				CC__Cdecl | CC__FastCall | CC__StdCall;
+//importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
+//libStmt:					ALib String1Literal endl;
 namespaceStmt:				Namespace ids endl;
-program:					endl* (useStmt | importStmt | libStmt)* namespaceStmt* (interfaceBlock | interfaceBlock2 | enumBlock | enumBlock2 | classBlock | classBlock2)*;
+program:					endl* useStmt* namespaceStmt* (annoBlock | interfaceBlock | enumBlock | classBlock)*;
 
 
 
@@ -337,7 +338,7 @@ program:					endl* (useStmt | importStmt | libStmt)* namespaceStmt* (interfaceBl
 // entry
 //
 programEntry:				program EOF;
-classItemFuncEntry:			(classItemFunc | classItem2) EOF;
+classItemFuncEntry:			classItemFunc EOF;
 typeEntry:					type EOF;
 
 

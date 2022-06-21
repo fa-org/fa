@@ -70,55 +70,6 @@ namespace fac.ASTs.Structs {
 			return _ret;
 		}
 
-		public static AstEnum FromContext (FaParser.EnumBlock2Context _ctx) {
-			var _enum_items = (from p in _ctx.enumItem () select new AstEnumItem (p)).ToList ();
-			var _types = (from p in _enum_items where p.AttachType != null select p.AttachType).ToList ();
-			for (int i = 0; i < _types.Count - 1; ++i) {
-				for (int j = i + 1; j < _types.Count; ++j) {
-					if (_types[i].IsSame (_types[j]))
-						_types.RemoveAt (j--);
-				}
-			}
-			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "__index__" } };
-			_vars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
-			//
-			string _name = _ctx.id ().GetText ();
-			var _ret = new AstEnum {
-				Token = _ctx.Start,
-				FullName = $"{Info.CurrentNamespace}.{_name}",
-				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
-				ClassEnumItems = _enum_items,
-				ClassVars = _vars,
-				ClassFuncs = new List<AstClassFunc> (),
-			};
-			//
-			Info.CurrentClass = _ret;
-			Info.CurrentFuncVariables = null;
-			var _sb = new StringBuilder ();
-			_sb.AppendLine (@$"public static bool operator== ({_name} _l, {_name} _r) {{
-	if (_l.__index__ != _r.__index__) {{
-		return false
-	}} ");
-			for (int i = 0; i < _enum_items.Count; ++i) {
-				_sb.AppendLine ($"else if (_l.__index__ == {i}) {{");
-				if (_enum_items[i].AttachType == null) {
-					_sb.AppendLine ($"		return true");
-				} else {
-					var _real_var_index = _ret.GetRealAttachVarPos (i);
-					_sb.AppendLine ($"		return _l.{_vars[_real_var_index].Name} == _r.{_vars[_real_var_index].Name}");
-				}
-				_sb.Append ($"	}} ");
-			}
-			_sb.AppendLine (@$"else {{
-		return false;
-	}}");
-			_sb.AppendLine (@$"}}");
-			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (_sb.ToString ()));
-			_ret.ClassFuncs.Add (Common.ParseCode<AstClassFunc> (@$"public static bool operator!= ({_name} _l, {_name} _r) => !(_l == _r);"));
-			_ret.ClassFuncs.AddRange (from p in _ctx.classItem2 () select new AstClassFunc (_ret, p));
-			return _ret;
-		}
-
 		public int GetRealAttachVarPos (int _enum_index) {
 			var _attach_type = ClassEnumItems[_enum_index].AttachType;
 			for (int i = 1; i < ClassVars.Count; ++i) {

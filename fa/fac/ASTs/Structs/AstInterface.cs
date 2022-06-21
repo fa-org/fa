@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using fac.AntlrTools;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -11,32 +12,29 @@ namespace fac.ASTs.Structs {
 	public class AstInterface: IAst, IAstClass {
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
+		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
+		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
-		public List<AstClassFunc> ClassFuncs { init; get; }
+		public List<AstClassFunc> ClassFuncs { get; private set; }
 		private bool m_compiled = false;
 
 
 
 		private AstInterface () { }
 		public static AstInterface FromContext (FaParser.InterfaceBlockContext _ctx) {
+			var _templates = _ctx.blockTemplates () != null ? (from p in _ctx.blockTemplates ().id () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList () : null;
+			foreach (var _var in _templates) {
+				if (_var.Name [0] != 'T')
+					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
+			}
 			var _ret = new AstInterface {
 				Token = _ctx.Start,
 				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
-				ClassVars = (from p in _ctx.interfaceItemVar () select new AstClassVar (p)).ToList (),
+				Templates = _templates,
+				ClassVars = (from p in _ctx.classItemVar () select new AstClassVar (p)).ToList (),
 			};
 			_ret.ClassFuncs = (from p in _ctx.interfaceItemFunc () select new AstClassFunc (_ret, p)).ToList ();
-			return _ret;
-		}
-
-		public static AstInterface FromContext (FaParser.InterfaceBlock2Context _ctx) {
-			var _ret = new AstClass {
-				Token = _ctx.Start,
-				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
-				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
-				ClassVars = (from p in _ctx.classItem2 () where p.classItemFuncExt2 () == null select new AstClassVar (p)).ToList (),
-			};
-			_ret.ClassFuncs = (from p in _ctx.classItem2 () where p.classItemFuncExt2 () != null select new AstClassFunc (_ret, p)).ToList ();
 			return _ret;
 		}
 
@@ -60,8 +58,6 @@ namespace fac.ASTs.Structs {
 			// Antlr转AST
 			foreach (var _var in ClassVars)
 				_var.ToAST ();
-			foreach (var _func in ClassFuncs)
-				_func.ToAST ();
 
 			// 处理AST
 			for (int i = 0; i < ExprTraversals.TraversalTypes.Count; ++i) {
@@ -75,33 +71,7 @@ namespace fac.ASTs.Structs {
 					//
 					ClassVars[j].DefaultValue = ClassVars[j].DefaultValue.TraversalWrap ((_deep: 0, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
 				}
-
-				// 类成员方法
-				for (int j = 0; j < ClassFuncs.Count; ++j) {
-					Info.InitFunc (ClassFuncs[j]);
-					//
-					if (i == 2) {
-						ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
-						ExprTraversals.Init = ExprTraversals.Complete = true;
-						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
-						if (!ExprTraversals.Complete) {
-							ExprTraversals.Init = false;
-							Info.InitFunc (ClassFuncs[j]);
-							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 0, _cb: ExprTraversals.Traversal));
-							Info.InitFunc (ClassFuncs[j]);
-							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: 1, _cb: ExprTraversals.Traversal));
-							ClassFuncs[j].BodyCodes.TraversalCalcTypeWrap ();
-							Info.InitFunc (ClassFuncs[j]);
-							ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
-						}
-					} else {
-						ClassFuncs[j].BodyCodes.TraversalWraps ((_deep: 1, _group: 0, _loop: i, _cb: ExprTraversals.Traversal));
-					}
-				}
 			}
-
-			foreach (var _func in ClassFuncs)
-				_func.ExpandFunc ();
 			return true;
 		}
 
@@ -120,7 +90,7 @@ namespace fac.ASTs.Structs {
 			return _sb.ToString ();
 		}
 
-		public int GetTemplateNum () => 0;
+		public int GetTemplateNum () => Templates?.Count ?? 0;
 
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
 			if ((_templates?.Count ?? 0) > 0)

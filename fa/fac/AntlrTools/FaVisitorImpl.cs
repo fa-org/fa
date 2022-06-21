@@ -94,9 +94,6 @@ namespace fac.AntlrTools {
 		public IAst VisitStmt (FaParser.StmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitPublicLevel (FaParser.PublicLevelContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitUseStmt (FaParser.UseStmtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitCallConvention (FaParser.CallConventionContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitImportStmt (FaParser.ImportStmtContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitLibStmt (FaParser.LibStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNamespaceStmt (FaParser.NamespaceStmtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitProgram (FaParser.ProgramContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTerminal (ITerminalNode node) => throw new NotImplementedException ();
@@ -127,19 +124,21 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeWrapVarList3 (FaParser.TypeWrapVarList3Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitIdAssignExpr2 (FaParser.IdAssignExpr2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitDefVarStmt2 (FaParser.DefVarStmt2Context _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassItemFuncExtBody (FaParser.ClassItemFuncExtBodyContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassItemVar (FaParser.ClassItemVarContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassItemFunc (FaParser.ClassItemFuncContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitClassBlock (FaParser.ClassBlockContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassItemFuncExt2 (FaParser.ClassItemFuncExt2Context _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassItem2 (FaParser.ClassItem2Context _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassBlock2 (FaParser.ClassBlock2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitEnumItem (FaParser.EnumItemContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitEnumBlock (FaParser.EnumBlockContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitEnumBlock2 (FaParser.EnumBlock2Context _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassTemplates (FaParser.ClassTemplatesContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassItemFuncEntry (FaParser.ClassItemFuncEntryContext _ctx) => _ctx.classItemFunc () != null ?
-			new AstClassFunc (Info.CurrentClass, _ctx.classItemFunc ()) : new AstClassFunc (Info.CurrentClass, _ctx.classItem2 ());
-		public IAst VisitClassItemName (FaParser.ClassItemNameContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassItemFuncEntry (FaParser.ClassItemFuncEntryContext _ctx) => new AstClassFunc (Info.CurrentClass, _ctx.classItemFunc ());
+		public IAst VisitInterfaceItemFunc (FaParser.InterfaceItemFuncContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitInterfaceBlock (FaParser.InterfaceBlockContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitBlockTemplates (FaParser.BlockTemplatesContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitItemName (FaParser.ItemNameContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeNameTuple (FaParser.TypeNameTupleContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitTypeNameArgsTuple (FaParser.TypeNameArgsTupleContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitFuncBody (FaParser.FuncBodyContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitAnnoBlock (FaParser.AnnoBlockContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitAnnoArg (FaParser.AnnoArgContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitAnnoUsingPart (FaParser.AnnoUsingPartContext _ctx) => throw new NotImplementedException ();
 	}
 }

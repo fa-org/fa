@@ -584,23 +584,65 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitPublicLevel([NotNull] FaParser.PublicLevelContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classItemName"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.blockTemplates"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitClassItemName([NotNull] FaParser.ClassItemNameContext context);
+	Result VisitBlockTemplates([NotNull] FaParser.BlockTemplatesContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classTemplates"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.itemName"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitClassTemplates([NotNull] FaParser.ClassTemplatesContext context);
+	Result VisitItemName([NotNull] FaParser.ItemNameContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classItemFuncExtBody"/>.
+	/// Visit a parse tree produced by <see cref="FaParser.typeNameTuple"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitClassItemFuncExtBody([NotNull] FaParser.ClassItemFuncExtBodyContext context);
+	Result VisitTypeNameTuple([NotNull] FaParser.TypeNameTupleContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.typeNameArgsTuple"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTypeNameArgsTuple([NotNull] FaParser.TypeNameArgsTupleContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.funcBody"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncBody([NotNull] FaParser.FuncBodyContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.annoBlock"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAnnoBlock([NotNull] FaParser.AnnoBlockContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.annoArg"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAnnoArg([NotNull] FaParser.AnnoArgContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.annoUsingPart"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAnnoUsingPart([NotNull] FaParser.AnnoUsingPartContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.interfaceItemFunc"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitInterfaceItemFunc([NotNull] FaParser.InterfaceItemFuncContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.interfaceBlock"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitInterfaceBlock([NotNull] FaParser.InterfaceBlockContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.classItemVar"/>.
 	/// </summary>
@@ -620,24 +662,6 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitClassBlock([NotNull] FaParser.ClassBlockContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classItemFuncExt2"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitClassItemFuncExt2([NotNull] FaParser.ClassItemFuncExt2Context context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classItem2"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitClassItem2([NotNull] FaParser.ClassItem2Context context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.classBlock2"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitClassBlock2([NotNull] FaParser.ClassBlock2Context context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.enumItem"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -650,89 +674,11 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitEnumBlock([NotNull] FaParser.EnumBlockContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.enumBlock2"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitEnumBlock2([NotNull] FaParser.EnumBlock2Context context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.importItem"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitImportItem([NotNull] FaParser.ImportItemContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.importItems"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitImportItems([NotNull] FaParser.ImportItemsContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.importPart"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitImportPart([NotNull] FaParser.ImportPartContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.interfaceItemVar"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitInterfaceItemVar([NotNull] FaParser.InterfaceItemVarContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.interfaceItemFunc"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitInterfaceItemFunc([NotNull] FaParser.InterfaceItemFuncContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.interfaceBlock"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitInterfaceBlock([NotNull] FaParser.InterfaceBlockContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.interfaceItemVar2"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitInterfaceItemVar2([NotNull] FaParser.InterfaceItemVar2Context context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.interfaceItemFunc2"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitInterfaceItemFunc2([NotNull] FaParser.InterfaceItemFunc2Context context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.interfaceBlock2"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitInterfaceBlock2([NotNull] FaParser.InterfaceBlock2Context context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.useStmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitUseStmt([NotNull] FaParser.UseStmtContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.callConvention"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitCallConvention([NotNull] FaParser.CallConventionContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.importStmt"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitImportStmt([NotNull] FaParser.ImportStmtContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.libStmt"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitLibStmt([NotNull] FaParser.LibStmtContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.namespaceStmt"/>.
 	/// </summary>

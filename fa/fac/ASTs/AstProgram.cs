@@ -1,5 +1,5 @@
-﻿using fac.Exceptions;
-using fac.Structures;
+﻿using fac.ASTs.Structs;
+using fac.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,6 @@ namespace fac.ASTs {
 		public string CurrentModule { init; get; }
 		public string CurrentNamespace { init; get; }
 		public List<string> CurrentUses { init; get; }
-		public List<ExternApi> CurrentExternApis { init; get; }
 
 		/// <summary>
 		/// 当前模块的类列表
@@ -43,25 +42,15 @@ namespace fac.ASTs {
 			// 处理当前引用
 			CurrentUses = Info.CurrentUses = (from p in _ctx.useStmt () select p.ids ().GetText ()).ToList ();
 
-			// 处理当前文件引用的外部库
-			foreach (var _lib_file in (from p in _ctx.libStmt () select Common.GetStringLiterialText (p.String1Literal ())))
-				Info.ExternLibs.Add (_lib_file);
-
-			// 处理当前文件引用的外部接口
-			CurrentExternApis = Info.CurrentExternApis = (from p in _ctx.importStmt () select new ExternApi (p)).ToList ();
-
-			// 处理导入类
+			// 处理接口
 			CurrentClasses = new List<IAstClass> ();
 			CurrentClasses.AddRange (from p in _ctx.interfaceBlock () select IAstClass.FromContext (p));
-			CurrentClasses.AddRange (from p in _ctx.interfaceBlock2 () select IAstClass.FromContext (p));
 
 			// 处理枚举
 			CurrentClasses.AddRange (from p in _ctx.enumBlock () select IAstClass.FromContext (p));
-			CurrentClasses.AddRange (from p in _ctx.enumBlock2 () select IAstClass.FromContext (p));
 
 			// 处理类
 			CurrentClasses.AddRange (from p in _ctx.classBlock () select IAstClass.FromContext (p));
-			CurrentClasses.AddRange (from p in _ctx.classBlock2 () select IAstClass.FromContext (p));
 		}
 
 		public void ProcessType () {
@@ -81,7 +70,6 @@ namespace fac.ASTs {
 			Info.CurrentSourceCode = CurrentSourceCode;
 			Info.CurrentNamespace = CurrentNamespace;
 			Info.CurrentUses = CurrentUses;
-			Info.CurrentExternApis = CurrentExternApis;
 			Log.Mark (LogMark.Build);
 		}
 

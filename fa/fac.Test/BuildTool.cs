@@ -54,7 +54,6 @@ namespace fac.Test {
 			Info.Visitor = null;
 			Info.CurrentNamespace = "";
 			Info.CurrentUses = null;
-			Info.CurrentExternApis = null;
 			Info.CurrentTraversalType = TraversalType.Root2Leaf;
 			Info.CurrentFuncVariables = null;
 			Info.CurrentClass = null;

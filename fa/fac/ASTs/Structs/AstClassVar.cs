@@ -19,22 +19,12 @@ namespace fac.ASTs.Structs {
 
 
 		public AstClassVar () { }
-		public AstClassVar (FaParser.ClassItem2Context _ctx) {
-			if (_ctx.classItemFuncExt2 () != null)
-				throw new NotImplementedException ();
-			Token = _ctx.Start;
-			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
-			Static = _ctx.Static () != null;
-			DataType = new AstType_TempType (_ctx.type ());
-			Name = _ctx.classItemName ().GetText ();
-			DefaultValueRaw = _ctx.middleExpr ();
-		}
 		public AstClassVar (FaParser.ClassItemVarContext _ctx) {
 			Token = _ctx.Start;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
-			DataType = new AstType_TempType (_ctx.type ());
-			Name = _ctx.classItemName ().GetText ();
+			DataType = new AstType_TempType (_ctx.typeNameTuple ().type ());
+			Name = _ctx.typeNameTuple ().itemName ().GetText ();
 			DefaultValueRaw = _ctx.middleExpr ();
 		}
 

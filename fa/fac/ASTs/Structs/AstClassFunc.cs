@@ -17,7 +17,7 @@ namespace fac.ASTs.Structs {
 		public string Name { get; set; }
 		public IAstType ReturnType { get; set; }
 		public List<(IAstType _type, ArgumentTypeExt _ext, string _name)> Arguments { init; get; }
-		public FaParser.ClassItemFuncExtBodyContext BodyRaw { init; get; }
+		public FaParser.FuncBodyContext BodyRaw { init; get; } = null;
 		public List<IAstStmt> BodyCodes { get; private set; } = null;
 
 		public AstType_Func FuncType {
@@ -54,23 +54,25 @@ namespace fac.ASTs.Structs {
 			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
-			Name = _ctx.classItemName ().GetText ();
-			ReturnType = new AstType_TempType (_ctx.type ());
-			Arguments = AstElemParser.Parse (_ctx.typeWrapVarList1 ());
-			BodyRaw = _ctx.classItemFuncExtBody ();
+			Name = _ctx.typeNameArgsTuple ().itemName ().GetText ();
+			ReturnType = new AstType_TempType (_ctx.typeNameArgsTuple ().type ());
+			Arguments = AstElemParser.Parse (_ctx.typeNameArgsTuple ().typeWrapVarList1 ());
+			Arguments.AddRange (AstElemParser.Parse (_ctx.typeNameArgsTuple ().typeWrapVarList2 ()));
+			BodyRaw = _ctx.funcBody ();
 		}
 
-		public AstClassFunc (IAstClass _parent_class, FaParser.ClassItem2Context _ctx) {
-			if (_ctx.classItemFuncExt2 () == null)
+		public AstClassFunc (IAstClass _parent_class, FaParser.InterfaceItemFuncContext _ctx) {
+			if (_parent_class == null)
 				throw new NotImplementedException ();
 			Token = _ctx.Start;
 			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;
-			Name = _ctx.classItemName ().GetText ();
-			ReturnType = new AstType_TempType (_ctx.type ());
-			Arguments = AstElemParser.Parse (_ctx.classItemFuncExt2 ().typeWrapVarList2 ());
-			BodyRaw = _ctx.classItemFuncExt2 ().classItemFuncExtBody ();
+			Name = _ctx.typeNameArgsTuple ().itemName ().GetText ();
+			ReturnType = new AstType_TempType (_ctx.typeNameArgsTuple ().type ());
+			Arguments = AstElemParser.Parse (_ctx.typeNameArgsTuple ().typeWrapVarList1 ());
+			Arguments.AddRange (AstElemParser.Parse (_ctx.typeNameArgsTuple ().typeWrapVarList2 ()));
+			BodyRaw = null;
 		}
 
 		public void ProcessType () {
