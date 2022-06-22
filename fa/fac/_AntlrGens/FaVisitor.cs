@@ -608,6 +608,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTypeNameArgsTuple([NotNull] FaParser.TypeNameArgsTupleContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.nameArgsTuple"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNameArgsTuple([NotNull] FaParser.NameArgsTupleContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.funcBody"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -632,6 +638,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitAnnoUsingPart([NotNull] FaParser.AnnoUsingPartContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.interfaceConstructFunc"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitInterfaceConstructFunc([NotNull] FaParser.InterfaceConstructFuncContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.interfaceItemFunc"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -643,6 +655,12 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitInterfaceBlock([NotNull] FaParser.InterfaceBlockContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="FaParser.classConstructFunc"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitClassConstructFunc([NotNull] FaParser.ClassConstructFuncContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.classItemVar"/>.
 	/// </summary>

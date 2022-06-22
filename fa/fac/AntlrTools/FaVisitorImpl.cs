@@ -24,6 +24,7 @@ namespace fac.AntlrTools {
 		}
 		public IAst VisitProgramEntry (FaParser.ProgramEntryContext _ctx) => new AstProgram (_ctx.program ());
 		public IAst VisitTypeEntry (FaParser.TypeEntryContext _ctx) => IAstType.FromContext (_ctx.type ());
+		public IAst VisitClassItemFuncEntry (FaParser.ClassItemFuncEntryContext _ctx) => new AstClassFunc (Info.CurrentClass, _ctx.classItemFunc ());
 		public IAst VisitShiftLAssign (FaParser.ShiftLAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitShiftRAssign (FaParser.ShiftRAssignContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitAllAssign (FaParser.AllAssignContext _ctx) => throw new NotImplementedException ();
@@ -45,7 +46,6 @@ namespace fac.AntlrTools {
 		public IAst VisitLiteral (FaParser.LiteralContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitId (FaParser.IdContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitIds (FaParser.IdsContext _ctx) => throw new NotImplementedException ();
-		//public IAst VisitIdExt (FaParser.IdExtContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeAfter (FaParser.TypeAfterContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeSingle (FaParser.TypeSingleContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeMulti (FaParser.TypeMultiContext _ctx) => throw new NotImplementedException ();
@@ -98,7 +98,6 @@ namespace fac.AntlrTools {
 		public IAst VisitProgram (FaParser.ProgramContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTerminal (ITerminalNode node) => throw new NotImplementedException ();
 		public IAst VisitErrorNode (IErrorNode node) => throw new NotImplementedException ();
-
 		public IAst VisitEndl (FaParser.EndlContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitEndl2 (FaParser.Endl2Context _ctx) => throw new NotImplementedException ();
 		public IAst VisitQFangL (FaParser.QFangLContext _ctx) => throw new NotImplementedException ();
@@ -129,7 +128,6 @@ namespace fac.AntlrTools {
 		public IAst VisitClassBlock (FaParser.ClassBlockContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitEnumItem (FaParser.EnumItemContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitEnumBlock (FaParser.EnumBlockContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitClassItemFuncEntry (FaParser.ClassItemFuncEntryContext _ctx) => new AstClassFunc (Info.CurrentClass, _ctx.classItemFunc ());
 		public IAst VisitInterfaceItemFunc (FaParser.InterfaceItemFuncContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitInterfaceBlock (FaParser.InterfaceBlockContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitBlockTemplates (FaParser.BlockTemplatesContext _ctx) => throw new NotImplementedException ();
@@ -140,5 +138,8 @@ namespace fac.AntlrTools {
 		public IAst VisitAnnoBlock (FaParser.AnnoBlockContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitAnnoArg (FaParser.AnnoArgContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitAnnoUsingPart (FaParser.AnnoUsingPartContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitNameArgsTuple (FaParser.NameArgsTupleContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitInterfaceConstructFunc (FaParser.InterfaceConstructFuncContext _ctx) => throw new NotImplementedException ();
+		public IAst VisitClassConstructFunc (FaParser.ClassConstructFuncContext _ctx) => throw new NotImplementedException ();
 	}
 }

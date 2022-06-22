@@ -16,7 +16,8 @@ namespace fac.ASTs.Structs {
 		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { get; private set; }
-		private bool m_compiled = false;
+		private bool m_compiled { get; set; } = false;
+		public Dictionary<string, AstInterfaceInst> Insts { get; set; } = new Dictionary<string, AstInterfaceInst> ();
 
 
 
@@ -93,9 +94,21 @@ namespace fac.ASTs.Structs {
 		public int GetTemplateNum () => Templates?.Count ?? 0;
 
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
-			if ((_templates?.Count ?? 0) > 0)
-				throw new CodeException (_token, $"非泛型类型无法指定模板参数");
-			return this;
+			//if ((_templates?.Count ?? 0) > 0)
+			//	throw new CodeException (_token, $"非泛型类型无法指定模板参数");
+			//return this;
+			if (Templates.Count != (_templates?.Count ?? 0))
+				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates?.Count ?? 0} 个参数，实际传入 {_templates?.Count ?? 0} 个参数");
+			foreach (var _type in _templates) {
+				if (_type is AstType_Void || _type is AstType_Any)
+					throw new CodeException (_token, "不可将 void 类型或 any 类型用于模板");
+			}
+			string _type_str = $"{FullName}<{string.Join (",", from p in _templates select p.ToString ())}>";
+			if (Insts.ContainsKey (_type_str))
+				return Insts [_type_str];
+			var _tcls_inst = new AstInterfaceInst(Token, this, _templates, _type_str);
+			Insts [_type_str] = _tcls_inst;
+			return _tcls_inst;
 		}
 	}
 }

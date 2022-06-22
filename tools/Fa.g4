@@ -289,6 +289,7 @@ blockTemplates:				quotJianL id (Comma id)* quotJianR;
 itemName:					id | (Operator allOp2);
 typeNameTuple:				(itemName Colon type) | (type itemName);
 typeNameArgsTuple:			(itemName blockTemplates? quotYuanL typeWrapVarList1? quotYuanR Colon type) | (type itemName blockTemplates? quotYuanL typeWrapVarList2? quotYuanR);
+nameArgsTuple:				id quotYuanL (typeWrapVarList1 | typeWrapVarList2)? quotYuanR;
 funcBody:					(exprFuncDef expr) | (quotHuaL stmt* quotHuaR);
 //classParent:				Colon ids (Comma ids)*;
 
@@ -307,13 +308,14 @@ annoUsingPart:				PrepId (quotYuanL (annoArg endl2)* annoArg endl2? quotYuanR)? 
 //
 // class
 //
-//
+interfaceConstructFunc:		annoUsingPart* publicLevel? nameArgsTuple endl;
 interfaceItemFunc:			annoUsingPart* publicLevel? Static? typeNameArgsTuple endl;
-interfaceBlock:				annoUsingPart* publicLevel? Interface id blockTemplates? quotHuaL (classItemVar | interfaceItemFunc)* quotHuaR endl;
+interfaceBlock:				annoUsingPart* publicLevel? Interface id blockTemplates? quotHuaL (classItemVar | interfaceItemFunc | interfaceConstructFunc)* quotHuaR endl;
 //
-classItemVar:				publicLevel? Static? typeNameTuple (Assign middleExpr)? endl;
-classItemFunc:				publicLevel? Static? typeNameArgsTuple funcBody endl;
-classBlock:					annoUsingPart* publicLevel? Class id blockTemplates? quotHuaL (classItemVar | classItemFunc)* quotHuaR endl;
+classConstructFunc:			annoUsingPart* publicLevel? nameArgsTuple funcBody endl;
+classItemVar:				annoUsingPart* publicLevel? Static? typeNameTuple (Assign middleExpr)? endl;
+classItemFunc:				annoUsingPart* publicLevel? Static? typeNameArgsTuple funcBody endl;
+classBlock:					annoUsingPart* publicLevel? Class id blockTemplates? quotHuaL (classItemVar | classItemFunc | classConstructFunc)* quotHuaR endl;
 //
 enumItem:					id (quotYuanL type quotYuanR)?;
 enumBlock:					annoUsingPart* publicLevel? Enum id blockTemplates? quotHuaL

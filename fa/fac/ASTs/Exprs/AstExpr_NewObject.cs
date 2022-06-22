@@ -68,6 +68,9 @@ namespace fac.ASTs.Exprs {
 				if (!_success)
 					return null;
 				InitialValues.AddRange (_default_init_vals);
+			} else if (ConstructorArguments != null) {
+				// TODO 检查构造函数参数
+				throw new UnimplException (Token);
 			} else {
 				// TODO 检查构造函数参数
 				throw new UnimplException (Token);
