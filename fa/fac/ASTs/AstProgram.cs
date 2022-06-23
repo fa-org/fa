@@ -84,5 +84,17 @@ namespace fac.ASTs {
 			_sb.AppendLine ($"}}");
 			return _sb.ToString ();
 		}
+
+		public override string GenerateCpp (int _indent) {
+			_generate_init ();
+			if (CurrentClasses.Count == 0)
+				return "";
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"namespace {Info.CurrentNamespace} {{");
+			foreach (var _class in CurrentClasses)
+				_sb.Append (_class.GenerateCpp (_indent));
+			_sb.AppendLine ($"}}");
+			return _sb.ToString ();
+		}
 	}
 }

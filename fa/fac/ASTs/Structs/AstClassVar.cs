@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime;
 using fac.ASTs.Exprs;
+using fac.ASTs.Structs.Part;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
 	public class AstClassVar: IAst {
+		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
 		public IAstType DataType { get; set; }
@@ -20,6 +22,7 @@ namespace fac.ASTs.Structs {
 
 		public AstClassVar () { }
 		public AstClassVar (FaParser.ClassItemVarContext _ctx) {
+			Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ());
 			Token = _ctx.Start;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
 			Static = _ctx.Static () != null;

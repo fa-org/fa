@@ -13,7 +13,6 @@ grammar Fa;
 //
 // keyword
 //
-Annotation:					'annotation';
 Break:						'break';
 CC__Cdecl:					'__cdecl';
 CC__FastCall:				'__fastcall';
@@ -298,10 +297,8 @@ funcBody:					(exprFuncDef expr) | (quotHuaL stmt* quotHuaR);
 //
 // annotation
 //
-annoBlock:					publicLevel? Annotation id quotHuaL (classItemVar)* quotHuaR endl;
-//
 annoArg:					id Assign literal;
-annoUsingPart:				PrepId (quotYuanL (annoArg endl2)* annoArg endl2? quotYuanR)? endl;
+annoUsingPart:				quotFangL id (quotYuanL (annoArg endl2)* annoArg endl2? quotYuanR)? quotFangR endl;
 
 
 
@@ -317,7 +314,7 @@ classItemVar:				annoUsingPart* publicLevel? Static? typeNameTuple (Assign middl
 classItemFunc:				annoUsingPart* publicLevel? Static? typeNameArgsTuple funcBody endl;
 classBlock:					annoUsingPart* publicLevel? Class id blockTemplates? quotHuaL (classItemVar | classItemFunc | classConstructFunc)* quotHuaR endl;
 //
-enumItem:					id (quotYuanL type quotYuanR)?;
+enumItem:					annoUsingPart* id (quotYuanL type quotYuanR)?;
 enumBlock:					annoUsingPart* publicLevel? Enum id blockTemplates? quotHuaL
 							(((enumItem endl2)* enumItem) | ((enumItem endl2)+ classItemFunc*))
 							quotHuaR endl;
@@ -332,7 +329,7 @@ useStmt:					Use (id Assign)? ids endl;
 //importStmt:					AImport type callConvention id quotYuanL typeVarList quotYuanR endl;
 //libStmt:					ALib String1Literal endl;
 namespaceStmt:				Namespace ids endl;
-program:					endl* useStmt* namespaceStmt* (annoBlock | interfaceBlock | enumBlock | classBlock)*;
+program:					endl* useStmt* namespaceStmt* (interfaceBlock | enumBlock | classBlock)*;
 
 
 

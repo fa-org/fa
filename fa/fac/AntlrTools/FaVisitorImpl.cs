@@ -135,7 +135,6 @@ namespace fac.AntlrTools {
 		public IAst VisitTypeNameTuple (FaParser.TypeNameTupleContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitTypeNameArgsTuple (FaParser.TypeNameArgsTupleContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitFuncBody (FaParser.FuncBodyContext _ctx) => throw new NotImplementedException ();
-		public IAst VisitAnnoBlock (FaParser.AnnoBlockContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitAnnoArg (FaParser.AnnoArgContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitAnnoUsingPart (FaParser.AnnoUsingPartContext _ctx) => throw new NotImplementedException ();
 		public IAst VisitNameArgsTuple (FaParser.NameArgsTupleContext _ctx) => throw new NotImplementedException ();

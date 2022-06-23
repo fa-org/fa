@@ -273,7 +273,7 @@ namespace fac.ASTs.Types {
 
 		public bool IsOptional { get => this is AstType_Class _class && _class.Class.FullName.StartsWith ("fa.Optional"); }
 
-		public IAstType Optional { get => this is AstType_Void ? AstType_OptionalWrap.VoidClass.GetClassType () : (this.IsOptional ? this : AstType_OptionalWrap.GetInstClass (this).GetClassType ()); }
+		public IAstType Optional { get => this is AstType_OptionalWrap ? this : new AstType_OptionalWrap { ItemType = this }; }
 
 		public IAstType UnwrapOptional {
 			get {

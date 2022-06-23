@@ -193,20 +193,7 @@ namespace fac.ASTs.Exprs {
 					return FromError (_ctx.Start, fa_Error.Null);
 				}
 			} else if (_ctx.literal () != null) {
-				string _type, _value = _ctx.GetText ();
-				if (_ctx.literal ().BoolLiteral () != null) {
-					_type = "bool";
-				} else if (_ctx.literal ().intNum () != null) {
-					_type = "int";
-				} else if (_ctx.literal ().floatNum () != null) {
-					_type = "float";
-				} else if (_ctx.literal ().String1Literal () != null) {
-					//_type = "string";
-					return AstExpr_BaseValue.FromCodeString (_ctx.Start, _value);
-				} else {
-					throw new UnimplException (_ctx);
-				}
-				return new AstExpr_BaseValue { Token = _ctx.Start, DataType = IAstType.FromName (_type), Value = _value };
+				return FromContext (_ctx.literal ());
 			} else if (_ctx.ifExpr () != null) {
 				var _exprs = (from p in _ctx.ifExpr ().expr () select FromContext (p)).ToList ();
 				var _branches = (from p in _ctx.ifExpr ().quotStmtExpr () select (IAstStmt.FromStmts (p.stmt ()), FromContext (p.expr ()))).ToList ();
@@ -253,6 +240,23 @@ namespace fac.ASTs.Exprs {
 			} else {
 				throw new UnimplException (_ctx);
 			}
+		}
+
+		public static IAstExpr FromContext (FaParser.LiteralContext _ctx) {
+			string _type, _value = _ctx.GetText ();
+			if (_ctx.BoolLiteral () != null) {
+				_type = "bool";
+			} else if (_ctx.intNum () != null) {
+				_type = "int";
+			} else if (_ctx.floatNum () != null) {
+				_type = "float";
+			} else if (_ctx.String1Literal () != null) {
+				//_type = "string";
+				return AstExpr_BaseValue.FromCodeString (_ctx.Start, _value);
+			} else {
+				throw new UnimplException (_ctx);
+			}
+			return new AstExpr_BaseValue { Token = _ctx.Start, DataType = IAstType.FromName (_type), Value = _value };
 		}
 
 		public static IAstExpr FromValue (string _data_type, string _value) => FromValue (IAstType.FromName (_data_type), _value);

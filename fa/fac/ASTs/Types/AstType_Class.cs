@@ -36,5 +36,9 @@ namespace fac.ASTs.Types {
 			_full_name = _full_name.Replace ($"__lt__{Info.CurrentNamespace}.", "__lt__").Replace ($"__comma__{Info.CurrentNamespace}.", "__comma__");
 			return _full_name;
 		}
+
+		public override string GenerateCpp (int _indent) {
+
+		}
 	}
 }

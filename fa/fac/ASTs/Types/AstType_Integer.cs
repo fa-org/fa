@@ -32,6 +32,18 @@ namespace fac.ASTs.Types {
 			_ => throw new UnimplException (Token)
 		};
 
+		public override string GenerateCpp (int _indent) => (IsSign, BitWidth) switch {
+			(true, 8) => "int8_t",
+			(false, 8) => "uint8_t",
+			(true, 16) => "int16_t",
+			(false, 16) => "uint16_t",
+			(true, 32) => "int32_t",
+			(false, 32) => "uint32_t",
+			(true, 64) => "int64_t",
+			(false, 64) => "uint64_t",
+			_ => throw new UnimplException (Token)
+		};
+
 		private static HashSet<string> sTypeNames = new HashSet<string> { "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64" };
 		private static Dictionary<string, string> sTypeMap = new Dictionary<string, string> { ["int"] = "int32", ["uint"] = "uint32" };
 	}

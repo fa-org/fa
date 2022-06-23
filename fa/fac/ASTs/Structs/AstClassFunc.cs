@@ -1,6 +1,7 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs.Part;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
 	public class AstClassFunc: IAst {
+		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public IAstClass ParentClass { get; set; }
 		public PublicLevel Level { init; get; }
 		public bool Static { init; get; }
@@ -34,6 +36,7 @@ namespace fac.ASTs.Structs {
 
 
 		public AstClassFunc (IAstClass _class, AstClassFunc _src, Func<string, IAstType> _get_impl_type) {
+			Annotations = _src.Annotations;
 			Token = _src.Token;
 			ParentClass = _class;
 			Level = _src.Level;
@@ -50,6 +53,7 @@ namespace fac.ASTs.Structs {
 		public AstClassFunc (IAstClass _parent_class, FaParser.ClassItemFuncContext _ctx) {
 			if (_parent_class == null)
 				throw new NotImplementedException ();
+			Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ());
 			Token = _ctx.Start;
 			ParentClass = _parent_class;
 			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;

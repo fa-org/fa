@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using fac.AntlrTools;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs.Part;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
 	public class AstTemplateEnumInst: IAst, IAstClass {
+		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public AstTemplateEnum Class { init; get; }
 		public List<IAstType> Templates { init; get; }
 
@@ -31,6 +33,7 @@ namespace fac.ASTs.Structs {
 
 
 		public AstTemplateEnumInst (IToken _token, AstTemplateEnum _class, List<IAstType> _templates, string _fullname) {
+			Annotations = _class.Annotations;
 			Token = _token;
 			Class = _class;
 			Templates = _templates;

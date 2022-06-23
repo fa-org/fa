@@ -620,12 +620,6 @@ public interface IFaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFuncBody([NotNull] FaParser.FuncBodyContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.annoBlock"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAnnoBlock([NotNull] FaParser.AnnoBlockContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.annoArg"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

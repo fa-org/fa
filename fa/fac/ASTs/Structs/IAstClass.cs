@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using fac.ASTs.Exprs.Names;
 using fac.ASTs.Structs;
+using fac.ASTs.Structs.Part;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
 	public interface IAstClass {
+		public List<AstAnnoUsingPart> Annotations { get; }
 		public string FullName { get; }
 		public string CSharpFullName { get => FullName; }
 		public List<AstEnumItem> ClassEnumItems { get; }
@@ -21,6 +23,7 @@ namespace fac.ASTs.Structs {
 		public void ProcessType ();
 		public bool Compile ();
 		public string GenerateCSharp (int _indent);
+		public string GenerateCpp (int _indent);
 
 		// 计算枚举类型所对应的附加变量的实际映射变量位置
 		public int GetRealAttachVarPos (int _enum_index) => -1;

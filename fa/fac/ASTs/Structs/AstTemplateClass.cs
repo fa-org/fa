@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using fac.AntlrTools;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs.Part;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
 	public class AstTemplateClass: IAst, IAstClass {
+		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
@@ -28,6 +30,7 @@ namespace fac.ASTs.Structs {
 					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
 			}
 			var _ret = new AstTemplateClass {
+				Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ()),
 				Token = _ctx.Start,
 				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,

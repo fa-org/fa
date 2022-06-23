@@ -1015,16 +1015,6 @@ public partial class FaBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// <return>The visitor result.</return>
 	public virtual Result VisitFuncBody([NotNull] FaParser.FuncBodyContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="FaParser.annoBlock"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitAnnoBlock([NotNull] FaParser.AnnoBlockContext context) { return VisitChildren(context); }
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="FaParser.annoArg"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>

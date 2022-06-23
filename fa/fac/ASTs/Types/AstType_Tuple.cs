@@ -12,5 +12,6 @@ namespace fac.ASTs.Types {
 
 		public override string ToString () => $"({string.Join (", ", from p in TupleTypes select $"{p._type} {p._name}")})";
 		public override string GenerateCSharp (int _indent) => $"({string.Join (", ", from p in TupleTypes select p._type.GenerateCSharp (_indent))})";
+		public override string GenerateCpp (int _indent) => $"std::tuple<{string.Join (", ", from p in TupleTypes select p._type.GenerateCpp (_indent))}>";
 	}
 }

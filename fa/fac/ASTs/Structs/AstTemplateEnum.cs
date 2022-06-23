@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using fac.AntlrTools;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs.Part;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
 	public class AstTemplateEnum: IAst, IAstClass {
+		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
 		public List<AstEnumItem> ClassEnumItems { init; get; }
@@ -38,6 +40,7 @@ namespace fac.ASTs.Structs {
 			var _vars = new List<AstClassVar> { new AstClassVar { Token = null, Level = PublicLevel.Public, Static = false, DataType = IAstType.FromName ("int"), Name = "__index__" } };
 			_vars.AddRange (from p in _types select new AstClassVar { Token = p.Token, Level = PublicLevel.Public, Static = false, DataType = p, DefaultValueRaw = null, Name = Common.GetTempId () });
 			var _ret = new AstTemplateEnum {
+				Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ()),
 				Token = _ctx.Start,
 				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
 				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,

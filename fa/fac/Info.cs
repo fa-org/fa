@@ -238,5 +238,21 @@ namespace fac {
 				_sb.Append (_program.GenerateCSharp (0));
 			return _sb.ToString ();
 		}
+
+		public static string GenerateCpp () {
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"#include <cstdint>");
+			_sb.AppendLine ($"#include <functional>");
+			_sb.AppendLine ($"#include <iostream>");
+			_sb.AppendLine ($"#include <optional>");
+			_sb.AppendLine ($"#include <string>");
+			_sb.AppendLine ($"#include <variant>");
+			_sb.AppendLine ();
+			_sb.AppendLine ();
+			_sb.AppendLine ();
+			foreach (var _program in Programs)
+				_sb.Append (_program.GenerateCpp (0));
+			return _sb.ToString ();
+		}
 	}
 }

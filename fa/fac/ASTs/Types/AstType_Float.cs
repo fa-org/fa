@@ -23,6 +23,8 @@ namespace fac.ASTs.Types {
 
 		public override string GenerateCSharp (int _indent) => BitWidth == 32 ? "float" : (BitWidth == 64 ? "double" : throw new UnimplException (Token));
 
+		public override string GenerateCpp (int _indent) => BitWidth == 32 ? "float" : (BitWidth == 64 ? "double" : throw new UnimplException (Token));
+
 		private static HashSet<string> sTypeNames = new HashSet<string> { "float32", "float64" };
 	}
 }

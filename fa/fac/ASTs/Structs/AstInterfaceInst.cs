@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using fac.AntlrTools;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs.Part;
 using fac.ASTs.Types;
 using fac.Exceptions;
 using System;
@@ -11,18 +12,19 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs {
 	public class AstInterfaceInst: IAst, IAstClass {
+		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public AstInterface Class { init; get; }
 		public List<IAstType> Templates { init; get; }
 
 		public string FullName { init; get; }
-		//public string CSharpFullName {
-		//	get {
-		//		int p = FullName.IndexOf ('<');
-		//		var _left = FullName[..p].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__");
-		//		var _right = FullName[p..].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__").Replace (".", "__dot__");
-		//		return $"{_left}{_right}";
-		//	}
-		//}
+		public string CSharpFullName {
+			get {
+				int p = FullName.IndexOf ('<');
+				var _left = FullName[..p].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__");
+				var _right = FullName[p..].Replace ("<", "__lt__").Replace (">", "__gt__").Replace (",", "__comma__").Replace (".", "__dot__");
+				return $"{_left}{_right}";
+			}
+		}
 		public List<AstEnumItem> ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
@@ -31,6 +33,7 @@ namespace fac.ASTs.Structs {
 
 
 		public AstInterfaceInst (IToken _token, AstInterface _class, List<IAstType> _templates, string _fullname) {
+			Annotations = _class.Annotations;
 			Token = _token;
 			Class = _class;
 			Templates = _templates;
@@ -61,12 +64,12 @@ namespace fac.ASTs.Structs {
 
 		public void ProcessType () {
 			Info.CurrentClass = this;
+			for (int i = 0; i < (Annotations?.Count ?? 0); ++i)
+				Annotations [i].ProcessType ();
 			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
 				ClassEnumItems[i].ProcessType ();
 			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)
 				ClassVars[i].ProcessType ();
-			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
-				ClassFuncs[i].ProcessType ();
 		}
 
 		public bool Compile () {

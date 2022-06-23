@@ -15,7 +15,7 @@ public annotation ImportBackend {
 
 
 
-@ImportBackend (Using = "using System.Collections.Generic;")
+[ImportBackend (Using = "using System.Collections.Generic;")]
 public interface List<T> {
 	void Add (T _item)
 	//void AddRange (T [] _items)

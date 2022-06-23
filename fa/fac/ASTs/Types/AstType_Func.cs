@@ -42,9 +42,15 @@ namespace fac.ASTs.Types {
 				_list.Add ((_type: ReturnType, _ext: ArgumentTypeExt.None));
 			}
 			return @$"{_func_type}<{string.Join (", ", from p in _list
-													   let _s1 = (p._ext == ArgumentTypeExt.Mut ? "ref " : "")
-													   let _s2 = p._type.GenerateCSharp (_indent)
-													   select $"{_s1}{_s2}")}>";
+														let _s1 = (p._ext == ArgumentTypeExt.Mut ? "ref " : "")
+														let _s2 = p._type.GenerateCSharp (_indent)
+														select $"{_s1}{_s2}")}>";
+		}
+
+		public override string GenerateCpp (int _indent) {
+			return @$"std::function<{ReturnType.GenerateCpp ()} ({string.Join (", ", from p in ArgumentTypes
+														let _s2 = p._type.GenerateCpp (_indent)
+														select p._ext == ArgumentTypeExt.Mut ? $"{_s2}&" : $"const {_s2}&")}>";
 		}
 	}
 }

@@ -10,5 +10,6 @@ namespace fac.ASTs.Types {
 	public class AstType_Void: IAstType {
 		public override string ToString () => "void";
 		public override string GenerateCSharp (int _indent) => "void";
+		public override string GenerateCpp (int _indent) => "void";
 	}
 }
