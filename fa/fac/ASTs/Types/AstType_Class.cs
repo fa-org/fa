@@ -38,7 +38,11 @@ namespace fac.ASTs.Types {
 		}
 
 		public override string GenerateCpp (int _indent) {
-
+			string _full_name = Class.CSharpFullName;
+			if (_full_name.StartsWith (Info.CurrentNamespace))
+				_full_name = _full_name [(Info.CurrentNamespace.Length + 1)..];
+			_full_name = _full_name.Replace ($"__lt__{Info.CurrentNamespace}.", "__lt__").Replace ($"__comma__{Info.CurrentNamespace}.", "__comma__");
+			return _full_name;
 		}
 	}
 }

@@ -82,5 +82,7 @@ namespace fac.ASTs.Stmts {
 		}
 
 		public override string GenerateCSharp (int _indent) => $"{_indent.Indent ()}{Expr.GenerateCSharp (_indent)};\r\n";
+
+		public override string GenerateCpp (int _indent) => $"{_indent.Indent ()}{Expr.GenerateCpp (_indent)};\r\n";
 	}
 }

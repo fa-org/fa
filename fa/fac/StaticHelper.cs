@@ -56,7 +56,7 @@ namespace fac {
 			return _success;
 		}
 
-		public static void AppendStmts (this StringBuilder _sb, List<IAstStmt> _stmts, int _indent) {
+		public static void AppendCSharpStmts (this StringBuilder _sb, List<IAstStmt> _stmts, int _indent) {
 			if (_stmts == null)
 				return;
 			foreach (var _stmt in _stmts) {
@@ -64,11 +64,27 @@ namespace fac {
 			}
 		}
 
-		public static void AppendExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {
+		public static void AppendCppStmts (this StringBuilder _sb, List<IAstStmt> _stmts, int _indent) {
+			if (_stmts == null)
+				return;
+			foreach (var _stmt in _stmts) {
+				_sb.Append (_stmt.GenerateCpp (_indent));
+			}
+		}
+
+		public static void AppendCSharpExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {
 			if (_exprs == null)
 				return;
 			foreach (var _expr in _exprs) {
 				_sb.Append ($"{_indent.Indent ()}{_expr.GenerateCSharp (_indent)};\r\n");
+			}
+		}
+
+		public static void AppendCppExprs (this StringBuilder _sb, List<IAstExpr> _exprs, int _indent) {
+			if (_exprs == null)
+				return;
+			foreach (var _expr in _exprs) {
+				_sb.Append ($"{_indent.Indent ()}{_expr.GenerateCpp (_indent)};\r\n");
 			}
 		}
 

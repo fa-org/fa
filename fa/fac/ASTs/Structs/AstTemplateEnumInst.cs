@@ -165,6 +165,20 @@ namespace fac.ASTs.Structs {
 			return _sb.ToString ();
 		}
 
+		public override string GenerateCpp (int _indent) {
+			Info.CurrentClass = this;
+			Info.CurrentFuncVariables = null;
+			//
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}class {CSharpFullName[(CSharpFullName.LastIndexOf ('.') + 1)..]} {{");
+			foreach (var _var in ClassVars)
+				_sb.Append (_var.GenerateCpp (_indent + 1));
+			foreach (var _func in ClassFuncs)
+				_sb.Append (_func.GenerateCpp (_indent + 1));
+			_sb.AppendLine ($"{_indent.Indent ()}}};");
+			return _sb.ToString ();
+		}
+
 		public int GetRealAttachVarPos (int _enum_index) {
 			var _attach_type = ClassEnumItems[_enum_index].AttachType;
 			if (_attach_type is AstType_Placeholder _ph_type)

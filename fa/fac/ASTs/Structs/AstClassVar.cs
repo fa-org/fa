@@ -57,6 +57,10 @@ namespace fac.ASTs.Structs {
 			//}
 		}
 
+		public override string GenerateCpp (int _indent) {
+			return $"{_indent.Indent ()}{Level.ToString ().ToLower ()}: {(Static ? " static" : "")} {DataType.GenerateCpp (_indent)} {Name};\r\n";
+		}
+
 		//public static int n0 = new Func<int> (() => 1).Invoke ();
 	}
 }

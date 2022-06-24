@@ -12,5 +12,6 @@ namespace fac.ASTs.Types {
 
 		public override string ToString () => $"{ItemType}[]";
 		public override string GenerateCSharp (int _indent) => $"List<{ItemType.GenerateCSharp (_indent)}>";
+		public override string GenerateCpp (int _indent) => $"std::vector<{ItemType.GenerateCpp (_indent)}>";
 	}
 }

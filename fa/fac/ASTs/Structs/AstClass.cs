@@ -115,6 +115,21 @@ namespace fac.ASTs.Structs {
 			return _sb.ToString ();
 		}
 
+		public override string GenerateCpp (int _indent) {
+			Info.CurrentClass = this;
+			Info.CurrentFuncVariables = null;
+			//
+			var _sb = new StringBuilder ();
+			_sb.Append ($"{_indent.Indent ()}class {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
+			_sb.AppendLine ($" {{");
+			foreach (var _var in ClassVars)
+				_sb.Append (_var.GenerateCpp (_indent + 1));
+			foreach (var _func in ClassFuncs)
+				_sb.Append (_func.GenerateCpp (_indent + 1));
+			_sb.AppendLine ($"{_indent.Indent ()}}};");
+			return _sb.ToString ();
+		}
+
 		public int GetTemplateNum () => 0;
 
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {

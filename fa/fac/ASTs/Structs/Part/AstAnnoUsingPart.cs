@@ -60,6 +60,8 @@ namespace fac.ASTs.Structs.Part {
 
 		public override string GenerateCSharp (int _indent) => throw new UnimplException (Token);
 
+		public override string GenerateCpp (int _indent) => throw new UnimplException (Token);
+
 		public static List<AstAnnoUsingPart> FromContexts (FaParser.AnnoUsingPartContext [] _ctxs) => (from _p in _ctxs select new AstAnnoUsingPart (_p)).ToList ();
 	}
 }

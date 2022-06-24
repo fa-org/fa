@@ -63,11 +63,25 @@ namespace fac.ASTs.Stmts {
 			var _sb = new StringBuilder ();
 			if (IsDoWhile) {
 				_sb.AppendLine ($"{_indent.Indent ()}do {{");
-				_sb.AppendStmts (Contents, _indent + 1);
+				_sb.AppendCSharpStmts (Contents, _indent + 1);
 				_sb.AppendLine ($"{_indent.Indent ()}}} while ({Condition.GenerateCSharp (_indent)});");
 			} else {
 				_sb.AppendLine ($"{_indent.Indent ()}while ({Condition.GenerateCSharp (_indent)}) {{");
-				_sb.AppendStmts (Contents, _indent + 1);
+				_sb.AppendCSharpStmts (Contents, _indent + 1);
+				_sb.AppendLine ($"{_indent.Indent ()}}}");
+			}
+			return _sb.ToString ();
+		}
+
+		public override string GenerateCpp (int _indent) {
+			var _sb = new StringBuilder ();
+			if (IsDoWhile) {
+				_sb.AppendLine ($"{_indent.Indent ()}do {{");
+				_sb.AppendCppStmts (Contents, _indent + 1);
+				_sb.AppendLine ($"{_indent.Indent ()}}} while ({Condition.GenerateCpp (_indent)});");
+			} else {
+				_sb.AppendLine ($"{_indent.Indent ()}while ({Condition.GenerateCpp (_indent)}) {{");
+				_sb.AppendCppStmts (Contents, _indent + 1);
 				_sb.AppendLine ($"{_indent.Indent ()}}}");
 			}
 			return _sb.ToString ();

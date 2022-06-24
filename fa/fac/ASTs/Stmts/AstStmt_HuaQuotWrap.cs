@@ -30,7 +30,15 @@ namespace fac.ASTs.Stmts {
 		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}{{");
-			_sb.AppendStmts (Stmts, _indent + 1);
+			_sb.AppendCSharpStmts (Stmts, _indent + 1);
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
+
+		public override string GenerateCpp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}{{");
+			_sb.AppendCppStmts (Stmts, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();
 		}

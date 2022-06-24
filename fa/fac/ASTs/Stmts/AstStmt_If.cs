@@ -77,10 +77,22 @@ namespace fac.ASTs.Stmts {
 		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}if ({Condition.GenerateCSharp (_indent)}) {{");
-			_sb.AppendStmts (IfTrueCodes, _indent + 1);
+			_sb.AppendCSharpStmts (IfTrueCodes, _indent + 1);
 			if (IfFalseCodes?.Any () ?? false) {
 				_sb.AppendLine ($"{_indent.Indent ()}}} else {{");
-				_sb.AppendStmts (IfFalseCodes, _indent + 1);
+				_sb.AppendCSharpStmts (IfFalseCodes, _indent + 1);
+			}
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
+
+		public override string GenerateCpp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}if ({Condition.GenerateCpp (_indent)}) {{");
+			_sb.AppendCppStmts (IfTrueCodes, _indent + 1);
+			if (IfFalseCodes?.Any () ?? false) {
+				_sb.AppendLine ($"{_indent.Indent ()}}} else {{");
+				_sb.AppendCppStmts (IfFalseCodes, _indent + 1);
 			}
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();

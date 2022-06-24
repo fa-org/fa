@@ -44,7 +44,15 @@ namespace fac.ASTs.Stmts {
 		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			_sb.AppendLine ($"{_indent.Indent ()}foreach ({Iterator.DataType.GenerateCSharp (_indent)} {Iterator.VarName} in {ListContainer.GenerateCSharp (_indent)}) {{");
-			_sb.AppendStmts (BodyCodes, _indent + 1);
+			_sb.AppendCSharpStmts (BodyCodes, _indent + 1);
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
+
+		public override string GenerateCpp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.AppendLine ($"{_indent.Indent ()}foreach ({Iterator.DataType.GenerateCpp (_indent)} {Iterator.VarName} in {ListContainer.GenerateCpp (_indent)}) {{");
+			_sb.AppendCppStmts (BodyCodes, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();
 		}

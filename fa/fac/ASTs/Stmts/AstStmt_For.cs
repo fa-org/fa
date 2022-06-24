@@ -62,12 +62,25 @@ namespace fac.ASTs.Stmts {
 		public override string GenerateCSharp (int _indent) {
 			var _sb = new StringBuilder ();
 			// 此处 Initializes 每次判断前执行一遍
-			_sb.AppendStmts (Initializes, _indent);
+			_sb.AppendCSharpStmts (Initializes, _indent);
 			//var _inc_str = string.Join (", ", from p in Increment select p.GenerateCSharp (_indent));
 			_sb.AppendLine ($"{_indent.Indent ()}for (; {Condition.GenerateCSharp (_indent)}; ) {{");
-			_sb.AppendStmts (BodyCodes, _indent + 1);
-			_sb.AppendExprs (Increment, _indent + 1);
-			_sb.AppendStmts (Initializes, _indent + 1);
+			_sb.AppendCSharpStmts (BodyCodes, _indent + 1);
+			_sb.AppendCSharpExprs (Increment, _indent + 1);
+			_sb.AppendCSharpStmts (Initializes, _indent + 1);
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
+
+		public override string GenerateCpp (int _indent) {
+			var _sb = new StringBuilder ();
+			// 此处 Initializes 每次判断前执行一遍
+			_sb.AppendCppStmts (Initializes, _indent);
+			//var _inc_str = string.Join (", ", from p in Increment select p.GenerateCpp (_indent));
+			_sb.AppendLine ($"{_indent.Indent ()}for (; {Condition.GenerateCpp (_indent)}; ) {{");
+			_sb.AppendCppStmts (BodyCodes, _indent + 1);
+			_sb.AppendCppExprs (Increment, _indent + 1);
+			_sb.AppendCppStmts (Initializes, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();
 		}

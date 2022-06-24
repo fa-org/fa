@@ -64,5 +64,15 @@ namespace fac.ASTs.Stmts {
 				return $"{_indent.Indent ()}return;\r\n";
 			}
 		}
+
+		public override string GenerateCpp (int _indent) {
+			if (Expr == null && ReturnType.ToString () == "void?") {
+				return $"{_indent.Indent ()}return std::nullopt;\r\n";
+			} else if (Expr != null) {
+				return $"{_indent.Indent ()}return {Expr.GenerateCpp (_indent)};\r\n";
+			} else {
+				return $"{_indent.Indent ()}return;\r\n";
+			}
+		}
 	}
 }

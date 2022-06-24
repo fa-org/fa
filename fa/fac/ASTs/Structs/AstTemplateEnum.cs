@@ -80,6 +80,10 @@ namespace fac.ASTs.Structs {
 			return string.Join ("", from p in Insts select p.Value.GenerateCSharp (_indent));
 		}
 
+		public override string GenerateCpp (int _indent) {
+			return string.Join ("", from p in Insts select p.Value.GenerateCpp (_indent));
+		}
+
 		public int GetTemplateNum () => Templates.Count;
 
 		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {

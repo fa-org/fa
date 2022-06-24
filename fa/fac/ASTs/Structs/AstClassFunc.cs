@@ -114,7 +114,28 @@ namespace fac.ASTs.Structs {
 			if (Arguments.Any ())
 				_sb.Remove (_sb.Length - 2, 2);
 			_sb.AppendLine (") {");
-			_sb.AppendStmts (BodyCodes, _indent + 1);
+			_sb.AppendCSharpStmts (BodyCodes, _indent + 1);
+			_sb.AppendLine ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
+
+		public override string GenerateCpp (int _indent) {
+			Info.CurrentFunc = this;
+			var _sb = new StringBuilder ();
+			var _b = ReturnType.GenerateCpp (_indent);
+			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()}: {(Static ? " static" : "")} {_b} {Name} (");
+			foreach (var _arg in Arguments) {
+				//if (_arg._type is AstType_ArrayWrap _awrap && _awrap.Params)
+				//	_sb.Append ("params ");
+				if (_arg._ext == ArgumentTypeExt.Mut) {
+					_sb.Append ("ref ");
+				}
+				_sb.Append ($"{(_arg._ext == ArgumentTypeExt.Mut ? "" : "const ")}{_arg._type.GenerateCpp (_indent)} {_arg._name}, ");
+			}
+			if (Arguments.Any ())
+				_sb.Remove (_sb.Length - 2, 2);
+			_sb.AppendLine (") {");
+			_sb.AppendCppStmts (BodyCodes, _indent + 1);
 			_sb.AppendLine ($"{_indent.Indent ()}}}");
 			return _sb.ToString ();
 		}

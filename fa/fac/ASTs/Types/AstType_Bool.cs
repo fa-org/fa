@@ -9,5 +9,6 @@ namespace fac.ASTs.Types {
 	public class AstType_Bool: IAstType {
 		public override string ToString () => $"bool";
 		public override string GenerateCSharp (int _indent) => "bool";
+		public override string GenerateCpp (int _indent) => "bool";
 	}
 }

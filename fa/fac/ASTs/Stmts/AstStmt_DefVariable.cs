@@ -90,6 +90,15 @@ namespace fac.ASTs.Stmts {
 			}
 		}
 
+		public override string GenerateCpp (int _indent) {
+			if (m_init) {
+				m_init = false;
+				return $"{_indent.Indent ()}{DataType.GenerateCpp (_indent)} {VarName}{(Expr != null ? $" = {Expr.GenerateCpp (_indent)}" : "")};\r\n";
+			} else {
+				return Expr != null ? $"{_indent.Indent ()}{VarName} = {Expr.GenerateCpp (_indent)};\r\n" : "";
+			}
+		}
+
 		private bool m_init = true;
 	}
 }
