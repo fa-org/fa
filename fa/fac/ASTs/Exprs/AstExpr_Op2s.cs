@@ -55,6 +55,8 @@ namespace fac.ASTs.Exprs {
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
+		public override string GenerateCpp (int _indent) => throw new Exception ("不应执行此处代码");
+
 		private static HashSet<string> sComare = new HashSet<string> { ">", ">=", "<", "<=" };
 
 		public override bool AllowAssign () => false;

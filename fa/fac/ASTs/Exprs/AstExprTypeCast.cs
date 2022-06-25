@@ -72,6 +72,8 @@ namespace fac.ASTs.Exprs {
 
 		public override string GenerateCSharp (int _indent) => $"({ExpectType.GenerateCSharp (_indent)}) {Value.GenerateCSharp (_indent)}";
 
+		public override string GenerateCpp (int _indent) => $"({ExpectType.GenerateCpp (_indent)}) {Value.GenerateCpp (_indent)}";
+
 		public override bool AllowAssign () => false;
 	}
 }

@@ -154,6 +154,20 @@ namespace fac.ASTs.Exprs {
 			return _sb.ToString ();
 		}
 
+		public override string GenerateCpp (int _indent) {
+			var _sb = new StringBuilder ();
+			var _b = Value.GenerateCpp (_indent);
+			_sb.Append ($"{_b} (");
+			for (int i = 0; i < Arguments.Count; ++i) {
+				_b = Arguments[i].GenerateCpp (_indent);
+				_sb.Append ($"{_b}, ");
+			}
+			if (Arguments.Any ())
+				_sb.Remove (_sb.Length - 2, 2);
+			_sb.Append (")");
+			return _sb.ToString ();
+		}
+
 		public override bool AllowAssign () => false;
 
 		public IAstExpr TryParse () {

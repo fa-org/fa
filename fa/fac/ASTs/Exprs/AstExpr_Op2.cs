@@ -220,6 +220,19 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
+		public override string GenerateCpp (int _indent) {
+			if (Operator == "??")
+				throw new Exception ("不应执行此处代码");
+			if (Operator == "=" && Value1 is AstExprName_Ignore)
+				return Value2.GenerateCpp (_indent);
+
+			if (sAssignOp2s.Contains (Operator)) {
+				return $"{Value1.GenerateCpp (_indent)} {Operator} {Value2.GenerateCpp (_indent)}";
+			} else {
+				return $"({Value1.GenerateCpp (_indent)} {Operator} {Value2.GenerateCpp (_indent)})";
+			}
+		}
+
 		public override bool AllowAssign () => false;
 
 		private static HashSet<string> sCompareOp2s = new HashSet<string> { ">", "<", ">=", "<=", "==", "!=" };

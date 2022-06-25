@@ -63,6 +63,13 @@ namespace fac.ASTs.Exprs {
 			return IsPrefix ? $"{Operator}{_b}" : $"{_b}{Operator}";
 		}
 
+		public override string GenerateCpp (int _indent) {
+			if ((!IsPrefix) && Operator == "?")
+				throw new Exception ("不应执行此处代码");
+			var _b = Value.GenerateCpp (_indent);
+			return IsPrefix ? $"{Operator}{_b}" : $"{_b}{Operator}";
+		}
+
 		public override bool AllowAssign () => Value.AllowAssign ();
 
 		public string GetIdRaw () {

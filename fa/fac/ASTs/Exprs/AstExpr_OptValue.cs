@@ -19,21 +19,15 @@ namespace fac.ASTs.Exprs {
 			throw new NotImplementedException ();
 		}
 
-		public override IAstType GuessType () => new AstType_OptionalWrap { ItemType = Child == null ? new AstType_Void () : Child.GuessType () };
+		public override IAstType GuessType () {
+			var _child_type = Child.GuessType ();
+			if (_child_type is AstType_OptionalWrap _owrap_type)
+				return _owrap_type.ItemType;
+			throw new NotImplementedException ();
+		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			if (_expect_type is AstType_OptionalWrap _owrap_type) {
-				if (Child == null) {
-					if (_owrap_type.ItemType is not AstType_Void)
-						throw new NotImplementedException ();
-				} else {
-					if (_owrap_type.ItemType is AstType_Void)
-						throw new NotImplementedException ();
-					Child.TraversalCalcType (_owrap_type.ItemType);
-				}
-			} else {
-				throw new NotImplementedException ();
-			}
+			Child = Child.TraversalCalcType (new AstType_OptionalWrap { ItemType = _expect_type });
 			ExpectType = _expect_type;
 			return this;
 		}
@@ -42,9 +36,7 @@ namespace fac.ASTs.Exprs {
 			throw new NotImplementedException ();
 		}
 
-		public override string GenerateCpp (int _indent) {
-			return Child == null ? "std::nullopt" : $"std::get<0> ({Child.GenerateCpp (_indent)})";
-		}
+		public override string GenerateCpp (int _indent) => $"std::get<0> ({Child.GenerateCpp (_indent)})";
 
 		public override bool AllowAssign () => false;
 	}
