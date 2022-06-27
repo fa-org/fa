@@ -42,6 +42,15 @@ namespace fac.ASTs.Exprs.Names {
 			}
 		}
 
+		public override string GenerateCpp (int _indent) {
+			if (ThisObject != null) {
+				var _b = ThisObject.GenerateCpp (_indent);
+				return $"{_b}.{Class.ClassVars [VariableIndex].Name}";
+			} else {
+				return $"{Class.CSharpFullName}.{Class.ClassVars [VariableIndex].Name}";
+			}
+		}
+
 		public override bool AllowAssign () => true;
 	}
 }

@@ -78,6 +78,8 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override string GenerateCSharp (int _indent) => throw new Exception ("不应执行此处代码");
 
+		public override string GenerateCpp (int _indent) => throw new Exception ("不应执行此处代码");
+
 		public override bool AllowAssign () => true;
 	}
 }

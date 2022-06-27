@@ -22,6 +22,8 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override string GenerateCSharp (int _indent) => Class.CSharpFullName;
 
+		public override string GenerateCpp (int _indent) => Class.CSharpFullName;
+
 		public override bool AllowAssign () => false;
 	}
 }

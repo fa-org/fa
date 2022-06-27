@@ -27,6 +27,7 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+			if (_expect_type is AstType_Void && )
 			Child = Child.TraversalCalcType (new AstType_OptionalWrap { ItemType = _expect_type });
 			ExpectType = _expect_type;
 			return this;

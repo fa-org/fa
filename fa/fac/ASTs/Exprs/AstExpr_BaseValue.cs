@@ -44,6 +44,14 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
+		public override string GenerateCpp (int _indent) {
+			if (DataType is AstType_String) {
+				return Common.WrapStringValue (Value);
+			} else {
+				return Value;
+			}
+		}
+
 		public override bool AllowAssign () => false;
 	}
 }

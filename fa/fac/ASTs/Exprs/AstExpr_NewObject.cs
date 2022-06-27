@@ -130,6 +130,8 @@ namespace fac.ASTs.Exprs {
 			return _sb.ToString ();
 		}
 
+		public override string GenerateCpp (int _indent) => throw new Exception ("不应执行此处代码");
+
 		public override bool AllowAssign () => false;
 	}
 }

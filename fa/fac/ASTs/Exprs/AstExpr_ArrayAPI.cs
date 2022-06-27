@@ -82,6 +82,8 @@ namespace fac.ASTs.Exprs {
 			};
 		}
 
+		public override string GenerateCpp (int _indent) => throw new Exception ("不应执行此处代码");
+
 		public override bool AllowAssign () => AccessType == ArrayApiType._AccessItem && Value.AllowAssign ();
 
 		public bool IsChangeData () => AccessType != ArrayApiType.Length && AccessType != ArrayApiType._AccessItem;

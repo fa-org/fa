@@ -18,6 +18,8 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override string GenerateCSharp (int _indent) => "this";
 
+		public override string GenerateCpp (int _indent) => "this";
+
 		public override bool AllowAssign () => false;
 	}
 }

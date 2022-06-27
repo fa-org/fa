@@ -84,6 +84,14 @@ namespace fac.ASTs.Exprs {
 			return _sb.ToString ();
 		}
 
+		public override string GenerateCpp (int _indent) {
+			var _sb = new StringBuilder ();
+			_sb.Append ("[&] (").Append (string.Join (", ", from p in Arguments select p._name)).AppendLine ($") -> {ReturnType.GenerateCpp (_indent)} {{");
+			_sb.AppendCSharpStmts (BodyCodes, _indent + 1);
+			_sb.Append ($"{_indent.Indent ()}}}");
+			return _sb.ToString ();
+		}
+
 		public override bool AllowAssign () => false;
 	}
 }

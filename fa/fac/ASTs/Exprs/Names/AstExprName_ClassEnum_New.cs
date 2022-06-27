@@ -114,6 +114,8 @@ namespace fac.ASTs.Exprs.Names {
 			//throw new NotImplementedException ();
 		}
 
+		public override string GenerateCpp (int _indent) => throw new Exception ("不应执行此处代码");
+
 		public override bool AllowAssign () => false;
 	}
 }

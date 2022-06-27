@@ -21,6 +21,8 @@ namespace fac.ASTs.Exprs.Names {
 
 		public override string GenerateCSharp (int _indent) => Func.Arguments[ArgumentIndex]._name;
 
+		public override string GenerateCpp (int _indent) => Func.Arguments [ArgumentIndex]._name;
+
 		public override bool AllowAssign () => Func.Arguments[ArgumentIndex]._ext == ArgumentTypeExt.Mut;
 	}
 }
