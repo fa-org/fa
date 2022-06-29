@@ -134,7 +134,7 @@ namespace fac.ASTs.Exprs {
 				_stmts.AddRange (AstStmt_ExprWrap.MakeAssign (_tmp_value1.GetRef (), Value1).ExpandStmt (_cache_err1));
 
 				// 如果为空则赋Value2
-				var (_stmts1, _expr1) = _tmp_value1.GetRef ().OptionalHasValue ().ExpandExpr (_cache_err);
+				var (_stmts1, _expr1) = AstExpr_OptHasValue.Make (_tmp_value1.GetRef ()).ExpandExpr (_cache_err);
 				_stmts.AddRange (_stmts1);
 				var _true_codes = new List<IAstStmt> ();
 				{

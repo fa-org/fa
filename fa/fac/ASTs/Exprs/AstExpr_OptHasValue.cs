@@ -12,11 +12,13 @@ namespace fac.ASTs.Exprs {
 		public IAstExpr Child { get; set; } = null;
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
-			throw new NotImplementedException ();
+			var (_list, _expr) = Child.ExpandExpr (_cache_err);
+			Child = _expr;
+			return (_list, this);
 		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
-			throw new NotImplementedException ();
+			Child = Child.TraversalWrap (_trav);
 		}
 
 		public override IAstType GuessType () => new AstType_Bool ();
@@ -36,5 +38,9 @@ namespace fac.ASTs.Exprs {
 		public override string GenerateCpp (int _indent) => $"{Child.GenerateCpp (_indent)}.index () == 0";
 
 		public override bool AllowAssign () => false;
+
+		public static AstExpr_OptHasValue Make (IAstExpr _var) {
+			return new AstExpr_OptHasValue { Child = _var, ExpectType = IAstType.FromName ("bool") };
+		}
 	}
 }

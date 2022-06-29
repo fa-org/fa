@@ -279,19 +279,13 @@ namespace fac.ASTs.Exprs {
 		//	return _expr;
 		//}
 
-		//// 判断一个可选类型是否有值，生成 bool 类型对象
-		//public IAstExpr OptionalHasValue () {
-		//	var _expr = AstExpr_Is.FromContext2 (Token, this, "Val");
-		//	_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExpr_Is);
-		//	return _expr;
-		//}
-
-		//// 判断一个可选类型是否无值，生成 bool 类型对象
-		//public IAstExpr OptionalNotHasValue () {
-		//	var _expr = AstExpr_Is.FromContext2 (Token, this, "Err");
-		//	_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExpr_Is);
-		//	return _expr;
-		//}
+		// 判断一个可选类型是否有值，生成 bool 类型对象
+		public IAstExpr OptionalHasValue () {
+			//var _expr = AstExpr_Is.FromContext2 (Token, this, "Val");
+			//_expr.TraversalCalcTypeWrap (null, a => _expr = a as AstExpr_Is);
+			//return _expr;
+			return AstExpr_OptHasValue.Make (this);
+		}
 
 		//// 将一个非可选类型值转为可选类型值
 		//public IAstExpr OptionalFromValue () {
