@@ -9,9 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	public class AstExpr_OptError: IAstExpr {
-		public string ErrInfo { get; set; } = "";
-
+	public class AstExpr_OptOk: IAstExpr {
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
 			return (new List<IAstStmt> (), this);
 		}
@@ -32,10 +30,10 @@ namespace fac.ASTs.Exprs {
 			throw new NotImplementedException ();
 		}
 
-		public override string GenerateCpp (int _indent) => Common.WrapStringValue (ErrInfo);
+		public override string GenerateCpp (int _indent) => "std::nullopt";
 
 		public override bool AllowAssign () => false;
 
-		public static AstExpr_OptError MakeFromNull (IToken _token = null) => new AstExpr_OptError { Token = _token, ErrInfo = "对象为 null" };
+		public static AstExpr_OptOk Make (IToken _token = null) => new AstExpr_OptOk { Token = _token, ErrInfo = "对象为 null" };
 	}
 }

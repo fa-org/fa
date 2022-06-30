@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
-	public class AstExpr_OptValue: IAstExpr {
+	public class AstExpr_OptAccessError: IAstExpr {
 		public IAstExpr Child { get; set; } = null;
 
 		public override (List<IAstStmt>, IAstExpr) ExpandExpr ((IAstExprName _var, AstStmt_Label _pos)? _cache_err) {
@@ -21,14 +21,15 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () {
 			var _child_type = Child.GuessType ();
-			if (_child_type is AstType_OptionalWrap _owrap_type)
-				return _owrap_type.ItemType;
-			throw new NotImplementedException ();
+			if (_child_type is not AstType_OptionalWrap)
+				throw new Exception ("子表达式类型只能是 AstType_OptionalWrap 类型");
+			return new AstType_Error ();
 		}
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			if (_expect_type is AstType_Void && )
-			Child = Child.TraversalCalcType (new AstType_OptionalWrap { ItemType = _expect_type });
+			//Child = Child.TraversalCalcType (new AstType_OptionalWrap { ItemType = _expect_type });
+			if (_expect_type is not AstType_Error)
+				throw new Exception ("返回类型只能是 AstType_Error 类型");
 			ExpectType = _expect_type;
 			return this;
 		}
@@ -37,7 +38,7 @@ namespace fac.ASTs.Exprs {
 			throw new NotImplementedException ();
 		}
 
-		public override string GenerateCpp (int _indent) => $"std::get<0> ({Child.GenerateCpp (_indent)})";
+		public override string GenerateCpp (int _indent) => $"std::get<1> ({Child.GenerateCpp (_indent)})";
 
 		public override bool AllowAssign () => false;
 	}
