@@ -37,5 +37,8 @@ namespace fac.ASTs.Exprs {
 		public override bool AllowAssign () => false;
 
 		public static AstExpr_OptError MakeFromNull (IToken _token = null) => new AstExpr_OptError { Token = _token, ErrInfo = "对象为 null" };
+		public static AstExpr_OptError MakeFromIndexOutOfBounds (IToken _token = null, IAstType _expect_type = null) => new AstExpr_OptError { Token = _token, ExpectType = _expect_type, ErrInfo = "索引超范围" };
+		public static AstExpr_OptError MakeFromDivideZero (IToken _token = null, IAstType _expect_type = null) => new AstExpr_OptError { ExpectType = _expect_type, ErrInfo = "除数为0" };
+		public static AstExpr_OptError MakeFromNotFound (IToken _token = null, IAstType _expect_type = null) => new AstExpr_OptError { ExpectType = _expect_type, ErrInfo = "未找到" };
 	}
 }

@@ -21,9 +21,9 @@ namespace fac.ASTs.Stmts {
 		public static AstStmt_ExprWrap MakeAssign (IAstExpr _dest, IAstExpr _src) {
 			if (!_dest.ExpectType.IsSame (_src.ExpectType)) {
 				if ($"{_src.ExpectType}" != "fa.Error" && _dest.ExpectType.IsSame (_src.ExpectType.Optional)) {
-					_src = _src.OptionalFromValue ();
+					_src = AstExpr_OptFromValue.Make (_src);
 				} else if (_dest.ExpectType.Optional.IsSame (_src.ExpectType)) {
-					_src = _src.AccessValue ();
+					_src = AstExpr_OptAccessValue.Make (_src);
 				}
 			}
 			return new AstStmt_ExprWrap { Token = _src.Token, Expr = new AstExpr_Op2 { Token = _src.Token, Value1 = _dest, Value2 = _src, Operator = "=", ExpectType = _dest.ExpectType } };

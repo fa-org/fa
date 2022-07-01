@@ -17,23 +17,21 @@ namespace fac.ASTs.Exprs {
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
 		}
 
-		public override IAstType GuessType () => new AstType_Error ();
+		public override IAstType GuessType () => new AstType_Void ();
 
 		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
-			if (_expect_type is not AstType_Error)
-				throw new Exception ("AstExpr_Error 对象的数据类型只能是 AstType_Error");
+			if (_expect_type is not AstType_Void)
+				throw new Exception ("AstExpr_OptOk 对象的数据类型只能是 AstType_Void");
 			ExpectType = _expect_type;
 			return this;
 		}
 
-		public override string GenerateCSharp (int _indent) {
-			throw new NotImplementedException ();
-		}
+		public override string GenerateCSharp (int _indent) => throw new NotImplementedException ();
 
 		public override string GenerateCpp (int _indent) => "std::nullopt";
 
 		public override bool AllowAssign () => false;
 
-		public static AstExpr_OptOk Make (IToken _token = null) => new AstExpr_OptOk { Token = _token, ErrInfo = "对象为 null" };
+		public static AstExpr_OptOk Make (IToken _token = null) => new AstExpr_OptOk { Token = _token };
 	}
 }

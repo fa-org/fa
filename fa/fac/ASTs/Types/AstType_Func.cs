@@ -48,7 +48,7 @@ namespace fac.ASTs.Types {
 		}
 
 		public override string GenerateCpp (int _indent) {
-			return @$"std::function<{ReturnType.GenerateCpp ()} ({string.Join (", ", from p in ArgumentTypes
+			return @$"std::function<{ReturnType.GenerateCpp (_indent)} ({string.Join (", ", from p in ArgumentTypes
 														let _s2 = p._type.GenerateCpp (_indent)
 														select p._ext == ArgumentTypeExt.Mut ? $"{_s2}&" : $"const {_s2}&")}>";
 		}

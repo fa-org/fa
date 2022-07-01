@@ -267,28 +267,31 @@ namespace fac {
 
 			// 输出
 			Directory.SetCurrentDirectory (Info.DestPath);
-			string _dest_src = Info.GenerateCSharp ();
-			if (!File.Exists (Path.Combine (Info.DestPath, $"{Info.ProjectName}.csproj")))
-				await RunProcessAsync ("dotnet new console --force");
-			if (args.Contains ("-d")) {
-				Console.WriteLine ("-------------------- generate begin --------------------");
-				Console.WriteLine (_dest_src);
-				Console.WriteLine ("--------------------  generate end  --------------------");
-			}
-			string _dest_file = Path.Combine (Info.DestPath, "Program.cs");
-			await File.WriteAllTextAsync (_dest_file, _dest_src, Encoding.UTF8);
-			if (args.Contains ("-r")) {
-				Console.WriteLine ("正在构建。。。");
-				await RunProcessAsync ("dotnet publish");
-			} else {
-				Console.WriteLine ("正在构建并运行。。。");
-				await RunProcessAsync ("dotnet run");
-			}
-			//
-			if (Debugger.IsAttached) {
-				Console.WriteLine ($"按任意键退出。。。");
-				Console.ReadKey ();
-			}
+			string _dest_src = Info.GenerateCpp ();
+			Console.WriteLine (_dest_src);
+			//if (!File.Exists (Path.Combine (Info.DestPath, $"{Info.ProjectName}.csproj")))
+			//	await RunProcessAsync ("dotnet new console --force");
+			//if (args.Contains ("-d")) {
+			//	Console.WriteLine ("-------------------- generate begin --------------------");
+			//	Console.WriteLine (_dest_src);
+			//	Console.WriteLine ("--------------------  generate end  --------------------");
+			//}
+			//string _dest_file = Path.Combine (Info.DestPath, "Program.cs");
+			//await File.WriteAllTextAsync (_dest_file, _dest_src, Encoding.UTF8);
+			//if (args.Contains ("-r")) {
+			//	Console.WriteLine ("正在构建。。。");
+			//	await RunProcessAsync ("dotnet publish");
+			//} else {
+			//	Console.WriteLine ("正在构建并运行。。。");
+			//	await RunProcessAsync ("dotnet run");
+			//}
+			////
+			//if (Debugger.IsAttached) {
+			//	Console.WriteLine ($"按任意键退出。。。");
+			//	Console.ReadKey ();
+			//}
+			Console.WriteLine ($"按任意键退出。。。");
+			Console.ReadKey ();
 		}
 	}
 }

@@ -109,7 +109,7 @@ namespace fac.AntlrTools {
 					throw new CodeException (_op2expr.Value1.Token, "目标不可被赋值");
 			} else if (_expr is AstStmt_Return _ret_stmt) {
 				if (Info.CurrentReturnType ().ToString () == "void?" && _ret_stmt.Expr == null) {
-					_ret_stmt.Expr = IAstExpr.OptionalFromOk ();
+					_ret_stmt.Expr = AstExpr_OptOk.Make ();
 				}
 			}
 			return _expr;

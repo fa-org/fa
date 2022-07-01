@@ -26,9 +26,11 @@ namespace fac.ASTs.Structs {
 		private AstInterface () { }
 		public static AstInterface FromContext (FaParser.InterfaceBlockContext _ctx) {
 			var _templates = _ctx.blockTemplates () != null ? (from p in _ctx.blockTemplates ().id () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList () : null;
-			foreach (var _var in _templates) {
-				if (_var.Name [0] != 'T')
-					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
+			if (_templates != null) {
+				foreach (var _var in _templates) {
+					if (_var.Name[0] != 'T')
+						throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
+				}
 			}
 			var _ret = new AstInterface {
 				Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ()),

@@ -148,7 +148,7 @@ namespace fac.ASTs.Exprs {
 					IfFalseCodes = new List<IAstStmt> { AstStmt_ExprWrap.MakeAssign (_val_idx, _rval), },
 				};
 				if (_cache_err?._var != null) {
-					_if_stmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (null, _cache_err?._var.ExpectType, fa_Error.IndexOutOfBounds)));
+					_if_stmt.IfTrueCodes.Add (AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_OptError.MakeFromIndexOutOfBounds (_val_idx.Token, _cache_err?._var.ExpectType)));
 					_if_stmt.IfTrueCodes.Add (_cache_err?._pos.Goto ());
 				}
 				_stmts.Add (_if_stmt);
@@ -204,7 +204,7 @@ namespace fac.ASTs.Exprs {
 						AstExpr_Op2.MakeCondition (_index_defvar.GetRef (), ">=", AstExpr_ArrayAPI.Array_Length (Value))
 					),
 					IfTrueCodes = new List<IAstStmt> {
-						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstType.OptionalFromError (Token, _cache_err?._var.ExpectType, fa_Error.IndexOutOfBounds)),
+						AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_OptError.MakeFromIndexOutOfBounds (Token, _cache_err?._var.ExpectType)),
 						_cache_err?._pos.Goto (),
 					},
 				});
@@ -226,7 +226,7 @@ namespace fac.ASTs.Exprs {
 					Token = Token,
 					Condition = AstExpr_Op2.MakeCondition (_defvar_temp_stmt.GetRef (), ">=", IAstExpr.FromValue ("int", "0")),
 					IfTrueCodes = AstStmt_ExprWrap.MakeAssign (_defvar_stmt.GetRef (), _defvar_temp_stmt.GetRef ()).ExpandStmt (_cache_err),
-					IfFalseCodes = AstStmt_ExprWrap.MakeAssign (_defvar_stmt.GetRef (), IAstExpr.OptionalFromError (Token, _defvar_stmt.DataType, fa_Error.NotFound)).ExpandStmt (_cache_err),
+					IfFalseCodes = AstStmt_ExprWrap.MakeAssign (_defvar_stmt.GetRef (), AstExpr_OptError.MakeFromNotFound (Token, _defvar_stmt.DataType)).ExpandStmt (_cache_err),
 				});
 				return (_stmts, _defvar_stmt.GetRef ());
 			} else {

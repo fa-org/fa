@@ -185,7 +185,7 @@ namespace fac.ASTs.Exprs {
 					_stmts.Add (new AstStmt_If {
 						Condition = AstExpr_Op2.MakeCondition (Value2, "==", IAstExpr.FromValue (Value2.ExpectType, "0")),
 						IfTrueCodes = new List<IAstStmt> {
-							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, IAstExpr.OptionalFromError (Token, _cache_err?._var.ExpectType, fa_Error.DivideZero)),
+							AstStmt_ExprWrap.MakeAssign (_cache_err?._var, AstExpr_OptError.MakeFromDivideZero (Token, _cache_err?._var.ExpectType)),
 							_cache_err?._pos.Goto (),
 						},
 						IfFalseCodes = new List<IAstStmt> {
