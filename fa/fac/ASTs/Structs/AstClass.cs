@@ -15,33 +15,34 @@ namespace fac.ASTs.Structs {
 		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
-		public List<AstEnumItem>? ClassEnumItems { get; } = new List<AstEnumItem> ();
+		public List<AstEnumItem>? ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { get; set; }
 		private bool m_compiled = false;
 
 
 
-		private AstClass () { }
+		private AstClass (FaParser.ClassBlockContext _ctx) {
+			Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ());
+			Token = _ctx.Start;
+			FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}";
+			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public;
+			ClassVars = (from p in _ctx.classItemVar () select new AstClassVar (p)).ToList ();
+			ClassFuncs = (from p in _ctx.classItemFunc () select new AstClassFunc (this, p)).ToList ();
+		}
 		public static AstClass FromContext (FaParser.ClassBlockContext _ctx) {
-			var _ret = new AstClass {
-				Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ()),
-				Token = _ctx.Start,
-				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
-				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
-				ClassVars = (from p in _ctx.classItemVar () select new AstClassVar (p)).ToList (),
-			};
-			_ret.ClassFuncs = (from p in _ctx.classItemFunc () select new AstClassFunc (_ret, p)).ToList ();
-			return _ret;
+			return new AstClass (_ctx);
 		}
 
 		public void ProcessType () {
 			Info.CurrentClass = this;
-			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
-				ClassEnumItems[i].ProcessType ();
-			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)
+			if (ClassEnumItems != null) {
+				for (int i = 0; i < ClassEnumItems.Count; ++i)
+					ClassEnumItems[i].ProcessType ();
+			}
+			for (int i = 0; i < ClassVars.Count; ++i)
 				ClassVars[i].ProcessType ();
-			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
+			for (int i = 0; i < ClassFuncs.Count; ++i)
 				ClassFuncs[i].ProcessType ();
 		}
 

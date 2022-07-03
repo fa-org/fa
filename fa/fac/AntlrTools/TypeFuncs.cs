@@ -31,7 +31,7 @@ namespace fac.AntlrTools {
 		}
 
 		// 获取函数语句代码列表
-		public static List<IAstStmt> GetFuncBodyCodes (IToken _token, IAstType _return_type, FaParser.ExprContext _expr_ctx, FaParser.StmtContext[] _stmt_ctxs) {
+		public static List<IAstStmt> GetFuncBodyCodes (IToken _token, IAstType? _return_type, FaParser.ExprContext _expr_ctx, FaParser.StmtContext[] _stmt_ctxs) {
 			List<IAstStmt> _body_codes;
 			if (_expr_ctx != null) {
 				_body_codes = new List<IAstStmt> ();

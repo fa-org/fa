@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Types {
 	public class AstType_Func: IAstType {
-		public IAstType ReturnType { get; set; }
-		public List<(IAstType _type, ArgumentTypeExt _ext)> ArgumentTypes { get; set; }
+		public IAstType? ReturnType { get; set; }
+		public List<(IAstType _type, ArgumentTypeExt _ext)> ArgumentTypes { get; set; } = new List<(IAstType _type, ArgumentTypeExt _ext)> ();
 
 
 
 		public override string ToString () {
 			var _list = new List<(IAstType _type, ArgumentTypeExt _ext)> ();
 			_list.AddRange (ArgumentTypes);
-			_list.Add ((_type: ReturnType, _ext: ArgumentTypeExt.None));
+			_list.Add ((_type: ReturnType ?? new AstType_Void (), _ext: ArgumentTypeExt.None));
 			return $"Func<{string.Join (", ", _list)}>";
 		}
 		//public static AstType_Func FromType (string _type_str, IToken _token, List<IAstType> _templates) {
@@ -39,7 +39,7 @@ namespace fac.ASTs.Types {
 				_func_type = "Func";
 				_list = new List<(IAstType _type, ArgumentTypeExt _ext)> ();
 				_list.AddRange (ArgumentTypes);
-				_list.Add ((_type: ReturnType, _ext: ArgumentTypeExt.None));
+				_list.Add ((_type: ReturnType ?? new AstType_Void (), _ext: ArgumentTypeExt.None));
 			}
 			return @$"{_func_type}<{string.Join (", ", from p in _list
 														let _s1 = (p._ext == ArgumentTypeExt.Mut ? "ref " : "")
@@ -48,7 +48,7 @@ namespace fac.ASTs.Types {
 		}
 
 		public override string GenerateCpp (int _indent) {
-			return @$"std::function<{ReturnType.GenerateCpp (_indent)} ({string.Join (", ", from p in ArgumentTypes
+			return @$"std::function<{(ReturnType ?? new AstType_Void ()).GenerateCpp (_indent)} ({string.Join (", ", from p in ArgumentTypes
 														let _s2 = p._type.GenerateCpp (_indent)
 														select p._ext == ArgumentTypeExt.Mut ? $"{_s2}&" : $"const {_s2}&")}>";
 		}

@@ -193,7 +193,7 @@ namespace fac {
 		/// <summary>
 		/// 当前类方法
 		/// </summary>
-		public static AstClassFunc? CurrentFunc { get; set; } = null;
+		public static IAstFunc? CurrentFunc { get; set; } = null;
 
 		public static void InitFunc (AstClassFunc? _func) {
 			CurrentFunc = _func;

@@ -17,6 +17,8 @@ namespace fac.ASTs.Structs {
 		public List<AstEnumItem>? ClassEnumItems { get; }
 		public List<AstClassVar> ClassVars { get; }
 		public List<AstClassFunc> ClassFuncs { get; }
+		public List<AstConstructFunc> ConstructFuncs { get; }
+		public AstConstructFunc DistructFunc { get; }
 
 		public AstType_Class GetClassType () => AstType_Class.GetType (null, this);
 

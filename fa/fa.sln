@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fac", "fac\fac.csproj", "{D780C1C3-A8BF-4450-8AA5-70EC36739563}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fac", "fac\fac.csproj", "{D780C1C3-A8BF-4450-8AA5-70EC36739563}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fac.Test", "fac.Test\fac.Test.csproj", "{EA8A0C1D-ABAB-4ED2-8C17-B07AA823EED6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fac.Test", "fac.Test\fac.Test.csproj", "{EA8A0C1D-ABAB-4ED2-8C17-B07AA823EED6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{1D5F93BF-8C53-4989-84B5-88D1B4EF6212}"
+	ProjectSection(SolutionItems) = preProject
+		..\tools\Fa.g4 = ..\tools\Fa.g4
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

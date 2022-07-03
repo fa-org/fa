@@ -25,7 +25,7 @@ namespace fac {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="_str"></param>
 		/// <returns></returns>
-		public static T? ParseEnum<T> (string _str) where T : struct {
+		public static T? ParseEnum<T> (string? _str) where T : struct {
 			if (string.IsNullOrEmpty (_str))
 				return null;
 			if (System.Enum.TryParse<T> (_str, out var _cc))
