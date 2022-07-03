@@ -26,7 +26,7 @@ namespace fac.ASTs.Exprs {
 			throw new NotImplementedException ();
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type is AstType_OptionalWrap)
 				throw new Exception ("可空类型不允许嵌套");
 			Child = Child.TraversalCalcType (new AstType_OptionalWrap { ItemType = _expect_type });

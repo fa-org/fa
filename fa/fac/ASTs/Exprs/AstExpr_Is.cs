@@ -11,9 +11,8 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Exprs {
 	public class AstExpr_Is: IAstExpr {
-		public AstExprName_ClassEnum_Access AccessExpr { get; set; }
-		public AstStmt_DefVariable DefVar { get; set; }
-		public bool IsDefVar { get => DefVar != null; }
+		public AstExprName_ClassEnum_Access? AccessExpr { get; set; }
+		public AstStmt_DefVariable? DefVar { get; set; }
 
 
 
@@ -46,13 +45,11 @@ namespace fac.ASTs.Exprs {
 		}
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) {
-			if (AccessExpr != null)
-				AccessExpr = AccessExpr.TraversalWrap (_trav) as AstExprName_ClassEnum_Access;
-			if (IsDefVar)
-				DefVar = DefVar.TraversalWrap (_trav) as AstStmt_DefVariable;
+			AccessExpr = AccessExpr?.TraversalWrap (_trav) as AstExprName_ClassEnum_Access ?? null;
+			DefVar = DefVar?.TraversalWrap (_trav) as AstStmt_DefVariable ?? null;
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (AccessExpr != null) {
 				if (!AccessExpr.TraversalCalcTypeWrap (null, a => AccessExpr = a as AstExprName_ClassEnum_Access))
 					return null;

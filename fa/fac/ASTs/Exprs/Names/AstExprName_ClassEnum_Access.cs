@@ -52,7 +52,7 @@ namespace fac.ASTs.Exprs.Names {
 				Value = Value.TraversalWrap (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (Value != null) {
 				if (!Value.TraversalCalcTypeWrap (EnumClass.GetClassType (), a => Value = a))
 					return null;

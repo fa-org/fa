@@ -14,43 +14,41 @@ namespace fac.ASTs.Structs {
 		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
-		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
+		public List<AstEnumItem>? ClassEnumItems { get; } = new List<AstEnumItem> ();
 		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
-		public List<AstClassFunc> ClassFuncs { get; private set; }
+		public List<AstClassFunc> ClassFuncs { init; get; }
 		private bool m_compiled { get; set; } = false;
 		public Dictionary<string, AstInterfaceInst> Insts { get; set; } = new Dictionary<string, AstInterfaceInst> ();
 
 
 
-		private AstInterface () { }
-		public static AstInterface FromContext (FaParser.InterfaceBlockContext _ctx) {
-			var _templates = _ctx.blockTemplates () != null ? (from p in _ctx.blockTemplates ().id () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList () : null;
-			if (_templates != null) {
-				foreach (var _var in _templates) {
-					if (_var.Name[0] != 'T')
-						throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
-				}
+		private AstInterface (FaParser.InterfaceBlockContext _ctx) {
+			var _templates = _ctx.blockTemplates () != null ? (from p in _ctx.blockTemplates ().id () select new AstType_Placeholder { Token = p.Start, Name = p.GetText () }).ToList () : new List<AstType_Placeholder>();
+			foreach (var _var in _templates) {
+				if (_var.Name[0] != 'T')
+					throw new CodeException (_var.Token, "模板名称必须以大写字母 T 开头");
 			}
-			var _ret = new AstInterface {
-				Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ()),
-				Token = _ctx.Start,
-				FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}",
-				Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText ()) ?? PublicLevel.Public,
-				Templates = _templates,
-				ClassVars = (from p in _ctx.classItemVar () select new AstClassVar (p)).ToList (),
-			};
-			_ret.ClassFuncs = (from p in _ctx.interfaceItemFunc () select new AstClassFunc (_ret, p)).ToList ();
-			return _ret;
+			Annotations = AstAnnoUsingPart.FromContexts (_ctx.annoUsingPart ());
+			Token = _ctx.Start;
+			FullName = $"{Info.CurrentNamespace}.{_ctx.id ().GetText ()}";
+			Level = Common.ParseEnum<PublicLevel> (_ctx.publicLevel ()?.GetText () ?? "") ?? PublicLevel.Public;
+			Templates = _templates;
+			ClassVars = (from p in _ctx.classItemVar () select new AstClassVar (p)).ToList ();
+			ClassFuncs = (from p in _ctx.interfaceItemFunc () select new AstClassFunc (this, p)).ToList ();
+		}
+
+		public static AstInterface FromContext (FaParser.InterfaceBlockContext _ctx) {
+			return new AstInterface (_ctx);
 		}
 
 		public void ProcessType () {
 			Info.CurrentClass = this;
-			for (int i = 0; i < (ClassEnumItems?.Count ?? 0); ++i)
+			for (int i = 0; i < (ClassEnumItems.Count); ++i)
 				ClassEnumItems[i].ProcessType ();
-			for (int i = 0; i < (ClassVars?.Count ?? 0); ++i)
+			for (int i = 0; i < (ClassVars.Count); ++i)
 				ClassVars[i].ProcessType ();
-			for (int i = 0; i < (ClassFuncs?.Count ?? 0); ++i)
+			for (int i = 0; i < (ClassFuncs.Count); ++i)
 				ClassFuncs[i].ProcessType ();
 		}
 
@@ -83,7 +81,7 @@ namespace fac.ASTs.Structs {
 
 		public override string GenerateCSharp (int _indent) {
 			Info.CurrentClass = this;
-			Info.CurrentFuncVariables = null;
+			Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
 			//
 			var _sb = new StringBuilder ();
 			_sb.Append ($"{_indent.Indent ()}{Level.ToString ().ToLower ()} class {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
@@ -98,7 +96,7 @@ namespace fac.ASTs.Structs {
 
 		public override string GenerateCpp (int _indent) {
 			Info.CurrentClass = this;
-			Info.CurrentFuncVariables = null;
+			Info.CurrentFuncVariables = new List<Info.FuncArgumentOrVars> ();
 			//
 			var _sb = new StringBuilder ();
 			_sb.Append ($"{_indent.Indent ()}class {FullName[(FullName.LastIndexOf ('.') + 1)..]}");
@@ -113,12 +111,12 @@ namespace fac.ASTs.Structs {
 
 		public int GetTemplateNum () => Templates?.Count ?? 0;
 
-		public IAstClass GetInst (List<IAstType> _templates, IToken _token = null) {
+		public IAstClass GetInst (List<IAstType> _templates, IToken _token) {
 			//if ((_templates?.Count ?? 0) > 0)
 			//	throw new CodeException (_token, $"非泛型类型无法指定模板参数");
 			//return this;
-			if (Templates.Count != (_templates?.Count ?? 0))
-				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates?.Count ?? 0} 个参数，实际传入 {_templates?.Count ?? 0} 个参数");
+			if (Templates.Count != _templates.Count)
+				throw new CodeException (_token, $"模板参数数量不匹配，需 {Templates.Count} 个参数，实际传入 {_templates.Count} 个参数");
 			foreach (var _type in _templates) {
 				if (_type is AstType_Void || _type is AstType_Any)
 					throw new CodeException (_token, "不可将 void 类型或 any 类型用于模板");

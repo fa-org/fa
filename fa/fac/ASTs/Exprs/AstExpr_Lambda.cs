@@ -53,7 +53,7 @@ namespace fac.ASTs.Exprs {
 			BodyCodes.TraversalWraps ((_deep: _trav._deep + 2, _group: Common.GetRandomInt (), _loop: _trav._loop, _cb: _trav._cb));
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (ReturnType == null)
 				throw new CodeException (Token, "此处无法声明 lambda 表达式主体");
 			int _size = Info.CurrentFuncVariables.Count;

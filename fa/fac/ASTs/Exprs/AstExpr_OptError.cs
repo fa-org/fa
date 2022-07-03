@@ -21,7 +21,7 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => new AstType_Error ();
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type is not AstType_Error)
 				throw new Exception ("AstExpr_Error 对象的数据类型只能是 AstType_Error");
 			ExpectType = _expect_type;

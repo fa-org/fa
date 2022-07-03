@@ -14,7 +14,7 @@ namespace fac.ASTs.Structs {
 		public List<AstAnnoUsingPart> Annotations { get; }
 		public string FullName { get; }
 		public string CSharpFullName { get => FullName; }
-		public List<AstEnumItem> ClassEnumItems { get; }
+		public List<AstEnumItem>? ClassEnumItems { get; }
 		public List<AstClassVar> ClassVars { get; }
 		public List<AstClassFunc> ClassFuncs { get; }
 

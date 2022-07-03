@@ -148,11 +148,11 @@ namespace fac {
 		/// </summary>
 		public class FuncArgumentOrVars {
 			public int Group { get; set; }
-			public AstExpr_Lambda LambdaFunc { get; set; } = null;
-			public AstClassFunc ClassFunc { get; set; } = null;
-			public Dictionary<string, AstStmt_DefVariable> Vars { get; set; } = null;
+			public AstExpr_Lambda? LambdaFunc { get; set; } = null;
+			public AstClassFunc? ClassFunc { get; set; } = null;
+			public Dictionary<string, AstStmt_DefVariable> Vars { get; set; } = new Dictionary<string, AstStmt_DefVariable> ();
 		}
-		public static List<FuncArgumentOrVars> CurrentFuncVariables { get; set; } = null;
+		public static List<FuncArgumentOrVars> CurrentFuncVariables { get; set; } = new List<FuncArgumentOrVars> ();
 		public static IAstExprName GetCurrentFuncVariableFromName (IToken _token, string _name) {
 			for (int i = CurrentFuncVariables.Count - 1; i >= 0; --i) {
 				var _item = CurrentFuncVariables[i];
@@ -193,9 +193,9 @@ namespace fac {
 		/// <summary>
 		/// 当前类方法
 		/// </summary>
-		public static AstClassFunc CurrentFunc { get; set; } = null;
+		public static AstClassFunc? CurrentFunc { get; set; } = null;
 
-		public static void InitFunc (AstClassFunc _func) {
+		public static void InitFunc (AstClassFunc? _func) {
 			CurrentFunc = _func;
 			CurrentFuncVariables = new List<FuncArgumentOrVars> ();
 			CurrentFuncVariables.Add (new FuncArgumentOrVars { Group = 0, ClassFunc = _func });

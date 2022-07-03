@@ -26,7 +26,7 @@ namespace fac.ASTs.Exprs.Names {
 				ThisObject = ThisObject.TraversalWrap (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			ExpectType = GuessType ();
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

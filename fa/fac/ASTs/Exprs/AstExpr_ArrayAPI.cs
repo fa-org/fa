@@ -50,7 +50,7 @@ namespace fac.ASTs.Exprs {
 				AttachArgs.TraversalWraps (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			bool _success = true;
 			if (Value != null)
 				_success &= Value.TraversalCalcTypeWrap (null, a => Value = a);

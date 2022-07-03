@@ -25,7 +25,7 @@ namespace fac.ASTs.Exprs {
 			return new AstExpr_BaseValue { Token = _token, DataType = IAstType.FromName ("string"), Value = _str };
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			ExpectType = DataType;
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

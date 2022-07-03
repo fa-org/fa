@@ -15,7 +15,7 @@ namespace fac.ASTs.Structs {
 		public List<AstAnnoUsingPart> Annotations { init; get; }
 		public string FullName { init; get; }
 		public PublicLevel Level { init; get; }
-		public List<AstEnumItem> ClassEnumItems { get; } = new List<AstEnumItem> ();
+		public List<AstEnumItem>? ClassEnumItems { get; } = new List<AstEnumItem> ();
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { get; set; }
 		private bool m_compiled = false;

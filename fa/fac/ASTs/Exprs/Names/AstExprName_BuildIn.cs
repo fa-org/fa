@@ -46,7 +46,7 @@ namespace fac.ASTs.Exprs.Names {
 			return null;
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (ExpectType == null)
 				ExpectType = IAstType.FromName (NameType);
 			return AstExprTypeCast.Make (this, _expect_type);

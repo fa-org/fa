@@ -20,7 +20,7 @@ namespace fac.ASTs.Exprs {
 			Values.TraversalWraps (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if ((from p in Operators where !sComare.Contains (p) select p).Any ())
 				throw new UnimplException (Values[0].Token);
 			var _item_type = TypeFuncs.GetCompatibleType (false, (from p in Values select p.GuessType ()).ToArray ());

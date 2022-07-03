@@ -40,7 +40,7 @@ namespace fac.ASTs.Exprs {
 				ConstructorArguments.TraversalWraps (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (DataType == null) {
 				if (_expect_type == null)
 					throw new CodeException (Token, "无法猜测对象类型");

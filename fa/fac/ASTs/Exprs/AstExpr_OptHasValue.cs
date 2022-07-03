@@ -23,7 +23,7 @@ namespace fac.ASTs.Exprs {
 
 		public override IAstType GuessType () => new AstType_Bool ();
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type is not AstType_Bool)
 				throw new NotImplementedException ();
 			Child.TraversalCalcType (null);

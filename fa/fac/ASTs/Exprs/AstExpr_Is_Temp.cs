@@ -34,7 +34,7 @@ namespace fac.ASTs.Exprs {
 				DefVar = DefVar.TraversalWrap (_trav) as AstStmt_DefVariable;
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (!Value.TraversalCalcTypeWrap (null, a => Value = a))
 				return null;
 			var _access = AstExprName_ClassEnum_Access.FromAccess (Value, IsWhat);

@@ -53,7 +53,7 @@ namespace fac.ASTs.Exprs {
 			Arguments.TraversalWraps (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (Value is AstExpr_BaseId _bi_expr) {
 				Value = _bi_expr.TryParse ();
 				if (Value is AstExpr_BaseId _bi_expr1) {

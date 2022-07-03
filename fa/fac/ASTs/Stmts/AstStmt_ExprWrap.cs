@@ -47,7 +47,7 @@ namespace fac.ASTs.Stmts {
 				Expr = Expr.TraversalWrap (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			if (Expr != null) {

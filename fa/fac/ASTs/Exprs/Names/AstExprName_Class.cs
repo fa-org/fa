@@ -13,7 +13,7 @@ namespace fac.ASTs.Exprs.Names {
 
 
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			ExpectType = AstType_Class.GetType (Token, Class);
 			return AstExprTypeCast.Make (this, _expect_type);
 		}

@@ -29,7 +29,7 @@ namespace fac.ASTs.Exprs {
 			Value2 = Value2.TraversalWrap (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			bool _success = true;
 			if (sCompareOp2s.Contains (Operator)) {
 				// > >=

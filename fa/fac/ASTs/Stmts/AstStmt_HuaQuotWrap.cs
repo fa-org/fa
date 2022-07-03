@@ -15,7 +15,7 @@ namespace fac.ASTs.Stmts {
 			Stmts.TraversalWraps ((_deep: _trav._deep + 1, _group: Common.GetRandomInt (), _loop: _trav._loop, _cb: _trav._cb));
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			bool _success = Stmts.TraversalCalcTypeWrap ();

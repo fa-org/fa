@@ -48,7 +48,7 @@ namespace fac.ASTs.Stmts {
 			IfFalseCodes.TraversalWraps (_trav1);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			bool _success = Condition.TraversalCalcTypeWrap (IAstType.FromName ("bool"), a => Condition = a);

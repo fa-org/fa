@@ -80,7 +80,7 @@ namespace fac.ASTs.Exprs {
 			}
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			bool _success = true;
 			if (Condition != null)
 				_success &= Condition.TraversalCalcTypeWrap (null, a => Condition = a);

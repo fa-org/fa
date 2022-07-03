@@ -22,7 +22,7 @@ namespace fac.ASTs.Exprs {
 			InitValues.TraversalWraps (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type == null) {
 				if (ItemDataType == null)
 					ItemDataType = (GuessType () as AstType_ArrayWrap).ItemType;

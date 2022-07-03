@@ -24,7 +24,7 @@ namespace fac.ASTs.Stmts {
 			BodyCodes.TraversalWraps (_trav1);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			// Iterator 为虚拟变量定义对象，不需要重新计算类型

@@ -26,7 +26,7 @@ namespace fac.ASTs.Exprs {
 			return new AstType_Error ();
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			//Child = Child.TraversalCalcType (new AstType_OptionalWrap { ItemType = _expect_type });
 			if (_expect_type is not AstType_Error)
 				throw new Exception ("返回类型只能是 AstType_Error 类型");

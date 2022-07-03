@@ -15,7 +15,7 @@ namespace fac.ASTs.Types {
 	public abstract class IAstType: IAstExpr {
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) => throw new Exception ("不应执行此处代码");
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			ExpectType = null;
 			return this;
 		}

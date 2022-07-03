@@ -25,7 +25,7 @@ namespace fac.ASTs.Structs {
 				return $"{_left}{_right}";
 			}
 		}
-		public List<AstEnumItem> ClassEnumItems { get; } = null;
+		public List<AstEnumItem>? ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
 		private bool m_compiled = false;
@@ -60,7 +60,7 @@ namespace fac.ASTs.Structs {
 			return null;
 		}
 
-		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class.GetInst (Templates));
+		public AstType_Class GetClassType () => AstType_Class.GetType (Token, Class.GetInst (Templates, Token));
 
 		public void ProcessType () {
 			Info.CurrentClass = this;

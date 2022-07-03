@@ -13,7 +13,7 @@ namespace fac.ASTs.Stmts {
 	public class AstStmt_DefVariable: IAstStmt {
 		public IAstType DataType { get; set; } = null;
 		public string VarName { init; get; } = Common.GetTempId ();
-		public IAstExpr Expr { get; set; } = null;
+		public IAstExpr? Expr { get; set; } = null;
 
 
 
@@ -52,7 +52,7 @@ namespace fac.ASTs.Stmts {
 				Expr = Expr.TraversalWrap (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type != null)
 				throw new Exception ("语句类型不可指定期望类型");
 			if (Expr != null) {

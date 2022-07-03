@@ -30,8 +30,8 @@ namespace fac.ASTs.Exprs {
 			return _obj;
 		}
 
-		public abstract IAstExpr TraversalCalcType (IAstType _expect_type);
-		public bool TraversalCalcTypeWrap (IAstType _expect_type, Action<IAstExpr> _cb) {
+		public abstract IAstExpr TraversalCalcType (IAstType? _expect_type);
+		public bool TraversalCalcTypeWrap (IAstType? _expect_type, Action<IAstExpr?> _cb) {
 			var _expr1 = TraversalCalcType (_expect_type);
 			bool _ret = _expr1 != null;
 			if (_ret)

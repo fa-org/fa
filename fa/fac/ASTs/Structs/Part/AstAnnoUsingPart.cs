@@ -12,10 +12,10 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Structs.Part {
 	public class AstAnnoUsingPart: IAstExpr {
-		public AstInterface Anno { get; set; } = null;
+		public AstInterface? Anno { get; set; } = null;
 		public string TempAnnoName { init; get; }
-		public List<string> TempVarNames { get; set; } = null;
-		public List<IAstExpr> InitValues { get; set; } = null;
+		public List<string>? TempVarNames { get; set; } = null;
+		public List<IAstExpr>? InitValues { get; set; } = null;
 
 
 
@@ -25,7 +25,7 @@ namespace fac.ASTs.Structs.Part {
 			InitValues.TraversalWraps (_trav1);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			ExpectType = new AstType_Void ();
 			return this;
 		}
@@ -53,7 +53,7 @@ namespace fac.ASTs.Structs.Part {
 			if (_annos.Count == 0) {
 				throw new NotImplementedException ();
 			} else if (_annos.Count > 1) {
-				throw new CodeException ((IToken) null, $"不明确的 {TempAnnoName} 类型");
+				throw new CodeException (Token, $"不明确的 {TempAnnoName} 类型");
 			}
 			Anno = _annos [0] as AstInterface;
 		}

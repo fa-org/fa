@@ -35,7 +35,7 @@ namespace fac.ASTs.Exprs {
 			return new AstExpr_DictionaryAPI_Temp { Token = _array.Token, Value = _array, AccessType = ArrayApiType._AccessItem, AttachArgs = new List<IAstExpr> { _index }, ExpectType = _item_type };
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			throw new NotImplementedException ();
 		}
 

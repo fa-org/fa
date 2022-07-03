@@ -17,7 +17,7 @@ namespace fac.ASTs.Exprs {
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) { }
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			// 单独处理枚举类型，另一部分代码位于AstExpr_OpN.cs
 			if (_expect_type is AstType_Class _classty && (_classty.Class.ClassEnumItems?.Count ?? 0) > 0) {
 				var _class_enum = AstExprName_ClassEnum_New._FindFromNameUncheckAttach (Token, _classty.Class, Id);

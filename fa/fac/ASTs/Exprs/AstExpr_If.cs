@@ -31,7 +31,7 @@ namespace fac.ASTs.Exprs {
 			IfFalse = IfFalse.TraversalWrap (_trav1);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			if (_expect_type == null)
 				_expect_type = GuessType ();
 			//

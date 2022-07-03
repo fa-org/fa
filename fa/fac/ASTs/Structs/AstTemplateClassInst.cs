@@ -25,7 +25,7 @@ namespace fac.ASTs.Structs {
 				return $"{_left}{_right}";
 			}
 		}
-		public List<AstEnumItem> ClassEnumItems { get; } = null;
+		public List<AstEnumItem>? ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
 		private bool m_compiled = false;

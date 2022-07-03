@@ -49,7 +49,7 @@ namespace fac.ASTs.Exprs {
 
 		public override void Traversal ((int _deep, int _group, int _loop, Func<IAstExpr, int, int, int, IAstExpr> _cb) _trav) => Value = Value.TraversalWrap (_trav);
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			// 只有一种情况会调用到，提前构造好转换，也就是ExpectType设置好之后
 			if (ExpectType == null)
 				throw new NotImplementedException ();

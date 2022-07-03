@@ -122,7 +122,7 @@ namespace fac {
 						_opn_expr1.Value = _id_expr.TryParse ();
 					if (_opn_expr1.Value is AstExprName_ClassEnum_New _new_expr) {
 						var _access_expr = AstExprName_ClassEnum_Access.FromSwitchCond (_new_expr);
-						_exprs[i] = AstExpr_Is.FromAccess (_access_expr, (_opn_expr1.Arguments[0] as AstExpr_BaseId).Id);
+						_exprs[i] = AstExpr_Is.FromAccess (_access_expr, (_opn_expr1.Arguments[0] as AstExpr_BaseId)?.Id ?? "");
 					}
 				}
 			}

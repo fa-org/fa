@@ -79,7 +79,7 @@ namespace fac.ASTs.Exprs.Names {
 				AttachExpr = AttachExpr.TraversalWrap (_trav);
 		}
 
-		public override IAstExpr TraversalCalcType (IAstType _expect_type) {
+		public override IAstExpr TraversalCalcType (IAstType? _expect_type) {
 			bool _need_attach = EnumClass.ClassEnumItems[EnumItemIndex].AttachType != null;
 			if ((AttachExpr != null) != _need_attach) {
 				throw new CodeException (Token, $"{EnumClass.ClassEnumItems[EnumItemIndex].Name} 枚举条件{(_need_attach ? "需要附带参数" : "不能附带参数")}，但实际{(_need_attach ? "没有附带参数" : "附带了参数")}");
