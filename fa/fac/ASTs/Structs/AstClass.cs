@@ -18,6 +18,8 @@ namespace fac.ASTs.Structs {
 		public List<AstEnumItem>? ClassEnumItems { get; } = null;
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { get; set; }
+		public List<AstConstructFunc> ConstructFuncs { get; }
+		public AstConstructFunc DistructFunc { get; }
 		private bool m_compiled = false;
 
 

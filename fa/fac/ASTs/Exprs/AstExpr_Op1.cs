@@ -109,9 +109,11 @@ namespace fac.ASTs.Exprs {
 				// 参数0为对象，当访问静态成员时传null
 				// 参数1为类对象
 				Func<IAstExpr, IAstClass, IAstExpr> _access_func = (_obj, _class) => {
-					for (int i = 0; i < (_class.ClassEnumItems?.Count ?? 0); ++i) {
-						if (_class.ClassEnumItems[i].Name == _access_name)
-							return new AstExprName_ClassEnum_New { Token = Token, EnumClass = _class, EnumItemIndex = i, AttachExpr = null };
+					if (_class.ClassEnumItems != null) {
+						for (int i = 0; i < _class.ClassEnumItems.Count; ++i) {
+							if (_class.ClassEnumItems[i].Name == _access_name)
+								return new AstExprName_ClassEnum_New { Token = Token, EnumClass = _class, EnumItemIndex = i, AttachExpr = null };
+						}
 					}
 					for (int i = 0; i < _class.ClassVars.Count; ++i) {
 						if (_class.ClassVars[i].Name == _access_name)
@@ -143,6 +145,7 @@ namespace fac.ASTs.Exprs {
 					var _argtype = _argexpr.Func.Arguments[_argexpr.ArgumentIndex]._type;
 					return _access_func2 (_argexpr, _argtype);
 				} else if (Value is AstExprName_ClassVar _cvarexpr) {
+					//var _var = _cvarexpr.Class.ClassVars [_cvarexpr.VariableIndex];
 					return _access_func (_cvarexpr, _cvarexpr.Class);
 				} else if (Value is AstExprName_Variable _varexpr) {
 					return _access_func2 (_varexpr, _varexpr.Var.DataType);

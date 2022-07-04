@@ -1,5 +1,6 @@
 ﻿using fac.ASTs.Exprs.Names;
 using fac.ASTs.Stmts;
+using fac.ASTs.Structs;
 using fac.ASTs.Types;
 using fac.ASTs.Types.Mappings;
 using fac.Exceptions;
@@ -69,10 +70,18 @@ namespace fac.ASTs.Exprs {
 					return null;
 				InitialValues.AddRange (_default_init_vals);
 			} else if (ConstructorArguments != null) {
-				// TODO 检查构造函数参数
-				throw new UnimplException (Token);
+				if (DataType is AstType_Class _cls_type) {
+					if (_cls_type.Class is AstInterface || _cls_type.Class is AstInterfaceInst) {
+						//构造interface，那么必须得有 Annotation
+						// TODO 检查 Annotation
+					}
+
+					foreach (var _construct_func in _cls_type.Class.ConstructFuncs) {
+						//if (_construct_func.)
+						// TODO 检查构造函数
+					}
+				}
 			} else {
-				// TODO 检查构造函数参数
 				throw new UnimplException (Token);
 			}
 			ExpectType = DataType;

@@ -29,7 +29,7 @@ public interface _std_vector<T> {
 	void push_back (T _item)
 }
 public class List<T> {
-	private _std_vector<T> m_list;
+	private _std_vector<T> m_list
 	public void Add (T _item) => m_list.push_back (_item)
 }
 

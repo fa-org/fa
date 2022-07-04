@@ -38,9 +38,9 @@ namespace fac {
 			}
 		}
 
-		public static bool TraversalCalcTypeWrap (this List<IAstExpr> _exprs, IAstType _expect_type = null) {
+		public static bool TraversalCalcTypeWrap (this List<IAstExpr> _exprs, IAstType? _expect_type = null) {
 			bool _success = true;
-			for (int i = 0; i < (_exprs?.Count ?? 0); ++i) {
+			for (int i = 0; i < _exprs.Count; ++i) {
 				if (_exprs[i] != null && _exprs[i] is not AstExprName_Ignore)
 					_success &= _exprs[i].TraversalCalcTypeWrap (_expect_type, a => _exprs[i] = a);
 			}
@@ -49,7 +49,7 @@ namespace fac {
 
 		public static bool TraversalCalcTypeWrap (this List<IAstStmt> _stmts) {
 			bool _success = true;
-			for (int i = 0; i < (_stmts?.Count ?? 0); ++i) {
+			for (int i = 0; i < _stmts.Count; ++i) {
 				if (_stmts[i] != null)
 					_success &= _stmts[i].TraversalCalcTypeWrap (null, a => _stmts[i] = a as IAstStmt);
 			}

@@ -1,6 +1,7 @@
 ﻿using fac.AntlrTools;
 using fac.ASTs.Exprs;
 using fac.ASTs.Exprs.Names;
+using fac.ASTs.Structs;
 using fac.ASTs.Types;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace fac.ASTs.Stmts {
 	public class AstStmt_Return: IAstStmt {
-		public IAstType ReturnType { get; set; } = Info.CurrentFunc.ReturnType;
+		public IAstType ReturnType { get; set; } = Info.CurrentFunc is AstClassFunc _func ? _func.ReturnType : new AstType_Void ();
 		public IAstExpr Expr { get; set; } = null;
 
 

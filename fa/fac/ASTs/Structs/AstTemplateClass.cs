@@ -19,6 +19,8 @@ namespace fac.ASTs.Structs {
 		public List<AstType_Placeholder> Templates { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { get; set; }
+		public List<AstConstructFunc> ConstructFuncs { get; } = new List<AstConstructFunc> ();
+		public AstConstructFunc? DistructFunc { get; } = null;
 		public Dictionary<string, AstTemplateClassInst> Insts { get; set; } = new Dictionary<string, AstTemplateClassInst> ();
 
 

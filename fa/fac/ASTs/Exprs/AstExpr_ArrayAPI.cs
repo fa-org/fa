@@ -55,7 +55,7 @@ namespace fac.ASTs.Exprs {
 			if (Value != null)
 				_success &= Value.TraversalCalcTypeWrap (null, a => Value = a);
 			if (AttachArgs != null)
-				_success &= AttachArgs.TraversalCalcTypeWrap (null);
+				_success &= AttachArgs.TraversalCalcTypeWrap ();
 			return _success ? AstExprTypeCast.Make (this, _expect_type) : null;
 		}
 

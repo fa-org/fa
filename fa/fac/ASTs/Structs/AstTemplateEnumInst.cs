@@ -28,6 +28,8 @@ namespace fac.ASTs.Structs {
 		public List<AstEnumItem> ClassEnumItems { init; get; }
 		public List<AstClassVar> ClassVars { init; get; }
 		public List<AstClassFunc> ClassFuncs { init; get; }
+		public List<AstConstructFunc> ConstructFuncs { get; } = new List<AstConstructFunc> ();
+		public AstConstructFunc? DistructFunc { get; } = null;
 		private bool m_compiled = false;
 
 
