@@ -165,11 +165,12 @@ namespace fac.ASTs.Exprs {
 					_tmp_expr.Arguments = (from p in _suffix_ctx.expr () select FromContext (p)).ToList ();
 					_expr = _tmp_expr;
 				} else if (_suffix_ctx.quotFangL () != null) {
-					//var _arr = _expr;
-					var _args = (from p in _suffix_ctx.exprOpt () select p.expr () != null ? FromContext (p.expr ()) : null).ToList ();
-					if (_args.Count != 1)
-						throw new CodeException (_args.Count > 0 ? _args[0].Token : _expr.Token, "数组随机访问下标只能传一个整数");
-					return AstExpr_ArrayAPI_Temp.Array_AccessItem (_expr, _args[0], true);
+					////var _arr = _expr;
+					//var _args = (from p in _suffix_ctx.exprOpt () select p.expr () != null ? FromContext (p.expr ()) : null).ToList ();
+					//if (_args.Count != 1)
+					//	throw new CodeException (_args.Count > 0 ? _args[0].Token : _expr.Token, "数组随机访问下标只能传一个整数");
+					//return AstExpr_ArrayAPI_Temp.Array_AccessItem (_expr, _args[0], true);
+					throw new NotImplementedException ();
 				} else {
 					throw new UnimplException (_suffix_ctx);
 				}
@@ -225,10 +226,11 @@ namespace fac.ASTs.Exprs {
 			} else if (_ctx.arrayExpr1 () != null) {
 				throw new UnimplException (_ctx);
 			} else if (_ctx.arrayExpr2 () != null) {
-				var _expr = new AstExpr_Array { Token = _ctx.Start };
-				_expr.InitValues = (from p in _ctx.arrayExpr2 ().expr () select FromContext (p)).ToList ();
-				_expr.InitCount = FromValue ("int", $"{_expr.InitValues.Count}");
-				return _expr;
+				//var _expr = new AstExpr_Array { Token = _ctx.Start };
+				//_expr.InitValues = (from p in _ctx.arrayExpr2 ().expr () select FromContext (p)).ToList ();
+				//_expr.InitCount = FromValue ("int", $"{_expr.InitValues.Count}");
+				//return _expr;
+				throw new UnimplException (_ctx);
 			} else if (_ctx.switchExpr2 () != null) {
 				return AstExpr_Switch.FromContext (_ctx.switchExpr2 ());
 			} else if (_ctx.switchExpr () != null) {

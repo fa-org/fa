@@ -2,28 +2,10 @@ use fa
 
 
 
-//public annotation Import {
-//	public string Alias = ""
-//	public string CC = "__cdecl"
-//}
-
-
-
 public interface ImportBackendAnnotation {
 	public string Using = ""
 	public string Alias = ""
 }
-
-
-
-//[ImportBackend (Using = "using System.Collections.Generic;")]
-//public interface List<T> {
-//	void Add (T _item)
-//	//void AddRange (T [] _items)
-//	//void AddRange (List<T> _items)
-//	//T operator[] (int _index)
-//}
-
 [ImportBackend (Using = "#include <vector>", Alias = "std::vector")]
 public interface _std_vector<T> {
 	void push_back (T _item)
@@ -41,3 +23,10 @@ class Program {
 		_a.Add (1)
 	}
 }
+
+
+
+//public annotation Import {
+//	public string Alias = ""
+//	public string CC = "__cdecl"
+//}

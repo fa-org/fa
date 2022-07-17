@@ -73,8 +73,6 @@ namespace fac.ASTs.Stmts {
 			var (_stmts, _expr) = Expr.ExpandExpr (IgnoreError ? (_var: null, _pos: null) : _cache_err);
 			if (_expr.IsSimpleExpr)
 				return _stmts;
-			if (_expr is AstExpr_ArrayAPI _biexpr && (!_biexpr.IsChangeData ()))
-				return _stmts;
 
 			Expr = _expr;
 			_stmts.Add (this);
