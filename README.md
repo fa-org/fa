@@ -1,5 +1,7 @@
 # fa
 
+**注：fa语言新编译器重构所有内容，对特性及偏向性有较大程度修改，暂未开源，开发出成品之后开源。此仓库暂时保留老编译器项目，待新编译器完成后替换**
+
 [![license](https://img.shields.io/github/license/fa-org/fa?color=09f)](./LICENSE)
 [![csharp](https://img.shields.io/lgtm/alerts/github/fa-org/fa?logo=lgtm)](https://lgtm.com/projects/g/fa-org/fa)
 [![csharp](https://img.shields.io/lgtm/grade/csharp/github/fa-org/fa?logo=lgtm)](https://lgtm.com/projects/g/fa-org/fa)
