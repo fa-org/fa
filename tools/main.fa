@@ -1,0 +1,159 @@
+namespace fa
+
+type int_t = int8 || uint8 || int16 || uint16 || int32 || uint32 || int64 || uint64
+type fmt_t = string || int_t || float32 || float64
+
+
+
+class Type {
+}
+
+@BuildIn
+class List<TVal> {
+	void RemoveAt (int)
+	void Add (TVal val)
+	void Clear ()
+	bool IsEmpty ()
+	int Count ()
+}
+
+class String {
+	public string Connect (params fa.List<string> _strs) {
+		string _ret = ""
+		for (var _str : _strs) {
+			_ret += _str
+		}
+		return _ret
+	}
+}
+
+//@BuildIn
+//class Object {
+//	static string ToString (Object _obj, string _fmt)
+//}
+
+@BuildIn
+class Dictionary<TKey, TVal> {
+	void Add (TKey k, TVal v)
+	bool Contains (TKey k)
+	TVal? operator[] (TKey k)
+	void Remove (TKey k)
+}
+
+
+
+annotation BuildIn {}
+annotation Extern {
+	string Name
+	string CppHeader
+}
+
+@BuildIn
+public enum Exception {
+	NullObject,
+}
+
+@BuildIn
+public enum Option<T> {
+	Null,
+	Value (T),
+	Except (Exception)
+}
+
+@BuildIn
+public class RawPtr<T> {
+	public int Length { get; }
+	public T operator[] (int index)
+
+	public static RawPtr<T> New (int size)
+	public static RawPtr<T> NewArray (int size)
+	public static void Delete (RawPtr<T>)
+	public static void DeleteArray (RawPtr<T>)
+}
+
+
+
+class AnnotationBlock {
+	public string                             file_name
+	public string                             line_number
+	public string                             namespace
+	public string                             anno_name
+	public Dictionary<String, ClassVarBlock>  vars
+	public Dictionary<String, ClassFuncBlock> funcs
+}
+
+class ClassBlock {
+	public string                             file_name
+	public string                             line_num
+	public string                             namespace
+	public string                             class_name
+	public Dictionary<String, ClassVarBlock>  vars
+	public Dictionary<String, ClassFuncBlock> funcs
+}
+
+enum FuncArgAttr { None, Mut, Params, Disperse }
+class ClassFuncBlock {
+	public string            file_name
+	public string            line_num
+	public ClassBlock        parent_class
+	public string            func_name
+	public string[]          arg_names
+	public Type[]            arg_types
+	public FuncArgAttr[]     arg_attrs
+	public Statment[]        body_codes
+}
+
+class ClassVarBlock {
+	public string            file_name
+	public string            line_num
+	public ClassBlock        parent_class
+	public string            var_name
+	public Type              var_type
+	public Expression?       var_init_value
+}
+
+enum StatementType { Return, Break, Continue }
+
+class Statment {
+	public StatementType?    stmt_type
+	public Expression?       stmt_expr
+}
+
+class Expression {}
+
+@BuildIn
+class Console {
+	public static void Write (string _str)
+	public static void WriteLine (string _str)
+}
+
+
+
+//annotation DebugPrint {
+//	void MakeFunction (ClassFuncBlock _func) {
+//		_func.BodyCodes.Insert (0, stmt Console.WriteLine("enter function"));
+//		_func.BodyCodes.Insert (1, stmt int n = 10);
+//		_func.BodyCodes.Insert (2, stmt Console.WriteLine($"{n}"));
+//		_func.BodyCodes.Append (stmt Console.WriteLine("leave function"));
+//	}
+//}
+
+class Program {
+	public static void Meta (mut Dictionary<string, ClassBlock> _classes) {
+		_classes ["Program"]?.funcs["Meta"]?.body_codes.Add (stmt Console.WriteLine ("hello world!"))
+		//Console.WriteLine ("hello world!")
+	}
+
+	public static void Main () {
+		//int a = calc sum (5, 10)
+		//Console.WriteLine ("hello world!")
+	}
+}
+
+
+
+//uint32[] buf = [ 1, 0, 0, 2, 3, 0, 0, 4 ]
+//uint32[] buf2 = [from p in buf where p != 0 select p]
+//for (var num : buf2) {
+//	Console.WriteLine ($"{((num % 2 == 0) ? "even" : "odd")} {num}")
+//}

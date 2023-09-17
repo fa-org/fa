@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\ASTs">
+      <UniqueIdentifier>{6dc1f455-75ca-4d3b-9a94-edb0a466ac3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ASTs\Blocks">
+      <UniqueIdentifier>{9b9ca211-b55a-4545-a26b-54054cbaf04a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ASTs\Exprs">
+      <UniqueIdentifier>{51cd9ec3-6cb3-46c5-80df-aea1c777c87e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ASTs\Exprs\NameExprs">
+      <UniqueIdentifier>{7e36acb9-ff55-4229-bd61-1d8966620ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ASTs\Stmts">
+      <UniqueIdentifier>{850dcec7-42bc-4c3f-b772-5fb4c3112c90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ASTs\Types">
+      <UniqueIdentifier>{67b363e2-112c-47d4-88df-2c34a77d6fab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\_impls">
+      <UniqueIdentifier>{9fa93918-48f1-4aa3-88a7-b9f26cfa1319}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{e8afc488-32da-4cea-9beb-b48f537ae4b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ASTs\Exprs\BuildIns">
+      <UniqueIdentifier>{8c839bf0-07e0-48c8-88b8-2044de068e2b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fa.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ASTs\_impls\IAstExpr.cpp">
+      <Filter>Source Files\_impls</Filter>
+    </ClCompile>
+    <ClCompile Include="ASTs\_impls\IAstStmt.cpp">
+      <Filter>Source Files\_impls</Filter>
+    </ClCompile>
+    <ClCompile Include="ASTs\_impls\IAstType.cpp">
+      <Filter>Source Files\_impls</Filter>
+    </ClCompile>
+    <ClCompile Include="ASTs\_impls\_other.cpp">
+      <Filter>Source Files\_impls</Filter>
+    </ClCompile>
+    <ClCompile Include="ASTs\_impls\IAstBlock.cpp">
+      <Filter>Source Files\_impls</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ASTs\_impls\pch.h">
+      <Filter>Source Files\_impls</Filter>
+    </ClInclude>
+    <ClInclude Include="common\CompileEnv.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Evaluation.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\ValueOper.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Directory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="File.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\IAst.hpp">
+      <Filter>Header Files\ASTs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_any.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_bool.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_class.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_class_template_item.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_float.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_func.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_func_template.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_int.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_temp_item.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_temp_name.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_tuple_wrap.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_unsure_wrap.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\AstType_void.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Types\IAstType.hpp">
+      <Filter>Header Files\ASTs\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\IAstStmt.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_break.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_continue.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_define_var.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_expr_wrap.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_for1.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_for2.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_if.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_return.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_stmts.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\IAstExpr.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\NameExprs\AstNameExpr_arg.hpp">
+      <Filter>Header Files\ASTs\Exprs\NameExprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\NameExprs\AstNameExpr_class_var.hpp">
+      <Filter>Header Files\ASTs\Exprs\NameExprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\NameExprs\AstNameExpr_enum_item.hpp">
+      <Filter>Header Files\ASTs\Exprs\NameExprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\NameExprs\AstNameExpr_class_func.hpp">
+      <Filter>Header Files\ASTs\Exprs\NameExprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\NameExprs\AstNameExpr_var.hpp">
+      <Filter>Header Files\ASTs\Exprs\NameExprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\NameExprs\IAstNameExpr.hpp">
+      <Filter>Header Files\ASTs\Exprs\NameExprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_array1.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_array2.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_calc_wrap.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_if.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_invoke.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_is.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_new.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_op1.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_op2.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_temp_name.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_template_wrap.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_this.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_type_wrap.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\AstExpr_value.hpp">
+      <Filter>Header Files\ASTs\Exprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\BuildIns\IAstBuildInExpr.hpp">
+      <Filter>Header Files\ASTs\Exprs\BuildIns</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\BuildIns\AstBuildInExpr_Dictionary.hpp">
+      <Filter>Header Files\ASTs\Exprs\BuildIns</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\BuildIns\AstBuildInExpr_Object.hpp">
+      <Filter>Header Files\ASTs\Exprs\BuildIns</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\BuildIns\AstBuildInExpr_String.hpp">
+      <Filter>Header Files\ASTs\Exprs\BuildIns</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\IAstBlock.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstAnnoPart.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstClassFunc.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstClassFuncEmpty.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstClassValueVar.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstClassVar.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstEnumItem.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstProgram.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstUse.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\BuildIns\AstBuildInExpr_Console.hpp">
+      <Filter>Header Files\ASTs\Exprs\BuildIns</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Stmts\AstStmt_define_var_group.hpp">
+      <Filter>Header Files\ASTs\Stmts</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\BuildIns\AstBuildInExpr_List.hpp">
+      <Filter>Header Files\ASTs\Exprs\BuildIns</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\BuildIns\AstBuildInExpr_Option.hpp">
+      <Filter>Header Files\ASTs\Exprs\BuildIns</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Exprs\NameExprs\AstNameExpr_func.hpp">
+      <Filter>Header Files\ASTs\Exprs\NameExprs</Filter>
+    </ClInclude>
+    <ClInclude Include="ASTs\Blocks\AstClass.hpp">
+      <Filter>Header Files\ASTs\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="common\StrUtils.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,4 +1,5 @@
-java -jar antlr-4.9.3-complete.jar -Dlanguage=Cpp -no-listener -visitor -o ../fac/antlr_gen Fa.g4
+java -jar antlr-4.10.1-complete.jar -Dlanguage=Cpp -no-listener -visitor -o ../fa_compile_runtime/antlr_gen FaLexer.g4
+java -jar antlr-4.10.1-complete.jar -Dlanguage=Cpp -no-listener -visitor -o ../fa_compile_runtime/antlr_gen FaParser.g4
 pause
 
 :: falang.moe 109 (zhujike.com
