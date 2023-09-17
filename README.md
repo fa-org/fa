@@ -13,13 +13,13 @@ fa语言编译器实现。一款专注于元编程的编程语言，目标是尽
 
 ```fa
 class Program {
-	public static void Meta (mut Dictionary<string, ClassBlock> _classes) {
+    public static void Meta (mut Dictionary<string, ClassBlock> _classes) {
         var _stmt = stmt Console.WriteLine ("hello world!")
-		_classes ["Program"]?.funcs["Main"]?.body_codes.Add (_stmt)
-	}
-
-	public static void Main () {
-	}
+        _classes ["Program"]?.funcs["Main"]?.body_codes.Add (_stmt)
+    }
+    
+    public static void Main () {
+    }
 }
 ```
 
@@ -27,9 +27,9 @@ class Program {
 
 ```fa
 class Program {
-	public static void Main () {
+    public static void Main () {
         var compile_time = calc DateTime.Now()
         Console.WriteLine ("Compile Time: {compile_time}")
-	}
+    }
 }
 ```
